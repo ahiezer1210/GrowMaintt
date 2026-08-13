@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   Image,
   StyleSheet,
@@ -7,7 +8,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { router } from "expo-router";
 
 export default function LoginScreen() {
 
@@ -72,7 +72,10 @@ export default function LoginScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => router.push("/register")}
+        >
           <Text style={styles.buttonText}>
             Sign In
           </Text>

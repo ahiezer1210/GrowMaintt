@@ -7,6 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
 
@@ -93,7 +94,10 @@ export default function LoginScreen() {
 
                 </View>
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => router.push("/verificacion")}
+                >
                     <Text style={styles.buttonText}>
                         Next
                     </Text>
