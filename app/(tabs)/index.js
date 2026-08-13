@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
 
@@ -16,7 +17,7 @@ export default function LoginScreen() {
 
     <View style={styles.container}>
 
-      
+
       <View style={styles.header}>
 
         <Image
@@ -85,7 +86,7 @@ export default function LoginScreen() {
           <View style={styles.line} />
         </View>
 
-        
+
         <TouchableOpacity style={styles.microsoftButton}>
 
           <Image
@@ -103,9 +104,12 @@ export default function LoginScreen() {
           <Text style={styles.account}>
             Don't have an account?
           </Text>
-          <Text style={styles.signup}>
-            Sign Up
-          </Text>
+
+          <TouchableOpacity onPress={() => router.push("/register")}>
+            <Text style={styles.signup}>
+              Sign Up
+            </Text>
+          </TouchableOpacity>
         </View>
 
       </View>
@@ -162,7 +166,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F5",
     borderRadius: 15,
     borderWidth: 1,
-    borderColor:  "#000000",
+    borderColor: "#000000",
     paddingHorizontal: 18,
     marginBottom: 22,
   },
@@ -172,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F5",
     borderRadius: 15,
     borderWidth: 1,
-    borderColor:  "#000000",
+    borderColor: "#000000",
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
