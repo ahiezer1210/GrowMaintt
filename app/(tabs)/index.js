@@ -10,32 +10,21 @@ import {
 } from "react-native";
 
 export default function LoginScreen() {
-
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-
     <View style={styles.container}>
-
-
       <View style={styles.header}>
-
         <Image
           source={require("../../assets/images/logo.png")}
           style={styles.logo}
         />
 
-        <Text style={styles.title}>
-          Sign In
-        </Text>
-
+        <Text style={styles.title}>Sign In</Text>
       </View>
 
       <View style={styles.card}>
-
-        <Text style={styles.label}>
-          Email or Username
-        </Text>
+        <Text style={styles.label}>Email or Username</Text>
 
         <TextInput
           style={styles.input}
@@ -43,12 +32,9 @@ export default function LoginScreen() {
           placeholderTextColor="#ACADAD"
         />
 
-        <Text style={styles.label}>
-          Password
-        </Text>
+        <Text style={styles.label}>Password</Text>
 
         <View style={styles.passwordBox}>
-
           <TextInput
             style={styles.password}
             placeholder="Enter your password"
@@ -56,74 +42,50 @@ export default function LoginScreen() {
             secureTextEntry={!showPassword}
           />
 
-          <TouchableOpacity
-            onPress={() => setShowPassword(!showPassword)}
-          >
-            <Text style={styles.show}>
-              {showPassword ? "Hide" : "Show"}
-            </Text>
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
-
         </View>
 
         <TouchableOpacity>
-          <Text style={styles.forgot}>
-            Forgot Password?
-          </Text>
+          <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
           onPress={() => router.push("/register")}
         >
-          <Text style={styles.buttonText}>
-            Sign In
-          </Text>
+          <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={styles.line} />
-          <Text style={styles.or}>
-            Or
-          </Text>
+          <Text style={styles.or}>Or</Text>
           <View style={styles.line} />
         </View>
 
-
         <TouchableOpacity style={styles.microsoftButton}>
-
           <Image
             source={require("../../assets/images/microsoft.jpeg")}
             style={styles.microsoftIcon}
           />
 
-          <Text style={styles.microsoftText}>
-            Continue with Microsoft
-          </Text>
-
+          <Text style={styles.microsoftText}>Continue with Microsoft</Text>
         </TouchableOpacity>
 
         <View style={styles.register}>
-          <Text style={styles.account}>
-            Don't have an account?
-          </Text>
+          <Text style={styles.account}>Don't have an account?</Text>
 
           <TouchableOpacity onPress={() => router.push("/register")}>
-            <Text style={styles.signup}>
-              Sign Up
-            </Text>
+            <Text style={styles.signup}>Sign Up</Text>
           </TouchableOpacity>
         </View>
-
       </View>
-
     </View>
-
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: "#081023",
@@ -268,5 +230,4 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginLeft: 5,
   },
-
 });
