@@ -1,6 +1,9 @@
 import { router } from "expo-router";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Image,
   StyleSheet,
   Text,
@@ -8,9 +11,46 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
+import { auth } from "../../firebaseConfig";
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert("Campos incompletos", "Ingresa tu correo y contraseña.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email.trim(), password);
+      router.replace("/home");
+    } catch (error) {
+      let message = "Ocurrió un error al iniciar sesión.";
+
+      switch (error.code) {
+        case "auth/invalid-email":
+          message = "El correo no es válido.";
+          break;
+        case "auth/user-not-found":
+        case "auth/wrong-password":
+        case "auth/invalid-credential":
+          message = "Correo o contraseña incorrectos.";
+          break;
+        case "auth/too-many-requests":
+          message = "Demasiados intentos. Intenta más tarde.";
+          break;
+      }
+
+      Alert.alert("Error", message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -30,6 +70,10 @@ export default function LoginScreen() {
           style={styles.input}
           placeholder="Enter your email"
           placeholderTextColor="#ACADAD"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
 
         <Text style={styles.label}>Password</Text>
@@ -40,6 +84,8 @@ export default function LoginScreen() {
             placeholder="Enter your password"
             placeholderTextColor="#ACADAD"
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
           />
 
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -47,15 +93,20 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/forgot-password")}>
           <Text style={styles.forgot}>Forgot Password?</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/register")}
+          style={[styles.button, loading && { opacity: 0.7 }]}
+          onPress={handleSignIn}
+          disabled={loading}
         >
-          <Text style={styles.buttonText}>Sign In</Text>
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>Sign In</Text>
+          )}
         </TouchableOpacity>
 
         <View style={styles.divider}>
