@@ -42,5 +42,5 @@ app-example
 /ios
 /android
  
- #Firebase config
- C:\Users\ahiez\OneDrive\Desktop\GrowMaint\firebaseConfig.js
+ # Firebase config
+firebaseConfig.js
