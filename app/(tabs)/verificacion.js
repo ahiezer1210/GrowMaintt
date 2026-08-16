@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -7,10 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { router } from "expo-router";
 
 export default function VerificationScreen() {
-
   const [code, setCode] = useState(["1", "2", "3", "4", "5", "6"]);
   const [verificationCode, setVerificationCode] = useState("123456");
 
@@ -26,112 +25,71 @@ export default function VerificationScreen() {
     setVerificationCode(newCode);
     setCode(["", "", "", "", "", ""]);
 
-    Alert.alert(
-      "Nuevo código",
-      `Tu nuevo código de verificación es: ${newCode}`
-    );
+    Alert.alert("New code", `Your verification code is: ${newCode}`);
   };
 
   const acceptCode = () => {
     const enteredCode = code.join("");
 
     if (enteredCode.length < 6) {
-      Alert.alert(
-        "Código incompleto",
-        "Ingrese los 6 números del código."
-      );
+      Alert.alert(" Incomplete code", "Enter the 6 numbers");
       return;
     }
 
     if (enteredCode === verificationCode) {
-      Alert.alert(
-        "Código correcto",
-        "Tu correo ha sido verificado correctamente.",
-        [
-          {
-            text: "Aceptar",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Correct code", "Your code has been verified", [
+        {
+          text: "Aceptar",
+          onPress: () => router.back(),
+        },
+      ]);
     } else {
       Alert.alert(
-        "Código incorrecto",
-        "El código ingresado no es correcto."
+        "Incorrect code",
+        "The email that was entered is not correct",
       );
     }
   };
 
   return (
-
     <View style={styles.container}>
-
       <View style={styles.header}>
-
-        <Text style={styles.title}>
-          Código De Verificación
-        </Text>
-
+        <Text style={styles.title}>Verification code</Text>
       </View>
 
       <View style={styles.card}>
+        <Text style={styles.instruction}>Enter the code sent to</Text>
 
-        <Text style={styles.instruction}>
-          Ingrese El Código Enviado A
-        </Text>
-
-        <Text style={styles.instruction}>
-          Su Correo
-        </Text>
+        <Text style={styles.instruction}>your email</Text>
 
         <View style={styles.codeContainer}>
-
           {code.map((number, index) => (
-
             <TextInput
               key={index}
               style={styles.codeInput}
               value={number}
-              onChangeText={(value) =>
-                handleCodeChange(value, index)
-              }
+              onChangeText={(value) => handleCodeChange(value, index)}
               keyboardType="number-pad"
               maxLength={1}
               textAlign="center"
               textAlignVertical="center"
             />
-
           ))}
-
         </View>
 
-        <TouchableOpacity
-          style={styles.acceptButton}
-          onPress={acceptCode}
-        >
-          <Text style={styles.acceptText}>
-            Accept
-          </Text>
+        <TouchableOpacity style={styles.acceptButton} onPress={acceptCode}>
+          <Text style={styles.acceptText}>Accept</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.sendButton}
-          onPress={sendAgain}
-        >
-          <Text style={styles.sendText}>
-            Send Again
-          </Text>
+        <TouchableOpacity style={styles.sendButton} onPress={sendAgain}>
+          <Text style={styles.sendText}>Send Again</Text>
         </TouchableOpacity>
-
       </View>
-
     </View>
-
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
     backgroundColor: "#081023",
@@ -221,5 +179,4 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "600",
   },
-
 });
