@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
   FlatList,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from "react-native";22  
-import { Ionicons } from "@expo/vector-icons";
+} from "react-native";
+22  
 
 const movements = [
   { id: "1", name: "Starbucks", type: "coffee", savings: 0.75 },
@@ -149,10 +150,10 @@ const styles = StyleSheet.create({
 
   blackHeader: {
     height: 205,
-    backgroundColor: "#050505",
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingTop: 42,
+    backgroundColor: "#081023",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 55,
     paddingHorizontal: 28,
   },
 

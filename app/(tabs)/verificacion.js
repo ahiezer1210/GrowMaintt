@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
 
   card: {
     flex: 1,
-    backgroundColor: "#F3FFF5",
+    backgroundColor: "#ffffff",
     borderTopLeftRadius: 55,
     borderTopRightRadius: 55,
     paddingHorizontal: 30,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     color: "#081023",
-    backgroundColor: "#F3FFF5",
+    backgroundColor: "#ffffff",
     padding: 0,
     margin: 0,
     includeFontPadding: false,
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   sendButton: {
     width: 130,
     height: 35,
-    backgroundColor: "#DDF5E5",
+    backgroundColor: "#25B7D3",
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
 
   sendText: {
-    color: "#081023",
+    color: "#ffffff",
     fontSize: 15,
     fontWeight: "600",
   },
