@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [confirmpassword, setConfirmPassword] = useState("");
 
   const registerusers = async () => {
-    if (!username || !email || !password || !confirmpassword) {
+    if (!username || !email.trim() || !password || !confirmpassword) {
       Alert.alert("Incomplete fields");
       return;
     }
@@ -30,8 +30,19 @@ export default function LoginScreen() {
       Alert.alert("Passwords don't match");
       return;
     }
-    if (password.length < 6) {
-      Alert.alert("Invalid password");
+
+    if (password.length < 8) {
+      Alert.alert(
+        "Invalid password",
+        "The password must have at least 8 characters"
+      )
+      return;
+    }
+
+    if (!/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      Alert.alert("Invalid password",
+        "The password must have at least one capital letter or special caracter"
+      )
       return;
     }
     try {
@@ -56,6 +67,8 @@ export default function LoginScreen() {
     } catch (error) {
       if (error.code == "auth/email-already-in-use") {
         Alert.alert("Email already exits");
+      } else if (error.code === "auth/username-already-in-use") {
+        Alert.alert("Username already exits");
       } else if (error.code === "auth/invalid-email") {
         Alert.alert("Invalid Email");
       } else if (error.code === "auth/weak-password") {

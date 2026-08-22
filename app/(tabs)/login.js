@@ -24,6 +24,13 @@ export default function LoginScreen() {
       return;
     }
 
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      Alert.alert("Invalid password",
+        "The password must have at least one capital letter, one lowercase letter, one number, and one special character"
+      )
+      return;
+    }
+
     setLoading(true);
 
     try {
