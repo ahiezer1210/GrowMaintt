@@ -1,24 +1,30 @@
+import { router } from "expo-router";
 import { FirebaseError } from "firebase/app";
 import { updatePassword } from "firebase/auth";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
-    Alert,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { auth } from "../../firebaseConfig";
 
 export default function ChangePassword() {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  // Refs en vez de estado: escribir no dispara re-render de toda la pantalla.
+  const newPasswordRef = useRef("");
+  const confirmPasswordRef = useRef("");
+
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const changePassword = async () => {
+    const newPassword = newPasswordRef.current;
+    const confirmPassword = confirmPasswordRef.current;
+
     if (!newPassword || !confirmPassword) {
       Alert.alert("Error", "Please complete all fields.");
       return;
@@ -52,13 +58,19 @@ export default function ChangePassword() {
 
       await updatePassword(user, newPassword);
 
+      newPasswordRef.current = "";
+      confirmPasswordRef.current = "";
+
       Alert.alert(
         "Success",
-        "Your password was changed successfully."
+        "Your password was changed successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/login"),
+          },
+        ]
       );
-
-      setNewPassword("");
-      setConfirmPassword("");
     } catch (error) {
       console.log(error);
 
@@ -107,9 +119,17 @@ export default function ChangePassword() {
             placeholder="Enter your new password"
             placeholderTextColor="#ACADAD"
             style={styles.password}
-            value={newPassword}
-            onChangeText={setNewPassword}
+            defaultValue=""
+            onChangeText={(text) => {
+              newPasswordRef.current = text;
+            }}
             secureTextEntry={!showNew}
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+            autoComplete="off"
+            textContentType="oneTimeCode"
+            importantForAutofill="no"
           />
 
           <TouchableOpacity
@@ -130,9 +150,17 @@ export default function ChangePassword() {
             placeholder="Confirm your password"
             placeholderTextColor="#ACADAD"
             style={styles.password}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
+            defaultValue=""
+            onChangeText={(text) => {
+              confirmPasswordRef.current = text;
+            }}
             secureTextEntry={!showConfirm}
+            autoCapitalize="none"
+            autoCorrect={false}
+            spellCheck={false}
+            autoComplete="off"
+            textContentType="oneTimeCode"
+            importantForAutofill="no"
           />
 
           <TouchableOpacity
@@ -165,6 +193,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
+    height: 205,
     alignItems: "center",
     paddingTop: 55,
     paddingBottom: 30,
@@ -192,8 +221,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  input: {
+    height: 55,
+    backgroundColor: "#F3F4F5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
+    paddingHorizontal: 18,
+    marginBottom: 35,
+  },
+
   passwordBox: {
-    height: 48,
+    height: 55,
     backgroundColor: "#F3F4F5",
     borderRadius: 15,
     borderWidth: 1,
@@ -201,7 +240,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    marginBottom: 22,
+    marginBottom: 15,
   },
 
   password: {
@@ -215,12 +254,12 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    height: 48,
+    height: 58,
     backgroundColor: "#25B7D3",
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 15,
+    marginTop: 25,
   },
 
   buttonText: {
