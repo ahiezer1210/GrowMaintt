@@ -1,10 +1,10 @@
 import { router } from "expo-router";
 import {
-    Image,
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 
 export default function Welcome() {
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
 
     paddingTop: 65,
-    paddingBottom: 45,
+    paddingBottom: 5,
     paddingHorizontal: 25,
 
     overflow: "hidden",
@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
   loginButton: {
     width: "92%",
 
-    height: 72,
+    height: 64,
 
     backgroundColor: "#08AEEF",
 
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   registerButton: {
     width: "92%",
 
-    height: 72,
+    height: 64,
 
     backgroundColor: "#FFFFFF",
 

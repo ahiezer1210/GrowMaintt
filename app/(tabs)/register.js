@@ -58,12 +58,16 @@ export default function LoginScreen() {
         uid: user.uid,
       });
 
-      Alert.alert("Registration succesfully", [
-        {
-          text: "Ok",
-          onPress: () => router.push("/verification"),
-        },
-      ]);
+     Alert.alert(
+  "Registration successfully",
+  "",
+  [
+    {
+      text: "Ok",
+      onPress: () => router.push("/verification"),
+    },
+  ]
+);
     } catch (error) {
       if (error.code == "auth/email-already-in-use") {
         Alert.alert("Email already exits");
