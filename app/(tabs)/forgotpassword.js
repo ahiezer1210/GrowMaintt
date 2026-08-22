@@ -24,8 +24,8 @@ export default function RecuperarContrasena({ navigation }) {
 
     if (!email) {
       Alert.alert(
-        "Campo vacío",
-        "Por favor, ingresa tu correo electrónico."
+        "Empty field",
+        "Please enter your email address."
       );
       return;
     }
@@ -34,8 +34,8 @@ export default function RecuperarContrasena({ navigation }) {
 
     if (!formatoCorreo.test(email)) {
       Alert.alert(
-        "Correo inválido",
-        "Ingresa un correo electrónico válido."
+        "Invalid email",
+        "Please enter a valid email address."
       );
       return;
     }
@@ -47,28 +47,28 @@ export default function RecuperarContrasena({ navigation }) {
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         Alert.alert(
-          "Correo no encontrado",
-          "No encontramos una cuenta asociada a este correo."
+          "Email not found",
+          "We couldn't find an account associated with this email."
         );
       } else if (error.code === "auth/invalid-email") {
         Alert.alert(
-          "Correo inválido",
-          "El correo electrónico ingresado no es válido."
+          "Invalid email",
+          "The email address entered is not valid."
         );
       } else if (error.code === "auth/too-many-requests") {
         Alert.alert(
-          "Demasiados intentos",
-          "Espera unos minutos antes de volver a intentarlo."
+          "Too many attempts",
+          "Please wait a few minutes before trying again."
         );
       } else if (error.code === "auth/network-request-failed") {
         Alert.alert(
-          "Sin conexión",
-          "No se pudo conectar con Firebase. Verifica tu conexión a Internet."
+          "No connection",
+          "Unable to connect to Firebase. Please check your internet connection."
         );
       } else {
         Alert.alert(
           "Error",
-          "No se pudo enviar el correo de recuperación. Intenta nuevamente."
+          "Could not send the recovery email. Please try again."
         );
       }
     } finally {
@@ -99,7 +99,7 @@ export default function RecuperarContrasena({ navigation }) {
         </TouchableOpacity>
 
         <Text style={styles.titulo}>
-          Recuperar{"\n"}Contraseña
+          Recover{"\n"}Password
         </Text>
       </View>
 
@@ -122,13 +122,13 @@ export default function RecuperarContrasena({ navigation }) {
 
         {!enviado ? (
           <>
-            <Text style={styles.label}>Usuario o Correo</Text>
+            <Text style={styles.label}>Username or Email</Text>
 
             <TextInput
               style={styles.input}
               value={correo}
               onChangeText={setCorreo}
-              placeholder="Ingresa tu correo"
+              placeholder="Enter your email"
               placeholderTextColor="#A8ADB5"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -137,7 +137,7 @@ export default function RecuperarContrasena({ navigation }) {
             />
 
             <Text style={styles.descripcion}>
-              Se le enviará un enlace a su correo
+              A link will be sent to your email
             </Text>
 
             <TouchableOpacity
@@ -152,7 +152,7 @@ export default function RecuperarContrasena({ navigation }) {
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
                 <Text style={styles.textoSiguiente}>
-                  Siguiente
+                  Next
                 </Text>
               )}
             </TouchableOpacity>
@@ -163,7 +163,7 @@ export default function RecuperarContrasena({ navigation }) {
               disabled={cargando}
             >
               <Text style={styles.textoIntentar}>
-                Cancelar
+                Cancel
               </Text>
             </TouchableOpacity>
           </>
@@ -178,12 +178,11 @@ export default function RecuperarContrasena({ navigation }) {
             </View>
 
             <Text style={styles.tituloConfirmacion}>
-              ¡Correo enviado!
+              Email Sent!
             </Text>
 
             <Text style={styles.mensajeConfirmacion}>
-              Hemos enviado un enlace para recuperar tu
-              contraseña a:
+              We have sent a link to reset your password to:
             </Text>
 
             <Text style={styles.correoConfirmacion}>
@@ -191,8 +190,7 @@ export default function RecuperarContrasena({ navigation }) {
             </Text>
 
             <Text style={styles.mensajePequeno}>
-              Revisa tu bandeja de entrada y también la
-              carpeta de spam.
+              Please check your inbox and also the spam folder.
             </Text>
 
             <TouchableOpacity
@@ -200,7 +198,7 @@ export default function RecuperarContrasena({ navigation }) {
               onPress={() => navigation.goBack()}
             >
               <Text style={styles.textoSiguiente}>
-                Volver al inicio
+                Back to Home
               </Text>
             </TouchableOpacity>
 
@@ -209,7 +207,7 @@ export default function RecuperarContrasena({ navigation }) {
               onPress={volverAIntentar}
             >
               <Text style={styles.textoIntentar}>
-                Usar otro correo
+                Use a different email
               </Text>
             </TouchableOpacity>
           </View>
