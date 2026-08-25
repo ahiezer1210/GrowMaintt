@@ -23,20 +23,14 @@ export default function RecuperarContrasena({ navigation }) {
     const email = correo.trim();
 
     if (!email) {
-      Alert.alert(
-        "Campo vacío",
-        "Por favor, ingresa tu correo electrónico."
-      );
+      Alert.alert("Empty field", "Please send your email again.");
       return;
     }
 
     const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoCorreo.test(email)) {
-      Alert.alert(
-        "Correo inválido",
-        "Ingresa un correo electrónico válido."
-      );
+      Alert.alert("Incorrect email", "Send a valid email.");
       return;
     }
 
@@ -47,29 +41,23 @@ export default function RecuperarContrasena({ navigation }) {
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         Alert.alert(
-          "Correo no encontrado",
-          "No encontramos una cuenta asociada a este correo."
+          "Email not found",
+          "We don't find a count with that email.",
         );
       } else if (error.code === "auth/invalid-email") {
-        Alert.alert(
-          "Correo inválido",
-          "El correo electrónico ingresado no es válido."
-        );
+        Alert.alert("too many attempts", "the email entered is incorrect");
       } else if (error.code === "auth/too-many-requests") {
         Alert.alert(
-          "Demasiados intentos",
-          "Espera unos minutos antes de volver a intentarlo."
+          "too many attempts",
+          "Wait a few minutes before try again.",
         );
       } else if (error.code === "auth/network-request-failed") {
         Alert.alert(
-          "Sin conexión",
-          "No se pudo conectar con Firebase. Verifica tu conexión a Internet."
+          "Without connection",
+          "Could not connect to Firebase. Check your Internet connection.",
         );
       } else {
-        Alert.alert(
-          "Error",
-          "No se pudo enviar el correo de recuperación. Intenta nuevamente."
-        );
+        Alert.alert("Error", "The recovery email couldn't be sent. Try again.");
       }
     } finally {
       setCargando(false);
@@ -91,16 +79,10 @@ export default function RecuperarContrasena({ navigation }) {
           style={styles.botonRegresar}
           onPress={() => navigation.goBack()}
         >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={26}
-            color="#FFFFFF"
-          />
+          <MaterialCommunityIcons name="arrow-left" size={26} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <Text style={styles.titulo}>
-          Recuperar{"\n"}Contraseña
-        </Text>
+        <Text style={styles.titulo}>Password{"\n"}Recovery</Text>
       </View>
 
       <View style={styles.card}>
@@ -112,17 +94,13 @@ export default function RecuperarContrasena({ navigation }) {
           />
 
           <View style={styles.checkCircle}>
-            <MaterialCommunityIcons
-              name="check"
-              size={21}
-              color="#FFFFFF"
-            />
+            <MaterialCommunityIcons name="check" size={21} color="#FFFFFF" />
           </View>
         </View>
 
         {!enviado ? (
           <>
-            <Text style={styles.label}>Usuario o Correo</Text>
+            <Text style={styles.label}>User or email</Text>
 
             <TextInput
               style={styles.input}
@@ -137,7 +115,7 @@ export default function RecuperarContrasena({ navigation }) {
             />
 
             <Text style={styles.descripcion}>
-              Se le enviará un enlace a su correo
+              A link will be sent to your email
             </Text>
 
             <TouchableOpacity
@@ -151,9 +129,7 @@ export default function RecuperarContrasena({ navigation }) {
               {cargando ? (
                 <ActivityIndicator color="#FFFFFF" />
               ) : (
-                <Text style={styles.textoSiguiente}>
-                  Siguiente
-                </Text>
+                <Text style={styles.textoSiguiente}>Next</Text>
               )}
             </TouchableOpacity>
 
@@ -162,9 +138,7 @@ export default function RecuperarContrasena({ navigation }) {
               onPress={() => navigation.goBack()}
               disabled={cargando}
             >
-              <Text style={styles.textoIntentar}>
-                Cancelar
-              </Text>
+              <Text style={styles.textoIntentar}>Cancel</Text>
             </TouchableOpacity>
           </>
         ) : (
@@ -177,40 +151,30 @@ export default function RecuperarContrasena({ navigation }) {
               />
             </View>
 
-            <Text style={styles.tituloConfirmacion}>
-              ¡Correo enviado!
-            </Text>
+            <Text style={styles.tituloConfirmacion}>¡Sent email!</Text>
 
             <Text style={styles.mensajeConfirmacion}>
-              Hemos enviado un enlace para recuperar tu
-              contraseña a:
+              We've sent a link to recover your password to:
             </Text>
 
-            <Text style={styles.correoConfirmacion}>
-              {correo}
-            </Text>
+            <Text style={styles.correoConfirmacion}>{correo}</Text>
 
             <Text style={styles.mensajePequeno}>
-              Revisa tu bandeja de entrada y también la
-              carpeta de spam.
+              Check your inbox and also the spam folder.
             </Text>
 
             <TouchableOpacity
               style={styles.botonSiguiente}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.textoSiguiente}>
-                Volver al inicio
-              </Text>
+              <Text style={styles.textoSiguiente}>Back to the login</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={styles.botonIntentar}
               onPress={volverAIntentar}
             >
-              <Text style={styles.textoIntentar}>
-                Usar otro correo
-              </Text>
+              <Text style={styles.textoIntentar}>Use another email.</Text>
             </TouchableOpacity>
           </View>
         )}
@@ -225,7 +189,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#081023",
   },
 
- header: {
+  header: {
     alignItems: "center",
     paddingTop: 55,
     paddingBottom: 30,
