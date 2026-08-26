@@ -1,13 +1,12 @@
-import React from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import {
+    Alert,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
 
 export default function SignOutScreen() {
   const handleSignOut = () => {
@@ -300,7 +299,7 @@ const styles = StyleSheet.create({
     height: 56,
 
     borderRadius: 28,
-
+   
     backgroundColor: "#27A9D4",
 
     alignItems: "center",
