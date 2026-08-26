@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig.js";
 
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
