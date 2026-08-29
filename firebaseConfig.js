@@ -20,4 +20,8 @@ const auth = initializeAuth(app, {
 
 const db = getFirestore(app);
 
+<<<<<<< HEAD
 export { auth, db };
+=======
+export { auth, db };   
+>>>>>>> 3f124ad4a202b9e60c4c014a9809279a9b2ece95
