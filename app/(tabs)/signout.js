@@ -1,15 +1,15 @@
-import React, { useLayoutEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-  useWindowDimensions,
-  StatusBar,
-} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useLayoutEffect } from 'react';
+import {
+  Alert,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 export default function LogoutScreen({ navigation }) {
   const { width, height } = useWindowDimensions();
@@ -466,17 +466,18 @@ const styles = StyleSheet.create({
   },
 
   bottomBar: {
-    width: '100%',
-    backgroundColor: '#25B5D1',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
-    borderTopLeftRadius: 78,
-    borderTopRightRadius: 0,
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    overflow: 'hidden',
-  },
+  width: "100%",
+  height: 65,
+  backgroundColor: "#25B5D1",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-around",
+  borderTopLeftRadius: 78,
+  borderTopRightRadius: 0,
+  borderBottomLeftRadius: 0,
+  borderBottomRightRadius: 0,
+  overflow: "hidden",
+},
 
   navButton: {
     flex: 1,
