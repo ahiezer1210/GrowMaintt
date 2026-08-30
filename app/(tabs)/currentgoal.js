@@ -1,13 +1,13 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 const mainGoal = {
@@ -19,7 +19,13 @@ const mainGoal = {
 
 const otherGoals = [
   { id: "1", icon: "laptop", title: "New laptop", objective: 800, saved: 320 },
-  { id: "2", icon: "book-open-variant", title: "Studies", objective: 1000, saved: 150 },
+  {
+    id: "2",
+    icon: "book-open-variant",
+    title: "Studies",
+    objective: 1000,
+    saved: 150,
+  },
   { id: "3", icon: "airplane", title: "Trip", objective: 2400, saved: 1200 },
 ];
 
@@ -34,7 +40,7 @@ const navIcons = [
 export default function SavingsGoalsScreen() {
   const { width, height } = useWindowDimensions();
   const scale = Math.min(width / 390, height / 844);
-  const s = (v: number) => Math.round(v * scale);
+  const s = (number) => Math.round(value * scale);
 
   const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
@@ -119,9 +125,7 @@ export default function SavingsGoalsScreen() {
 
             <View style={styles.amounts}>
               <View>
-                <Text style={[styles.label, { fontSize: s(12) }]}>
-                  Goal
-                </Text>
+                <Text style={[styles.label, { fontSize: s(12) }]}>Goal</Text>
                 <Text style={[styles.amount, { fontSize: s(18) }]}>
                   ${mainGoal.target}
                 </Text>
@@ -130,9 +134,7 @@ export default function SavingsGoalsScreen() {
               <View style={styles.divider} />
 
               <View>
-                <Text style={[styles.label, { fontSize: s(12) }]}>
-                  Saved
-                </Text>
+                <Text style={[styles.label, { fontSize: s(12) }]}>Saved</Text>
                 <Text style={[styles.amount, { fontSize: s(18) }]}>
                   ${mainGoal.saved}
                 </Text>
@@ -140,14 +142,9 @@ export default function SavingsGoalsScreen() {
             </View>
 
             <View style={styles.progressBar}>
+              <View style={[styles.progressDone, { width: `${progress}%` }]} />
               <View
-                style={[styles.progressDone, { width: `${progress}%` }]}
-              />
-              <View
-                style={[
-                  styles.progressLeft,
-                  { width: `${100 - progress}%` },
-                ]}
+                style={[styles.progressLeft, { width: `${100 - progress}%` }]}
               />
             </View>
 
@@ -182,8 +179,7 @@ export default function SavingsGoalsScreen() {
                 color="#0b1624"
               />
               <Text style={[styles.deadlineText, { fontSize: s(12) }]}>
-                Deadline:{" "}
-                <Text style={styles.bold}>{mainGoal.deadline}</Text>
+                Deadline: <Text style={styles.bold}>{mainGoal.deadline}</Text>
               </Text>
             </View>
           </View>
@@ -200,9 +196,7 @@ export default function SavingsGoalsScreen() {
           </View>
 
           {otherGoals.map((goal) => {
-            const percentage = Math.round(
-              (goal.saved / goal.objective) * 100
-            );
+            const percentage = Math.round((goal.saved / goal.objective) * 100);
 
             return (
               <TouchableOpacity
@@ -237,9 +231,7 @@ export default function SavingsGoalsScreen() {
                     {goal.title}
                   </Text>
 
-                  <Text
-                    style={[styles.goalObjective, { fontSize: s(12) }]}
-                  >
+                  <Text style={[styles.goalObjective, { fontSize: s(12) }]}>
                     Goal: ${goal.objective}
                   </Text>
                 </View>
