@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
 
   nav: {
     position: "absolute",
-    height: 110,
+    height: 100,
     bottom: 0,
     right: 0,
     left: 0,
@@ -148,6 +148,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    borderTopLeftRadius: 50,
+    borderTopLeftRadius: 80,
   },
 });

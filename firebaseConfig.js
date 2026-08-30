@@ -1,13 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { initializeApp } from "firebase/app";
-import {
-    getReactNativePersistence,
-    initializeAuth
-} from "firebase/auth";
+import { getReactNativePersistence, initializeAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AlzaSyAd-YVIRDhh93tyknoiMOltmCG8qQzutr8",
+  apiKey: "AIzaSyAd-YVlRDhh93tYKnoiMOltmCG8qQzutr8",
   authDomain: "growmaint.firebaseapp.com",
   projectId: "growmaint",
   storageBucket: "growmaint.firebasestorage.app",
