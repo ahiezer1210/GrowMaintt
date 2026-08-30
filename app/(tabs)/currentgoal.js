@@ -10,55 +10,33 @@ import {
     useWindowDimensions,
 } from "react-native";
 
-const otherGoalsData = [
-  {
-    id: "1",
-    icon: "laptop",
-    title: "New laptop",
-    objective: 800,
-    saved: 320,
-  },
-  {
-    id: "2",
-    icon: "book-open-variant",
-    title: "Studies",
-    objective: 1000,
-    saved: 150,
-  },
-  {
-    id: "3",
-    icon: "airplane",
-    title: "Trip",
-    objective: 2400,
-    saved: 1200,
-  },
+const mainGoal = {
+  title: "Beach trip",
+  target: 500,
+  saved: 300,
+  deadline: "December 30, 2026",
+};
+
+const otherGoals = [
+  { id: "1", icon: "laptop", title: "New laptop", objective: 800, saved: 320 },
+  { id: "2", icon: "book-open-variant", title: "Studies", objective: 1000, saved: 150 },
+  { id: "3", icon: "airplane", title: "Trip", objective: 2400, saved: 1200 },
+];
+
+const navIcons = [
+  "home-outline",
+  "chart-box-outline",
+  "swap-horizontal",
+  "layers-outline",
+  "account-outline",
 ];
 
 export default function SavingsGoalsScreen() {
   const { width, height } = useWindowDimensions();
-
   const scale = Math.min(width / 390, height / 844);
-  const s = (value) => Math.round(value * scale);
+  const s = (v: number) => Math.round(v * scale);
 
-  const navIcons = [
-    "home-outline",
-    "chart-box-outline",
-    "swap-horizontal",
-    "layers-outline",
-    "account-outline",
-  ];
-
-  const mainGoal = {
-    target: 500,
-    saved: 300,
-    title: "Beach trip",
-    deadline: "December 30, 2026",
-  };
-
-  const progressPercentage = Math.round(
-    (mainGoal.saved / mainGoal.target) * 100,
-  );
-
+  const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
 
   return (
@@ -69,15 +47,7 @@ export default function SavingsGoalsScreen() {
         barStyle="light-content"
       />
 
-      <View
-        style={[
-          styles.header,
-          {
-            height: s(130),
-            paddingHorizontal: s(20),
-          },
-        ]}
-      >
+      <View style={[styles.header, { height: s(130) }]}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => router.back()}
@@ -85,14 +55,7 @@ export default function SavingsGoalsScreen() {
           <MaterialCommunityIcons name="arrow-left" size={s(24)} color="#fff" />
         </TouchableOpacity>
 
-        <Text
-          style={[
-            styles.headerTitle,
-            {
-              fontSize: s(20),
-            },
-          ]}
-        >
+        <Text style={[styles.headerTitle, { fontSize: s(20) }]}>
           Savings Goals
         </Text>
 
@@ -105,15 +68,7 @@ export default function SavingsGoalsScreen() {
         </TouchableOpacity>
       </View>
 
-      <Text
-        style={[
-          styles.headerSubtitle,
-          {
-            fontSize: s(14),
-            paddingHorizontal: s(20),
-          },
-        ]}
-      >
+      <Text style={[styles.subtitle, { fontSize: s(14) }]}>
         Organize your goals and achieve your dreams.
       </Text>
 
@@ -127,26 +82,23 @@ export default function SavingsGoalsScreen() {
         ]}
       >
         <ScrollView
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingBottom: s(110),
-            },
-          ]}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            padding: s(20),
+            paddingBottom: s(120),
+          }}
         >
           <View
             style={[
-              styles.currentGoalCard,
+              styles.mainGoal,
               {
                 padding: s(20),
                 borderRadius: s(16),
-                marginTop: s(20),
               },
             ]}
           >
             <View style={styles.cardHeader}>
-              <View style={styles.targetIconCircle}>
+              <View style={styles.goalIconCircle}>
                 <MaterialCommunityIcons
                   name="bullseye-arrow"
                   size={s(28)}
@@ -155,196 +107,117 @@ export default function SavingsGoalsScreen() {
               </View>
 
               <View style={styles.cardTitles}>
-                <Text
-                  style={[
-                    styles.cardStatus,
-                    {
-                      fontSize: s(12),
-                    },
-                  ]}
-                >
+                <Text style={[styles.status, { fontSize: s(12) }]}>
                   Main goal
                 </Text>
 
-                <Text
-                  style={[
-                    styles.cardGoalTitle,
-                    {
-                      fontSize: s(16),
-                    },
-                  ]}
-                >
+                <Text style={[styles.cardTitle, { fontSize: s(16) }]}>
                   {mainGoal.title}
                 </Text>
               </View>
             </View>
-            <View style={styles.amountsRow}>
+
+            <View style={styles.amounts}>
               <View>
-                <Text
-                  style={[
-                    styles.amountLabel,
-                    {
-                      fontSize: s(12),
-                    },
-                  ]}
-                >
+                <Text style={[styles.label, { fontSize: s(12) }]}>
                   Goal
                 </Text>
-
-                <Text
-                  style={[
-                    styles.amountValue,
-                    {
-                      fontSize: s(18),
-                    },
-                  ]}
-                >
+                <Text style={[styles.amount, { fontSize: s(18) }]}>
                   ${mainGoal.target}
                 </Text>
               </View>
 
-              <View style={styles.verticalDivider} />
+              <View style={styles.divider} />
 
               <View>
-                <Text
-                  style={[
-                    styles.amountLabel,
-                    {
-                      fontSize: s(12),
-                    },
-                  ]}
-                >
+                <Text style={[styles.label, { fontSize: s(12) }]}>
                   Saved
                 </Text>
-
-                <Text
-                  style={[
-                    styles.amountValue,
-                    {
-                      fontSize: s(18),
-                    },
-                  ]}
-                >
+                <Text style={[styles.amount, { fontSize: s(18) }]}>
                   ${mainGoal.saved}
                 </Text>
               </View>
             </View>
 
-            <View style={styles.progressBarContainer}>
+            <View style={styles.progressBar}>
               <View
-                style={[
-                  styles.progressBarFilled,
-                  {
-                    width: `${progressPercentage}%`,
-                  },
-                ]}
+                style={[styles.progressDone, { width: `${progress}%` }]}
               />
-
               <View
                 style={[
-                  styles.progressBarRemaining,
-                  {
-                    width: `${100 - progressPercentage}%`,
-                  },
+                  styles.progressLeft,
+                  { width: `${100 - progress}%` },
                 ]}
               />
             </View>
-            <View style={styles.progressDetailsRow}>
-              <View style={styles.detailItem}>
+
+            <View style={styles.progressInfo}>
+              <View style={styles.info}>
                 <MaterialCommunityIcons
                   name="bullseye-arrow"
                   size={s(16)}
                   color="#0b1624"
                 />
-
-                <Text
-                  style={[
-                    styles.detailText,
-                    {
-                      fontSize: s(12),
-                    },
-                  ]}
-                >
-                  {progressPercentage}% Completed
+                <Text style={[styles.infoText, { fontSize: s(12) }]}>
+                  {progress}% Completed
                 </Text>
               </View>
 
-              <View style={styles.detailItem}>
+              <View style={styles.info}>
                 <MaterialCommunityIcons
                   name="cash-minus"
                   size={s(16)}
                   color="#0b1624"
                 />
-
-                <Text
-                  style={[
-                    styles.detailText,
-                    {
-                      fontSize: s(12),
-                    },
-                  ]}
-                >
+                <Text style={[styles.infoText, { fontSize: s(12) }]}>
                   ${remaining} left
                 </Text>
               </View>
             </View>
-            <View style={styles.deadlineContainer}>
+
+            <View style={styles.deadline}>
               <MaterialCommunityIcons
                 name="calendar-outline"
                 size={s(16)}
                 color="#0b1624"
               />
-
-              <Text
-                style={[
-                  styles.deadlineText,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
+              <Text style={[styles.deadlineText, { fontSize: s(12) }]}>
                 Deadline:{" "}
-                <Text style={styles.deadlineBold}>{mainGoal.deadline}</Text>
+                <Text style={styles.bold}>{mainGoal.deadline}</Text>
               </Text>
             </View>
           </View>
 
-          <View style={styles.sectionHeader}>
+          <View style={styles.section}>
             <MaterialCommunityIcons
               name="bullseye-arrow"
               size={s(20)}
               color="#0b1624"
             />
-
-            <Text
-              style={[
-                styles.sectionTitle,
-                {
-                  fontSize: s(20),
-                },
-              ]}
-            >
+            <Text style={[styles.sectionTitle, { fontSize: s(20) }]}>
               My other goals
             </Text>
           </View>
 
-          {otherGoalsData.map((item) => {
-            const progress = Math.round((item.saved / item.objective) * 100);
+          {otherGoals.map((goal) => {
+            const percentage = Math.round(
+              (goal.saved / goal.objective) * 100
+            );
 
             return (
               <TouchableOpacity
-                key={item.id}
+                key={goal.id}
                 style={[
-                  styles.goalItemContainer,
+                  styles.goalItem,
                   {
-                    paddingVertical: s(10),
+                    padding: s(10),
                     paddingHorizontal: s(16),
                   },
                 ]}
               >
                 <View
                   style={[
-                    styles.goalIconBox,
+                    styles.goalIcon,
                     {
                       width: s(46),
                       height: s(46),
@@ -353,57 +226,31 @@ export default function SavingsGoalsScreen() {
                   ]}
                 >
                   <MaterialCommunityIcons
-                    name={item.icon}
+                    name={goal.icon}
                     size={s(24)}
                     color="#fff"
                   />
                 </View>
 
-                <View style={styles.goalTextContent}>
-                  <Text
-                    style={[
-                      styles.goalItemTitle,
-                      {
-                        fontSize: s(16),
-                      },
-                    ]}
-                  >
-                    {item.title}
+                <View style={styles.goalInfo}>
+                  <Text style={[styles.goalName, { fontSize: s(16) }]}>
+                    {goal.title}
                   </Text>
 
                   <Text
-                    style={[
-                      styles.goalItemSubtitle,
-                      {
-                        fontSize: s(12),
-                      },
-                    ]}
+                    style={[styles.goalObjective, { fontSize: s(12) }]}
                   >
-                    Goal: ${item.objective}
+                    Goal: ${goal.objective}
                   </Text>
                 </View>
 
-                <View style={styles.goalAmountContent}>
-                  <Text
-                    style={[
-                      styles.goalItemAmount,
-                      {
-                        fontSize: s(16),
-                      },
-                    ]}
-                  >
-                    ${item.saved}
+                <View style={styles.goalAmount}>
+                  <Text style={[styles.saved, { fontSize: s(16) }]}>
+                    ${goal.saved}
                   </Text>
 
-                  <Text
-                    style={[
-                      styles.goalItemPercentage,
-                      {
-                        fontSize: s(12),
-                      },
-                    ]}
-                  >
-                    {progress}%
+                  <Text style={[styles.percentage, { fontSize: s(12) }]}>
+                    {percentage}%
                   </Text>
                 </View>
 
@@ -420,41 +267,26 @@ export default function SavingsGoalsScreen() {
             style={[
               styles.createButton,
               {
-                borderRadius: s(24),
-                marginTop: s(30),
                 height: s(48),
+                borderRadius: s(24),
+                marginTop: s(15),
               },
             ]}
           >
-            <Text
-              style={[
-                styles.createButtonText,
-                {
-                  fontSize: s(14),
-                },
-              ]}
-            >
+            <Text style={[styles.createText, { fontSize: s(14) }]}>
               Create New Goal
             </Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
 
-      <View
-        style={[
-          styles.bottomBar,
-          {
-            height: s(85),
-            borderTopLeftRadius: s(50),
-          },
-        ]}
-      >
+      <View style={[styles.navbar, { height: s(95) }]}>
         {navIcons.map((icon, index) => (
           <TouchableOpacity key={icon} style={styles.navButton}>
             <MaterialCommunityIcons
               name={icon}
               size={s(index === 2 ? 28 : 24)}
-              color={index === "#fff"}
+              color={index === 0 ? "#fff" : "#a3e6f5"}
             />
           </TouchableOpacity>
         ))}
@@ -466,30 +298,30 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#0b1624",
+    backgroundColor: "#fff",
   },
 
   header: {
-    width: "100%",
     backgroundColor: "#0b1624",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    paddingHorizontal: 20,
     paddingTop: StatusBar.currentHeight,
   },
 
   backButton: {
     width: 46,
     height: 46,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
   },
 
   headerTitle: {
     flex: 1,
     color: "#fff",
-    fontWeight: "bold",
     textAlign: "center",
+    fontWeight: "bold",
   },
 
   bellButton: {
@@ -501,35 +333,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  headerSubtitle: {
+  subtitle: {
     color: "#fff",
+    backgroundColor: "#0b1624",
     textAlign: "center",
-    marginBottom: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
 
   main: {
     flex: 1,
-    width: "100%",
     backgroundColor: "#fff",
     overflow: "hidden",
     marginTop: -10,
   },
 
-  scrollContent: {
-    padding: 20,
-  },
-
-  currentGoalCard: {
+  mainGoal: {
     backgroundColor: "#25B7D3",
+    marginTop: 20,
+    marginBottom: 30,
     elevation: 4,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
-    marginBottom: 30,
   },
 
   cardHeader: {
@@ -538,7 +365,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
-  targetIconCircle: {
+  goalIconCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
@@ -552,43 +379,41 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  cardStatus: {
+  status: {
     color: "#0b1624",
     opacity: 0.8,
-    marginBottom: 2,
   },
 
-  cardGoalTitle: {
+  cardTitle: {
     color: "#0b1624",
     fontWeight: "bold",
   },
 
-  amountsRow: {
+  amounts: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginVertical: 10,
   },
 
-  verticalDivider: {
+  divider: {
     width: 1,
     height: 30,
     backgroundColor: "#0b1624",
     opacity: 0.3,
   },
 
-  amountLabel: {
+  label: {
     color: "#0b1624",
     opacity: 0.7,
-    marginBottom: 2,
   },
 
-  amountValue: {
+  amount: {
     color: "#0b1624",
     fontWeight: "bold",
   },
 
-  progressBarContainer: {
+  progressBar: {
     flexDirection: "row",
     height: 8,
     borderRadius: 4,
@@ -596,37 +421,37 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  progressBarFilled: {
+  progressDone: {
     backgroundColor: "#0b1624",
   },
 
-  progressBarRemaining: {
+  progressLeft: {
     backgroundColor: "#e0f7fa",
   },
 
-  progressDetailsRow: {
+  progressInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
   },
 
-  detailItem: {
+  info: {
     flexDirection: "row",
     alignItems: "center",
   },
 
-  detailText: {
+  infoText: {
     color: "#0b1624",
     marginLeft: 5,
   },
 
-  deadlineContainer: {
+  deadline: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 5,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: "rgba(11,24,38,0.1)",
-    paddingTop: 10,
   },
 
   deadlineText: {
@@ -634,11 +459,11 @@ const styles = StyleSheet.create({
     marginLeft: 5,
   },
 
-  deadlineBold: {
+  bold: {
     fontWeight: "bold",
   },
 
-  sectionHeader: {
+  section: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
@@ -650,7 +475,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 
-  goalItemContainer: {
+  goalItem: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -658,67 +483,67 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     elevation: 2,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
 
-  goalIconBox: {
-    justifyContent: "center",
+  goalIcon: {
     alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#25B7D3",
   },
 
-  goalTextContent: {
+  goalInfo: {
     flex: 1,
     paddingHorizontal: 15,
   },
 
-  goalItemTitle: {
+  goalName: {
     color: "#0b1624",
     fontWeight: "bold",
-    marginBottom: 2,
   },
 
-  goalItemSubtitle: {
+  goalObjective: {
     color: "#6b7280",
   },
 
-  goalAmountContent: {
+  goalAmount: {
     alignItems: "flex-end",
     marginRight: 10,
   },
 
-  goalItemAmount: {
+  saved: {
     color: "#0b1624",
     fontWeight: "bold",
   },
 
-  goalItemPercentage: {
+  percentage: {
     color: "#06b6d4",
   },
 
   createButton: {
+    width: "100%",
     backgroundColor: "#0b1624",
     alignItems: "center",
     justifyContent: "center",
-    width: "100%",
   },
 
-  createButtonText: {
+  createText: {
     color: "#fff",
     fontWeight: "bold",
   },
 
-  bottomBar: {
-    width: "100%",
+  navbar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: "#25B7D3",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    borderTopLeftRadius: 50,
   },
 
   navButton: {
