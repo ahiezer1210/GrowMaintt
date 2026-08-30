@@ -40,7 +40,7 @@ const navIcons = [
 export default function SavingsGoalsScreen() {
   const { width, height } = useWindowDimensions();
   const scale = Math.min(width / 390, height / 844);
-  const s = (number) => Math.round(value * scale);
+  const s = (value) => Math.round(value * scale);
 
   const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
