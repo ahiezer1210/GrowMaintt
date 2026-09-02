@@ -12,7 +12,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
 const SecurityAlertScreen = () => {
   const { width, height } = useWindowDimensions();
-  const isSmallScreen = width < true;
+  const isSmallScreen = width < 350;
   const isShortScreen = height < 700;
 
   return (
