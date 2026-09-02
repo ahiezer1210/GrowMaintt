@@ -116,7 +116,6 @@ export default function Expensescreen() {
             );
           })}
 
-          {/* ALL THREE */}
           <TouchableOpacity
             style={[styles.option, allSelected && styles.optionSelected]}
             onPress={selectAll}
@@ -162,7 +161,6 @@ export default function Expensescreen() {
           </TouchableOpacity>
         </View>
 
-        {/* SAVE */}
         <TouchableOpacity
           style={styles.saveButton}
           onPress={savePeriod}
