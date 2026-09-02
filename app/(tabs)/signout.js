@@ -138,8 +138,7 @@ export default function LogoutScreen({ navigation }) {
           ]}
         >
           <ScrollView
-          showsVerticalScrollIndicator={false}
-
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={[
               styles.content,
               {
@@ -185,149 +184,150 @@ export default function LogoutScreen({ navigation }) {
                 color="#1464E8"
                 style={styles.logoutArrow}
               />
-            </ScrollView>
+            </View>
+          </ScrollView>
 
-            <Text
-              style={[
-                styles.question,
-                {
-                  fontSize: s(24),
-                  lineHeight: s(29),
-                },
-              ]}
-            >
-              Are you sure you want to
-              {"\n"}
-              log out?
-            </Text>
-
-            <Text
-              style={[
-                styles.description,
-                {
-                  fontSize: s(15),
-                  lineHeight: s(21),
-                },
-              ]}
-            >
-              You will be logged out of this device. To access your account
-              again, you will need to log in again.
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                {
-                  width: s(225),
-                  height: s(54),
-                  borderRadius: s(30),
-                },
-              ]}
-              onPress={handleLogout}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  {
-                    fontSize: s(17),
-                  },
-                ]}
-              >
-                Log Out
-              </Text>
-            </TouchableOpacity>
-
-            <Text
-              style={[
-                styles.everywhereText,
-                {
-                  fontSize: s(15),
-                  lineHeight: s(21),
-                },
-              ]}
-            >
-              Or log out from all your
-              {"\n"}
-              devices
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.actionButton,
-                {
-                  width: s(225),
-                  height: s(54),
-                  borderRadius: s(30),
-                },
-              ]}
-              onPress={handleLogoutEverywhere}
-              activeOpacity={0.8}
-            >
-              <Text
-                style={[
-                  styles.buttonText,
-                  {
-                    fontSize: s(17),
-                  },
-                ]}
-              >
-                Go
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <View
+          <Text
             style={[
-              styles.bottomBar,
+              styles.question,
               {
-                height: s(86),
-                borderTopLeftRadius: s(78),
+                fontSize: s(24),
+                lineHeight: s(29),
               },
             ]}
           >
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons
-                name="home-outline"
-                size={s(35)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+            Are you sure you want to
+            {"\n"}
+            log out?
+          </Text>
 
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons
-                name="chart-box-outline"
-                size={s(35)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+          <Text
+            style={[
+              styles.description,
+              {
+                fontSize: s(15),
+                lineHeight: s(21),
+              },
+            ]}
+          >
+            You will be logged out of this device. To access your account again,
+            you will need to log in again.
+          </Text>
 
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons
-                name="swap-horizontal"
-                size={s(37)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                width: s(225),
+                height: s(54),
+                borderRadius: s(30),
+              },
+            ]}
+            onPress={handleLogout}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  fontSize: s(17),
+                },
+              ]}
+            >
+              Log Out
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={s(35)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+          <Text
+            style={[
+              styles.everywhereText,
+              {
+                fontSize: s(15),
+                lineHeight: s(21),
+              },
+            ]}
+          >
+            Or log out from all your
+            {"\n"}
+            devices
+          </Text>
 
-            <TouchableOpacity style={styles.navButton}>
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={s(35)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              {
+                width: s(225),
+                height: s(54),
+                borderRadius: s(30),
+              },
+            ]}
+            onPress={handleLogoutEverywhere}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  fontSize: s(17),
+                },
+              ]}
+            >
+              Go
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height: s(86),
+              borderTopLeftRadius: s(78),
+            },
+          ]}
+        >
+          <TouchableOpacity style={styles.navButton}>
+            <MaterialCommunityIcons
+              name="home-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navButton}>
+            <MaterialCommunityIcons
+              name="chart-box-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navButton}>
+            <MaterialCommunityIcons
+              name="swap-horizontal"
+              size={s(37)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navButton}>
+            <MaterialCommunityIcons
+              name="layers-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.navButton}>
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
         </View>
       </View>
+    </View>
   );
 }
 
