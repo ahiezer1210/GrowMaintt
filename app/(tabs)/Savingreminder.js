@@ -1,13 +1,13 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    Image,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Image,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 
 export default function SavingsReminder() {
@@ -138,7 +138,7 @@ export default function SavingsReminder() {
             style={[
               styles.cardBox,
               {
-                width: s(330),
+                width: Math.min(s(330), width - s(30)),
                 borderRadius: s(16),
                 padding: s(12),
                 marginTop: s(14),
@@ -228,7 +228,7 @@ export default function SavingsReminder() {
             style={[
               styles.actionButton,
               {
-                width: s(210),
+                width: Math.min(s(210), width - s(80)),
                 height: s(40),
                 borderRadius: s(22),
                 marginTop: s(18),
@@ -259,12 +259,11 @@ export default function SavingsReminder() {
           ]}
         >
           {navIcons.map((icon, index) => (
-            <TouchableOpacity key={icon} style={styles.navButton}>
-              <MaterialCommunityIcons
-                name={icon}
-                size={s(index === 2 ? 28 : 24)}
-                color={"#FFFF"}
-              />
+            <TouchableOpacity
+              key={icon}
+              style={[styles.navButton, width >= 600 && { maxwidth: 110 }]}
+            >
+              <MaterialCommunityIcons name={icon} color={"#FFFF"} />
             </TouchableOpacity>
           ))}
         </View>
