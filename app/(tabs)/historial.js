@@ -2,12 +2,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
   FlatList,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
-22  
 
 const movements = [
   { id: "1", name: "Starbucks", type: "coffee", savings: 0.75 },
@@ -28,10 +29,14 @@ const movements = [
 
 export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
+  const { width, height } = useWindowDimensions();
+
+  const scale = Math.min(width / 390, height / 844);
+  const s = (value) => Math.round(value * scale);
 
   const totalSaved = movements.reduce(
     (total, movement) => total + movement.savings,
-    0
+    0,
   );
 
   const visibleMovements = showAll ? movements : movements.slice(0, 6);
@@ -56,38 +61,135 @@ export default function HistorialScreen() {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.blackHeader}>
-        <Text style={styles.headerTitle}>Savings History</Text>
+      <StatusBar
+        translucent
+        backgroundColor="#071426"
+        barStyle="light-content"
+      />
+
+      <View
+        style={[
+          styles.header,
+          {
+            height: s(145),
+            paddingHorizontal: s(22),
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.headerTitle,
+            {
+              fontSize: s(24),
+            },
+          ]}
+        >
+          Savings History
+        </Text>
       </View>
 
-      <View style={styles.whitePanel}>
-        <View style={styles.blueCard}>
-          <View style={styles.walletBox}>
-            <Ionicons
-              name="wallet-outline"
-              size={48}
-              color="#172B3A"
-            />
+      <View
+        style={[
+          styles.whitePanel,
+          {
+            borderTopLeftRadius: s(45),
+            borderTopRightRadius: s(45),
+            paddingHorizontal: s(22),
+            paddingTop: s(28),
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.blueCard,
+            {
+              height: s(108),
+              borderRadius: s(10),
+              paddingHorizontal: s(18),
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.walletBox,
+              {
+                width: s(82),
+                height: s(82),
+                marginRight: s(15),
+              },
+            ]}
+          >
+            <Ionicons name="wallet-outline" size={s(48)} color="#172B3A" />
           </View>
 
           <View style={styles.cardInfo}>
-            <Text style={styles.cardTitle}>The Power of Saving</Text>
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  fontSize: s(15),
+                },
+              ]}
+            >
+              The Power of Saving
+            </Text>
 
-            <Text style={styles.totalSaved}>
+            <Text
+              style={[
+                styles.totalSaved,
+                {
+                  fontSize: s(24),
+                },
+              ]}
+            >
               ${totalSaved.toFixed(2)}
             </Text>
 
-            <Text style={styles.keepSaving}>
+            <Text
+              style={[
+                styles.keepSaving,
+                {
+                  fontSize: s(13),
+                },
+              ]}
+            >
               Keep saving!
             </Text>
           </View>
         </View>
 
-        <View style={styles.divider} />
+        <View
+          style={[
+            styles.divider,
+            {
+              marginTop: s(18),
+              marginBottom: s(14),
+            },
+          ]}
+        />
 
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Movements</Text>
-          <Text style={styles.sectionTitle}>Round-up</Text>
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                fontSize: s(17),
+              },
+            ]}
+          >
+            Movements
+          </Text>
+
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                fontSize: s(17),
+              },
+            ]}
+          >
+            Round-up
+          </Text>
         </View>
 
         <FlatList
@@ -96,20 +198,52 @@ export default function HistorialScreen() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <View style={styles.movement}>
-              <View style={styles.movementIcon}>
+            <View
+              style={[
+                styles.movement,
+                {
+                  height: s(70),
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.movementIcon,
+                  {
+                    width: s(58),
+                    height: s(58),
+                    marginRight: s(12),
+                  },
+                ]}
+              >
                 <Ionicons
                   name={getIcon(item.type)}
-                  size={34}
+                  size={s(34)}
                   color="#172B3A"
                 />
               </View>
 
-              <Text style={styles.movementName}>
+              <Text
+                style={[
+                  styles.movementName,
+                  {
+                    fontSize: s(15),
+                  },
+                ]}
+                numberOfLines={1}
+              >
                 {item.name}
               </Text>
 
-              <Text style={styles.movementAmount}>
+              <Text
+                style={[
+                  styles.movementAmount,
+                  {
+                    fontSize: s(15),
+                    marginLeft: s(8),
+                  },
+                ]}
+              >
                 + ${item.savings.toFixed(2)}
               </Text>
             </View>
@@ -117,23 +251,53 @@ export default function HistorialScreen() {
         />
 
         <TouchableOpacity
-          style={styles.seeAll}
+          style={[
+            styles.seeAll,
+            {
+              paddingVertical: s(10),
+              paddingRight: s(4),
+            },
+          ]}
           onPress={() => setShowAll(!showAll)}
           activeOpacity={0.7}
         >
-          <Text style={styles.seeAllText}>
+          <Text
+            style={[
+              styles.seeAllText,
+              {
+                fontSize: s(15),
+                marginRight: s(4),
+              },
+            ]}
+          >
             {showAll ? "Show less" : "See all"}
           </Text>
 
           <Ionicons
             name={showAll ? "chevron-up" : "arrow-forward"}
-            size={22}
+            size={s(22)}
             color="#172B3A"
           />
         </TouchableOpacity>
 
-        <View style={styles.bottomTotal}>
-          <Text style={styles.bottomText}>
+        <View
+          style={[
+            styles.bottomTotal,
+            {
+              height: s(42),
+              borderRadius: s(8),
+              marginBottom: s(8),
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.bottomText,
+              {
+                fontSize: s(15),
+              },
+            ]}
+          >
             Total saved: ${totalSaved.toFixed(2)}
           </Text>
         </View>
@@ -145,51 +309,38 @@ export default function HistorialScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#DDE2E3",
+    backgroundColor: "#071426",
   },
 
   header: {
-    height: 205,
-    backgroundColor: "#081023",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingTop: 55,
-    paddingHorizontal: 28,
+    width: "100%",
+    backgroundColor: "#071426",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   headerTitle: {
     color: "#FFFFFF",
-    fontSize: 24,
     fontWeight: "600",
     textAlign: "center",
   },
 
   whitePanel: {
     flex: 1,
+    width: "100%",
     backgroundColor: "#FAFAF7",
-    marginTop: -38,
-    borderTopLeftRadius: 48,
-    borderTopRightRadius: 48,
-    paddingHorizontal: 22,
-    paddingTop: 28,
     overflow: "hidden",
   },
 
   blueCard: {
-    height: 108,
     backgroundColor: "#20A9D8",
-    borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 18,
   },
 
   walletBox: {
-    width: 82,
-    height: 82,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
   },
 
   cardInfo: {
@@ -198,28 +349,23 @@ const styles = StyleSheet.create({
 
   cardTitle: {
     color: "#172B3A",
-    fontSize: 15,
     fontWeight: "700",
   },
 
   totalSaved: {
     color: "#172B3A",
-    fontSize: 24,
     fontWeight: "800",
     marginTop: 2,
   },
 
   keepSaving: {
     color: "#172B3A",
-    fontSize: 13,
     marginTop: 1,
   },
 
   divider: {
     height: 1,
     backgroundColor: "#D9D9D9",
-    marginTop: 18,
-    marginBottom: 14,
   },
 
   sectionHeader: {
@@ -231,7 +377,6 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     color: "#222222",
-    fontSize: 17,
     fontWeight: "700",
   },
 
@@ -240,7 +385,6 @@ const styles = StyleSheet.create({
   },
 
   movement: {
-    height: 70,
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
@@ -248,54 +392,40 @@ const styles = StyleSheet.create({
   },
 
   movementIcon: {
-    width: 58,
-    height: 58,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
   },
 
   movementName: {
     flex: 1,
     color: "#222222",
-    fontSize: 15,
     fontWeight: "600",
   },
 
   movementAmount: {
     color: "#172B3A",
-    fontSize: 15,
     fontWeight: "600",
-    marginLeft: 8,
   },
 
   seeAll: {
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    paddingVertical: 10,
-    paddingRight: 4,
   },
 
   seeAllText: {
     color: "#172B3A",
-    fontSize: 15,
     fontWeight: "500",
-    marginRight: 4,
   },
 
   bottomTotal: {
-    height: 42,
     backgroundColor: "#55C9D5",
-    borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
   },
 
   bottomText: {
     color: "#172B3A",
-    fontSize: 15,
     fontWeight: "700",
   },
 });
