@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { signOut } from "firebase/auth";
 import { useLayoutEffect } from "react";
 import {
   Alert,
@@ -11,6 +12,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { auth } from "../../firebaseConfig.js";
 
 const NAV_ICONS = [
   "home-outline",
@@ -56,7 +58,7 @@ export default function LogoutScreen({ navigation }) {
     });
   }, [navigation]);
 
-  const logout = () =>
+  const logout = () => {
     Alert.alert(
       "Log Out",
       "Are you sure you want to log out?",
@@ -67,32 +69,25 @@ export default function LogoutScreen({ navigation }) {
         },
         {
           text: "Log Out",
-          onPress: () => router.replace("/login"),
+          onPress: async () => {
+            try {
+              await signOut(auth);
+              router.replace("/login");
+            } catch (error) {
+              Alert.alert("Error", "Could not log out. Please try again.");
+            }
+          },
         },
       ],
       {
         cancelable: true,
       },
     );
+  };
 
-  const logoutEverywhere = () =>
-    Alert.alert(
-      "Log Out Everywhere",
-      "Do you want to log out from all your devices?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Continue",
-          onPress: () => router.replace("/login"),
-        },
-      ],
-      {
-        cancelable: true,
-      },
-    );
+  const logoutEverywhere = () => {
+    router.push("/logout-everywhere");
+  };
 
   const button = (text, onPress) => (
     <TouchableOpacity
@@ -166,9 +161,7 @@ export default function LogoutScreen({ navigation }) {
               styles.bell,
               {
                 width: tablet ? 52 : small ? 40 : 45,
-
                 height: tablet ? 52 : small ? 40 : 45,
-
                 borderRadius: tablet ? 26 : small ? 20 : 23,
               },
             ]}
@@ -181,13 +174,12 @@ export default function LogoutScreen({ navigation }) {
             />
           </TouchableOpacity>
         </View>
-        x
+
         <View
           style={[
             styles.main,
             {
               borderTopLeftRadius: tablet ? 55 : small ? 35 : 45,
-
               borderTopRightRadius: tablet ? 55 : small ? 35 : 45,
             },
           ]}
@@ -198,15 +190,10 @@ export default function LogoutScreen({ navigation }) {
               styles.content,
               {
                 width: tablet ? "85%" : "100%",
-
                 maxWidth: tablet ? 700 : undefined,
-
                 paddingHorizontal: tablet ? 0 : small ? 22 : 30,
-
                 paddingTop: tablet ? 35 : small ? 20 : 28,
-
                 paddingBottom: 40,
-
                 gap: tablet ? 24 : small ? 15 : 20,
               },
             ]}
@@ -235,7 +222,6 @@ export default function LogoutScreen({ navigation }) {
                     styles.doorInside,
                     {
                       width: tablet ? 68 : small ? 48 : 57,
-
                       height: tablet ? 102 : small ? 73 : 86,
                     },
                   ]}
@@ -255,7 +241,6 @@ export default function LogoutScreen({ navigation }) {
                 styles.question,
                 {
                   fontSize: ui.question,
-
                   lineHeight: tablet ? 34 : small ? 25 : 29,
                 },
               ]}
@@ -268,9 +253,7 @@ export default function LogoutScreen({ navigation }) {
                 styles.description,
                 {
                   fontSize: ui.description,
-
                   lineHeight: tablet ? 24 : small ? 19 : 21,
-
                   width: tablet ? "100%" : small ? "92%" : "90%",
                 },
               ]}
@@ -286,7 +269,6 @@ export default function LogoutScreen({ navigation }) {
                 styles.everywhere,
                 {
                   fontSize: small ? 14 : tablet ? 17 : 15,
-
                   lineHeight: small ? 19 : tablet ? 24 : 21,
                 },
               ]}
@@ -297,6 +279,7 @@ export default function LogoutScreen({ navigation }) {
             {button("Log Out Everywhere", logoutEverywhere)}
           </ScrollView>
         </View>
+
         <View style={styles.bottom}>
           {NAV_ICONS.map((icon, index) => (
             <TouchableOpacity
@@ -371,14 +354,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-
     shadowColor: "#1464E8",
-
     shadowOffset: {
       width: 0,
       height: 5,
     },
-
     shadowOpacity: 0.13,
     shadowRadius: 10,
     elevation: 5,
