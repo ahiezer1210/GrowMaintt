@@ -59,7 +59,7 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Themes */}
+        {/* Temas */}
         <View style={styles.themesContainer}>
           <TouchableOpacity
             style={styles.themeOption}
@@ -93,7 +93,7 @@ export default function SettingsScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Contenedor Blanco Ajustado */}
+      {/* Tarjeta Blanca Ajustada para ocupar todo el espacio */}
       <View style={styles.contentCard}>
         <View style={styles.optionsList}>
           {OPTIONS.map(([icon, text, route]) => (
@@ -109,12 +109,12 @@ export default function SettingsScreen({ navigation }) {
 
               <Text style={styles.optionText}>{text}</Text>
 
-              <Ionicons name="chevron-forward" size={24} color="#0D1B2A" />
+              <Ionicons name="chevron-forward" size={22} color="#0D1B2A" />
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Navegación Celeste */}
+        {/* Navegación Celeste Inferior */}
         <View style={styles.bottomNavContainer}>
           <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
             <View style={styles.bottomTabBar}>
@@ -218,14 +218,13 @@ const styles = StyleSheet.create({
   optionsList: {
     flex: 1,
     paddingHorizontal: 22,
-    paddingTop: 12,
-    paddingBottom: 12,
-    justifyContent: "space-evenly",
+    paddingTop: 16,
+    paddingBottom: 16,
+    justifyContent: "space-between",
   },
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
   },
   iconCircle: {
     width: 42,
