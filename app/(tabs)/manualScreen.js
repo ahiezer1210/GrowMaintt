@@ -1,123 +1,141 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   StatusBar,
+  useWindowDimensions,
+  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function ManualScreen({ navigation }) {
+  const { width, height } = useWindowDimensions();
+  const [activeTab, setActiveTab] = useState('home');
+  const [hasNotification, setHasNotification] = useState(true);
+
+  // Escalas responsivas basadas en el ancho y alto de pantalla
+  const scale = width / 375;
+  const verticalScale = height / 812;
+
+  const handleNotificationPress = () => {
+    setHasNotification(false);
+    Alert.alert('Notificaciones', 'No tienes nuevas notificaciones pendientes.');
+  };
+
+  const handleNavPress = (screenName, tabKey) => {
+    setActiveTab(tabKey);
+    if (navigation && screenName) {
+      navigation.navigate(screenName);
+    }
+  };
+
   return (
-    <View style={styles.screen}>
+    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+      <StatusBar backgroundColor="#071426" barStyle="light-content" />
 
-      <StatusBar
-        backgroundColor="#071426"
-        barStyle="light-content"
-      />
-
-    
-      <View style={styles.header}>
-
+      {/* Header Fijo */}
+      <View style={[styles.header, { height: Math.max(65, height * 0.09) }]}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation?.goBack()}
+          onPress={() => (navigation?.goBack ? navigation.goBack() : null)}
+          activeOpacity={0.7}
         >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={34}
-            color="#FFFFFF"
-          />
+          <MaterialCommunityIcons name="arrow-left" size={28 * scale} color="#FFFFFF" />
         </TouchableOpacity>
 
         <View style={styles.headerCenter}>
-          <Text style={styles.headerTitle}>
+          <Text style={[styles.headerTitle, { fontSize: 20 * scale }]}>
             User Manual
           </Text>
-
-          <Text style={styles.headerSubtitle}>
+          <Text style={[styles.headerSubtitle, { fontSize: 12 * scale }]}>
             Everything you need to know
           </Text>
         </View>
 
-        <View style={styles.bellButton}>
+        <TouchableOpacity
+          style={styles.bellButton}
+          onPress={handleNotificationPress}
+          activeOpacity={0.7}
+        >
           <MaterialCommunityIcons
-            name="bell-outline"
-            size={27}
+            name={hasNotification ? 'bell-badge-outline' : 'bell-outline'}
+            size={22 * scale}
             color="#397468"
           />
-        </View>
-
+        </TouchableOpacity>
       </View>
 
-    
+      {/* Main Content Area - Estática sin Scroll */}
       <View style={styles.main}>
-
         <View style={styles.content}>
-
-          <Text style={styles.mainTitle}>
+          <Text style={[styles.mainTitle, { fontSize: 20 * scale }]}>
             What is GrowMait?
           </Text>
 
           <View style={styles.introBox}>
-            <Text style={styles.introText}>
+            <Text style={[styles.introText, { fontSize: 11.5 * scale, lineHeight: 15 * scale }]}>
               GrowMait is your ally to keep control of your finances,
               expenses and savings. Everything in one simple, easy
               and secure place.
             </Text>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>1. Home</Text>
-            <Text style={styles.sectionText}>
-              Know your balance, recent activity and get a quick summary of your finances.
-            </Text>
+          {/* Lista de Secciones Distribuidas */}
+          <View style={styles.sectionsContainer}>
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>1. Home</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Know your balance, recent activity and get a quick summary of your finances.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>2. Add Expense</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Register your daily expenses and classify them by category.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>3. Reports</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Visualize your income, expenses and savings with charts and statistics.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>4. Savings</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Create savings goals, contribute regularly and reach your objectives.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>5. Transactions</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Review the history of all your financial movements in detail.
+              </Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>6. Settings</Text>
+              <Text style={[styles.sectionText, { fontSize: 10.5 * scale }]}>
+                Manage your account preferences and configuration.
+              </Text>
+            </View>
           </View>
 
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>2. Add Expense</Text>
-            <Text style={styles.sectionText}>
-              Register your daily expenses and classify them by category.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>3. Reports</Text>
-            <Text style={styles.sectionText}>
-              Visualize your income, expenses and savings with charts and statistics.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>4. Savings</Text>
-            <Text style={styles.sectionText}>
-              Create savings goals, contribute regularly and reach your objectives.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>5. Transactions</Text>
-            <Text style={styles.sectionText}>
-              Review the history of all your financial movements in detail.
-            </Text>
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>6. Settings</Text>
-            <Text style={styles.sectionText}>
-              Manage your account preferences and configuration.
-            </Text>
-          </View>
-
+          {/* Tips */}
           <View style={styles.tipsHeader}>
             <MaterialCommunityIcons
               name="lightbulb-outline"
-              size={29}
+              size={22 * scale}
               color="#071426"
             />
-
-            <Text style={styles.tipsTitle}>
+            <Text style={[styles.tipsTitle, { fontSize: 17 * scale }]}>
               Useful Tips
             </Text>
           </View>
@@ -125,16 +143,14 @@ export default function ManualScreen({ navigation }) {
           <View style={styles.tip}>
             <MaterialCommunityIcons
               name="shield-check-outline"
-              size={36}
+              size={28 * scale}
               color="#071426"
             />
-
             <View style={styles.tipContent}>
-              <Text style={styles.tipTitle}>
+              <Text style={[styles.tipTitle, { fontSize: 13 * scale }]}>
                 Keep your data safe
               </Text>
-
-              <Text style={styles.tipDescription}>
+              <Text style={[styles.tipDescription, { fontSize: 10 * scale }]}>
                 Do not share your password or sign in on shared devices.
               </Text>
             </View>
@@ -143,123 +159,128 @@ export default function ManualScreen({ navigation }) {
           <View style={styles.tip}>
             <MaterialCommunityIcons
               name="bullseye-arrow"
-              size={36}
+              size={28 * scale}
               color="#071426"
             />
-
             <View style={styles.tipContent}>
-              <Text style={styles.tipTitle}>
+              <Text style={[styles.tipTitle, { fontSize: 13 * scale }]}>
                 Set realistic goals
               </Text>
-
-              <Text style={styles.tipDescription}>
+              <Text style={[styles.tipDescription, { fontSize: 10 * scale }]}>
                 Start with small goals and increase them little by little.
               </Text>
             </View>
           </View>
-
         </View>
 
+        {/* Bottom Navigation Bar Fijo */}
+        <SafeAreaView edges={['bottom']} style={styles.bottomBarContainer}>
+          <View style={[styles.bottomBar, { height: Math.max(60, height * 0.075) }]}>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => handleNavPress('Home', 'home')}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="home-outline"
+                size={26 * scale}
+                color={activeTab === 'home' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'}
+              />
+            </TouchableOpacity>
 
-        <View style={styles.bottomBar}>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => handleNavPress('Reports', 'reports')}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="chart-box-outline"
+                size={26 * scale}
+                color={activeTab === 'reports' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'}
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navButton}>
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={32}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => handleNavPress('Transactions', 'transactions')}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="swap-horizontal"
+                size={28 * scale}
+                color={activeTab === 'transactions' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'}
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navButton}>
-            <MaterialCommunityIcons
-              name="chart-box-outline"
-              size={32}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => handleNavPress('Savings', 'savings')}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="layers-outline"
+                size={26 * scale}
+                color={activeTab === 'savings' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'}
+              />
+            </TouchableOpacity>
 
-          <TouchableOpacity style={styles.navButton}>
-            <MaterialCommunityIcons
-              name="swap-horizontal"
-              size={34}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navButton}>
-            <MaterialCommunityIcons
-              name="layers-outline"
-              size={32}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navButton}>
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={32}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-        </View>
-
+            <TouchableOpacity
+              style={styles.navButton}
+              onPress={() => handleNavPress('Profile', 'profile')}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={26 * scale}
+                color={activeTab === 'profile' ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'}
+              />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </View>
-
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-
   screen: {
     flex: 1,
     backgroundColor: '#071426',
   },
-
   header: {
-    height: 105,
     width: '100%',
     backgroundColor: '#071426',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 18,
   },
-
   backButton: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
+    alignItems: 'center',
   },
-
   headerCenter: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   headerTitle: {
     color: '#FFFFFF',
-    fontSize: 24,
     fontWeight: '800',
   },
-
   headerSubtitle: {
     color: '#FFFFFF',
-    fontSize: 14,
-    marginTop: 2,
+    marginTop: 1,
   },
-
   bellButton: {
-    width: 45,
-    height: 45,
-    borderRadius: 23,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#E2F5E9',
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   main: {
     flex: 1,
     backgroundColor: '#FFFFFF',
@@ -267,97 +288,83 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 42,
     overflow: 'hidden',
   },
-
   content: {
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 30,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 8,
+    justifyContent: 'space-between',
   },
-
   mainTitle: {
     textAlign: 'center',
     color: '#263B3D',
-    fontSize: 24,
     fontWeight: '800',
-    marginBottom: 10,
+    marginBottom: 4,
   },
-
   introBox: {
     backgroundColor: '#2BB3CA',
-    borderRadius: 15,
-    paddingHorizontal: 16,
-    paddingVertical: 13,
-    marginBottom: 5,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 4,
   },
-
   introText: {
     color: '#073246',
     textAlign: 'center',
-    fontSize: 13,
-    lineHeight: 17,
     fontWeight: '700',
   },
-
-  section: {
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#42B7C8',
-    paddingVertical: 3,
+  sectionsContainer: {
+    flex: 1,
+    justifyContent: 'space-evenly',
   },
-
+  section: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#42B7C8',
+    paddingVertical: 2,
+  },
   sectionTitle: {
     color: '#111111',
-    fontSize: 16,
     fontWeight: '800',
   },
-
   sectionText: {
     color: '#222222',
-    fontSize: 12,
-    lineHeight: 15,
+    lineHeight: 13,
   },
-
   tipsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 5,
-    marginBottom: 3,
+    marginTop: 4,
+    marginBottom: 2,
   },
-
   tipsTitle: {
     color: '#071426',
-    fontSize: 21,
     fontWeight: '800',
-    marginLeft: 8,
+    marginLeft: 6,
   },
-
   tip: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 1.5,
+    borderBottomWidth: 1,
     borderBottomColor: '#42B7C8',
-    paddingVertical: 4,
+    paddingVertical: 2,
   },
-
   tipContent: {
     flex: 1,
-    marginLeft: 10,
+    marginLeft: 8,
   },
-
   tipTitle: {
     color: '#111111',
-    fontSize: 15,
     fontWeight: '800',
   },
-
   tipDescription: {
     color: '#42AFC1',
-    fontSize: 11,
-    lineHeight: 14,
-    marginTop: 1,
+    lineHeight: 12,
   },
-
+  bottomBarContainer: {
+    backgroundColor: '#2BB3CA',
+    borderTopLeftRadius: 70,
+  },
   bottomBar: {
-    height: 78,
     width: '100%',
     backgroundColor: '#2BB3CA',
     flexDirection: 'row',
@@ -365,12 +372,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     borderTopLeftRadius: 70,
   },
-
   navButton: {
     flex: 1,
     height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
   },
-
 });

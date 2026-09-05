@@ -1,153 +1,265 @@
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
-const options = [
-  ["shield-checkmark-outline", "Backup and synchronization"],
-  ["key-outline", "Change password"],
-  ["cash-outline", "Expense control period"],
-  ["phone-portrait-outline", "Log out"],
-  ["close-outline", "Delete account"],
+const OPTIONS = [
+  ["shield-checkmark-outline", "Backup and synchronization", "Backup"],
+  ["key-outline", "Change password", "Password"],
+  ["cash-outline", "Expense control period", "Expenses"],
+  ["phone-portrait-outline", "Linked devices", "Devices"],
+  ["log-out-outline", "Log out", "Logout"],
+  ["close-outline", "Delete account", "DeleteAccount"],
 ];
 
-export default function Settings() {
+const NAV_ITEMS = [
+  { name: "home-outline", key: "home", route: "Home" },
+  { name: "bar-chart-outline", key: "reports", route: "Reports" },
+  { name: "swap-horizontal-outline", key: "transactions", route: "Transactions" },
+  { name: "layers-outline", key: "savings", route: "Savings" },
+  { name: "person-outline", key: "profile", route: "Profile" },
+];
+
+export default function SettingsScreen({ navigation }) {
+  const [selectedTheme, setSelectedTheme] = useState("light");
+  const [activeTab, setActiveTab] = useState("profile");
+
+  const handleOptionPress = (route) => {
+    if (navigation && route) {
+      navigation.navigate(route);
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={["top"]} style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <View style={styles.top}>
-          <Ionicons name="arrow-back" size={28} color="white" />
-          <Text style={styles.title}>Settings</Text>
-          <Ionicons name="notifications-outline" size={25} color="white" />
-        </View>
-        <View style={styles.themes}>
-          <TouchableOpacity style={styles.theme}>
-            <Ionicons name="sunny-outline" size={50} color="white" />
-            <View style={[styles.radio, styles.active]} />
-            <Text style={styles.themeText}>Light theme</Text>
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            onPress={() => (navigation?.goBack ? navigation.goBack() : null)}
+            activeOpacity={0.7}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.theme}>
-            <Ionicons name="moon-outline" size={50} color="white" />
-            <View style={styles.radio} />
-            <Text style={styles.themeText}>Dark Theme</Text>
+
+          <Text style={styles.headerTitle}>Settings</Text>
+
+          <TouchableOpacity
+            onPress={() => navigation?.navigate("Notifications")}
+            activeOpacity={0.7}
+            style={styles.notificationBadge}
+          >
+            <Ionicons name="notifications-outline" size={18} color="#0D1B2A" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Themes */}
+        <View style={styles.themesContainer}>
+          <TouchableOpacity
+            style={styles.themeOption}
+            onPress={() => setSelectedTheme("light")}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="sunny-outline" size={38} color="#FFFFFF" />
+            <View
+              style={[
+                styles.radioButton,
+                selectedTheme === "light" && styles.radioActive,
+              ]}
+            />
+            <Text style={styles.themeLabel}>Light theme</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.themeOption}
+            onPress={() => setSelectedTheme("dark")}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="moon-outline" size={38} color="#FFFFFF" />
+            <View
+              style={[
+                styles.radioButton,
+                selectedTheme === "dark" && styles.radioActive,
+              ]}
+            />
+            <Text style={styles.themeLabel}>Dark theme</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.card}>
-        {options.map(([icon, text]) => (
-          <TouchableOpacity style={styles.option} key={text}>
-            <View style={styles.circle}>
-              <Ionicons name={icon} size={26} color="White" />
+      {/* Contenedor Blanco Ajustado */}
+      <View style={styles.contentCard}>
+        <View style={styles.optionsList}>
+          {OPTIONS.map(([icon, text, route]) => (
+            <TouchableOpacity
+              style={styles.optionRow}
+              key={text}
+              activeOpacity={0.7}
+              onPress={() => handleOptionPress(route)}
+            >
+              <View style={styles.iconCircle}>
+                <Ionicons name={icon} size={22} color="#FFFFFF" />
+              </View>
+
+              <Text style={styles.optionText}>{text}</Text>
+
+              <Ionicons name="chevron-forward" size={24} color="#0D1B2A" />
+            </TouchableOpacity>
+          ))}
+        </View>
+
+        {/* Navegación Celeste */}
+        <View style={styles.bottomNavContainer}>
+          <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
+            <View style={styles.bottomTabBar}>
+              {NAV_ITEMS.map((item) => {
+                const isSelected = activeTab === item.key;
+                return (
+                  <TouchableOpacity
+                    key={item.key}
+                    style={styles.tabItem}
+                    activeOpacity={0.7}
+                    onPress={() => {
+                      setActiveTab(item.key);
+                      if (navigation && item.route) {
+                        navigation.navigate(item.route);
+                      }
+                    }}
+                  >
+                    <Ionicons
+                      name={item.name}
+                      size={26}
+                      color={
+                        isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.65)"
+                      }
+                    />
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-
-            <Text style={styles.text}>{text}</Text>
-
-            <Ionicons name="chevron-forward" size={26} color="#172334" />
-          </TouchableOpacity>
-        ))}
-
-        <View style={styles.nav}>
-          <Ionicons name="home-outline" size={30} color="white" />
-          <Ionicons name="bar-chart-outline" size={30} color="white" />
-          <Ionicons name="swap-horizontal-outline" size={30} color="white" />
-          <Ionicons name="layers-outline" size={30} color="white" />
-          <Ionicons name="person-outline" size={30} color="white" />
+          </SafeAreaView>
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#111C2E",
+    backgroundColor: "#0D1B2A",
   },
-
   header: {
-    height: 210,
-    padding: 25,
+    paddingHorizontal: 20,
+    paddingTop: 6,
+    paddingBottom: 14,
   },
-
-  top: {
+  topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 10,
   },
-
-  title: {
-    color: "white",
-    fontSize: 25,
+  backButton: {
+    width: 32,
+    height: 32,
+    justifyContent: "center",
   },
-
-  themes: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    marginTop: 30,
-  },
-
-  theme: {
-    alignItems: "center",
-  },
-
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 20,
-    backgroundColor: "#D9DDE0",
-    marginVertical: 8,
-  },
-
-  active: {
-    backgroundColor: "#25B7D3",
-  },
-
-  themeText: {
-    color: "white",
+  headerTitle: {
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
   },
-
-  card: {
-    flex: 1,
-    backgroundColor: "#F7F7F7",
-    borderTopLeftRadius: 50,
-    borderTopRightRadius: 50,
-    paddingHorizontal: 20,
-    paddingTop: 14,
-  },
-
-  option: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 75,
-    gap: 20,
-  },
-
-  circle: {
-    width: 40,
-    height: 40,
-    borderRadius: 30,
-    backgroundColor: "#25B7D3",
+  notificationBadge: {
+    backgroundColor: "#FFFFFF",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  text: {
-    flex: 1,
-    fontSize: 20,
-    color: "#3E464C",
-  },
-
-  nav: {
-    position: "absolute",
-    height: 100,
-    bottom: 0,
-    right: 0,
-    left: 0,
-    backgroundColor: "#25B7D3",
+  themesContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    borderTopLeftRadius: 80,
+    paddingHorizontal: 10,
+  },
+  themeOption: {
+    alignItems: "center",
+  },
+  radioButton: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#C4C4C4",
+    marginVertical: 5,
+  },
+  radioActive: {
+    backgroundColor: "#23BDEE",
+  },
+  themeLabel: {
+    color: "#FFFFFF",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  contentCard: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    justifyContent: "space-between",
+  },
+  optionsList: {
+    flex: 1,
+    paddingHorizontal: 22,
+    paddingTop: 12,
+    paddingBottom: 12,
+    justifyContent: "space-evenly",
+  },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  iconCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: "#23BDEE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 16,
+  },
+  optionText: {
+    flex: 1,
+    fontSize: 14.5,
+    fontWeight: "600",
+    color: "#263238",
+  },
+  bottomNavContainer: {
+    backgroundColor: "#FFFFFF",
+  },
+  bottomNavSafeArea: {
+    backgroundColor: "#23BDEE",
+    borderTopLeftRadius: 35,
+  },
+  bottomTabBar: {
+    height: 55,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "#23BDEE",
+    borderTopLeftRadius: 35,
+  },
+  tabItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

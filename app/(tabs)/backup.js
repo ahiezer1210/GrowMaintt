@@ -1,7 +1,6 @@
+import { Feather, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useState } from 'react';
 import {
-  SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Switch,
@@ -9,53 +8,67 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import IonIcon from 'react-native-vector-icons/Ionicons';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const NAV = [
-  ["home-outline", "ion"],
-  ["bar-chart-outline", "ion"],
-  ["swap-horizontal", "material"],
-  ["layers-outline", "material"],
-  ["person-outline", "ion"],
+  ['home-outline', 'ion', 'Home', 'home'],
+  ['bar-chart-outline', 'ion', 'Reports', 'reports'],
+  ['swap-horizontal', 'material', 'Transactions', 'swap'],
+  ['layers-outline', 'material', 'Savings', 'layers'],
+  ['person-outline', 'ion', 'Profile', 'account'],
 ];
 
-const BackupScreen = () => {
+const BackupScreen = ({ navigation }) => {
   const [autoBackup, setAutoBackup] = useState(true);
   const [includeVideos, setIncludeVideos] = useState(false);
   const [useMobileData, setUseMobileData] = useState(false);
   const [endToEndEncryption, setEndToEndEncryption] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
 
-  const renderNavIcon = (name, type, size = 28, color = "#FFFFFF") => {
-    if (type === "ion") {
-      return <IonIcon name={name} size={size} color={color} />;
+  const renderNavIcon = (name, type, size = 26, color = '#FFFFFF') => {
+    if (type === 'ion') {
+      return <Ionicons color={color} name={name} size={size} />;
     }
-    return <Icon name={name} size={size} color={color} />;
+    return <MaterialCommunityIcons color={color} name={name} size={size} />;
+  };
+
+  const handleNavPress = (screenName, tabKey) => {
+    setActiveTab(tabKey);
+    if (navigation && screenName) {
+      navigation.navigate(screenName);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0D1B2A" />
-      
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <StatusBar backgroundColor="#0D1B2A" barStyle="light-content" />
+
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Icon name="arrow-left" size={24} color="#FFFFFF" />
+        <TouchableOpacity
+          onPress={() => (navigation?.goBack ? navigation.goBack() : null)}
+          activeOpacity={0.7}
+          style={styles.backButton}
+        >
+          <Ionicons color="#FFFFFF" name="arrow-back" size={24} />
         </TouchableOpacity>
+
         <Text style={styles.headerTitle}>Backup</Text>
+
+        <View style={styles.headerRightSpacer} />
       </View>
 
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      {/* Bloque Superior */}
+      <View style={styles.topSection}>
+        {/* Card 1: Estado del Backup */}
         <View style={styles.successCard}>
           <View style={styles.successHeader}>
-            <Icon name="shield-check" size={28} color="#000000" />
+            <MaterialCommunityIcons color="#000000" name="shield-check-outline" size={26} />
             <Text style={styles.successTitle}>
               Backup Completed
             </Text>
           </View>
-          
+
           <View style={styles.progressContainer}>
             <View style={styles.progressBarBackground}>
               <View style={[styles.progressBarFill, { width: '100%' }]} />
@@ -64,93 +77,113 @@ const BackupScreen = () => {
           </View>
         </View>
 
+        {/* Card 2: Resumen de Datos */}
         <View style={styles.infoCardsRow}>
-          <View style={styles.infoCard}>
-            <Icon name="calendar-clock" size={22} color="#FFFFFF" />
-            <Text style={styles.infoLabel}>Last Backup</Text>
-            <Text style={styles.infoValue}>11/10/2025</Text>
+          <View style={styles.infoCardWhite}>
+            <Feather color="#23BDEE" name="arrow-up-right" size={20} style={styles.cardIcon} />
+            <Text style={styles.infoLabelDark}>Last Backup</Text>
+            <Text style={styles.infoValueDark}>11/10/2025</Text>
           </View>
 
-          <View style={styles.infoCard}>
-            <Icon name="database" size={22} color="#FFFFFF" />
-            <Text style={styles.infoLabel}>Size</Text>
-            <Text style={styles.infoValue}>268 MB</Text>
+          <View style={styles.infoCardBlue}>
+            <MaterialCommunityIcons color="#FFFFFF" name="database-outline" size={20} style={styles.cardIcon} />
+            <Text style={styles.infoLabelLight}>Size</Text>
+            <Text style={styles.infoValueLight}>268 MB</Text>
           </View>
         </View>
+      </View>
 
-        <View style={styles.settingsCard}>
-          <Text style={styles.sectionTitle}>Backup Settings</Text>
+      {/* Bloque Inferior */}
+      <View style={styles.whiteSheet}>
+        <Text style={styles.sectionTitle}>Backup Settings</Text>
 
-          <View style={styles.divider} />
-          
-          <Text style={styles.description}>
-            Save a backup of your data in the cloud
+        <View style={styles.greyDivider} />
 
-            To Ensure You Don't Lose Your Data When You Get A New Phone
-            With Android/Apple.
+        <Text style={styles.descriptionText}>
+          Save a backup of your data in the cloud To Ensure You Don't Lose Your Data When You Get A New Phone With Android/Apple.
+        </Text>
+
+        {/* Switches */}
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>Automatic Backups</Text>
+          <Switch
+            value={autoBackup}
+            onValueChange={setAutoBackup}
+            thumbColor="#FFFFFF"
+            trackColor={{ false: '#E0E0E0', true: '#0D1B2A' }}
+          />
+        </View>
+
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>Include Videos</Text>
+          <Switch
+            value={includeVideos}
+            onValueChange={setIncludeVideos}
+            thumbColor="#FFFFFF"
+            trackColor={{ false: '#E0E0E0', true: '#0D1B2A' }}
+          />
+        </View>
+
+        <View style={styles.settingRow}>
+          <Text style={styles.settingLabel}>Use Mobile Data</Text>
+          <Switch
+            value={useMobileData}
+            onValueChange={setUseMobileData}
+            thumbColor="#FFFFFF"
+            trackColor={{ false: '#E0E0E0', true: '#0D1B2A' }}
+          />
+        </View>
+
+        {/* Sección Cifrado */}
+        <View style={styles.encryptionSection}>
+          <Text style={styles.encryptionTitle}>End-to-End Encryption</Text>
+          <Text style={styles.encryptionDescription}>
+            For More Security, You Can Protect Your Backup With End-to-End Encryption
           </Text>
 
           <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Automatic Backups</Text>
+            <Text style={styles.settingLabel}>Disabled</Text>
             <Switch
-              value={autoBackup}
-              onValueChange={setAutoBackup}
-              trackColor={{ false: '#555', true: '#081023' }}
+              value={endToEndEncryption}
+              onValueChange={setEndToEndEncryption}
               thumbColor="#FFFFFF"
+              trackColor={{ false: '#E0E0E0', true: '#0D1B2A' }}
             />
-          </View>
-
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Include Videos</Text>
-            <Switch
-              value={includeVideos}
-              onValueChange={setIncludeVideos}
-              trackColor={{ false: '#555', true: '#081023' }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
-
-          <View style={styles.settingRow}>
-            <Text style={styles.settingLabel}>Use Mobile Data</Text>
-            <Switch
-              value={useMobileData}
-              onValueChange={setUseMobileData}
-              trackColor={{ false: '#555', true: '#081023' }}
-              thumbColor="#FFFFFF"
-            />
-          </View>
-
-          <View style={styles.encryptionSection}>
-            <Text style={styles.encryptionTitle}>End-to-End Encryption</Text>
-
-            <Text style={styles.encryptionDescription}>
-              For More Security, You Can Protect Your Backup
-              With End-to-End Encryption
-            </Text>
-            
-            <View style={styles.settingRow}>
-              <Text style={styles.settingLabel}>Disabled</Text>
-              <Switch
-                value={endToEndEncryption}
-                onValueChange={setEndToEndEncryption}
-                trackColor={{ false: '#555', true: '#081023' }}
-                thumbColor="#FFFFFF"
-              />
-            </View>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.saveButton} activeOpacity={0.85}>
+        <View style={styles.greyDivider} />
+
+        {/* Botón Guardar */}
+        <TouchableOpacity activeOpacity={0.85} style={styles.saveButton}>
           <Text style={styles.saveButtonText}>Save Settings</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
-      <View style={styles.bottomTabBar}>
-        {NAV.map(([name, type], index) => (
-          <TouchableOpacity key={index} style={styles.tabItem}>
-            {renderNavIcon(name, type)}
-          </TouchableOpacity>
-        ))}
+      {/* Navegación Inferior */}
+      <View style={styles.bottomBarContainer}>
+        <SafeAreaView edges={['bottom']} style={styles.bottomBarWrapper}>
+          <View style={styles.bottomTabBar}>
+            {NAV.map(([name, type, screenName, tabKey], index) => {
+              const isSelected = activeTab === tabKey;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleNavPress(screenName, tabKey)}
+                  activeOpacity={0.7}
+                  style={styles.tabItem}
+                >
+                  {renderNavIcon(
+                    name,
+                    type,
+                    26,
+                    isSelected ? '#FFFFFF' : 'rgba(255, 255, 255, 0.65)'
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </SafeAreaView>
       </View>
     </SafeAreaView>
   );
@@ -164,39 +197,46 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    height: 45,
   },
   backButton: {
-    marginRight: 12,
+    width: 30,
+    height: 30,
+    justifyContent: 'center',
   },
   headerTitle: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+    textAlign: 'center',
   },
-  scrollContent: {
+  headerRightSpacer: {
+    width: 30,
+  },
+  topSection: {
     paddingHorizontal: 16,
-    paddingBottom: 120,
+    paddingTop: 8,
+    paddingBottom: 12,
   },
   successCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
   },
   successHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 6,
   },
   successTitle: {
-    color: '#093030',
-    fontSize: 18,
+    color: '#0D1B2A',
+    fontSize: 13,
     fontWeight: '700',
-    marginLeft: 12,
+    marginLeft: 8,
     flex: 1,
-    lineHeight: 24,
   },
   progressContainer: {
     flexDirection: 'row',
@@ -204,132 +244,147 @@ const styles = StyleSheet.create({
   },
   progressBarBackground: {
     flex: 1,
-    height: 14,
-    backgroundColor: '#ACADAD',
-    borderRadius: 50,
+    height: 8,
+    backgroundColor: '#E0E0E0',
+    borderRadius: 10,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#25B7D3',
-    borderRadius: 50,
+    backgroundColor: '#23BDEE',
   },
   progressText: {
-    color: '#25B7D3',
-    fontSize: 14,
-    fontWeight: '600',
-    marginLeft: 10,
+    color: '#23BDEE',
+    fontSize: 11,
+    fontWeight: '700',
+    marginLeft: 8,
   },
   infoCardsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginTop: 10,
   },
-  infoCard: {
-    backgroundColor: '#25B7D3',
+  infoCardWhite: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    paddingVertical: 16,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     width: '48%',
     alignItems: 'center',
   },
-  infoLabel: {
+  infoCardBlue: {
+    backgroundColor: '#23BDEE',
+    borderRadius: 14,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    width: '48%',
+    alignItems: 'center',
+  },
+  cardIcon: {
+    marginBottom: 2,
+  },
+  infoLabelDark: {
+    color: '#546E7A',
+    fontSize: 10,
+  },
+  infoValueDark: {
+    color: '#0D1B2A',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  infoLabelLight: {
+    color: '#E0F7FA',
+    fontSize: 10,
+  },
+  infoValueLight: {
     color: '#FFFFFF',
     fontSize: 13,
-    marginTop: 6,
-  },
-  infoValue: {
-    color: '#FFFFFF',
-    fontSize: 16,
     fontWeight: '700',
-    marginTop: 2,
   },
-  settingsCard: {
+  whiteSheet: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 16,
+    justifyContent: 'space-between',
   },
   sectionTitle: {
-    color: '#093030',
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  description: {
-    color: '#546E7A',
+    color: '#0D1B2A',
     fontSize: 13,
-    lineHeight: 20,
-    marginBottom: 20,
+    fontWeight: '700',
+  },
+  greyDivider: {
+    height: 5,
+    backgroundColor: '#DCDCDC',
+    borderRadius: 10,
+    marginVertical: 4,
+  },
+  descriptionText: {
+    color: '#546E7A',
+    fontSize: 9.5,
+    lineHeight: 13,
   },
   settingRow: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 2,
-    paddingLeft: 18,
+    marginVertical: 1,
   },
   settingLabel: {
     color: '#263238',
-    fontSize: 15,
-    flex: 1,
-    marginRight: 12,
+    fontSize: 11.5,
+    fontWeight: '500',
   },
   encryptionSection: {
-
+    marginTop: 2,
   },
   encryptionTitle: {
-    color: '#093030',
-    fontSize: 15,
+    color: '#0D1B2A',
+    fontSize: 11.5,
     fontWeight: '700',
-    marginBottom: 6,
   },
   encryptionDescription: {
     color: '#546E7A',
-    fontSize: 13,
-    lineHeight: 19,
-    marginBottom: 12,
-  },
-  divider: {
-    height: 14,
-    borderRadius: 50,
-    backgroundColor: '#ACADAD',
-    marginVertical: 12,
+    fontSize: 9,
+    lineHeight: 12,
+    marginBottom: 2,
   },
   saveButton: {
-    backgroundColor: '#00BCD4',
-    borderRadius: 30,
-    paddingVertical: 16,
+    backgroundColor: '#23BDEE',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 35,
+    alignSelf: 'center',
+    width: '55%',
     alignItems: 'center',
-    marginBottom: 16,
   },
   saveButtonText: {
     color: '#FFFFFF',
-    fontSize: 17,
+    fontSize: 13,
     fontWeight: '700',
   },
+  bottomBarContainer: {
+    backgroundColor: '#FFFFFF',
+  },
+  bottomBarWrapper: {
+    backgroundColor: '#23BDEE',
+    borderTopLeftRadius: 35,
+  },
   bottomTabBar: {
-  flexDirection: 'row',
-  justifyContent: 'space-around',
-  alignItems: 'center',
-  backgroundColor: '#25B7D3',
-  paddingVertical: 18,
-  paddingBottom: 28,               
-  borderTopLeftRadius: 60,         
-  borderTopRightRadius: 0,         
-  elevation: 12,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: -4 },
-  shadowOpacity: 0.15,
-  shadowRadius: 8,
-  height: 95,
-  position: 'absolute',            
-  bottom: 0,
-  left: 0,
-  right: 0,
-},
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    height: 55,
+    backgroundColor: '#23BDEE',
+    borderTopLeftRadius: 35,
+  },
   tabItem: {
-    padding: 8,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 
