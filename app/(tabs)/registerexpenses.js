@@ -1,287 +1,313 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
-import { Switch } from "react-native";
-import {Ionicons} from "@expo/vector-icons";
 import {
     Alert,
-    StyleSheet,
-    Text,
+    StyleSheet, Switch, Text,
     TextInput,
     TouchableOpacity,
     View,
+    useWindowDimensions
 } from "react-native";
 
 export default function Registerexpenses() {
-    const [amount, setAmount] = useState("");
-    const [category, setCategory] = useState("");
-    const [date, setDate] = useState("");
-    const [description, setDescription] = useState("");
-    const [isRecurrent, setIsRecurrent] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const scle = Math.min(width / 390, height / 844);
+  const s = (value) => Math.round(value * scale);
 
-    const registeredExpenses = async () => {
-        if (!amount || !category || !date) {
-            Alert.alert("Incomplete fields");
-            return;
-        }
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [isRecurrent, setIsRecurrent] = useState(false);
 
-        const expenses = {
-            amount: Number(amount),
-            category: category,
-            date: date,
-            description: description,
-            isRecurrent: isRecurrent,
-        }
+  const registeredExpenses = async () => {
+    if (!amount || !category || !date) {
+      Alert.alert("Incomplete fields");
+      return;
+    }
 
-        console.log("Expenses recorded: ", expenses);
-
-        Alert.alert("Success", "The expenses has been recorded");
-
-        setAmount("");
-        setCategory("");
-        setDate("");
-        setDescription("");
-        setIsRecurrent(false)
-
+    const expenses = {
+      amount: Number(amount),
+      category: category,
+      date: date,
+      description: description,
+      isRecurrent: isRecurrent,
     };
 
-    const cancelExpenses = () => {
-        setAmount("");
-        setCategory("");
-        setDate("");
-        setDescription("");
-        setIsRecurrent(false);
-    };
+    console.log("Expenses recorded: ", expenses);
 
+    Alert.alert("Success", "The expenses has been recorded");
 
-    return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
-                    <Ionicons
-                        name="arrow-back"
-                        size={25}
-                        color="#ffffff"
-                    />
-                </TouchableOpacity>
-                <Text style={styles.title}>Register expenses</Text>
+    setAmount("");
+    setCategory("");
+    setDate("");
+    setDescription("");
+    setIsRecurrent(false);
+  };
 
-                <TouchableOpacity style={styles.notificationButton}>
-                    <Ionicons
-                        name="notifications-outline"
-                        size={22}
-                        color="#081023"
-                    />
-                </TouchableOpacity>
-            </View>
+  const cancelExpenses = () => {
+    setAmount("");
+    setCategory("");
+    setDate("");
+    setDescription("");
+    setIsRecurrent(false);
+  };
 
-            <View style={styles.card}>
-                <Text style={styles.label}>Amount</Text>
+  return (
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: s(55),
+            paddingBottom: s(30),
+          },
+        ]}
+      >
+        <TouchableOpacity style={[styles.backButton, { width: s(35) }]}>
+          <Ionicons name="arrow-back" size={25} color="#ffffff" />
+        </TouchableOpacity>
+        <Text style={[styles.title, { fontSize: s(28), marginLeft: s(25) }]}>
+          Register expenses
+        </Text>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Eje.$5"
-                    keyboardType="numeric"
-                    value={amount}
-                    onChangeText={setAmount}
-                    placeholderTextColor="#ACADAD"
-                />
+        <TouchableOpacity
+          style={[
+            styles.notificationButton,
+            {
+              width: s(34),
+              height: s(34),
+              borderRadius: s(18),
+            },
+          ]}
+        >
+          <Ionicons name="notifications-outline" size={s(25)} color="#081023" />
+        </TouchableOpacity>
+      </View>
 
-                <Text style={styles.label}>Category</Text>
+      <View style={styles.card}>
+        <Text style={styles.label}>Amount</Text>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Eje.Transport"
-                    value={category}
-                    onChangeText={setCategory}
-                    placeholderTextColor="#ACADAD"
-                />
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.$5"
+          keyboardType="numeric"
+          value={amount}
+          onChangeText={setAmount}
+          placeholderTextColor="#ACADAD"
+        />
 
-                <Text style={styles.label}>Date</Text>
+        <Text style={styles.label}>Category</Text>
 
-                <TextInput
-                    style={styles.date}
-                    placeholder="23 june 2026 "
-                    value={date}
-                    onChangeText={setDate}
-                    placeholderTextColor="#ACADAD"
-                />
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.Transport"
+          value={category}
+          onChangeText={setCategory}
+          placeholderTextColor="#ACADAD"
+        />
 
-                <Text style={styles.label}>Description(optional)</Text>
+        <Text style={styles.label}>Date</Text>
 
-                <TextInput
-                    style={styles.input}
-                    placeholder="Eje.Go out with friends"
-                    value={description}
-                    onChangeText={setDescription}
-                    placeholderTextColor="#ACADAD"
-                />
+        <TextInput
+          style={styles.date}
+          placeholder="23 june 2026 "
+          value={date}
+          onChangeText={setDate}
+          placeholderTextColor="#ACADAD"
+        />
 
-                <Text style={styles.label}>It´s a recurring expense?</Text>
+        <Text style={styles.label}>Description(optional)</Text>
 
-                <View style={styles.optionsContainer}>
-                    <Text style={styles.recurrentText}>
-                        Activa la opción si es{"\n"}
-                        recurrente
-                    </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.Go out with friends"
+          value={description}
+          onChangeText={setDescription}
+          placeholderTextColor="#ACADAD"
+        />
 
-                    <Switch
-                        value={isRecurrent}
-                        onValueChange={setIsRecurrent}
-                        trackColor={{
-                            false: "#bdbdbd",
-                            true: "#168aff"
-                        }}
-                        thumbColor="#ffffff"
-                    />
-                </View>
+        <Text style={styles.label}>It´s a recurring expense?</Text>
 
+        <View style={styles.optionsContainer}>
+          <Text style={styles.recurrentText}>
+            Activa la opción si es{"\n"}
+            recurrente
+          </Text>
 
-                <TouchableOpacity style={styles.button} onPress={registeredExpenses}>
-                    <Text style={styles.buttonText}>Save expenses</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.button} onPress={cancelExpenses}>
-                    <Text style={styles.buttonText}>Cancele</Text>
-                </TouchableOpacity>
-
-            </View>
+          <Switch
+            value={isRecurrent}
+            onValueChange={setIsRecurrent}
+            trackColor={{
+              false: "#bdbdbd",
+              true: "#168aff",
+            }}
+            thumbColor="#ffffff"
+          />
         </View>
-    );
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              height: s(48),
+              marginTop: s(15),
+              borderRadius: s(18),
+            },
+          ]}
+          onPress={registeredExpenses}
+        >
+          <Text style={[styles.buttonText, { fontSize: s(17) }]}>
+            Save expenses
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              height: s(34),
+              marginTop: s(15),
+              borderRadius: s(18),
+            },
+          ]}
+          onPress={cancelExpenses}
+        >
+          <Text style={[styles.buttonText, { fontSize: s(17) }]}>Cancele</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#081023",
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#081023",
+  },
 
-    header: {
-        paddingTop: 55,
-        paddingBottom: 30,
-        flexDirection:"row",
-        alignItems:"center",
-        justifyContent:"center",
-    },
+  header: {
+    paddingTop: 55,
+    paddingBottom: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    backButton: {
-        width: 35,
-        alignItems: "flex-start",
-        marginLeft:10,
-        
-    },
+  backButton: {
+    width: 35,
+    alignItems: "flex-start",
+    marginLeft: 10,
+  },
 
-    title: {
-        color: "#FFFFFF",
-        fontSize: 28,
-        fontWeight: "600",
-        flex: 1,
-        marginLeft: 25,
+  title: {
+    color: "#FFFFFF",
+    fontSize: 28,
+    fontWeight: "600",
+    flex: 1,
+    marginLeft: 25,
+  },
 
-    },
+  notificationButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 18,
+    backgroundColor: "#E0F5E7",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
-    notificationButton: {
-        width: 34,
-        height: 34,
-        borderRadius: 18,
-        backgroundColor: "#E0F5E7",
-        justifyContent: "center",
-        alignItems: "center",
-    },
+  card: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    paddingHorizontal: 30,
+    paddingTop: 25,
+  },
 
-    card: {
-        flex: 1,
-        backgroundColor: "#FFFFFF",
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        paddingHorizontal: 30,
-        paddingTop: 25,
-    },
+  label: {
+    color: "#081023",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 10,
+  },
 
-    label: {
-        color: "#081023",
-        fontSize: 14,
-        fontWeight: "600",
-        marginBottom: 10,
-    },
+  input: {
+    height: 48,
+    backgroundColor: "#F3F4F5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
+    paddingHorizontal: 18,
+    marginBottom: 22,
+  },
 
-    input: {
-        height: 48,
-        backgroundColor: "#F3F4F5",
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: "#000000",
-        paddingHorizontal: 18,
-        marginBottom: 22,
-    },
+  date: {
+    height: 48,
+    backgroundColor: "#F3F4F5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 18,
+    marginBottom: 22,
+  },
 
-    date: {
-        height: 48,
-        backgroundColor: "#F3F4F5",
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: "#000000",
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 18,
-        marginBottom: 22,
-    },
+  optionsContainer: {
+    flexDirection: "row",
+    marginBottom: 17,
+    height: 40,
+    backgroundColor: "#f3f4f5",
+    borderRadius: 13,
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexDirection: "row",
+    paddingHorizontal: 8,
+  },
 
-    optionsContainer: {
-        flexDirection: "row",
-        marginBottom: 17,
-        height: 40,
-        backgroundColor:"#f3f4f5",
-        borderRadius:13,
-        justifyContent: "space-between",
-        alignItems: "center",
-        flexDirection: "row",
-        paddingHorizontal: 8,
+  optionButton: {
+    flex: 1,
+    height: 48,
+    backgroundColor: "#f3f4f5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 17,
+    flexDirection: "row",
+    paddingHorizontal: 8,
+  },
 
-    },
+  selectedOption: {
+    backgroundColor: "#25b7d3",
+    borderColor: "#25b7d3",
+  },
 
-    optionButton: {
-        flex: 1,
-        height: 48,
-        backgroundColor: "#f3f4f5",
-        borderRadius: 15,
-        borderWidth: 1,
-        borderColor: "#000000",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 17,
-        flexDirection: "row",
-        paddingHorizontal: 8,
-    },
+  optionText: {
+    color: "081023",
+    fontSize: 16,
+    fontWeight: "600",
+  },
 
-    selectedOption: {
-        backgroundColor: "#25b7d3",
-        borderColor: "#25b7d3",
-    },
+  selectedOptionText: {
+    color: "#ffffff",
+  },
 
-    optionText: {
-        color: "081023",
-        fontSize: 16,
-        fontWeight: "600",
-    },
+  button: {
+    height: 48,
+    backgroundColor: "#25B7D3",
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+  },
 
-    selectedOptionText: {
-        color: "#ffffff"
-    },
-
-
-    button: {
-        height: 48,
-        backgroundColor: "#25B7D3",
-        borderRadius: 18,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 15,
-    },
-
-    buttonText: {
-        color: "#FFFFFF",
-        fontWeight: "700",
-        fontSize: 17,
-    },
-
-
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 17,
+  },
 });

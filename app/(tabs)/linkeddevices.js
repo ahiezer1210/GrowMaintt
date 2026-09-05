@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+
 import { router } from "expo-router";
 import {
   ScrollView,
@@ -6,108 +7,172 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
+const devices = [
+  {
+    icon: "phone-portrait-outline",
+    name: "My device",
+    details: "Samsung A06\nEl Salvador",
+    active: true,
+    status: "Active now",
+  },
+  {
+    icon: "laptop-outline",
+    name: "Windows 11",
+    details: "El Salvador\nChrome · Windows",
+    active: false,
+    status: "Last active: yesterday",
+  },
+  {
+    icon: "phone-portrait-outline",
+    name: "Samsung Galaxy A06",
+    details: "Sign in: 12/01\nEl Salvador",
+    active: false,
+    status: "Last active: 3 months ago",
+  },
+];
+
 export default function Devices() {
+  const { width } = useWindowDimensions();
+
+  const small = width < 350;
+  const tablet = width >= 600;
+
+  const sizes = {
+    title: small ? 23 : tablet ? 30 : 27,
+    icon: small ? 24 : 28,
+    padding: small ? 12 : tablet ? 18 : 15,
+    cardRadius: small ? 18 : 20,
+  };
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          small && styles.headerSmall,
+          tablet && styles.headerTablet,
+        ]}
+      >
         <View style={styles.top}>
           <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={28} color="white" />
+            <Ionicons name="arrow-back" size={small ? 25 : 28} color="#FFF" />
           </TouchableOpacity>
 
-          <Text style={styles.title}>Linked devices</Text>
+          <Text style={[styles.title, { fontSize: sizes.title }]}>
+            Linked devices
+          </Text>
 
-          <View style={{ width: 28 }} />
+          <View style={{ width: small ? 25 : 28 }} />
         </View>
       </View>
 
-      <View style={styles.curve} />
+      <View
+        style={[
+          styles.curve,
+          {
+            top: small ? 170 : tablet ? 190 : 180,
+          },
+        ]}
+      />
 
       <ScrollView
         style={styles.content}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={[
+          styles.contentContainer,
+          small && styles.contentSmall,
+          tablet && styles.contentTablet,
+        ]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionTitle}>Your devices</Text>
+        <Text style={[styles.sectionTitle, small && styles.sectionSmall]}>
+          Your devices
+        </Text>
 
-        <View style={styles.deviceCard}>
-          <View style={styles.deviceIcon}>
-            <Ionicons name="phone-portrait-outline" size={28} color="#3A7AFE" />
-          </View>
-
-          <View style={styles.deviceInfo}>
-            <Text style={styles.deviceName}>My device</Text>
-
-            <Text style={styles.deviceDetails}>
-              Samsung A06{"\n"}El Salvador
-            </Text>
-
-            <View style={styles.status}>
-              <View style={styles.activeDot} />
-              <Text style={styles.activeText}>Active now</Text>
+        {devices.map((device, index) => (
+          <View
+            key={index}
+            style={[
+              styles.deviceCard,
+              {
+                padding: sizes.padding,
+                borderRadius: sizes.cardRadius,
+              },
+              small && styles.deviceCardSmall,
+              tablet && styles.deviceCardTablet,
+            ]}
+          >
+            <View style={[styles.deviceIcon, small && styles.deviceIconSmall]}>
+              <Ionicons name={device.icon} size={sizes.icon} color="#3A7AFE" />
             </View>
-          </View>
 
-          <TouchableOpacity style={styles.unlinkButton}>
-            <Text style={styles.unlinkText}>Unlink</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.deviceInfo}>
+              <Text
+                style={[styles.deviceName, small && styles.deviceNameSmall]}
+                numberOfLines={1}
+              >
+                {device.name}
+              </Text>
 
-        <View style={styles.deviceCard}>
-          <View style={styles.deviceIcon}>
-            <Ionicons name="laptop-outline" size={28} color="#3A7AFE" />
-          </View>
+              <Text
+                style={[
+                  styles.deviceDetails,
+                  small && styles.deviceDetailsSmall,
+                ]}
+              >
+                {device.details}
+              </Text>
 
-          <View style={styles.deviceInfo}>
-            <Text style={styles.deviceName}>Windows 11</Text>
+              <View style={styles.status}>
+                <View
+                  style={[
+                    device.active ? styles.activeDot : styles.dot,
+                    small && styles.dotSmall,
+                  ]}
+                />
 
-            <Text style={styles.deviceDetails}>
-              El Salvador{"\n"}Chrome · Windows
-            </Text>
-
-            <View style={styles.status}>
-              <View style={styles.dot} />
-              <Text style={styles.lastActive}>Last active: yesterday</Text>
+                <Text
+                  style={[
+                    device.active ? styles.activeText : styles.lastActive,
+                    small &&
+                      (device.active
+                        ? styles.activeTextSmall
+                        : styles.lastActiveSmall),
+                  ]}
+                  numberOfLines={1}
+                >
+                  {device.status}
+                </Text>
+              </View>
             </View>
+
+            <TouchableOpacity
+              style={[styles.unlinkButton, small && styles.unlinkButtonSmall]}
+            >
+              <Text
+                style={[styles.unlinkText, small && styles.unlinkTextSmall]}
+              >
+                Unlink
+              </Text>
+            </TouchableOpacity>
           </View>
+        ))}
 
-          <TouchableOpacity style={styles.unlinkButton}>
-            <Text style={styles.unlinkText}>Unlink</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.deviceCard}>
-          <View style={styles.deviceIcon}>
-            <Ionicons name="phone-portrait-outline" size={28} color="#3A7AFE" />
-          </View>
-
-          <View style={styles.deviceInfo}>
-            <Text style={styles.deviceName}>Samsung Galaxy A06</Text>
-
-            <Text style={styles.deviceDetails}>
-              Sign in: 12/01{"\n"}El Salvador
-            </Text>
-
-            <View style={styles.status}>
-              <View style={styles.dot} />
-              <Text style={styles.lastActive}>Last active: 3 months ago</Text>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.unlinkButton}>
-            <Text style={styles.unlinkText}>Unlink</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.infoCard}>
-          <Ionicons name="shield-checkmark-outline" size={25} color="#3A7AFE" />
+        <View style={[styles.infoCard, small && styles.infoCardSmall]}>
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={small ? 22 : 25}
+            color="#3A7AFE"
+          />
 
           <View style={styles.infoTextContainer}>
-            <Text style={styles.infoTitle}>Keep your account secure</Text>
+            <Text style={[styles.infoTitle, small && styles.infoTitleSmall]}>
+              Keep your account secure
+            </Text>
 
-            <Text style={styles.infoText}>
+            <Text style={[styles.infoText, small && styles.infoTextSmall]}>
               If you don't recognize a device, unlink it to protect your
               account.
             </Text>
@@ -121,7 +186,7 @@ export default function Devices() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
   },
 
   header: {
@@ -129,6 +194,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#081023",
     paddingTop: 55,
     paddingHorizontal: 24,
+    marginTop: -30,
+  },
+
+  headerSmall: {
+    height: 170,
+    paddingTop: 45,
+    paddingHorizontal: 16,
+  },
+
+  headerTablet: {
+    height: 210,
+    paddingTop: 65,
+    paddingHorizontal: 35,
   },
 
   top: {
@@ -138,14 +216,12 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: "white",
-    fontSize: 27,
+    color: "#FFF",
     fontWeight: "700",
   },
 
   curve: {
     position: "absolute",
-    top: 165,
     width: "100%",
     height: 75,
     backgroundColor: "#F7F9FC",
@@ -162,6 +238,16 @@ const styles = StyleSheet.create({
     paddingTop: 15,
   },
 
+  contentSmall: {
+    padding: 14,
+    paddingTop: 12,
+  },
+
+  contentTablet: {
+    paddingHorizontal: 40,
+    paddingTop: 20,
+  },
+
   sectionTitle: {
     fontSize: 18,
     fontWeight: "700",
@@ -169,11 +255,14 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+  sectionSmall: {
+    fontSize: 16,
+    marginBottom: 12,
+  },
+
   deviceCard: {
     minHeight: 110,
     backgroundColor: "#FFF",
-    borderRadius: 20,
-    padding: 15,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 14,
@@ -181,7 +270,18 @@ const styles = StyleSheet.create({
     shadowColor: "#000",
     shadowOpacity: 0.07,
     shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+  },
+
+  deviceCardSmall: {
+    minHeight: 105,
+  },
+
+  deviceCardTablet: {
+    minHeight: 120,
   },
 
   deviceIcon: {
@@ -194,14 +294,26 @@ const styles = StyleSheet.create({
     marginRight: 14,
   },
 
+  deviceIconSmall: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    marginRight: 10,
+  },
+
   deviceInfo: {
     flex: 1,
+    minWidth: 0,
   },
 
   deviceName: {
     fontSize: 16,
     fontWeight: "700",
     color: "#222",
+  },
+
+  deviceNameSmall: {
+    fontSize: 14,
   },
 
   deviceDetails: {
@@ -211,10 +323,16 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
 
+  deviceDetailsSmall: {
+    fontSize: 11,
+    lineHeight: 16,
+  },
+
   status: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 4,
+    minWidth: 0,
   },
 
   dot: {
@@ -233,15 +351,30 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
 
+  dotSmall: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 5,
+  },
+
   activeText: {
     fontSize: 12,
-    color: "#259e8c",
+    color: "#259E8C",
     fontWeight: "600",
+  },
+
+  activeTextSmall: {
+    fontSize: 10,
   },
 
   lastActive: {
     fontSize: 12,
     color: "#030101",
+  },
+
+  lastActiveSmall: {
+    fontSize: 10,
   },
 
   unlinkButton: {
@@ -252,10 +385,21 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
+  unlinkButtonSmall: {
+    paddingVertical: 7,
+    paddingHorizontal: 9,
+    borderRadius: 9,
+    marginLeft: 5,
+  },
+
   unlinkText: {
     color: "#081023",
     fontSize: 12,
     fontWeight: "700",
+  },
+
+  unlinkTextSmall: {
+    fontSize: 10,
   },
 
   infoCard: {
@@ -264,6 +408,11 @@ const styles = StyleSheet.create({
     padding: 16,
     flexDirection: "row",
     marginTop: 8,
+  },
+
+  infoCardSmall: {
+    padding: 13,
+    borderRadius: 16,
   },
 
   infoTextContainer: {
@@ -278,9 +427,18 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
 
+  infoTitleSmall: {
+    fontSize: 12,
+  },
+
   infoText: {
     fontSize: 12,
     lineHeight: 18,
     color: "#666",
+  },
+
+  infoTextSmall: {
+    fontSize: 11,
+    lineHeight: 16,
   },
 });
