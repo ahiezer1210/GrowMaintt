@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
 
-export default function LoginScreen() {
+export default function SignupScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const [confirmpassword, setConfirmPassword] = useState("");
 
   const registerusers = async () => {
-    if (!username || !email.trim() || !password || !confirmpassword) {
+    if (!username.trim() || !email.trim() || !password || !confirmpassword) {
       Alert.alert("Incomplete fields");
       return;
     }
@@ -34,40 +34,37 @@ export default function LoginScreen() {
     if (password.length < 8) {
       Alert.alert(
         "Invalid password",
-        "The password must have at least 8 characters"
-      )
+        "The password must have at least 8 characters",
+      );
       return;
     }
 
     if (!/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      Alert.alert("Invalid password",
-        "The password must have at least one capital letter or special caracter"
-      )
+      Alert.alert(
+        "Invalid password",
+        "The password must have at least one capital letter or special caracter",
+      );
       return;
     }
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        email,
+        email.trim(),
         password,
       );
       const user = userCredential.user;
       await setDoc(doc(db, "Users", user.uid), {
-        username: username,
-        email: email,
+        username: username.trim(),
+        email: email.trim(),
         uid: user.uid,
       });
 
-     Alert.alert(
-  "Registration successfully",
-  "",
-  [
-    {
-      text: "Ok",
-      onPress: () => router.push("/verification"),
-    },
-  ]
-);
+      Alert.alert("Registration successfully", "", [
+        {
+          text: "Ok",
+          onPress: () => router.push("/home"),
+        },
+      ]);
     } catch (error) {
       if (error.code == "auth/email-already-in-use") {
         Alert.alert("Email already exits");
@@ -99,6 +96,7 @@ export default function LoginScreen() {
           value={username}
           onChangeText={setUsername}
           placeholderTextColor="#ACADAD"
+          autoCapitalize="none"
         />
 
         <Text style={styles.label}>E-mail</Text>
@@ -109,6 +107,9 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           placeholderTextColor="#ACADAD"
+          autoCapitalize="none"
+          keybooardType="email-address"
+          autoCorrect={false}
         />
 
         <Text style={styles.label}>Password</Text>
@@ -121,6 +122,8 @@ export default function LoginScreen() {
             onChangeText={setPassword}
             placeholderTextColor="#ACADAD"
             secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
 
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -138,6 +141,8 @@ export default function LoginScreen() {
             onChangeText={setConfirmPassword}
             placeholderTextColor="#ACADAD"
             secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
           />
 
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>

@@ -1,378 +1,315 @@
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
-  Image,
-  StatusBar,
+  Alert,
   StyleSheet,
+  Switch,
   Text,
+  TextInput,
   TouchableOpacity,
-  useWindowDimensions,
   View,
+  useWindowDimensions,
 } from "react-native";
 
-export default function SavingsReminder() {
+export default function Registerexpenses() {
   const { width, height } = useWindowDimensions();
-
   const scale = Math.min(width / 390, height / 844);
   const s = (value) => Math.round(value * scale);
 
-  const navIcons = [
-    "home-outline",
-    "chart-box-outline",
-    "swap-horizontal",
-    "layers-outline",
-    "account-outline",
-  ];
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [isRecurrent, setIsRecurrent] = useState(false);
+
+  const registeredExpenses = async () => {
+    if (!amount.trim() || !category.trim() || !date.trim()) {
+      Alert.alert("Incomplete fields");
+      return;
+    }
+
+    const expenses = {
+      amount: Number(amount.replace(",", ".")),
+      category: category,
+      date: date,
+      description: description,
+      isRecurrent: isRecurrent,
+    };
+
+    console.log("Expenses recorded: ", expenses);
+
+    Alert.alert("Success", "The expenses has been recorded");
+
+    setAmount("");
+    setCategory("");
+    setDate("");
+    setDescription("");
+    setIsRecurrent(false);
+  };
+
+  const cancelExpenses = () => {
+    setAmount("");
+    setCategory("");
+    setDate("");
+    setDescription("");
+    setIsRecurrent(false);
+  };
 
   return (
-    <View style={styles.screen}>
-      <StatusBar
-        translucent
-        backgroundColor={"#0b1624"}
-        barStyle="light-content"
-      />
-
+    <View style={styles.container}>
       <View
         style={[
           styles.header,
           {
-            height: s(115),
-            paddingHorizontal: s(17),
+            paddingTop: s(55),
+            paddingBottom: s(30),
           },
         ]}
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={s(22)}
-            color={"#FFFF"}
-          />
+        <TouchableOpacity style={[styles.backButton, { width: s(35) }]}>
+          <Ionicons name="arrow-back" size={25} color="#ffffff" />
         </TouchableOpacity>
-
-        <Text
-          style={[
-            styles.headerTitle,
-            {
-              fontSize: s(19),
-              lineHeight: s(23),
-            },
-          ]}
-        >
-          Savings{"\n"}Reminder
+        <Text style={[styles.title, { fontSize: s(28), marginLeft: s(25) }]}>
+          Register expenses
         </Text>
 
-        <View
+        <TouchableOpacity
           style={[
-            styles.bellButton,
+            styles.notificationButton,
             {
-              width: s(30),
-              height: s(30),
-              borderRadius: s(15),
+              width: s(34),
+              height: s(34),
+              borderRadius: s(18),
             },
           ]}
         >
-          <MaterialCommunityIcons
-            name="bell-outline"
-            size={s(17)}
-            color={"#428574"}
-          />
-        </View>
+          <Ionicons name="notifications-outline" size={s(25)} color="#081023" />
+        </TouchableOpacity>
       </View>
 
-      <View
-        style={[
-          styles.main,
-          {
-            borderTopLeftRadius: s(36),
-            borderTopRightRadius: s(36),
-          },
-        ]}
-      >
-        <View style={styles.content}>
-          <Image
-            source={require("../../assets/images/Screenshot 2026-08-29 2030457.png")}
-            style={{
-              width: s(190),
-              height: s(140),
+      <View style={styles.card}>
+        <Text style={styles.label}>Amount</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.$5"
+          keyboardType="numeric"
+          value={amount}
+          onChangeText={setAmount}
+          placeholderTextColor="#ACADAD"
+        />
+
+        <Text style={styles.label}>Category</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.Transport"
+          value={category}
+          onChangeText={setCategory}
+          placeholderTextColor="#ACADAD"
+        />
+
+        <Text style={styles.label}>Date</Text>
+
+        <TextInput
+          style={styles.date}
+          placeholder="23 june 2026 "
+          value={date}
+          onChangeText={setDate}
+          placeholderTextColor="#ACADAD"
+        />
+
+        <Text style={styles.label}>Description(optional)</Text>
+
+        <TextInput
+          style={styles.input}
+          placeholder="Eje.Go out with friends"
+          value={description}
+          onChangeText={setDescription}
+          placeholderTextColor="#ACADAD"
+        />
+
+        <Text style={styles.label}>It´s a recurring expense?</Text>
+
+        <View style={styles.optionsContainer}>
+          <Text style={styles.recurrentText}>
+            Activa la opción si es{"\n"}
+            recurrente
+          </Text>
+
+          <Switch
+            value={isRecurrent}
+            onValueChange={setIsRecurrent}
+            trackColor={{
+              false: "#bdbdbd",
+              true: "#168aff",
             }}
-            resizeMode="contain"
+            thumbColor="#ffffff"
           />
-
-          <Text
-            style={[
-              styles.successTitle,
-              {
-                fontSize: s(22),
-              },
-            ]}
-          >
-            Great job!
-          </Text>
-
-          <Text
-            style={[
-              styles.successSubtitle,
-              {
-                fontSize: s(13),
-              },
-            ]}
-          >
-            Today you saved
-          </Text>
-
-          <Text
-            style={[
-              styles.amountText,
-              {
-                fontSize: s(36),
-              },
-            ]}
-          >
-            $0.40
-          </Text>
-
-          <View
-            style={[
-              styles.cardBox,
-              {
-                width: Math.min(s(330), width - s(30)),
-                borderRadius: s(16),
-                padding: s(12),
-                marginTop: s(14),
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.cardLabel,
-                {
-                  fontSize: s(11),
-                },
-              ]}
-            >
-              Percentage of your goal
-            </Text>
-
-            <View
-              style={[
-                styles.progressBarBackground,
-                {
-                  height: s(11),
-                  borderRadius: s(5),
-                  marginVertical: s(8),
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.progressBarFill,
-                  {
-                    width: "25%",
-                    height: "100%",
-                    borderRadius: s(5),
-                  },
-                ]}
-              />
-            </View>
-
-            <Text
-              style={[
-                styles.progressHint,
-                {
-                  fontSize: s(10),
-                },
-              ]}
-            >
-              Keep up with your goal!
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.cardBox,
-              styles.tipBox,
-              {
-                width: s(330),
-                borderRadius: s(16),
-                padding: s(12),
-                marginTop: s(10),
-              },
-            ]}
-          >
-            <MaterialCommunityIcons
-              name="star-outline"
-              size={s(35)}
-              color={"#0b1624"}
-              style={{ marginRight: s(10) }}
-            />
-            <Text
-              style={[
-                styles.tipText,
-                {
-                  fontSize: s(11),
-                  lineHeight: s(15),
-                },
-              ]}
-            >
-              Tip: Saving $0.40 cents a day{"\n"}will get you about $12.00{"\n"}
-              in a month.{"\n"}
-              <Text style={{ fontWeight: "bold" }}>
-                Remember to visualize your savings!
-              </Text>
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.actionButton,
-              {
-                width: Math.min(s(210), width - s(80)),
-                height: s(40),
-                borderRadius: s(22),
-                marginTop: s(18),
-              },
-            ]}
-            onPress={() => {}}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                {
-                  fontSize: s(14),
-                },
-              ]}
-            >
-              Go To Savings
-            </Text>
-          </TouchableOpacity>
         </View>
 
-        <View
+        <TouchableOpacity
           style={[
-            styles.bottomBar,
+            styles.button,
             {
-              height: s(85),
-              borderTopLeftRadius: s(50),
+              height: s(48),
+              marginTop: s(15),
+              borderRadius: s(18),
             },
           ]}
+          onPress={registeredExpenses}
         >
-          {navIcons.map((icon, index) => (
-            <TouchableOpacity
-              key={icon}
-              style={[styles.navButton, width >= 600 && { maxwidth: 110 }]}
-            >
-              <MaterialCommunityIcons name={icon} color={"#FFFF"} />
-            </TouchableOpacity>
-          ))}
-        </View>
+          <Text style={[styles.buttonText, { fontSize: s(17) }]}>
+            Save expenses
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            {
+              height: s(34),
+              marginTop: s(15),
+              borderRadius: s(18),
+            },
+          ]}
+          onPress={cancelExpenses}
+        >
+          <Text style={[styles.buttonText, { fontSize: s(17) }]}>Cancele</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
-    backgroundColor: "#0b1624",
+    backgroundColor: "#081023",
   },
+
   header: {
-    width: "100%",
-    backgroundColor: "#0b1624",
+    paddingTop: 55,
+    paddingBottom: 30,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
   },
+
   backButton: {
-    width: 41,
-    height: 46,
-    justifyContent: "center",
+    width: 35,
     alignItems: "flex-start",
+    marginLeft: 10,
   },
-  headerTitle: {
+
+  title: {
+    color: "#FFFFFF",
+    fontSize: 28,
+    fontWeight: "600",
     flex: 1,
-    color: "#FFFF",
-    fontWeight: "bold",
-    textAlign: "center",
+    marginLeft: 25,
   },
-  bellButton: {
-    backgroundColor: "#d7f3e8",
-    alignItems: "center",
+
+  notificationButton: {
+    width: 34,
+    height: 34,
+    borderRadius: 18,
+    backgroundColor: "#E0F5E7",
     justifyContent: "center",
-  },
-  main: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#FFFF",
-    overflow: "hidden",
-  },
-  content: {
-    flex: 1,
     alignItems: "center",
-    paddingTop: 15,
   },
-  successTitle: {
-    color: "#0b1624",
-    fontWeight: "bold",
-    marginTop: 5,
+
+  card: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    paddingHorizontal: 30,
+    paddingTop: 25,
   },
-  successSubtitle: {
-    color: "#6b7280",
-    marginTop: 2,
+
+  label: {
+    color: "#081023",
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 10,
   },
-  amountText: {
-    color: "#0b1624",
-    fontWeight: "bold",
-    marginTop: 2,
-  },
-  cardBox: {
+
+  input: {
+    height: 48,
+    backgroundColor: "#F3F4F5",
+    borderRadius: 15,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
+    borderColor: "#000000",
+    paddingHorizontal: 18,
+    marginBottom: 22,
   },
-  cardLabel: {
-    color: "#6b7280",
-  },
-  progressBarBackground: {
-    width: "100%",
-    backgroundColor: "#e5e7eb",
-    overflow: "hidden",
-  },
-  progressBarFill: {
-    backgroundColor: "#0b1624",
-  },
-  progressHint: {
-    color: "#9ca3af",
-    textAlign: "right",
-  },
-  tipBox: {
+
+  date: {
+    height: 48,
+    backgroundColor: "#F3F4F5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 18,
+    marginBottom: 22,
   },
-  tipText: {
-    flex: 1,
-    color: "#374151",
-  },
-  actionButton: {
-    backgroundColor: "#0b1624",
+
+  optionsContainer: {
+    flexDirection: "row",
+    marginBottom: 17,
+    height: 40,
+    backgroundColor: "#f3f4f5",
+    borderRadius: 13,
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "row",
+    paddingHorizontal: 8,
   },
-  buttonText: {
-    color: "#FFFF",
+
+  optionButton: {
+    flex: 1,
+    height: 48,
+    backgroundColor: "#f3f4f5",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: "#000000",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 17,
+    flexDirection: "row",
+    paddingHorizontal: 8,
+  },
+
+  selectedOption: {
+    backgroundColor: "#25b7d3",
+    borderColor: "#25b7d3",
+  },
+
+  optionText: {
+    color: "081023",
+    fontSize: 16,
     fontWeight: "600",
   },
-  bottomBar: {
-    width: "100%",
-    backgroundColor: "#25B7D3",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
+
+  selectedOptionText: {
+    color: "#ffffff",
   },
-  navButton: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
+
+  button: {
+    height: 48,
+    backgroundColor: "#25B7D3",
+    borderRadius: 18,
     justifyContent: "center",
+    alignItems: "center",
+    marginTop: 15,
+  },
+
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 17,
   },
 });

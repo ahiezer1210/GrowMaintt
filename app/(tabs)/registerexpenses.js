@@ -1,17 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    Alert,
-    StyleSheet, Switch, Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    useWindowDimensions
+  Alert,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function Registerexpenses() {
   const { width, height } = useWindowDimensions();
-  const scle = Math.min(width / 390, height / 844);
+  const scale = Math.min(width / 390, height / 844);
   const s = (value) => Math.round(value * scale);
 
   const [amount, setAmount] = useState("");
