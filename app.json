@@ -7,7 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "growmaint",
     "userInterfaceStyle": "automatic",
+<<<<<<< HEAD
 
+=======
+>>>>>>> 064a3ebe2bff8be98be9cfcb5aa5ed89ae3de9ab
     "ios": {
       "supportsTablet": true
     },
@@ -18,7 +21,10 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+<<<<<<< HEAD
 
+=======
+>>>>>>> 064a3ebe2bff8be98be9cfcb5aa5ed89ae3de9ab
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.GrowMaint"
     },
