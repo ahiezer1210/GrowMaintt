@@ -3,7 +3,6 @@ import { createContext, useContext, useState } from "react";
 const PeriodContext = createContext();
 
 export function PeriodProvider({ children }) {
-  // Por defecto se muestran los 3 periodos
   const [selectedPeriods, setSelectedPeriods] = useState([
     "daily",
     "weekly",

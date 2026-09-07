@@ -10,7 +10,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { usePeriods } from "../../context/PeriodContext"; // ajusta la ruta si es necesario
+import { usePeriods } from "../../context/PeriodContext";
 
 const COLORS = {
   cyan: "#25B7D3",
@@ -80,12 +80,11 @@ export default function App() {
   const small = width < 360;
   const scale = small ? 0.88 : width > 430 ? 1.08 : 1;
 
-  // Solo los filtros que el usuario eligió en la pantalla de control
+
   const availableFilters = ["Daily", "Weekly", "Monthly"].filter((item) =>
     selectedPeriods.includes(item.toLowerCase())
   );
 
-  // Si el periodo actual ya no está disponible, cambia al primero disponible
   useEffect(() => {
     if (availableFilters.length > 0 && !availableFilters.includes(period)) {
       setPeriod(availableFilters[0]);
@@ -111,7 +110,6 @@ export default function App() {
           <Savings data={data} scale={scale} />
           <Actions scale={scale} />
 
-          {/* Solo muestra los filtros seleccionados */}
           {availableFilters.length > 0 && (
             <View style={styles.filters}>
               {availableFilters.map((item) => (

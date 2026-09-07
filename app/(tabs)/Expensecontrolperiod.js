@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { usePeriods } from "../../context/PeriodContext.js"; // ajusta la ruta si es necesario
+import { usePeriods } from "../../context/PeriodContext.js";
 
 const periods = [
   {
@@ -29,7 +29,6 @@ export default function Expensescreen() {
   const { selectedPeriods, setSelectedPeriods } = usePeriods();
   const [tempSelected, setTempSelected] = useState(selectedPeriods);
 
-  // Sincronizar cuando se abre la pantalla
   useEffect(() => {
     setTempSelected(selectedPeriods);
   }, [selectedPeriods]);
@@ -53,7 +52,7 @@ export default function Expensescreen() {
   const allSelected = tempSelected.length === periods.length;
 
   const savePeriod = () => {
-    setSelectedPeriods(tempSelected); // Actualiza la pantalla principal
+    setSelectedPeriods(tempSelected); 
     router.back();
   };
 
@@ -125,7 +124,6 @@ export default function Expensescreen() {
             );
           })}
 
-          {/* Opción "All three" */}
           <TouchableOpacity
             style={[styles.option, allSelected && styles.optionSelected]}
             onPress={selectAll}
