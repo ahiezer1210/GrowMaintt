@@ -16,11 +16,8 @@
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
-<<<<<<< HEAD
-    "expo": "^57.0.19",
-=======
+    "expo": "^57.0.20",
     "expo": "~57.0.20",
->>>>>>> 064a3ebe2bff8be98be9cfcb5aa5ed89ae3de9ab
     "expo-constants": "~57.0.17",
     "expo-device": "~57.0.1",
     "expo-font": "~57.0.3",

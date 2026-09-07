@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   Image,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -24,11 +25,19 @@ export default function SavingsReminder() {
     "account-outline",
   ];
 
+  const navRoutes = [
+    "/home",
+    "/reports",
+    "/transactions",
+    "/savings",
+    "/profile",
+  ];
+
   return (
     <View style={styles.screen}>
       <StatusBar
         translucent
-        backgroundColor={"#0b1624"}
+        backgroundColor="#0b1624"
         barStyle="light-content"
       />
 
@@ -48,7 +57,7 @@ export default function SavingsReminder() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={s(22)}
-            color={"#FFFF"}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
 
@@ -77,7 +86,7 @@ export default function SavingsReminder() {
           <MaterialCommunityIcons
             name="bell-outline"
             size={s(17)}
-            color={"#428574"}
+            color="#428574"
           />
         </View>
       </View>
@@ -91,7 +100,16 @@ export default function SavingsReminder() {
           },
         ]}
       >
-        <View style={styles.content}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[
+            styles.content,
+            {
+              paddingBottom: s(110),
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
           <Image
             source={require("../../assets/images/Screenshot 2026-08-29 2030457.png")}
             style={{
@@ -189,12 +207,13 @@ export default function SavingsReminder() {
               Keep up with your goal!
             </Text>
           </View>
+
           <View
             style={[
               styles.cardBox,
               styles.tipBox,
               {
-                width: s(330),
+                width: Math.min(s(330), width - s(30)),
                 borderRadius: s(16),
                 padding: s(12),
                 marginTop: s(10),
@@ -204,9 +223,10 @@ export default function SavingsReminder() {
             <MaterialCommunityIcons
               name="star-outline"
               size={s(35)}
-              color={"#0b1624"}
+              color="#0b1624"
               style={{ marginRight: s(10) }}
             />
+
             <Text
               style={[
                 styles.tipText,
@@ -216,7 +236,8 @@ export default function SavingsReminder() {
                 },
               ]}
             >
-              Tip: Saving $0.40 cents a day{"\n"}will get you about $12.00{"\n"}
+              Tip: Saving $0.40 cents a day{"\n"}
+              will get you about $12.00{"\n"}
               in a month.{"\n"}
               <Text style={{ fontWeight: "bold" }}>
                 Remember to visualize your savings!
@@ -234,7 +255,7 @@ export default function SavingsReminder() {
                 marginTop: s(18),
               },
             ]}
-            onPress={() => {}}
+            onPress={() => router.push("/savings")}
           >
             <Text
               style={[
@@ -247,23 +268,29 @@ export default function SavingsReminder() {
               Go To Savings
             </Text>
           </TouchableOpacity>
-        </View>
+        </ScrollView>
 
         <View
           style={[
             styles.bottomBar,
             {
-              height: s(85),
-              borderTopLeftRadius: s(50),
+              height: s(100),
+              borderTopLeftRadius: s(55),
             },
           ]}
         >
           {navIcons.map((icon, index) => (
             <TouchableOpacity
               key={icon}
-              style={[styles.navButton, width >= 600 && { maxwidth: 110 }]}
+              style={styles.navButton}
+              onPress={() => router.push(navRoutes[index])}
+              activeOpacity={0.7}
             >
-              <MaterialCommunityIcons name={icon} color={"#FFFF"} />
+              <MaterialCommunityIcons
+                name={icon}
+                size={s(30)}
+                color="#FFFFFF"
+              />
             </TouchableOpacity>
           ))}
         </View>
@@ -277,98 +304,125 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0b1624",
   },
+
   header: {
     width: "100%",
     backgroundColor: "#0b1624",
     flexDirection: "row",
     alignItems: "center",
   },
+
   backButton: {
     width: 41,
     height: 46,
     justifyContent: "center",
     alignItems: "flex-start",
   },
+
   headerTitle: {
     flex: 1,
-    color: "#FFFF",
+    color: "#FFFFFF",
     fontWeight: "bold",
     textAlign: "center",
   },
+
   bellButton: {
     backgroundColor: "#d7f3e8",
     alignItems: "center",
     justifyContent: "center",
   },
+
   main: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FFFF",
+    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
-  content: {
+
+  scroll: {
     flex: 1,
+  },
+
+  content: {
     alignItems: "center",
     paddingTop: 15,
   },
+
   successTitle: {
     color: "#0b1624",
     fontWeight: "bold",
     marginTop: 5,
   },
+
   successSubtitle: {
     color: "#6b7280",
     marginTop: 2,
   },
+
   amountText: {
     color: "#0b1624",
     fontWeight: "bold",
     marginTop: 2,
   },
+
   cardBox: {
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#FFFFFF",
   },
+
   cardLabel: {
     color: "#6b7280",
   },
+
   progressBarBackground: {
     width: "100%",
     backgroundColor: "#e5e7eb",
     overflow: "hidden",
   },
+
   progressBarFill: {
     backgroundColor: "#0b1624",
   },
+
   progressHint: {
     color: "#9ca3af",
     textAlign: "right",
   },
+
   tipBox: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   tipText: {
     flex: 1,
     color: "#374151",
   },
+
   actionButton: {
     backgroundColor: "#0b1624",
     alignItems: "center",
     justifyContent: "center",
   },
+
   buttonText: {
-    color: "#FFFF",
+    color: "#FFFFFF",
     fontWeight: "600",
   },
+
   bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
     width: "100%",
     backgroundColor: "#25B7D3",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
   },
+
   navButton: {
     flex: 1,
     height: "100%",

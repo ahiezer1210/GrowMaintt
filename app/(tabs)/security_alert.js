@@ -248,7 +248,7 @@ export default function SecurityAlertScreen() {
           ["home-outline", "/home"],
           ["bar-chart-outline", "/reports"],
           ["swap-horizontal-outline", "/transactions"],
-          ["library-outline", "/notifications"],
+          ["layers-outline", "/notifications"],
           ["person-outline", "/profile"],
         ].map(([icon, route]) => (
           <TouchableOpacity
