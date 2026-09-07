@@ -1,5 +1,14 @@
 import { router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -11,7 +20,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { auth } from "../../firebaseConfig.js";
+
+import { auth, db } from "../../firebaseConfig.js";
+import { getDeviceId } from "../../utils/device";
+import { getRealDeviceInfo } from "../../utils/deviceInfo";
+
 export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -20,36 +33,106 @@ export default function LoginScreen() {
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
-      Alert.alert("Campos incompletos", "Ingresa tu correo y contraseña.");
-      return;
-    }
-
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      Alert.alert("Invalid password",
-        "The password must have at least one capital letter, one lowercase letter, one number, and one special character"
-      )
+      Alert.alert("Incomplete fields", "Please enter your email and password.");
       return;
     }
 
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password,
+      );
+
+      const user = credential.user;
+
+      const deviceId = await getDeviceId();
+
+      const { deviceName, location } = await getRealDeviceInfo();
+
+      const devicesRef = collection(db, "Users", user.uid, "devices");
+
+      const deviceRef = doc(db, "Users", user.uid, "devices", deviceId);
+
+      const deviceSnapshot = await getDoc(deviceRef);
+
+      if (deviceSnapshot.exists()) {
+        await setDoc(
+          deviceRef,
+          {
+            deviceName,
+            location,
+            lastLoginAt: serverTimestamp(),
+          },
+          { merge: true },
+        );
+
+        router.replace("/home");
+        return;
+      }
+
+      const devicesSnapshot = await getDocs(devicesRef);
+
+      const isFirstDevice = devicesSnapshot.empty;
+
+      await setDoc(deviceRef, {
+        deviceId,
+        deviceName,
+        location,
+        firstLoginAt: serverTimestamp(),
+        lastLoginAt: serverTimestamp(),
+        trusted: isFirstDevice,
+        primary: isFirstDevice,
+      });
+
+      if (isFirstDevice) {
+        const userRef = doc(db, "Users", user.uid);
+
+        await setDoc(
+          userRef,
+          {
+            primaryDeviceId: deviceId,
+          },
+          { merge: true },
+        );
+      } else {
+        const alertsRef = collection(db, "Users", user.uid, "securityAlerts");
+
+        await addDoc(alertsRef, {
+          uid: user.uid,
+          deviceId,
+          deviceName,
+          location,
+          type: "login_attempt",
+          status: "pending",
+          read: false,
+          createdAt: serverTimestamp(),
+        });
+      }
+
       router.replace("/home");
     } catch (error) {
-      let message = "Ocurrió un error al iniciar sesión.";
+      let message = "Unable to sign in. Please try again.";
 
       switch (error.code) {
         case "auth/invalid-email":
-          message = "El correo no es válido.";
+          message = "The email address is not valid.";
           break;
+
         case "auth/user-not-found":
         case "auth/wrong-password":
         case "auth/invalid-credential":
-          message = "Correo o contraseña incorrectos.";
+          message = "Incorrect email or password.";
           break;
+
         case "auth/too-many-requests":
-          message = "Demasiados intentos. Intenta más tarde.";
+          message = "Too many attempts. Please try again later.";
+          break;
+
+        case "permission-denied":
+          message = "You do not have permission to access this data.";
           break;
       }
 
@@ -118,7 +201,9 @@ export default function LoginScreen() {
 
         <View style={styles.divider}>
           <View style={styles.line} />
+
           <Text style={styles.or}>Or</Text>
+
           <View style={styles.line} />
         </View>
 

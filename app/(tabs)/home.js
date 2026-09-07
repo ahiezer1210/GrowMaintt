@@ -1,15 +1,19 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  StatusBar,
-  TouchableOpacity,
-  ScrollView,
-  useWindowDimensions,
-} from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { collection, onSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+} from "react-native";
+
+import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
   cyan: "#25B7D3",
@@ -73,11 +77,40 @@ const NAV = [
 
 export default function App() {
   const [period, setPeriod] = useState("Monthly");
+  const [hasNotification, setHasNotification] = useState(false);
+
   const { width } = useWindowDimensions();
 
   const small = width < 360;
   const scale = small ? 0.88 : width > 430 ? 1.08 : 1;
   const data = DATA[period];
+
+  useEffect(() => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      setHasNotification(false);
+      return;
+    }
+
+    const alertsRef = collection(db, "Users", user.uid, "securityAlerts");
+
+    const unsubscribe = onSnapshot(
+      alertsRef,
+      (snapshot) => {
+        const hasUnread = snapshot.docs.some(
+          (item) => item.data().read !== true,
+        );
+
+        setHasNotification(hasUnread);
+      },
+      () => {
+        setHasNotification(false);
+      },
+    );
+
+    return unsubscribe;
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -88,12 +121,21 @@ export default function App() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.content,
-            { paddingHorizontal: small ? 18 : width > 430 ? 34 : 25 },
+            {
+              paddingHorizontal: small ? 18 : width > 430 ? 34 : 25,
+            },
           ]}
         >
-          <Header small={small} scale={scale} />
+          <Header
+            small={small}
+            scale={scale}
+            hasNotification={hasNotification}
+          />
+
           <Balance data={data} small={small} scale={scale} />
+
           <Savings data={data} scale={scale} />
+
           <Actions scale={scale} />
 
           <View style={styles.filters}>
@@ -101,10 +143,7 @@ export default function App() {
               <TouchableOpacity
                 key={item}
                 onPress={() => setPeriod(item)}
-                style={[
-                  styles.filter,
-                  period === item && styles.activeFilter,
-                ]}
+                style={[styles.filter, period === item && styles.activeFilter]}
               >
                 <Text
                   style={[
@@ -130,7 +169,7 @@ export default function App() {
   );
 }
 
-function Header({ small, scale }) {
+function Header({ small, scale, hasNotification }) {
   const size = small ? 55 : 68;
 
   return (
@@ -138,7 +177,11 @@ function Header({ small, scale }) {
       <View
         style={[
           styles.profile,
-          { width: size, height: size, borderRadius: size / 2 },
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          },
         ]}
       />
 
@@ -149,20 +192,27 @@ function Header({ small, scale }) {
         >
           Hello, User!
         </Text>
+
         <Text style={styles.welcomeText}>Welcome back</Text>
       </View>
 
       <TouchableOpacity
         style={[
           styles.notification,
-          { width: small ? 44 : 52, height: small ? 44 : 52 },
+          {
+            width: small ? 44 : 52,
+            height: small ? 44 : 52,
+          },
         ]}
+        onPress={() => router.push("/notifications")}
       >
         <Ionicons
           name="notifications-outline"
           size={small ? 24 : 29}
           color={COLORS.white}
         />
+
+        {hasNotification && <View style={styles.notificationDot} />}
       </TouchableOpacity>
     </View>
   );
@@ -197,11 +247,8 @@ function BalanceItem({ icon, title, value, size, expense, small }) {
   return (
     <View style={styles.balanceItem}>
       <View style={styles.titleRow}>
-        <Ionicons
-          name={icon}
-          size={small ? 16 : 18}
-          color={COLORS.white}
-        />
+        <Ionicons name={icon} size={small ? 16 : 18} color={COLORS.white} />
+
         <Text style={[styles.balanceTitle, small && { fontSize: 12 }]}>
           {title}
         </Text>
@@ -225,12 +272,7 @@ function Savings({ data, scale }) {
   return (
     <View style={styles.savings}>
       <View style={styles.progress}>
-        <View
-          style={[
-            styles.progressFill,
-            { width: `${data.progress}%` },
-          ]}
-        >
+        <View style={[styles.progressFill, { width: `${data.progress}%` }]}>
           <Text style={[styles.progressText, { fontSize: 15 * scale }]}>
             {data.progress}%
           </Text>
@@ -264,11 +306,7 @@ function Actions({ scale }) {
             ]}
           >
             {type === "ion" ? (
-              <Ionicons
-                name={icon}
-                size={27 * scale}
-                color={COLORS.cyan}
-              />
+              <Ionicons name={icon} size={27 * scale} color={COLORS.cyan} />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
@@ -303,19 +341,10 @@ function Transaction({ data, small }) {
           },
         ]}
       >
-        <Ionicons
-          name={icon}
-          size={small ? 24 : 30}
-          color={COLORS.white}
-        />
+        <Ionicons name={icon} size={small ? 24 : 30} color={COLORS.white} />
       </View>
 
-      <View
-        style={[
-          styles.transactionInfo,
-          { width: small ? 82 : 112 },
-        ]}
-      >
+      <View style={[styles.transactionInfo, { width: small ? 82 : 112 }]}>
         <Text
           style={[styles.transactionTitle, small && { fontSize: 15 }]}
           numberOfLines={1}
@@ -336,7 +365,10 @@ function Transaction({ data, small }) {
       <Text
         style={[
           styles.transactionType,
-          small && { fontSize: 10, width: 48 },
+          small && {
+            fontSize: 10,
+            width: 48,
+          },
         ]}
         numberOfLines={1}
       >
@@ -374,11 +406,7 @@ function BottomNav({ small }) {
       {NAV.map(([icon, type], index) => (
         <TouchableOpacity key={index} style={styles.navItem}>
           {type === "ion" ? (
-            <Ionicons
-              name={icon}
-              size={small ? 25 : 31}
-              color={COLORS.white}
-            />
+            <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
           ) : (
             <MaterialCommunityIcons
               name={icon}
@@ -440,6 +468,19 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+
+  notificationDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF3B30",
+    borderWidth: 2,
+    borderColor: COLORS.cyan,
   },
 
   balance: {

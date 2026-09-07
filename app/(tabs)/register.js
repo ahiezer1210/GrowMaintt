@@ -5,12 +5,11 @@ import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   Alert,
-  Image,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
 
@@ -153,21 +152,6 @@ export default function SignupScreen() {
         <TouchableOpacity style={styles.button} onPress={registerusers}>
           <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
-
-        <View style={styles.divider}>
-          <View style={styles.line} />
-          <Text style={styles.or}>Or</Text>
-          <View style={styles.line} />
-        </View>
-
-        <TouchableOpacity style={styles.microsoftButton}>
-          <Image
-            source={require("../../assets/images/Microsoft.png")}
-            style={styles.microsoftIcon}
-          />
-
-          <Text style={styles.microsoftText}>Continue with Microsoft</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -251,43 +235,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 17,
-  },
-
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 30,
-  },
-
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ACADAD",
-  },
-
-  or: {
-    marginHorizontal: 12,
-    color: "#ACADAD",
-  },
-
-  microsoftButton: {
-    height: 55,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#ACADAD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  microsoftIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-
-  microsoftText: {
-    color: "#081023",
-    fontWeight: "600",
   },
 });

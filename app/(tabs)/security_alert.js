@@ -1,5 +1,11 @@
+import { router, useLocalSearchParams } from "expo-router";
+import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,197 +16,253 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 
-const SecurityAlertScreen = () => {
+import { auth, db } from "../../firebaseConfig";
+
+export default function SecurityAlertScreen() {
   const { width, height } = useWindowDimensions();
-  const isSmallScreen = width < 350;
-  const isShortScreen = height < 700;
+  const { id } = useLocalSearchParams();
+
+  const small = width < 350;
+  const short = height < 700;
+
+  const [loading, setLoading] = useState(false);
+  const [loadingAlert, setLoadingAlert] = useState(true);
+  const [deviceName, setDeviceName] = useState("Unknown device");
+  const [location, setLocation] = useState("Unknown location");
+
+  useEffect(() => {
+    const loadAlert = async () => {
+      try {
+        const user = auth.currentUser;
+
+        if (!user || !id) return;
+
+        const ref = doc(db, "Users", user.uid, "securityAlerts", String(id));
+
+        const snapshot = await getDoc(ref);
+
+        if (!snapshot.exists()) {
+          Alert.alert(
+            "Alert not found",
+            "This security alert no longer exists.",
+            [{ text: "OK", onPress: () => router.back() }],
+          );
+          return;
+        }
+
+        const data = snapshot.data();
+        setDeviceName(data.deviceName || "Unknown device");
+        setLocation(data.location || "Unknown location");
+      } catch (error) {
+        console.log("Error loading alert:", error);
+        Alert.alert("Error", "Could not load the security alert.");
+      } finally {
+        setLoadingAlert(false);
+      }
+    };
+
+    loadAlert();
+  }, [id]);
+
+  const respond = async (response) => {
+    if (loading || !id) return;
+
+    setLoading(true);
+
+    try {
+      const user = auth.currentUser;
+
+      if (!user) {
+        Alert.alert("Sesión requerida", "Debes iniciar sesión para continuar.");
+        return;
+      }
+
+      const alertRef = doc(db, "Users", user.uid, "securityAlerts", String(id));
+
+      await updateDoc(alertRef, {
+        status: response,
+        read: true,
+        respondedAt: serverTimestamp(),
+      });
+
+      if (response === "recognized") {
+        const alertSnapshot = await getDoc(alertRef);
+        const data = alertSnapshot.data();
+
+        if (data?.deviceId) {
+          const deviceRef = doc(
+            db,
+            "Users",
+            user.uid,
+            "devices",
+            data.deviceId,
+          );
+
+          await updateDoc(deviceRef, {
+            trusted: true,
+          });
+        }
+
+        Alert.alert(
+          "Login confirmado",
+          "Este dispositivo ha sido reconocido correctamente.",
+          [{ text: "OK", onPress: () => router.back() }],
+        );
+      } else {
+        Alert.alert(
+          "Login no reconocido",
+          "La alerta de seguridad fue registrada.",
+          [{ text: "OK", onPress: () => router.back() }],
+        );
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      Alert.alert("Error", "No se pudo procesar tu respuesta.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loadingAlert) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor="#0B1C2D" />
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color="#2B6CE5" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#0B1C2D" />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Icon
-            name="chevron-back"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
+        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
+          <Icon name="chevron-back" size={small ? 22 : 24} color="#FFF" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Security Alert</Text>
 
-        <View style={styles.headerRight}>
-          <View style={styles.checkCircle}>
-            <Icon
-              name="notifications"
-              size={isSmallScreen ? 24 : 26}
-              color="#FFFFFF"
-            />
-          </View>
-        </View>
+        <TouchableOpacity
+          style={styles.checkCircle}
+          onPress={() => router.push("/notifications")}
+        >
+          <Icon name="notifications" size={small ? 24 : 26} color="#FFF" />
+        </TouchableOpacity>
       </View>
 
       <View
         style={[
           styles.content,
-          isSmallScreen && styles.contentSmall,
-          isShortScreen && styles.contentShort,
+          small && styles.contentSmall,
+          short && styles.contentShort,
         ]}
       >
-        <View
-          style={[
-            styles.iconContainer,
-            isSmallScreen && styles.iconContainerSmall,
-          ]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
         >
-          <View
-            style={[
-              styles.outerCircle,
-              isSmallScreen && styles.outerCircleSmall,
-            ]}
-          >
-            <View
-              style={[
-                styles.warningTriangle,
-                isSmallScreen && styles.warningTriangleSmall,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.exclamation,
-                  isSmallScreen && styles.exclamationSmall,
-                ]}
-              >
-                !
+          <View style={[styles.iconContainer, small && styles.iconSmall]}>
+            <View style={[styles.outerCircle, small && styles.outerSmall]}>
+              <View style={[styles.warning, small && styles.warningSmall]}>
+                <Text
+                  style={[styles.exclamation, small && styles.exclamationSmall]}
+                >
+                  !
+                </Text>
+              </View>
+            </View>
+
+            <View style={[styles.line, styles.topLeft]} />
+            <View style={[styles.line, styles.topRight]} />
+            <View style={[styles.line, styles.bottomLeft]} />
+            <View style={[styles.line, styles.bottomRight]} />
+          </View>
+
+          <Text style={[styles.mainTitle, small && styles.mainTitleSmall]}>
+            New Login Attempt
+          </Text>
+
+          <View style={styles.infoRow}>
+            <MaterialIcons
+              name="smartphone"
+              size={small ? 65 : 75}
+              color="#333"
+            />
+
+            <View style={styles.infoText}>
+              <Text style={[styles.label, small && styles.textSmall]}>
+                Device
+              </Text>
+              <Text style={[styles.value, small && styles.textSmall]}>
+                {deviceName}
               </Text>
             </View>
           </View>
 
-          <View style={[styles.decorLine, styles.lineTopLeft]} />
-          <View style={[styles.decorLine, styles.lineTopRight]} />
-          <View style={[styles.decorLine, styles.lineBottomLeft]} />
-          <View style={[styles.decorLine, styles.lineBottomRight]} />
-        </View>
-
-        <Text
-          style={[styles.mainTitle, isSmallScreen && styles.mainTitleSmall]}
-        >
-          New Login Attempt
-        </Text>
-
-        <View style={styles.infoRow}>
-          <MaterialIcons
-            name="smartphone"
-            size={isSmallScreen ? 65 : 75}
-            color="#333"
-          />
-
-          <View style={styles.infoTextContainer}>
-            <Text style={[styles.infoLabel, isSmallScreen && styles.textSmall]}>
-              Device
-            </Text>
-
-            <Text style={[styles.infoValue, isSmallScreen && styles.textSmall]}>
-              Samsung Galaxy A06
+          <View style={styles.infoRow}>
+            <Icon name="location-outline" size={small ? 27 : 30} color="#333" />
+            <Text style={[styles.location, small && styles.locationSmall]}>
+              {location}
             </Text>
           </View>
-        </View>
 
-        <View style={styles.infoRow}>
-          <Icon
-            name="location-outline"
-            size={isSmallScreen ? 27 : 30}
-            color="#333"
-          />
-
-          <Text
-            style={[
-              styles.locationText,
-              isSmallScreen && styles.locationTextSmall,
-            ]}
-          >
-            San Salvador, El Salvador
+          <Text style={[styles.question, small && styles.questionSmall]}>
+            Was this you?
           </Text>
-        </View>
 
-        <Text style={[styles.question, isSmallScreen && styles.questionSmall]}>
-          Was this you?
-        </Text>
-
-        <TouchableOpacity
-          style={[styles.primaryButton, isSmallScreen && styles.buttonSmall]}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.primaryButtonText,
-              isSmallScreen && styles.buttonTextSmall,
-            ]}
+          <TouchableOpacity
+            style={[styles.button, small && styles.buttonSmall]}
+            disabled={loading}
+            onPress={() => respond("recognized")}
           >
-            Yes, It Was Me
-          </Text>
-        </TouchableOpacity>
+            {loading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text
+                style={[styles.buttonText, small && styles.buttonTextSmall]}
+              >
+                Yes, It Was Me
+              </Text>
+            )}
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.secondaryButton, isSmallScreen && styles.buttonSmall]}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.secondaryButtonText,
-              isSmallScreen && styles.buttonTextSmall,
-            ]}
+          <TouchableOpacity
+            style={[styles.button, small && styles.buttonSmall]}
+            disabled={loading}
+            onPress={() => respond("not_recognized")}
           >
-            No, It Was Not Me
-          </Text>
-        </TouchableOpacity>
+            <Text style={[styles.buttonText, small && styles.buttonTextSmall]}>
+              No, It Was Not Me
+            </Text>
+          </TouchableOpacity>
+
+          <View style={{ height: 100 }} />
+        </ScrollView>
       </View>
 
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Icon
-            name="home-outline"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Icon
-            name="bar-chart-outline"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Icon
-            name="swap-horizontal-outline"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Icon
-            name="library-outline"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Icon
-            name="person-outline"
-            size={isSmallScreen ? 22 : 24}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
+        {[
+          ["home-outline", "/home"],
+          ["bar-chart-outline", "/reports"],
+          ["swap-horizontal-outline", "/transactions"],
+          ["library-outline", "/notifications"],
+          ["person-outline", "/profile"],
+        ].map(([icon, route]) => (
+          <TouchableOpacity
+            key={route}
+            style={styles.navItem}
+            onPress={() => router.push(route)}
+          >
+            <Icon name={icon} size={small ? 22 : 24} color="#FFF" />
+          </TouchableOpacity>
+        ))}
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -215,37 +277,32 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     backgroundColor: "#0B1C2D",
   },
-  backButton: {
+  back: {
     width: 40,
     height: 40,
     justifyContent: "center",
   },
   headerTitle: {
-    color: "#FFFFFF",
+    color: "#FFF",
     fontSize: 18,
     fontWeight: "600",
-  },
-  headerRight: {
-    width: 40,
-    alignItems: "flex-end",
   },
   checkCircle: {
     width: 28,
     height: 28,
     borderRadius: 14,
     borderWidth: 1.5,
-    borderColor: "#FFFFFF",
+    borderColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
   },
   content: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 24,
     paddingTop: 24,
-    alignItems: "center",
   },
   contentSmall: {
     paddingHorizontal: 18,
@@ -254,6 +311,10 @@ const styles = StyleSheet.create({
   contentShort: {
     paddingTop: 12,
   },
+  scroll: {
+    alignItems: "center",
+    paddingBottom: 30,
+  },
   iconContainer: {
     width: 160,
     height: 160,
@@ -261,7 +322,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 24,
   },
-  iconContainerSmall: {
+  iconSmall: {
     width: 135,
     height: 135,
     marginBottom: 15,
@@ -274,56 +335,55 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  outerCircleSmall: {
+  outerSmall: {
     width: 115,
     height: 115,
     borderRadius: 58,
   },
-  warningTriangle: {
+  warning: {
     width: 72,
     height: 72,
     backgroundColor: "#2B6CE5",
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    transform: [{ rotate: "0deg" }],
   },
-  warningTriangleSmall: {
+  warningSmall: {
     width: 60,
     height: 60,
     borderRadius: 10,
   },
   exclamation: {
-    color: "#FFFFFF",
+    color: "#FFF",
     fontSize: 42,
     fontWeight: "bold",
   },
   exclamationSmall: {
     fontSize: 36,
   },
-  decorLine: {
+  line: {
     position: "absolute",
     width: 16,
     height: 3,
     backgroundColor: "#2B6CE5",
     borderRadius: 2,
   },
-  lineTopLeft: {
+  topLeft: {
     top: 18,
     left: 12,
     transform: [{ rotate: "-40deg" }],
   },
-  lineTopRight: {
+  topRight: {
     top: 18,
     right: 12,
     transform: [{ rotate: "40deg" }],
   },
-  lineBottomLeft: {
+  bottomLeft: {
     bottom: 22,
     left: 12,
     transform: [{ rotate: "40deg" }],
   },
-  lineBottomRight: {
+  bottomRight: {
     bottom: 22,
     right: 12,
     transform: [{ rotate: "-40deg" }],
@@ -346,14 +406,15 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     paddingHorizontal: 8,
   },
-  infoTextContainer: {
+  infoText: {
+    flex: 1,
     marginLeft: 12,
   },
-  infoLabel: {
+  label: {
     fontSize: 13,
     color: "#666",
   },
-  infoValue: {
+  value: {
     fontSize: 15,
     fontWeight: "600",
     color: "#1A1A1A",
@@ -361,14 +422,15 @@ const styles = StyleSheet.create({
   textSmall: {
     fontSize: 13,
   },
-  locationText: {
+  location: {
+    flex: 1,
     marginLeft: 12,
     fontSize: 15,
     fontWeight: "500",
     color: "#1A1A1A",
     paddingLeft: 12,
   },
-  locationTextSmall: {
+  locationSmall: {
     fontSize: 13,
     marginLeft: 8,
     paddingLeft: 8,
@@ -384,7 +446,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 16,
   },
-  primaryButton: {
+  button: {
     width: "65%",
     backgroundColor: "#0B1C2D",
     paddingVertical: 16,
@@ -392,25 +454,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 14,
   },
-  primaryButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    width: "65%",
-    backgroundColor: "#0B1C2D",
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#0B1C2D",
-  },
   buttonSmall: {
     paddingVertical: 13,
   },
-  secondaryButtonText: {
-    color: "#FFFFFF",
+  buttonText: {
+    color: "#FFF",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -425,7 +473,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     borderTopLeftRadius: 65,
-    borderTopRightRadius: 0,
     position: "absolute",
     bottom: 0,
     left: 0,
@@ -434,6 +481,10 @@ const styles = StyleSheet.create({
   navItem: {
     padding: 8,
   },
+  loading: {
+    flex: 1,
+    backgroundColor: "#FFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
 });
-
-export default SecurityAlertScreen;
