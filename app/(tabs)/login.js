@@ -199,23 +199,6 @@ export default function LoginScreen() {
           )}
         </TouchableOpacity>
 
-        <View style={styles.divider}>
-          <View style={styles.line} />
-
-          <Text style={styles.or}>Or</Text>
-
-          <View style={styles.line} />
-        </View>
-
-        <TouchableOpacity style={styles.microsoftButton}>
-          <Image
-            source={require("../../assets/images/microsoft.jpeg")}
-            style={styles.microsoftIcon}
-          />
-
-          <Text style={styles.microsoftText}>Continue with Microsoft</Text>
-        </TouchableOpacity>
-
         <View style={styles.register}>
           <Text style={styles.account}>Don't have an account?</Text>
 
@@ -318,44 +301,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 17,
-  },
-
-  divider: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 25,
-  },
-
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ACADAD",
-  },
-
-  or: {
-    marginHorizontal: 12,
-    color: "#ACADAD",
-  },
-
-  microsoftButton: {
-    height: 55,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: "#ACADAD",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  microsoftIcon: {
-    width: 20,
-    height: 20,
-    marginRight: 10,
-  },
-
-  microsoftText: {
-    color: "#081023",
-    fontWeight: "600",
   },
 
   register: {

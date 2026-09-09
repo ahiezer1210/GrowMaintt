@@ -1,26 +1,26 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const OPTIONS = [
-  ["shield-checkmark-outline", "Backup and synchronization", "Backup"],
-  ["key-outline", "Change password", "Password"],
-  ["cash-outline", "Expense control period", "Expenses"],
-  ["phone-portrait-outline", "Linked devices", "Devices"],
-  ["log-out-outline", "Log out", "Logout"],
-  ["close-outline", "Delete account", "DeleteAccount"],
+  ["shield-checkmark-outline", "Backup and synchronization", "backup"],
+  ["key-outline", "Change password", "newPassword"],
+  ["cash-outline", "Expense control period", "Expensecontrolperiod"],
+  ["phone-portrait-outline", "Linked devices", "linkeddevices"],
+  ["log-out-outline", "Log out", "signout"],
+  ["close-outline", "Delete account", "deleteaccount"],
 ];
 
 const NAV_ITEMS = [
   { name: "home-outline", key: "home", route: "Home" },
   { name: "bar-chart-outline", key: "reports", route: "Reports" },
-  { name: "swap-horizontal-outline", key: "transactions", route: "Transactions" },
+  {
+    name: "swap-horizontal-outline",
+    key: "expenses",
+    route: "ExpensesManagement",
+  },
   { name: "layers-outline", key: "savings", route: "Savings" },
   { name: "person-outline", key: "profile", route: "Profile" },
 ];
@@ -30,14 +30,11 @@ export default function SettingsScreen({ navigation }) {
   const [activeTab, setActiveTab] = useState("profile");
 
   const handleOptionPress = (route) => {
-    if (navigation && route) {
-      navigation.navigate(route);
-    }
+    router.push(`/${route}`);
   };
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.topRow}>
           <TouchableOpacity
@@ -59,7 +56,6 @@ export default function SettingsScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
-        {/* Temas */}
         <View style={styles.themesContainer}>
           <TouchableOpacity
             style={styles.themeOption}
@@ -93,7 +89,6 @@ export default function SettingsScreen({ navigation }) {
         </View>
       </View>
 
-      {/* Tarjeta Blanca Ajustada para ocupar todo el espacio */}
       <View style={styles.contentCard}>
         <View style={styles.optionsList}>
           {OPTIONS.map(([icon, text, route]) => (
@@ -114,7 +109,6 @@ export default function SettingsScreen({ navigation }) {
           ))}
         </View>
 
-        {/* Navegación Celeste Inferior */}
         <View style={styles.bottomNavContainer}>
           <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
             <View style={styles.bottomTabBar}>
