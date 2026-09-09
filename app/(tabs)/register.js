@@ -9,7 +9,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
 
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000000",
     paddingHorizontal: 18,
-    marginBottom: 22,
+    marginBottom: 28,
   },
 
   passwordBox: {
