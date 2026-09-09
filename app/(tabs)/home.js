@@ -68,11 +68,11 @@ const ACTIONS = [
 ];
 
 const NAV = [
-  ["home-outline", "ion"],
-  ["bar-chart-outline", "ion"],
-  ["swap-horizontal", "material"],
-  ["layers-outline", "material"],
-  ["person-outline", "ion"],
+  ["home-outline", "ion", "/"],
+  ["bar-chart-outline", "ion", "/historial"],
+  ["swap-horizontal", "material", "/ExpensesManagement"],
+  ["layers-outline", "material", "/currentgoal"],
+  ["person-outline", "ion", "/Profile"],
 ];
 
 export default function App() {
@@ -341,7 +341,12 @@ function Transaction({ data, small }) {
           },
         ]}
       >
-        <Ionicons name={icon} size={small ? 24 : 30} color={COLORS.white} />
+        <Ionicons
+          name={icon}
+          size={27}
+          color={COLORS.white}
+          style={{ transform: [{ translateY: 1 }] }}
+        />
       </View>
 
       <View style={[styles.transactionInfo, { width: small ? 82 : 112 }]}>
@@ -403,8 +408,12 @@ function BottomNav({ small }) {
         },
       ]}
     >
-      {NAV.map(([icon, type], index) => (
-        <TouchableOpacity key={index} style={styles.navItem}>
+      {NAV.map(([icon, type, route], index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.navItem}
+          onPress={() => router.push(route)}
+        >
           {type === "ion" ? (
             <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
           ) : (
@@ -585,6 +594,9 @@ const styles = StyleSheet.create({
   },
 
   actionIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.lightCyan,
     alignItems: "center",
     justifyContent: "center",
