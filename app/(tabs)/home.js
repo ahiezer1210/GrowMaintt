@@ -143,7 +143,10 @@ export default function App() {
               <TouchableOpacity
                 key={item}
                 onPress={() => setPeriod(item)}
-                style={[styles.filter, period === item && styles.activeFilter]}
+                style={[
+                  styles.filter,
+                  period === item && styles.activeFilter,
+                ]}
               >
                 <Text
                   style={[
@@ -163,7 +166,7 @@ export default function App() {
           ))}
         </ScrollView>
 
-        <BottomNav small={small} />
+        <BottomNav small={small} scale={scale} />
       </View>
     </SafeAreaView>
   );
@@ -247,7 +250,11 @@ function BalanceItem({ icon, title, value, size, expense, small }) {
   return (
     <View style={styles.balanceItem}>
       <View style={styles.titleRow}>
-        <Ionicons name={icon} size={small ? 16 : 18} color={COLORS.white} />
+        <Ionicons
+          name={icon}
+          size={small ? 16 : 18}
+          color={COLORS.white}
+        />
 
         <Text style={[styles.balanceTitle, small && { fontSize: 12 }]}>
           {title}
@@ -306,7 +313,11 @@ function Actions({ scale }) {
             ]}
           >
             {type === "ion" ? (
-              <Ionicons name={icon} size={27 * scale} color={COLORS.cyan} />
+              <Ionicons
+                name={icon}
+                size={27 * scale}
+                color={COLORS.cyan}
+              />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
@@ -365,7 +376,12 @@ function Transaction({ data, small }) {
         </Text>
       </View>
 
-      <View style={[styles.transactionDivider, small && { height: 42 }]} />
+      <View
+        style={[
+          styles.transactionDivider,
+          small && { height: 42 },
+        ]}
+      />
 
       <Text
         style={[
@@ -380,7 +396,12 @@ function Transaction({ data, small }) {
         {type}
       </Text>
 
-      <View style={[styles.transactionDivider, small && { height: 42 }]} />
+      <View
+        style={[
+          styles.transactionDivider,
+          small && { height: 42 },
+        ]}
+      />
 
       <Text
         style={[
@@ -397,14 +418,14 @@ function Transaction({ data, small }) {
   );
 }
 
-function BottomNav({ small }) {
+function BottomNav({ small, scale }) {
   return (
     <View
       style={[
         styles.bottom,
         {
-          height: small ? 85 : 100,
-          borderTopLeftRadius: small ? 45 : 65,
+          height: 65 * scale,
+          borderTopLeftRadius: 78 * scale,
         },
       ]}
     >
@@ -415,7 +436,11 @@ function BottomNav({ small }) {
           onPress={() => router.push(route)}
         >
           {type === "ion" ? (
-            <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
+            <Ionicons
+              name={icon}
+              size={small ? 25 : 31}
+              color={COLORS.white}
+            />
           ) : (
             <MaterialCommunityIcons
               name={icon}
@@ -694,13 +719,14 @@ const styles = StyleSheet.create({
 
   bottom: {
     position: "absolute",
-    left: 0,
-    right: 0,
     bottom: 0,
+    left: 0,
+    width: "100%",
     backgroundColor: COLORS.cyan,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+    overflow: "hidden",
   },
 
   navItem: {
