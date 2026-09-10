@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 
+import { usePeriods } from "../../context/PeriodContext.js";
 import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
@@ -76,6 +77,8 @@ const NAV = [
 ];
 
 export default function App() {
+  const { selectedPeriods } = usePeriods();
+
   const [period, setPeriod] = useState("Monthly");
   const [hasNotification, setHasNotification] = useState(false);
 
@@ -83,6 +86,17 @@ export default function App() {
 
   const small = width < 360;
   const scale = small ? 0.88 : width > 430 ? 1.08 : 1;
+
+  const availablePeriods = selectedPeriods.map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1),
+  );
+
+  useEffect(() => {
+    if (availablePeriods.length > 0 && !availablePeriods.includes(period)) {
+      setPeriod(availablePeriods[0]);
+    }
+  }, [selectedPeriods]);
+
   const data = DATA[period];
 
   useEffect(() => {
@@ -139,7 +153,7 @@ export default function App() {
           <Actions scale={scale} />
 
           <View style={styles.filters}>
-            {["Daily", "Weekly", "Monthly"].map((item) => (
+            {availablePeriods.map((item) => (
               <TouchableOpacity
                 key={item}
                 onPress={() => setPeriod(item)}
@@ -158,7 +172,7 @@ export default function App() {
             ))}
           </View>
 
-          {data.transactions.map((item, index) => (
+          {data?.transactions.map((item, index) => (
             <Transaction key={index} data={item} small={small} />
           ))}
         </ScrollView>
@@ -332,6 +346,7 @@ function Actions({ scale }) {
 
 function Transaction({ data, small }) {
   const [icon, title, date, type, amount] = data;
+
   const negative = amount.startsWith("-");
 
   return (
@@ -350,11 +365,20 @@ function Transaction({ data, small }) {
           name={icon}
           size={27}
           color={COLORS.white}
-          style={{ transform: [{ translateY: 1 }] }}
+          style={{
+            transform: [{ translateY: 1 }],
+          }}
         />
       </View>
 
-      <View style={[styles.transactionInfo, { width: small ? 82 : 112 }]}>
+      <View
+        style={[
+          styles.transactionInfo,
+          {
+            width: small ? 82 : 112,
+          },
+        ]}
+      >
         <Text
           style={[styles.transactionTitle, small && { fontSize: 15 }]}
           numberOfLines={1}
@@ -614,7 +638,7 @@ const styles = StyleSheet.create({
   },
 
   filters: {
-    height: 55,
+    minHeight: 55,
     borderRadius: 30,
     backgroundColor: COLORS.white,
     flexDirection: "row",
@@ -627,6 +651,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 45,
   },
 
   activeFilter: {
