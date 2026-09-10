@@ -1,13 +1,14 @@
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    Image,
-    Linking,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  Image,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function InversionesScreen() {
@@ -38,6 +39,10 @@ export default function InversionesScreen() {
     await Linking.openURL("https://www.interactivebrokers.com/");
   };
 
+  const abrirNotificaciones = () => {
+    router.push("/notifications");
+  };
+
   return (
     <View style={styles.container}>
       <View
@@ -53,14 +58,14 @@ export default function InversionesScreen() {
           style={[
             styles.backButton,
             {
-              transform: [{ translateY: 13 * scale }],
+              transform: [{ translateY: 4 * scale }],
             },
           ]}
           onPress={() => router.back()}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={22 * scale}
+            size={35 * scale}
             color="#FFFFFF"
           />
         </TouchableOpacity>
@@ -71,8 +76,8 @@ export default function InversionesScreen() {
             {
               fontSize: 25 * scale,
               transform: [
-                { translateX: 2 * scale },
-                { translateY: 11 * scale },
+                { translateX: 7 * scale },
+                { translateY: 1 * scale },
               ],
             },
           ]}
@@ -80,20 +85,22 @@ export default function InversionesScreen() {
           Investments
         </Text>
 
-        <View
+        <TouchableOpacity
           style={[
             styles.headerBell,
             {
-              transform: [{ translateY: 13 * scale }],
+              transform: [{ translateY: 4 * scale }],
             },
           ]}
+          onPress={abrirNotificaciones}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="bell-circle-outline"
-            size={28 * scale}
+            size={35 * scale}
             color="#FFFFFF"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View
@@ -298,7 +305,7 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: "#111C2E",
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -362,7 +369,7 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontWeight: "600",
-    color: "#111C2E",
+    color: "#071426",
   },
 
   linkButton: {

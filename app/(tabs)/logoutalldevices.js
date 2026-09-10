@@ -1,6 +1,17 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { signOut } from "firebase/auth";
 import {
+  collection,
+  getDocs,
+  increment,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { useState } from "react";
+import {
+  Alert,
   Image,
   StatusBar,
   StyleSheet,
@@ -9,26 +20,120 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { auth, db } from "../../firebaseConfig.js";
 
 export default function LogoutDevices() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
+  const [loading, setLoading] = useState(false);
 
-  const scale = Math.min(width / 390, height / 844);
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600 && width < 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
   const s = (value) => Math.round(value * scale);
 
-  const navIcons = [
-    "home-outline",
-    "chart-box-outline",
-    "swap-horizontal",
-    "layers-outline",
-    "account-outline",
+  const navItems = [
+    {
+      icon: "home-outline",
+      route: "/home",
+    },
+    {
+      icon: "chart-box-outline",
+      route: "/historial",
+    },
+    {
+      icon: "swap-horizontal",
+      route: "/administracion-gastos",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/Edit_profile",
+    },
   ];
+
+  const logoutEverywhere = async () => {
+    if (loading) return;
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert(
+        "Error",
+        "No hay una sesión activa."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const uid = user.uid;
+
+      const usersQuery = query(
+        collection(db, "users"),
+        where("uid", "==", uid)
+      );
+
+      const snapshot = await getDocs(usersQuery);
+
+      if (snapshot.empty) {
+        Alert.alert(
+          "Error",
+          "No se encontró el usuario en la base de datos."
+        );
+        setLoading(false);
+        return;
+      }
+
+      const userDocument = snapshot.docs[0];
+
+      await updateDoc(userDocument.ref, {
+        sessionVersion: increment(1),
+      });
+
+      await signOut(auth);
+
+      router.replace("/login");
+    } catch (error) {
+      console.log(
+        "Error al cerrar sesión en todos los dispositivos:",
+        error
+      );
+
+      Alert.alert(
+        "Error",
+        "No se pudieron cerrar las sesiones. Intenta nuevamente."
+      );
+
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.screen}>
       <StatusBar
         translucent
-        backgroundColor={"#071426"}
+        backgroundColor="#071426"
         barStyle="light-content"
       />
 
@@ -37,18 +142,26 @@ export default function LogoutDevices() {
           styles.header,
           {
             height: s(115),
-            paddingHorizontal: s(17),
+            paddingHorizontal: horizontalPadding,
           },
         ]}
       >
         <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+          style={[
+            styles.backButton,
+            {
+              transform: [
+                { translateY: 4 * scale },
+                { translateX: -4 * scale },
+              ],
+            },
+          ]}
+          onPress={() => router.push("/signout")}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={s(22)}
-            color={"#FFFF"}
+            size={s(35)}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
 
@@ -64,22 +177,22 @@ export default function LogoutDevices() {
           Log out on all your{"\n"}devices
         </Text>
 
-        <View
+        <TouchableOpacity
           style={[
-            styles.bellButton,
+            styles.headerBell,
             {
-              width: s(30),
-              height: s(30),
-              borderRadius: s(15),
+              transform: [{ translateY: 3 * scale }],
             },
           ]}
+          onPress={() => router.push("/notifications")}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
-            name="bell-outline"
-            size={s(19)}
-            color={"#397468"}
+            name="bell-circle-outline"
+            size={35 * scale}
+            color="#FFFFFF"
           />
-        </View>
+        </TouchableOpacity>
       </View>
 
       <View
@@ -91,12 +204,24 @@ export default function LogoutDevices() {
           },
         ]}
       >
-        <View style={styles.content}>
+        <View
+          style={[
+            styles.content,
+            {
+              paddingTop: s(10),
+              paddingHorizontal: horizontalPadding,
+            },
+          ]}
+        >
           <Image
-            source={require("../../assets/images/Screenshot 2026-08-28 21253461.png")}
+            source={require(
+              "../../assets/images/Screenshot 2026-08-28 21253461.png"
+            )}
             style={{
               width: s(210),
               height: s(210),
+              marginTop: s(-17),
+              transform: [{ translateX: -5 * scale }],
             }}
             resizeMode="contain"
           />
@@ -107,6 +232,8 @@ export default function LogoutDevices() {
               {
                 fontSize: s(14),
                 lineHeight: s(20),
+                marginTop: s(20),
+                transform: [{ translateY: -23 * scale }],
               },
             ]}
           >
@@ -119,23 +246,36 @@ export default function LogoutDevices() {
               styles.question,
               {
                 fontSize: s(25),
+                marginTop: s(25),
+                transform: [{ translateY: -29 * scale }],
               },
             ]}
           >
             Do you want to continue?
           </Text>
 
-          <View style={styles.buttonsContainer}>
+          <View
+            style={[
+              styles.buttonsContainer,
+              {
+                marginTop: s(40),
+                transform: [{ translateY: -45 * scale }],
+              },
+            ]}
+          >
             <TouchableOpacity
               style={[
                 styles.actionButton,
                 {
                   width: s(190),
-                  height: s(36),
+                  height: s(44),
                   borderRadius: s(22),
+                  opacity: loading ? 0.6 : 1,
                 },
               ]}
-              onPress={() => {}}
+              onPress={logoutEverywhere}
+              disabled={loading}
+              activeOpacity={0.8}
             >
               <Text
                 style={[
@@ -145,7 +285,7 @@ export default function LogoutDevices() {
                   },
                 ]}
               >
-                Continue
+                {loading ? "Logging out..." : "Continue"}
               </Text>
             </TouchableOpacity>
 
@@ -154,12 +294,13 @@ export default function LogoutDevices() {
                 styles.actionButton,
                 {
                   width: s(190),
-                  height: s(36),
+                  height: s(44),
                   borderRadius: s(22),
                   marginTop: s(12),
                 },
               ]}
               onPress={() => router.back()}
+              disabled={loading}
             >
               <Text
                 style={[
@@ -179,17 +320,22 @@ export default function LogoutDevices() {
           style={[
             styles.bottomBar,
             {
-              height: s(95),
-              borderTopLeftRadius: s(60),
+              height: 65 * scale,
+              borderTopLeftRadius: 78 * scale,
             },
           ]}
         >
-          {navIcons.map((icon, index) => (
-            <TouchableOpacity key={icon} style={styles.navButton}>
+          {navItems.map((item) => (
+            <TouchableOpacity
+              key={item.icon}
+              style={styles.navButton}
+              onPress={() => router.push(item.route)}
+              activeOpacity={0.7}
+            >
               <MaterialCommunityIcons
-                name={icon}
-                size={s(index === 2 ? 30 : 26)}
-                color={"#FFFF"}
+                name={item.icon}
+                size={35 * scale}
+                color="#FFFFFF"
               />
             </TouchableOpacity>
           ))}
@@ -198,6 +344,7 @@ export default function LogoutDevices() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
@@ -212,54 +359,47 @@ const styles = StyleSheet.create({
   },
 
   backButton: {
-    width: 41,
-    height: 46,
     justifyContent: "center",
     alignItems: "flex-start",
   },
 
   headerTitle: {
     flex: 1,
-    color: "#FFFF",
-    fontWeight: "505",
+    color: "#FFFFFF",
+    fontWeight: "700",
     textAlign: "center",
+    transform: [{ translateY: 9 }],
   },
 
-  bellButton: {
-    backgroundColor: "#E2F5E9",
-    alignItems: "center",
+  headerBell: {
     justifyContent: "center",
   },
 
   main: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FFFF",
+    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
 
   content: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 40,
   },
 
   description: {
     color: "#071426",
     textAlign: "center",
-    marginTop: 20,
   },
 
   question: {
     color: "#071426",
     textAlign: "center",
-    fontWeight: "710",
-    marginTop: 25,
+    fontWeight: "400",
   },
 
   buttonsContainer: {
     alignItems: "center",
-    marginTop: 40,
   },
 
   actionButton: {
@@ -269,16 +409,20 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: "#FFFF",
+    color: "#FFFFFF",
     fontWeight: "505",
   },
 
   bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
     width: "100%",
-    backgroundColor: "#25B7D3",
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+    overflow: "hidden",
   },
 
   navButton: {
@@ -286,6 +430,5 @@ const styles = StyleSheet.create({
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: 20,
   },
 });
