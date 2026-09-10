@@ -1,4 +1,5 @@
 import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   StatusBar,
@@ -45,7 +46,7 @@ const BackupScreen = ({ navigation }) => {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => (navigation?.goBack ? navigation.goBack() : null)}
+          onPress={() => router.push("/Seetings")}
           activeOpacity={0.7}
           style={styles.backButton}
         >
