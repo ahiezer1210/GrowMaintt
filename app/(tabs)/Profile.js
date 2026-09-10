@@ -29,9 +29,7 @@ export default function Profile() {
             icon: "person-outline",
 
             color: "#27b6d1",
-
-            route: "/editProfile"
-
+            route: "/Edit_profile"
         },
 
         {
@@ -41,9 +39,7 @@ export default function Profile() {
             icon: "shield-checkmark-outline",
 
             color: "#27b6d1",
-
-            route: "/security"
-
+            route: "/privacyScreen"
         },
 
         {
@@ -53,9 +49,7 @@ export default function Profile() {
             icon: "settings-outline",
 
             color: "#27b6d1",
-
-            route: "/configuration"
-
+            route: "/Seetings"
         },
 
         {
@@ -65,9 +59,7 @@ export default function Profile() {
             icon: "help-circle-outline",
 
             color: "#27b6d1",
-
-            route: "/terms"
-
+            route: "/terminos"
         },
 
         {
@@ -77,12 +69,11 @@ export default function Profile() {
             icon: "log-out-outline",
 
             color: "#27b6d1",
-
-            route: "/null"
-
+            route: "/signout"
         }
 
     ];
+
 
     return (
         <SafeAreaView style={styles.container}>
@@ -99,7 +90,7 @@ export default function Profile() {
                     />
                 </TouchableOpacity>
                 <Text style={styles.title}>Profile</Text>
-                <TouchableOpacity style={styles.notificationButton}>
+                <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/notifications")}>
                     <Ionicons
 
                         name="notifications-outline"
@@ -150,6 +141,7 @@ export default function Profile() {
                                     { backgroundColor: option.color }
 
                                 ]}
+
                             >
                                 <Ionicons
 
@@ -160,6 +152,7 @@ export default function Profile() {
                                     color="#FFFFFF"
 
                                 />
+
                             </View>
                             <Text style={styles.optionText}>
 
@@ -169,6 +162,43 @@ export default function Profile() {
 
                     ))}
                 </View>
+            </View>
+            <View style={styles.bottomBar}>
+                <TouchableOpacity onPress={() => router.push("/home")}>
+                    <Ionicons
+                        name="home-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/historial")}>
+                    <Ionicons
+                        name="bar-chart-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
+                    <Ionicons
+                        name="swap-horizontal-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity>
+                    <Ionicons
+                        name="layers-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/Profile")}>
+                    <Ionicons
+                        name="person-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
             </View>
         </SafeAreaView>
 
@@ -188,8 +218,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#0e2738",
+        backgroundColor: "#081023",
+        marginTop: -30,
     },
+
     backButton: {
         width: 45,
         height: 45,
@@ -203,6 +235,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "700",
         fontSize: 25,
+        marginTop: 30,
     },
 
     notificationButton: {
@@ -219,7 +252,7 @@ const styles = StyleSheet.create({
         height: 90,
         borderRadius: 45,
         position: "absolute",
-        top: -25,
+        top: -40,
         overflow: "hidden",
         borderWidth: 3,
         borderColor: "#0e2738",
@@ -234,29 +267,29 @@ const styles = StyleSheet.create({
     content: {
         backgroundColor: "#FFFFFF",
         flex: 1,
-        paddingTop: 55,
+        marginTop: 60,
         borderTopLeftRadius: 35,
         borderTopRightRadius: 35,
         alignItems: "center",
-        width:"100%"
+        width: "100%"
     },
 
     name: {
         color: "#0e2738",
         fontSize: 18,
-        marginTop: 0,
+        marginTop: 50,
         fontWeight: "700",
     },
 
     optionsContainer: {
         width: "100%",
         paddingHorizontal: 30,
-        marginTop: 35,
+        marginTop: 15,
     },
 
     opttion: {
         width: "100%",
-        minHeight:60,
+        minHeight: 60,
         alignItems: "center",
         flexDirection: "row",
         marginBottom: 18,
@@ -274,9 +307,15 @@ const styles = StyleSheet.create({
     optionText: {
         color: "#0e2738",
         fontSize: 16,
-        fontWeight: "500",
+        fontWeight: "600",
         lineHeight: 20,
     },
-
+    bottomBar: {
+        height: 70,
+        backgroundColor: "#24b6d1",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        marginBottom: -25,
+    },
 });
-

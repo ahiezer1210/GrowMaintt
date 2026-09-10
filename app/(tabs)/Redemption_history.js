@@ -1,6 +1,7 @@
-    
+
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { router } from "expo-router";
 import {
     Alert,
     ScrollView,
@@ -92,7 +93,7 @@ export default function Redemptionhistory() {
                             <View style={styles.giftContainer}>
                                 <Ionicons
                                     name="gift-outline"
-                                    size={35}
+                                    size={80}
                                     color="#081023"
                                 />
 
@@ -102,7 +103,7 @@ export default function Redemptionhistory() {
 
                                 <Ionicons
                                     name="star-outline"
-                                    size={20}
+                                    size={25}
                                     color="#081023"
                                 />
 
@@ -119,7 +120,7 @@ export default function Redemptionhistory() {
                             <View style={styles.resumenItem}>
                                 <Ionicons
                                     name="wallet-outline"
-                                    size={20}
+                                    size={25}
                                     color="#081023"
                                 />
 
@@ -135,7 +136,7 @@ export default function Redemptionhistory() {
                             <View style={styles.resumenItem}>
                                 <Ionicons
                                     name="pricetag-outline"
-                                    size={20}
+                                    size={25}
                                     color="#081023"
                                 />
 
@@ -250,8 +251,51 @@ export default function Redemptionhistory() {
                 </ScrollView>
 
             </View>
+            <View style={styles.bottomBar}>
+                <TouchableOpacity onPress={() => router.push("/home")}>
+                    <Ionicons
+                        name="home-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/historial")}>
+                    <Ionicons
+                        name="bar-chart-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
+                    <Ionicons
+                        name="swap-horizontal-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity>
+                    <Ionicons
+                        name="layers-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/Profile")}>
+                    <Ionicons
+                        name="person-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+            </View>
 
         </View>
+
 
     );
 }
@@ -300,7 +344,7 @@ const styles = StyleSheet.create({
     header: {
         alignItems: "center",
         paddingTop: 55,
-        paddingBottom: 30,
+        paddingBottom: 60,
     },
 
     title: {
@@ -329,6 +373,7 @@ const styles = StyleSheet.create({
         borderRadius: 7,
         marginBottom: 25,
         paddingTop: 5,
+        marginTop: -20,
     },
 
     resumenContent: {
@@ -337,10 +382,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",
+        marginTop: -5,
     },
 
     resumenTitleGeneral: {
-        fontSize: 10,
+        fontSize: 15,
         color: "#081023",
         fontWeight: "700",
         marginBottom: 3,
@@ -351,16 +397,19 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+        
     },
 
     giftContainer: {
-        width: 50,
+        width: 90,
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "flex-start",
+        marginTop: -10,
+        
     },
 
     resumenTitle: {
-        fontSize: 8,
+        fontSize: 11,
         color: "#081023",
         fontWeight: "600",
         marginTop: 2,
@@ -368,7 +417,7 @@ const styles = StyleSheet.create({
     },
 
     resumenValor: {
-        fontSize: 11,
+        fontSize: 15,
         color: "#081023",
         fontWeight: "700",
         marginTop: 2,
@@ -477,5 +526,13 @@ const styles = StyleSheet.create({
         color: "#777777",
         fontSize: 13,
         marginTop: 10,
+    },
+
+    bottomBar: {
+        height: 70,
+        backgroundColor: "#24b6d1",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
     },
 });

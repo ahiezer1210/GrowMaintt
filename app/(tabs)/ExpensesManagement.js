@@ -56,30 +56,34 @@ export default function ExpenseManagement() {
                 >
                     <Ionicons
                         name="arrow-back"
-                        size={20}
+                        size={25}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
                 <Text style={styles.headertitle}>
                     Expense{"\n"}Management
                 </Text>
-                <View style={styles.notification}>
+                <TouchableOpacity style={styles.notification} onPress={() => router.push("/notifications")}>
                     <Ionicons
                         name="notifications-outline"
-                        size={15}
+                        size={23}
                         color={"#0E2738"}
                     />
-                </View>
+                </TouchableOpacity>
             </View>
             <ScrollView
                 style={styles.content}
+                contentContainerStyle={{
+                    paddingTop: 12,
+                    paddingBottom: 20,
+                }}
                 showsVerticalScrollIndicator={false}
             >
                 <View style={styles.section}>
                     <View style={styles.sectionTitleContainer}>
                         <Ionicons
                             name="card-outline"
-                            size={20}
+                            size={30}
                             color={"#0E2738"}
                         />
                         <Text style={styles.sectiontitle}>
@@ -100,7 +104,7 @@ export default function ExpenseManagement() {
                     <View style={styles.sectionTitleContainer}>
                         <Ionicons
                             name="coins-outline"
-                            size={20}
+                            size={30}
                             color={"#0E2738"}
                         />
                         <Text style={styles.sectiontitle}>
@@ -121,7 +125,7 @@ export default function ExpenseManagement() {
                     <View style={styles.sectionTitleContainer}>
                         <Ionicons
                             name="calendar-outline"
-                            size={20}
+                            size={30}
                             color={"#0E2738"}
                         />
                         <Text style={styles.sectiontitle}>
@@ -141,6 +145,49 @@ export default function ExpenseManagement() {
                 </View>
                 <View style={styles.bottomSpace} />
             </ScrollView >
+
+            <View style={styles.bottomBar}>
+                <TouchableOpacity onPress={() => router.push("/home")}>
+                    <Ionicons
+                        name="home-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/historial")}>
+                    <Ionicons
+                        name="bar-chart-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
+                    <Ionicons
+                        name="swap-horizontal-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity>
+                    <Ionicons
+                        name="layers-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => router.push("/Profile")}>
+                    <Ionicons
+                        name="person-outline"
+                        size={27}
+                        color={"#FFFFFF"}
+                    />
+                </TouchableOpacity>
+
+            </View>
         </View >
     );
 }
@@ -150,7 +197,7 @@ function ExpenseItem({ name, amount, icon }) {
             <View style={styles.expenseIcon}>
                 <Ionicons
                     name={icon}
-                    size={19}
+                    size={28}
                     color={"#FFFFFF"}
                 />
             </View>
@@ -174,7 +221,7 @@ function ScheduledExpense({
             <View style={styles.expenseIcon}>
                 <Ionicons
                     name={icon}
-                    size={19}
+                    size={28}
                     color={"#FFFFFF"}
                 />
             </View>
@@ -189,35 +236,39 @@ function ScheduledExpense({
             </Text>
         </View>
     );
+
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#0E2738",
+        backgroundColor: "#081023",
     },
     header: {
-        height: 74,
+        height: 130,
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 15,
+        backgroundColor: "#081023",
+        marginTop: 30,
     },
     backButton: {
         width: 35,
         alignItems: "flex-start",
+        justifyContent: "center",
     },
     headertitle: {
         flex: 1,
         color: "#FFFFFF",
-        fontSize: 20,
+        fontSize: 25,
         fontWeight: "400",
-        textAlign: "left",
+        textAlign: "center",
         lineHeight: 22,
     },
     notification: {
-        width: 23,
-        height: 23,
-        borderRadius: 12,
+        width: 30,
+        height: 30,
+        borderRadius: 15,
         backgroundColor: "#D8F2E2",
         alignItems: "center",
         justifyContent: "center",
@@ -225,22 +276,22 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
         backgroundColor: "#FFFFFF",
-        borderTopLeftRadius: 30,
-        borderTopRightRadius: 30,
+        borderTopLeftRadius: 35,
+        borderTopRightRadius: 35,
         paddingHorizontal: 20,
-        paddingTop: 12,
+        marginTop: 10,
     },
     section: {
-        marginBottom: 13,
+        marginBottom: 10,
     },
     sectionTitleContainer: {
         flexDirection: "row",
         alignItems: "center",
-        height: 27,
+        height: 35,
     },
     sectiontitle: {
         color: "#172128",
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: "400",
         marginLeft: 6,
     },
@@ -248,27 +299,27 @@ const styles = StyleSheet.create({
         height: 1,
         backgroundColor: "#777777",
         width: "100%",
-        marginTop: 3,
-        marginBottom: 7,
+        marginTop: 12,
+        marginBottom: 5,
     },
     expenseRow: {
-        height: 45,
+        minHeight: 45,
         flexDirection: "row",
         alignItems: "center",
     },
     expenseIcon: {
-        width: 31,
-        height: 31,
-        borderRadius: 11,
-        backgroundColor: "#3299f5",
+        width: 45,
+        height: 40,
+        borderRadius: 16,
+        backgroundColor: "#24b6d1",
         justifyContent: "center",
         alignItems: "center",
     },
     expensename: {
         flex: 1,
-        marginLeft: 8,
+        marginLeft: 9,
         color: "#26313b",
-        fontSize: 12,
+        fontSize: 15,
         fontWeight: "400",
     },
     amount: {
@@ -284,6 +335,14 @@ const styles = StyleSheet.create({
         marginRight: 18,
     },
     bottomSpace: {
-        height: 30,
+        height: 70,
+    },
+
+    bottomBar: {
+        height: 70,
+        backgroundColor: "#24b6d1",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
     },
 });
