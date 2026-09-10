@@ -185,7 +185,7 @@ export default function Profile() {
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
                     <Ionicons
                         name="layers-outline"
                         size={27}

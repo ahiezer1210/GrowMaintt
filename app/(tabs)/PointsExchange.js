@@ -182,7 +182,7 @@ export default function PointExchange() {
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.back()}>
+                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
                     <Ionicons
                         name="layers-outline"
                         size={27}

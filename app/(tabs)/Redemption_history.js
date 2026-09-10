@@ -276,7 +276,7 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
                     <Ionicons
                         name="layers-outline"
                         size={27}
