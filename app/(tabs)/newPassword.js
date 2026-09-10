@@ -13,7 +13,6 @@ import {
 import { auth } from "../../firebaseConfig";
 
 export default function ChangePassword() {
-  // Refs en vez de estado: escribir no dispara re-render de toda la pantalla.
   const newPasswordRef = useRef("");
   const confirmPasswordRef = useRef("");
 
@@ -31,10 +30,7 @@ export default function ChangePassword() {
     }
 
     if (newPassword.length < 6) {
-      Alert.alert(
-        "Error",
-        "The password must be at least 6 characters long."
-      );
+      Alert.alert("Error", "The password must be at least 6 characters long.");
       return;
     }
 
@@ -46,10 +42,7 @@ export default function ChangePassword() {
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert(
-        "Error",
-        "There is no user currently signed in."
-      );
+      Alert.alert("Error", "There is no user currently signed in.");
       return;
     }
 
@@ -61,16 +54,12 @@ export default function ChangePassword() {
       newPasswordRef.current = "";
       confirmPasswordRef.current = "";
 
-      Alert.alert(
-        "Success",
-        "Your password was changed successfully.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/login"),
-          },
-        ]
-      );
+      Alert.alert("Success", "Your password was changed successfully.", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/login"),
+        },
+      ]);
     } catch (error) {
       console.log(error);
 
@@ -78,23 +67,14 @@ export default function ChangePassword() {
         error instanceof FirebaseError &&
         error.code === "auth/requires-recent-login"
       ) {
-        Alert.alert(
-          "Session expired",
-          "You need to sign in again."
-        );
+        Alert.alert("Session expired", "You need to sign in again.");
       } else if (
         error instanceof FirebaseError &&
         error.code === "auth/weak-password"
       ) {
-        Alert.alert(
-          "Weak password",
-          "The password must be stronger."
-        );
+        Alert.alert("Weak password", "The password must be stronger.");
       } else {
-        Alert.alert(
-          "Error",
-          "The password could not be changed."
-        );
+        Alert.alert("Error", "The password could not be changed.");
       }
     } finally {
       setLoading(false);
@@ -104,15 +84,11 @@ export default function ChangePassword() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>
-          Change Password
-        </Text>
+        <Text style={styles.title}>Change Password</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>
-          New Password
-        </Text>
+        <Text style={styles.label}>New Password</Text>
 
         <View style={styles.passwordBox}>
           <TextInput
@@ -132,18 +108,12 @@ export default function ChangePassword() {
             importantForAutofill="no"
           />
 
-          <TouchableOpacity
-            onPress={() => setShowNew(!showNew)}
-          >
-            <Text style={styles.show}>
-              {showNew ? "Hide" : "Show"}
-            </Text>
+          <TouchableOpacity onPress={() => setShowNew(!showNew)}>
+            <Text style={styles.show}>{showNew ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.label}>
-          Confirm Password
-        </Text>
+        <Text style={styles.label}>Confirm Password</Text>
 
         <View style={styles.passwordBox}>
           <TextInput
@@ -163,12 +133,8 @@ export default function ChangePassword() {
             importantForAutofill="no"
           />
 
-          <TouchableOpacity
-            onPress={() => setShowConfirm(!showConfirm)}
-          >
-            <Text style={styles.show}>
-              {showConfirm ? "Hide" : "Show"}
-            </Text>
+          <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+            <Text style={styles.show}>{showConfirm ? "Hide" : "Show"}</Text>
           </TouchableOpacity>
         </View>
 
