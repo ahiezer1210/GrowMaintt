@@ -1,5 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
+import { Button } from "react-native";
+import { TextInput } from "react-native";
 import {
   ScrollView,
   StatusBar,
@@ -38,12 +41,29 @@ const navIcons = [
 ];
 
 export default function SavingsGoalsScreen() {
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [goal, setGoal] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const [savedgoal, setSavedgoal] = useState(null);
+
   const { width, height } = useWindowDimensions();
   const scale = Math.min(width / 390, height / 844);
   const s = (value) => Math.round(value * scale);
 
   const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
+
+  const savegoal = () => {
+    setSavedgoal({
+      name: goal,
+      amount: amount,
+    });
+
+    setGoal("");
+      setAmount("");
+      setMostrarFormulario(false);
+  };
 
   return (
     <View style={styles.screen}>
@@ -264,11 +284,54 @@ export default function SavingsGoalsScreen() {
                 marginTop: s(15),
               },
             ]}
+            onPress={() => setMostrarFormulario(true)}
           >
             <Text style={[styles.createText, { fontSize: s(14) }]}>
               Create New Goal
             </Text>
           </TouchableOpacity>
+
+          {mostrarFormulario && (
+            <View style={styles.formulario}>
+              <Text style={styles.subtitulo}>
+                New goal
+              </Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. Buy a laptop"
+                value={goal}
+                onChangeText={setGoal}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. $300"
+                value={amount}
+                onChangeText={setAmount}
+              />
+
+              <Button
+                title="Save goal"
+                onPress={savegoal}
+              />
+
+            </View>
+
+          )}
+
+          {savedgoal && (
+            <View style={styles.meta}>
+              <Text style={styles.Titlegoal}>
+                {savedgoal.name}
+              </Text>
+
+              <Text>
+                {savedgoal.amount}
+              </Text>
+
+            </View>
+          )}
         </ScrollView>
       </View>
 
@@ -542,5 +605,27 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  formulario: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 15,
+  },
+
+  subtitulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 15,
+  },
+
+  input: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 15,
   },
 });
