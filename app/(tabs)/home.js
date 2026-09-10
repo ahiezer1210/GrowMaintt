@@ -143,10 +143,7 @@ export default function App() {
               <TouchableOpacity
                 key={item}
                 onPress={() => setPeriod(item)}
-                style={[
-                  styles.filter,
-                  period === item && styles.activeFilter,
-                ]}
+                style={[styles.filter, period === item && styles.activeFilter]}
               >
                 <Text
                   style={[
@@ -177,7 +174,7 @@ function Header({ small, scale, hasNotification }) {
 
   return (
     <View style={styles.header}>
-      <View
+      <TouchableOpacity
         style={[
           styles.profile,
           {
@@ -186,6 +183,7 @@ function Header({ small, scale, hasNotification }) {
             borderRadius: size / 2,
           },
         ]}
+        onPress={() => router.push("/Profile")}
       />
 
       <View style={styles.welcome}>
@@ -250,11 +248,7 @@ function BalanceItem({ icon, title, value, size, expense, small }) {
   return (
     <View style={styles.balanceItem}>
       <View style={styles.titleRow}>
-        <Ionicons
-          name={icon}
-          size={small ? 16 : 18}
-          color={COLORS.white}
-        />
+        <Ionicons name={icon} size={small ? 16 : 18} color={COLORS.white} />
 
         <Text style={[styles.balanceTitle, small && { fontSize: 12 }]}>
           {title}
@@ -317,11 +311,7 @@ function Actions({ scale }) {
             ]}
           >
             {type === "ion" ? (
-              <Ionicons
-                name={icon}
-                size={27 * scale}
-                color={COLORS.cyan}
-              />
+              <Ionicons name={icon} size={27 * scale} color={COLORS.cyan} />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
@@ -380,12 +370,7 @@ function Transaction({ data, small }) {
         </Text>
       </View>
 
-      <View
-        style={[
-          styles.transactionDivider,
-          small && { height: 42 },
-        ]}
-      />
+      <View style={[styles.transactionDivider, small && { height: 42 }]} />
 
       <Text
         style={[
@@ -400,12 +385,7 @@ function Transaction({ data, small }) {
         {type}
       </Text>
 
-      <View
-        style={[
-          styles.transactionDivider,
-          small && { height: 42 },
-        ]}
-      />
+      <View style={[styles.transactionDivider, small && { height: 42 }]} />
 
       <Text
         style={[
@@ -440,11 +420,7 @@ function BottomNav({ small, scale }) {
           onPress={() => router.push(route)}
         >
           {type === "ion" ? (
-            <Ionicons
-              name={icon}
-              size={small ? 25 : 31}
-              color={COLORS.white}
-            />
+            <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
           ) : (
             <MaterialCommunityIcons
               name={icon}
