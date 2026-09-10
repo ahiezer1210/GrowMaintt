@@ -182,8 +182,7 @@ export default function InvestmentReminder() {
               },
             ]}
             activeOpacity={0.8}
-            onPress={() => {
-            }}
+            onPress={() => router.push("/investments")}
           >
             <Text
               style={[

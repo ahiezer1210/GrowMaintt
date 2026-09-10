@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
 
@@ -19,6 +20,8 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
+  const { width, height } = useWindowDimensions();
+  const tablet = width >= 600;
 
   const registerusers = async () => {
     if (!username.trim() || !email.trim() || !password || !confirmpassword) {
@@ -86,7 +89,7 @@ export default function SignupScreen() {
         <Text style={styles.title}>Register</Text>
       </View>
 
-      <View style={styles.card}>
+      <View style={[styles.card, tablet && { paddingTop: 55 }]}>
         <Text style={styles.label}>Username</Text>
 
         <TextInput
@@ -198,7 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000000",
     paddingHorizontal: 18,
-    marginBottom: 28,
+    marginBottom: 34,
   },
 
   passwordBox: {
@@ -210,7 +213,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    marginBottom: 22,
+    marginBottom: 28,
   },
 
   password: {

@@ -61,10 +61,10 @@ const DATA = {
 };
 
 const ACTIONS = [
-  ["card-outline", "Expense\nManagement", "ion"],
-  ["book-outline", "User\nManual", "ion"],
-  ["trending-up-outline", "Investments", "ion"],
-  ["swap-horizontal", "Points\nExchange", "material"],
+  ["card-outline", "Expense\nManagement", "ion", "/ExpensesManagement"],
+  ["book-outline", "User\nManual", "ion", "/manualScreen"],
+  ["trending-up-outline", "Investments", "ion", "/investments"],
+  ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
 ];
 
 const NAV = [
@@ -293,8 +293,12 @@ function Savings({ data, scale }) {
 function Actions({ scale }) {
   return (
     <View style={styles.actions}>
-      {ACTIONS.map(([icon, text, type]) => (
-        <TouchableOpacity key={text} style={styles.action}>
+      {ACTIONS.map(([icon, text, type, route]) => (
+        <TouchableOpacity
+          key={text}
+          style={[styles.action, { height: 84 * scale }]}
+          onPress={() => router.push(route)}
+        >
           <View
             style={[
               styles.actionIcon,
@@ -581,7 +585,6 @@ const styles = StyleSheet.create({
 
   action: {
     width: "48%",
-    height: 84,
     borderRadius: 24,
     backgroundColor: COLORS.white,
     alignItems: "center",
