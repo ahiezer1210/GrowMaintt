@@ -8,6 +8,8 @@ import {
 
     StyleSheet,
 
+    ScrollView,
+
     Text,
 
     TouchableOpacity,
@@ -103,65 +105,71 @@ export default function Profile() {
                 </TouchableOpacity>
             </View>
             <View style={styles.content}>
-                <View style={styles.imageContainer}>
-                    <Image
 
-                        source={require("../../assets/images/Image.jpg")}
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    <View style={styles.imageContainer}>
+                        <Image
 
-                        style={styles.logo}
+                            source={require("../../assets/images/Image.jpg")}
 
-                    />
-                </View>
-                <Text style={styles.name}>Diana Cardoza</Text>
-                <View style={styles.optionsContainer}>
+                            style={styles.logo}
 
-                    {menuOptions.map((option, index) => (
-                        <TouchableOpacity
+                        />
+                    </View>
+                    <Text style={styles.name}>Diana Cardoza</Text>
+                    <View style={styles.optionsContainer}>
 
-                            key={index}
+                        {menuOptions.map((option, index) => (
+                            <TouchableOpacity
 
-                            style={styles.opttion}
+                                key={index}
 
-                            onPress={() => {
+                                style={styles.opttion}
 
-                                if (option.route) {
+                                onPress={() => {
 
-                                    router.push(option.route);
+                                    if (option.route) {
 
-                                }
+                                        router.push(option.route);
 
-                            }}
-                        >
-                            <View
+                                    }
 
-                                style={[
-
-                                    styles.iconContainer,
-
-                                    { backgroundColor: option.color }
-
-                                ]}
-
+                                }}
                             >
-                                <Ionicons
+                                <View
 
-                                    name={option.icon}
+                                    style={[
 
-                                    size={22}
+                                        styles.iconContainer,
 
-                                    color="#FFFFFF"
+                                        { backgroundColor: option.color }
 
-                                />
+                                    ]}
 
-                            </View>
-                            <Text style={styles.optionText}>
+                                >
+                                    <Ionicons
 
-                                {option.title}
-                            </Text>
-                        </TouchableOpacity>
+                                        name={option.icon}
 
-                    ))}
-                </View>
+                                        size={22}
+
+                                        color="#FFFFFF"
+
+                                    />
+
+                                </View>
+                                <Text style={styles.optionText}>
+
+                                    {option.title}
+                                </Text>
+                            </TouchableOpacity>
+
+                        ))}
+                    </View>
+                </ScrollView>
             </View>
             <View style={styles.bottomBar}>
                 <TouchableOpacity onPress={() => router.push("/home")}>
@@ -211,6 +219,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#081023",
+    },
+
+    scrollContent:{
+        alignItems: "center",
+        paddingBottom: 30,
     },
 
     header: {
