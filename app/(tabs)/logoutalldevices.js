@@ -59,7 +59,7 @@ export default function LogoutDevices() {
     },
     {
       icon: "swap-horizontal",
-      route: "/administracion-gastos",
+      route: "/expensesManagement",
     },
     {
       icon: "layers-outline",
@@ -67,9 +67,18 @@ export default function LogoutDevices() {
     },
     {
       icon: "account-outline",
-      route: "/Edit_profile",
+      route: "/profile",
     },
   ];
+
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/logoutalldevices",
+      },
+    });
+  };
 
   const logoutEverywhere = async () => {
     if (loading) return;
@@ -77,10 +86,7 @@ export default function LogoutDevices() {
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert(
-        "Error",
-        "No hay una sesión activa."
-      );
+      Alert.alert("Error", "No hay una sesión activa.");
       return;
     }
 
@@ -91,7 +97,7 @@ export default function LogoutDevices() {
 
       const usersQuery = query(
         collection(db, "users"),
-        where("uid", "==", uid)
+        where("uid", "==", uid),
       );
 
       const snapshot = await getDocs(usersQuery);
@@ -99,7 +105,7 @@ export default function LogoutDevices() {
       if (snapshot.empty) {
         Alert.alert(
           "Error",
-          "No se encontró el usuario en la base de datos."
+          "No se encontró el usuario en la base de datos.",
         );
         setLoading(false);
         return;
@@ -117,12 +123,12 @@ export default function LogoutDevices() {
     } catch (error) {
       console.log(
         "Error al cerrar sesión en todos los dispositivos:",
-        error
+        error,
       );
 
       Alert.alert(
         "Error",
-        "No se pudieron cerrar las sesiones. Intenta nuevamente."
+        "No se pudieron cerrar las sesiones. Intenta nuevamente.",
       );
 
       setLoading(false);
@@ -184,7 +190,7 @@ export default function LogoutDevices() {
               transform: [{ translateY: 3 * scale }],
             },
           ]}
-          onPress={() => router.push("/notifications")}
+          onPress={abrirNotificaciones}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
@@ -215,7 +221,7 @@ export default function LogoutDevices() {
         >
           <Image
             source={require(
-              "../../assets/images/Screenshot 2026-08-28 21253461.png"
+              "../../assets/images/Screenshot 2026-08-28 21253461.png",
             )}
             style={{
               width: s(210),

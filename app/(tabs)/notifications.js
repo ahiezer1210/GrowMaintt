@@ -1,6 +1,11 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import { collection, doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { router, useLocalSearchParams } from "expo-router";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -17,6 +22,8 @@ import { auth, db } from "../../firebaseConfig";
 const categories = ["All", "Savings", "Investment", "Rewards", "Security"];
 
 export default function NotificationsScreen() {
+  const { from } = useLocalSearchParams();
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [notifications, setNotifications] = useState([]);
   const [activeTab, setActiveTab] = useState("home");
@@ -33,6 +40,7 @@ export default function NotificationsScreen() {
         const data = snapshot.docs
           .map((item) => {
             const alert = item.data();
+
             const date = alert.createdAt?.toDate
               ? alert.createdAt.toDate()
               : new Date();
@@ -69,7 +77,9 @@ export default function NotificationsScreen() {
   const filtered =
     selectedCategory === "All"
       ? notifications
-      : notifications.filter((item) => item.category === selectedCategory);
+      : notifications.filter(
+          (item) => item.category === selectedCategory,
+        );
 
   const unreadCount = notifications.filter((item) => item.unread).length;
 
@@ -133,8 +143,13 @@ export default function NotificationsScreen() {
     return (
       <View style={styles.empty}>
         <View style={styles.emptyIcon}>
-          <MaterialCommunityIcons name={icon} size={38} color="#ACADAD" />
+          <MaterialCommunityIcons
+            name={icon}
+            size={38}
+            color="#ACADAD"
+          />
         </View>
+
         <Text style={styles.emptyTitle}>{title}</Text>
         <Text style={styles.emptyText}>{description}</Text>
       </View>
@@ -146,13 +161,35 @@ export default function NotificationsScreen() {
     router.push(route);
   };
 
+  const volver = () => {
+    if (from) {
+      router.replace(from);
+    } else {
+      router.replace("/home");
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#071426"
+      />
 
       <View style={styles.header}>
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-          <MaterialCommunityIcons name="arrow-left" size={28} color="#FFF" />
+        <TouchableOpacity
+          style={styles.back}
+          onPress={volver}
+          activeOpacity={0.8}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35}
+            color="#FFFFFF"
+          />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Notifications</Text>
@@ -167,14 +204,17 @@ export default function NotificationsScreen() {
               key={category}
               style={[
                 styles.category,
-                selectedCategory === category && styles.categoryActive,
+                selectedCategory === category &&
+                  styles.categoryActive,
               ]}
               onPress={() => setSelectedCategory(category)}
+              activeOpacity={0.8}
             >
               <Text
                 style={[
                   styles.categoryText,
-                  selectedCategory === category && styles.categoryTextActive,
+                  selectedCategory === category &&
+                    styles.categoryTextActive,
                 ]}
               >
                 {category}
@@ -207,7 +247,10 @@ export default function NotificationsScreen() {
 
                   <View style={styles.notificationContent}>
                     <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.description}>{item.description}</Text>
+
+                    <Text style={styles.description}>
+                      {item.description}
+                    </Text>
 
                     <View style={styles.dateRow}>
                       <Text style={styles.time}>{item.time}</Text>
@@ -215,12 +258,17 @@ export default function NotificationsScreen() {
                     </View>
                   </View>
 
-                  {item.unread && <View style={styles.notificationDot} />}
+                  {item.unread && (
+                    <View style={styles.notificationDot} />
+                  )}
                 </TouchableOpacity>
               ))}
         </ScrollView>
 
-        <SafeAreaView edges={["bottom"]} style={styles.bottomContainer}>
+        <SafeAreaView
+          edges={["bottom"]}
+          style={styles.bottomContainer}
+        >
           <View style={styles.bottomBar}>
             {[
               ["home", "/home", "home-outline", 35],
@@ -233,11 +281,16 @@ export default function NotificationsScreen() {
                 key={tab}
                 style={styles.navItem}
                 onPress={() => nav(tab, route)}
+                activeOpacity={0.8}
               >
                 <MaterialCommunityIcons
                   name={icon}
                   size={size}
-                  color={activeTab === tab ? "#FFF" : "rgba(255,255,255,0.6)"}
+                  color={
+                    activeTab === tab
+                      ? "#FFFFFF"
+                      : "rgba(255,255,255,0.6)"
+                  }
                 />
               </TouchableOpacity>
             ))}
@@ -251,49 +304,61 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
+
   header: {
-    height: 100,
-    backgroundColor: "#081023",
+    height: 118,
+    backgroundColor: "#071426",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    justifyContent: "space-between",
+    paddingHorizontal: 25,
   },
+
   back: {
-    position: "absolute",
-    left: 24,
-    top: 45,
+    width: 30,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    transform: [{ translateY: 4 }],
   },
+
   headerTitle: {
-    color: "#FFF",
-    fontSize: 27,
+    flex: 1,
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontSize: 25,
     fontWeight: "700",
+    transform: [
+      { translateX: -5},
+      { translateY: 1 },
+    ],
   },
+
   headerDot: {
-    position: "absolute",
-    right: 30,
-    top: 45,
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: "#27B4D0",
-    top: 15,
+    marginLeft: 10,
   },
+
   content: {
     flex: 1,
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingTop: 20,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 45,
+    borderTopRightRadius: 45,
+    paddingTop: 28,
     overflow: "hidden",
   },
+
   categories: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginBottom: 15,
+    paddingHorizontal: 9,
+    marginBottom: 20,
   },
+
   category: {
     height: 35,
     paddingHorizontal: 10,
@@ -301,24 +366,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5E9F3",
     justifyContent: "center",
   },
+
   categoryActive: {
     backgroundColor: "#27B4D0",
   },
+
   categoryText: {
     fontSize: 10,
     fontWeight: "700",
     color: "#172D3D",
   },
+
   categoryTextActive: {
-    color: "#FFF",
+    color: "#FFFFFF",
   },
+
   list: {
     flex: 1,
     paddingHorizontal: 16,
   },
+
   listContent: {
     paddingBottom: 90,
   },
+
   notification: {
     minHeight: 76,
     backgroundColor: "#F4F4F4",
@@ -328,41 +399,49 @@ const styles = StyleSheet.create({
     position: "relative",
     marginBottom: 12,
   },
+
   icon: {
     width: 35,
     justifyContent: "center",
     alignItems: "center",
     marginRight: 7,
   },
+
   notificationContent: {
     flex: 1,
     paddingRight: 15,
   },
+
   title: {
     color: "#172D3D",
     fontSize: 11,
     fontWeight: "800",
     marginBottom: 3,
   },
+
   description: {
     color: "#6D7580",
     fontSize: 9,
     lineHeight: 12,
   },
+
   dateRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
     marginTop: 4,
   },
+
   time: {
     color: "#172D3D",
     fontSize: 8,
     marginRight: 3,
   },
+
   date: {
     color: "#172D3D",
     fontSize: 8,
   },
+
   notificationDot: {
     position: "absolute",
     left: 11,
@@ -372,12 +451,14 @@ const styles = StyleSheet.create({
     borderRadius: 7,
     backgroundColor: "#27B4D0",
   },
+
   empty: {
     minHeight: 420,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 35,
   },
+
   emptyIcon: {
     width: 75,
     height: 75,
@@ -387,6 +468,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: 15,
   },
+
   emptyTitle: {
     color: "#172D3D",
     fontSize: 16,
@@ -394,12 +476,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 6,
   },
+
   emptyText: {
     color: "#6D7580",
     fontSize: 11,
     textAlign: "center",
     lineHeight: 16,
   },
+
   bottomContainer: {
     position: "absolute",
     bottom: 0,
@@ -408,6 +492,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#25B5D1",
     borderTopLeftRadius: 78,
   },
+
   bottomBar: {
     height: 65,
     backgroundColor: "#25B5D1",
@@ -415,6 +500,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopLeftRadius: 78,
   },
+
   navItem: {
     flex: 1,
     height: "100%",

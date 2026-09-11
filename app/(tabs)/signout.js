@@ -14,12 +14,27 @@ import {
 } from "react-native";
 import { auth } from "../../firebaseConfig.js";
 
-const NAV_ICONS = [
-  "home-outline",
-  "chart-box-outline",
-  "swap-horizontal",
-  "layers-outline",
-  "account-outline",
+const navItems = [
+  {
+    icon: "home-outline",
+    route: "/home",
+  },
+  {
+    icon: "chart-box-outline",
+    route: "/historial",
+  },
+  {
+    icon: "swap-horizontal",
+    route: "/expensesManagement",
+  },
+  {
+    icon: "layers-outline",
+    route: "/currentgoal",
+  },
+  {
+    icon: "account-outline",
+    route: "/profile",
+  },
 ];
 
 export default function LogoutScreen({ navigation }) {
@@ -34,7 +49,7 @@ export default function LogoutScreen({ navigation }) {
   const ui = {
     header: tablet ? 125 : small ? 100 : 118,
     title: scale(25, 30),
-    icon: scale(34, 35),
+    icon: scale(35, 35),
     circle: scale(160, 190),
     arrow: scale(57, 67),
     buttonW: scale(225, 280),
@@ -57,6 +72,15 @@ export default function LogoutScreen({ navigation }) {
       tabBarStyle: { display: "none" },
     });
   }, [navigation]);
+
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/signout",
+      },
+    });
+  };
 
   const logout = () => {
     Alert.alert(
@@ -128,20 +152,30 @@ export default function LogoutScreen({ navigation }) {
           style={[
             styles.header,
             {
-              height: ui.header,
-              paddingHorizontal: tablet ? 35 : small ? 14 : 18,
+              height: 118 * (small ? 0.85 : tablet ? 1.15 : 1),
+              paddingHorizontal: small ? 18 : tablet ? 45 : 25,
             },
           ]}
         >
           <TouchableOpacity
-            style={styles.back}
+            style={[
+              styles.back,
+              {
+                transform: [
+                  {
+                    translateY:
+                      4 * (small ? 0.85 : tablet ? 1.15 : 1),
+                  },
+                ],
+              },
+            ]}
             onPress={() => navigation?.goBack()}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={ui.icon}
-              color="#FFF"
+              size={35 * (small ? 0.85 : tablet ? 1.15 : 1)}
+              color="#FFFFFF"
             />
           </TouchableOpacity>
 
@@ -149,7 +183,18 @@ export default function LogoutScreen({ navigation }) {
             style={[
               styles.headerTitle,
               {
-                fontSize: ui.title,
+                fontSize:
+                  25 * (small ? 0.85 : tablet ? 1.15 : 1),
+                transform: [
+                  {
+                    translateX:
+                      7 * (small ? 0.85 : tablet ? 1.15 : 1),
+                  },
+                  {
+                    translateY:
+                      1 * (small ? 0.85 : tablet ? 1.15 : 1),
+                  },
+                ],
               },
             ]}
           >
@@ -158,19 +203,23 @@ export default function LogoutScreen({ navigation }) {
 
           <TouchableOpacity
             style={[
-              styles.bell,
+              styles.headerBell,
               {
-                width: tablet ? 52 : small ? 40 : 45,
-                height: tablet ? 52 : small ? 40 : 45,
-                borderRadius: tablet ? 26 : small ? 20 : 23,
+                transform: [
+                  {
+                    translateY:
+                      4 * (small ? 0.85 : tablet ? 1.15 : 1),
+                  },
+                ],
               },
             ]}
-            activeOpacity={0.8}
+            onPress={abrirNotificaciones}
+            activeOpacity={0.7}
           >
             <MaterialCommunityIcons
-              name="bell-outline"
-              size={tablet ? 30 : 27}
-              color="#397468"
+              name="bell-circle-outline"
+              size={35 * (small ? 0.85 : tablet ? 1.15 : 1)}
+              color="#FFFFFF"
             />
           </TouchableOpacity>
         </View>
@@ -193,7 +242,7 @@ export default function LogoutScreen({ navigation }) {
                 maxWidth: tablet ? 700 : undefined,
                 paddingHorizontal: tablet ? 0 : small ? 22 : 30,
                 paddingTop: tablet ? 35 : small ? 20 : 28,
-                paddingBottom: 40,
+                paddingBottom: 100,
                 gap: tablet ? 24 : small ? 15 : 20,
               },
             ]}
@@ -280,17 +329,32 @@ export default function LogoutScreen({ navigation }) {
           </ScrollView>
         </View>
 
-        <View style={styles.bottom}>
-          {NAV_ICONS.map((icon, index) => (
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height:
+                65 * (small ? 0.85 : tablet ? 1.15 : 1),
+              borderTopLeftRadius:
+                78 * (small ? 0.85 : tablet ? 1.15 : 1),
+            },
+          ]}
+        >
+          {navItems.map((item) => (
             <TouchableOpacity
-              key={icon}
-              style={[styles.navButton, tablet && styles.navTablet]}
+              key={item.route}
+              style={styles.navItem}
               activeOpacity={0.8}
+              onPress={() => router.push(item.route)}
             >
               <MaterialCommunityIcons
-                name={icon}
-                size={tablet ? 38 : index === 2 ? 37 : 35}
-                color="#FFF"
+                name={item.icon}
+                size={
+                  item.icon === "swap-horizontal"
+                    ? 37 * (small ? 0.85 : tablet ? 1.15 : 1)
+                    : 35 * (small ? 0.85 : tablet ? 1.15 : 1)
+                }
+                color="#FFFFFF"
               />
             </TouchableOpacity>
           ))}
@@ -316,24 +380,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 
   back: {
-    width: 48,
-    height: 48,
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
-    flex: 1,
-    textAlign: "center",
     color: "#FFF",
     fontWeight: "700",
   },
 
-  bell: {
-    backgroundColor: "#E2F5E9",
-    alignItems: "center",
+  headerBell: {
     justifyContent: "center",
   },
 
@@ -415,25 +476,22 @@ const styles = StyleSheet.create({
     color: "#111",
   },
 
-  bottom: {
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
     width: "100%",
-    height: 86,
     backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    borderTopLeftRadius: 78,
     overflow: "hidden",
   },
 
-  navButton: {
+  navItem: {
     flex: 1,
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  navTablet: {
-    maxWidth: 110,
   },
 });
