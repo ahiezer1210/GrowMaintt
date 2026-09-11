@@ -45,7 +45,7 @@ export default function SavingsGoalsScreen() {
   const [goal, setGoal] = useState("");
   const [amount, setAmount] = useState("");
 
-  const [savedgoal, setSavedgoal] = useState(null);
+  const [savedgoal, setSavedgoal] = useState([]);
 
   const { width, height } = useWindowDimensions();
   const scale = Math.min(width / 390, height / 844);
@@ -55,14 +55,24 @@ export default function SavingsGoalsScreen() {
   const remaining = mainGoal.target - mainGoal.saved;
 
   const savegoal = () => {
-    setSavedgoal({
-      name: goal,
-      amount: amount,
-    });
+    if (!goal || !amount){
+      return;
+    }
+
+    setSavedgoal([
+      ...savedgoal,
+      {
+        id: Date.now().toString(),
+        icon: "bullseye-arrow",
+        title: goal,
+        objective:Number(amount.replace("$", "")),
+        saved: 0,
+      },
+    ]);
 
     setGoal("");
-      setAmount("");
-      setMostrarFormulario(false);
+    setAmount("");
+    setMostrarFormulario(false);
   };
 
   return (
@@ -215,7 +225,7 @@ export default function SavingsGoalsScreen() {
             </Text>
           </View>
 
-          {otherGoals.map((goal) => {
+          {[...otherGoals, ...savedgoal].map((goal) => {
             const percentage = Math.round((goal.saved / goal.objective) * 100);
 
             return (
@@ -318,19 +328,6 @@ export default function SavingsGoalsScreen() {
 
             </View>
 
-          )}
-
-          {savedgoal && (
-            <View style={styles.meta}>
-              <Text style={styles.Titlegoal}>
-                {savedgoal.name}
-              </Text>
-
-              <Text>
-                {savedgoal.amount}
-              </Text>
-
-            </View>
           )}
         </ScrollView>
       </View>
@@ -611,21 +608,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 20,
     backgroundColor: '#f2f2f2',
-    borderRadius: 15,
+    borderRadius: 20,
+     borderWidth: 1,
+    borderColor: "#d9e5e8"
   },
 
   subtitulo: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
+    color: "#0b1624"
+    
   },
 
   input: {
     backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 12,
+    borderRadius: 12,
+    padding: 13,
     marginBottom: 15,
+    fontSize: 14,
+    color: "#0b1624",
   },
 });
