@@ -1,16 +1,13 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Button } from "react-native";
-import { TextInput } from "react-native";
 import {
-  ScrollView,
+  Button, ScrollView,
   StatusBar,
   StyleSheet,
-  Text,
-  TouchableOpacity,
+  Text, TextInput, TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 
 const mainGoal = {
@@ -324,9 +321,7 @@ export default function SavingsGoalsScreen() {
 
           {mostrarFormulario && (
             <View style={styles.formulario}>
-              <Text style={styles.subtitulo}>
-                New goal
-              </Text>
+              <Text style={styles.subtitulo}>New goal</Text>
 
               <TextInput
                 style={styles.input}
@@ -342,13 +337,8 @@ export default function SavingsGoalsScreen() {
                 onChangeText={setAmount}
               />
 
-              <Button
-                title="Save goal"
-                onPress={savegoal}
-              />
-
+              <Button title="Save goal" onPress={savegoal} />
             </View>
-
           )}
         </ScrollView>
       </View>
@@ -371,7 +361,7 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#0b1624",
   },
 
   header: {
@@ -419,6 +409,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     overflow: "hidden",
     marginTop: -10,
+    zIndex: 2,
+    elevation: 2,
   },
 
   mainGoal: {
@@ -628,23 +620,22 @@ const styles = StyleSheet.create({
   formulario: {
     marginTop: 20,
     padding: 20,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: "#f2f2f2",
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#d9e5e8"
+    borderColor: "#d9e5e8",
   },
 
   subtitulo: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: "#0b1624"
-
+    fontWeight: "bold",
+    color: "#0b1624",
   },
 
   input: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 12,
     padding: 13,
     marginBottom: 15,
