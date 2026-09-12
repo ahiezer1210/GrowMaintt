@@ -4,9 +4,7 @@
     "moduleResolution": "bundler",
     "jsx": "react-native",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
