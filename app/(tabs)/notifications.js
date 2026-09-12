@@ -177,12 +177,6 @@ export default function NotificationsScreen() {
   };
 
   const volver = () => {
-<<<<<<< HEAD
-    if (from) {
-      router.replace(from);
-    } else {
-      router.replace("/home");
-=======
     if (from === "/profile") {
       router.push("/profile");
     } else if (from === "/settings") {
@@ -195,7 +189,6 @@ export default function NotificationsScreen() {
       router.push("/signout");
     } else {
       router.push("/home");
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
     }
   };
 
@@ -241,13 +234,9 @@ export default function NotificationsScreen() {
                 selectedCategory === category &&
                   styles.categoryActive,
               ]}
-<<<<<<< HEAD
-              onPress={() => setSelectedCategory(category)}
-=======
               onPress={() =>
                 setSelectedCategory(category)
               }
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
               activeOpacity={0.8}
             >
               <Text
@@ -287,17 +276,12 @@ export default function NotificationsScreen() {
                     />
                   </View>
 
-<<<<<<< HEAD
-                  <View style={styles.notificationContent}>
-                    <Text style={styles.title}>{item.title}</Text>
-=======
                   <View
                     style={styles.notificationContent}
                   >
                     <Text style={styles.title}>
                       {item.title}
                     </Text>
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
 
                     <Text style={styles.description}>
                       {item.description}
@@ -315,13 +299,9 @@ export default function NotificationsScreen() {
                   </View>
 
                   {item.unread && (
-<<<<<<< HEAD
-                    <View style={styles.notificationDot} />
-=======
                     <View
                       style={styles.notificationDot}
                     />
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
                   )}
                 </TouchableOpacity>
               ))}
@@ -368,15 +348,7 @@ export default function NotificationsScreen() {
                 <MaterialCommunityIcons
                   name={icon}
                   size={size}
-<<<<<<< HEAD
-                  color={
-                    activeTab === tab
-                      ? "#FFFFFF"
-                      : "rgba(255,255,255,0.6)"
-                  }
-=======
                   color="#FFFFFF"
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
                 />
               </TouchableOpacity>
             ))}
@@ -416,11 +388,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "700",
     transform: [
-<<<<<<< HEAD
-      { translateX: -5},
-=======
       { translateX: -5 },
->>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
       { translateY: 1 },
     ],
   },
