@@ -17,6 +17,7 @@ export default function TabLayout() {
             <Ionicons name="home" size={size} color={color} />
           ),
         }}
+<<<<<<< HEAD
       />
 
       <Tabs.Screen
@@ -29,5 +30,37 @@ export default function TabLayout() {
         }}
       />
     </Tabs>
+=======
+      >
+        <Tabs.Screen
+          name="home"
+          options={{
+            title: "Home",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons
+                name="home"
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: "Profile",
+            tabBarIcon: ({ color, size }) => (
+              <Ionicons
+                name="person"
+                size={size}
+                color={color}
+              />
+            ),
+          }}
+        />
+      </Tabs>
+    </PeriodProvider>
+>>>>>>> 9fea95f (fix: update settings and navigation)
   );
 }

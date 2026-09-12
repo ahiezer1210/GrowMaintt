@@ -1,282 +1,321 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import { router } from "expo-router";
-
 import {
-
     Image,
-
+    ScrollView,
     StyleSheet,
-
     Text,
-
     TouchableOpacity,
-
-    View
-
+    View,
 } from "react-native";
-
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
+  const menuOptions = [
+    {
+      title: "Edite Profile",
+      icon: "person-outline",
+      color: "#27b6d1",
+      route: "/edit_profile",
+    },
+    {
+      title: "Security",
+      icon: "shield-checkmark-outline",
+      color: "#27b6d1",
+      route: "/security",
+    },
+    {
+      title: "Settings",
+      icon: "settings-outline",
+      color: "#27b6d1",
+      route: "/settings",
+    },
+    {
+      title: "Terms and\n Conditions",
+      icon: "help-circle-outline",
+      color: "#27b6d1",
+      route: "/terms",
+    },
+    {
+      title: "Log\n Out",
+      icon: "log-out-outline",
+      color: "#27b6d1",
+      route: "/signout",
+    },
+  ];
 
-    const menuOptions = [
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/profile",
+      },
+    });
+  };
 
-        {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
 
-            title: "Edite Profile",
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={25}
+            color="#ffffff"
+          />
+        </TouchableOpacity>
 
-            icon: "person-outline",
+        <Text style={styles.title}>
+          Profile
+        </Text>
 
-            color: "#27b6d1",
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={abrirNotificaciones}
+        >
+          <Ionicons
+            name="notifications-outline"
+            size={22}
+            color="#081023"
+          />
+        </TouchableOpacity>
 
-            route: "/editProfile"
+      </View>
 
-        },
+      <View style={styles.content}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollContent}
+        >
 
-        {
+          <View style={styles.imageContainer}>
+            <Image
+              source={require("../../assets/images/Image.jpg")}
+              style={styles.logo}
+            />
+          </View>
 
-            title: "Security",
+          <Text style={styles.name}>
+            Diana Cardoza
+          </Text>
 
-            icon: "shield-checkmark-outline",
+          <View style={styles.optionsContainer}>
 
-            color: "#27b6d1",
-
-            route: "/security"
-
-        },
-
-        {
-
-            title: "Configuration",
-
-            icon: "settings-outline",
-
-            color: "#27b6d1",
-
-            route: "/configuration"
-
-        },
-
-        {
-
-            title: "Terms and\n Conditions",
-
-            icon: "help-circle-outline",
-
-            color: "#27b6d1",
-
-            route: "/terms"
-
-        },
-
-        {
-
-            title: "Log\n Out",
-
-            icon: "log-out-outline",
-
-            color: "#27b6d1",
-
-            route: "/null"
-
-        }
-
-    ];
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Ionicons
-
-                        name="arrow-back"
-
-                        size={25}
-
-                        color="#ffffff"
-
-                    />
-                </TouchableOpacity>
-                <Text style={styles.title}>Profile</Text>
-                <TouchableOpacity style={styles.notificationButton}>
-                    <Ionicons
-
-                        name="notifications-outline"
-
-                        size={22}
-
-                        color="#081023"
-
-                    />
-                </TouchableOpacity>
-            </View>
-            <View style={styles.content}>
-                <View style={styles.imageContainer}>
-                    <Image
-
-                        source={require("../../assets/images/Image.jpg")}
-
-                        style={styles.logo}
-
-                    />
+            {menuOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.opttion}
+                onPress={() => {
+                  if (option.route) {
+                    router.push(option.route);
+                  }
+                }}
+              >
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      backgroundColor: option.color,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={option.icon}
+                    size={22}
+                    color="#FFFFFF"
+                  />
                 </View>
-                <Text style={styles.name}>Diana Cardoza</Text>
-                <View style={styles.optionsContainer}>
 
-                    {menuOptions.map((option, index) => (
-                        <TouchableOpacity
+                <Text style={styles.optionText}>
+                  {option.title}
+                </Text>
+              </TouchableOpacity>
+            ))}
 
-                            key={index}
+          </View>
 
-                            style={styles.opttion}
+        </ScrollView>
 
-                            onPress={() => {
+        <View style={styles.bottomBar}>
 
-                                if (option.route) {
+          <TouchableOpacity
+            onPress={() => router.push("/home")}
+          >
+            <Ionicons
+              name="home-outline"
+              size={27}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
 
-                                    router.push(option.route);
+          <TouchableOpacity
+            onPress={() => router.push("/historial")}
+          >
+            <Ionicons
+              name="bar-chart-outline"
+              size={27}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
 
-                                }
+          <TouchableOpacity
+            onPress={() =>
+              router.push("/expensesManagement")
+            }
+          >
+            <Ionicons
+              name="swap-horizontal-outline"
+              size={27}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
 
-                            }}
-                        >
-                            <View
+          <TouchableOpacity
+            onPress={() =>
+              router.push("/currentgoal")
+            }
+          >
+            <Ionicons
+              name="layers-outline"
+              size={27}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
 
-                                style={[
+          <TouchableOpacity
+            onPress={() =>
+              router.push("/profile")
+            }
+          >
+            <Ionicons
+              name="person-outline"
+              size={27}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
 
-                                    styles.iconContainer,
-
-                                    { backgroundColor: option.color }
-
-                                ]}
-                            >
-                                <Ionicons
-
-                                    name={option.icon}
-
-                                    size={22}
-
-                                    color="#FFFFFF"
-
-                                />
-                            </View>
-                            <Text style={styles.optionText}>
-
-                                {option.title}
-                            </Text>
-                        </TouchableOpacity>
-
-                    ))}
-                </View>
-            </View>
-        </SafeAreaView>
-
-    );
-
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#081023",
+  },
 
-    container: {
-        flex: 1,
-        backgroundColor: "#081023",
-    },
+  scrollContent: {
+    alignItems: "center",
+    paddingBottom: 30,
+  },
 
-    header: {
-        height: 105,
-        paddingHorizontal: 20,
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#0e2738",
-    },
-    backButton: {
-        width: 45,
-        height: 45,
-        alignItems: "flex-start",
-        justifyContent: "center",
-    },
+  header: {
+    height: 105,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#0e2738",
+  },
 
-    title: {
-        flex: 1,
-        textAlign: "center",
-        color: "#FFFFFF",
-        fontWeight: "700",
-        fontSize: 25,
-    },
+  backButton: {
+    width: 45,
+    height: 45,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
 
-    notificationButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: "#d8f2e2",
-        alignItems: "center",
-        justifyContent: "center"
-    },
+  title: {
+    flex: 1,
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 25,
+  },
 
-    imageContainer: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        position: "absolute",
-        top: -25,
-        overflow: "hidden",
-        borderWidth: 3,
-        borderColor: "#0e2738",
-    },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#d8f2e2",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-    logo: {
-        width: "100%",
-        height: "100%",
-        resizeMode: "cover",
-    },
+  imageContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    position: "absolute",
+    top: -25,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#0e2738",
+  },
 
-    content: {
-        backgroundColor: "#FFFFFF",
-        flex: 1,
-        paddingTop: 55,
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        alignItems: "center",
-        width:"100%"
-    },
+  logo: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
 
-    name: {
-        color: "#0e2738",
-        fontSize: 18,
-        marginTop: 0,
-        fontWeight: "700",
-    },
+  content: {
+    backgroundColor: "#FFFFFF",
+    flex: 1,
+    paddingTop: 55,
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    alignItems: "center",
+    width: "100%",
+  },
 
-    optionsContainer: {
-        width: "100%",
-        paddingHorizontal: 30,
-        marginTop: 35,
-    },
+  name: {
+    color: "#0e2738",
+    fontSize: 18,
+    marginTop: 0,
+    fontWeight: "700",
+  },
 
-    opttion: {
-        width: "100%",
-        minHeight:60,
-        alignItems: "center",
-        flexDirection: "row",
-        marginBottom: 18,
-    },
+  optionsContainer: {
+    width: "100%",
+    paddingHorizontal: 30,
+    marginTop: 35,
+  },
 
-    iconContainer: {
-        width: 45,
-        height: 45,
-        borderRadius: 12,
-        marginRight: 15,
-        justifyContent: "center",
-        alignItems: "center",
-    },
+  opttion: {
+    width: "100%",
+    minHeight: 60,
+    alignItems: "center",
+    flexDirection: "row",
+    marginBottom: 18,
+  },
 
-    optionText: {
-        color: "#0e2738",
-        fontSize: 16,
-        fontWeight: "500",
-        lineHeight: 20,
-    },
+  iconContainer: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    marginRight: 15,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
+  optionText: {
+    color: "#0e2738",
+    fontSize: 16,
+    fontWeight: "500",
+    lineHeight: 20,
+  },
+
+  bottomBar: {
+    height: 70,
+    backgroundColor: "#24b6d1",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginBottom: -25,
+  },
 });
-
