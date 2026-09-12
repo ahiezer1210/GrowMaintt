@@ -1,33 +1,46 @@
-import React, { useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 
 const OPTIONS = [
-  ["shield-checkmark-outline", "Backup and synchronization", "Backup"],
-  ["key-outline", "Change password", "Password"],
-  ["cash-outline", "Expense control period", "Expenses"],
-  ["phone-portrait-outline", "Linked devices", "Devices"],
-  ["log-out-outline", "Log out", "Logout"],
-  ["close-outline", "Delete account", "DeleteAccount"],
+  { icon: "shield-checkmark-outline", label: "Backup and synchronization", route: "Backup" },
+  { icon: "key-outline", label: "Change password", route: "Password" },
+  { icon: "cash-outline", label: "Expense control period", route: "Expenses" },
+  { icon: "phone-portrait-outline", label: "Linked devices", route: "Devices" },
+  { icon: "log-out-outline", label: "Log out", route: "Logout" },
+  { icon: "close-outline", label: "Delete account", route: "DeleteAccount" },
 ];
 
 const NAV_ITEMS = [
-  { name: "home-outline", key: "home", route: "Home" },
-  { name: "bar-chart-outline", key: "reports", route: "Reports" },
-  { name: "swap-horizontal-outline", key: "transactions", route: "Transactions" },
-  { name: "layers-outline", key: "savings", route: "Savings" },
-  { name: "person-outline", key: "profile", route: "Profile" },
+  { name: "home-outline", type: "ion", key: "home", route: "Home" },
+  { name: "bar-chart-outline", type: "ion", key: "reports", route: "Reports" },
+  { name: "swap-horizontal", type: "material", key: "transactions", route: "Transactions" },
+  { name: "layers-outline", type: "material", key: "savings", route: "Savings" },
+  { name: "person-outline", type: "ion", key: "profile", route: "Profile" },
 ];
 
 export default function SettingsScreen({ navigation }) {
   const [selectedTheme, setSelectedTheme] = useState("light");
   const [activeTab, setActiveTab] = useState("profile");
+
+  const { width, height } = useWindowDimensions();
+
+  const isLandscape = width > height;
+  const baseDimension = Math.min(width, height);
+  const scale = Math.max(0.85, Math.min(baseDimension / 390, 1.15));
+
+  const s = (val) => Math.round(val * scale);
+
+  const NAV_HEIGHT = isLandscape ? 36 : 40;
 
   const handleOptionPress = (route) => {
     if (navigation && route) {
@@ -37,43 +50,52 @@ export default function SettingsScreen({ navigation }) {
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor="#0D1B2A" />
+
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: isLandscape ? 4 : 10,
+            paddingBottom: isLandscape ? 8 : 16,
+          },
+        ]}
+      >
         <View style={styles.topRow}>
           <TouchableOpacity
             onPress={() => (navigation?.goBack ? navigation.goBack() : null)}
             activeOpacity={0.7}
             style={styles.backButton}
           >
-            <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+            <Ionicons name="arrow-back" size={s(24)} color="#FFFFFF" />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>Settings</Text>
+          <Text style={[styles.headerTitle, { fontSize: s(22) }]}>Settings</Text>
 
           <TouchableOpacity
             onPress={() => navigation?.navigate("Notifications")}
             activeOpacity={0.7}
             style={styles.notificationBadge}
           >
-            <Ionicons name="notifications-outline" size={18} color="#0D1B2A" />
+            <Ionicons name="notifications-outline" size={s(18)} color="#0D1B2A" />
           </TouchableOpacity>
         </View>
 
-        {/* Temas */}
-        <View style={styles.themesContainer}>
+        <View style={[styles.themesContainer, { marginTop: isLandscape ? 4 : 10 }]}>
           <TouchableOpacity
             style={styles.themeOption}
             onPress={() => setSelectedTheme("light")}
             activeOpacity={0.8}
           >
-            <Ionicons name="sunny-outline" size={38} color="#FFFFFF" />
+            <Ionicons name="sunny-outline" size={s(32)} color="#FFFFFF" />
             <View
               style={[
                 styles.radioButton,
+                { width: s(14), height: s(14), borderRadius: s(7) },
                 selectedTheme === "light" && styles.radioActive,
               ]}
             />
-            <Text style={styles.themeLabel}>Light theme</Text>
+            <Text style={[styles.themeLabel, { fontSize: s(13) }]}>Light theme</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -81,70 +103,102 @@ export default function SettingsScreen({ navigation }) {
             onPress={() => setSelectedTheme("dark")}
             activeOpacity={0.8}
           >
-            <Ionicons name="moon-outline" size={38} color="#FFFFFF" />
+            <Ionicons name="moon-outline" size={s(32)} color="#FFFFFF" />
             <View
               style={[
                 styles.radioButton,
+                { width: s(14), height: s(14), borderRadius: s(7) },
                 selectedTheme === "dark" && styles.radioActive,
               ]}
             />
-            <Text style={styles.themeLabel}>Dark theme</Text>
+            <Text style={[styles.themeLabel, { fontSize: s(13) }]}>Dark theme</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Tarjeta Blanca Ajustada para ocupar todo el espacio */}
       <View style={styles.contentCard}>
-        <View style={styles.optionsList}>
-          {OPTIONS.map(([icon, text, route]) => (
-            <TouchableOpacity
-              style={styles.optionRow}
-              key={text}
-              activeOpacity={0.7}
-              onPress={() => handleOptionPress(route)}
-            >
-              <View style={styles.iconCircle}>
-                <Ionicons name={icon} size={22} color="#FFFFFF" />
-              </View>
+        {isLandscape ? (
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={styles.scrollOptionsContainer}
+            showsVerticalScrollIndicator={false}
+          >
+            {OPTIONS.map((item) => (
+              <TouchableOpacity
+                style={styles.optionRowLandscape}
+                key={item.label}
+                activeOpacity={0.7}
+                onPress={() => handleOptionPress(item.route)}
+              >
+                <View style={styles.iconCircleLandscape}>
+                  <Ionicons name={item.icon} size={25} color="#FFFFFF" />
+                </View>
+                <Text style={styles.optionTextLandscape}>{item.label}</Text>
+                <Ionicons name="chevron-forward" size={24} color="#0D1B2A" />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        ) : (
 
-              <Text style={styles.optionText}>{text}</Text>
+          <View style={styles.optionsListVertical}>
+            {OPTIONS.map((item) => (
+              <TouchableOpacity
+                style={styles.optionRowVertical}
+                key={item.label}
+                activeOpacity={0.7}
+                onPress={() => handleOptionPress(item.route)}
+              >
+                <View
+                  style={[
+                    styles.iconCircleVertical,
+                    { width: s(48), height: s(48), borderRadius: s(24) },
+                  ]}
+                >
+                  <Ionicons name={item.icon} size={s(25)} color="#FFFFFF" />
+                </View>
+                <Text style={[styles.optionTextVertical, { fontSize: s(17.5) }]}>
+                  {item.label}
+                </Text>
+                <Ionicons name="chevron-forward" size={s(24)} color="#0D1B2A" />
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
 
-              <Ionicons name="chevron-forward" size={22} color="#0D1B2A" />
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Navegación Celeste Inferior */}
-        <View style={styles.bottomNavContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
-            <View style={styles.bottomTabBar}>
-              {NAV_ITEMS.map((item) => {
-                const isSelected = activeTab === item.key;
-                return (
-                  <TouchableOpacity
-                    key={item.key}
-                    style={styles.tabItem}
-                    activeOpacity={0.7}
-                    onPress={() => {
-                      setActiveTab(item.key);
-                      if (navigation && item.route) {
-                        navigation.navigate(item.route);
-                      }
-                    }}
-                  >
+        <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
+          <View style={[styles.bottomTabBar, { height: NAV_HEIGHT }]}>
+            {NAV_ITEMS.map((item) => {
+              const isSelected = activeTab === item.key;
+              return (
+                <TouchableOpacity
+                  key={item.key}
+                  style={styles.tabItem}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    setActiveTab(item.key);
+                    if (navigation && item.route) {
+                      navigation.navigate(item.route);
+                    }
+                  }}
+                >
+                  {item.type === "ion" ? (
                     <Ionicons
                       name={item.name}
-                      size={26}
-                      color={
-                        isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.65)"
-                      }
+                      size={isLandscape ? 17 : 20}
+                      color={isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.65)"}
                     />
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </SafeAreaView>
-        </View>
+                  ) : (
+                    <MaterialCommunityIcons
+                      name={item.name}
+                      size={isLandscape ? 19 : 22}
+                      color={isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.65)"}
+                    />
+                  )}
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </SafeAreaView>
       </View>
     </SafeAreaView>
   );
@@ -156,31 +210,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#0D1B2A",
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 6,
-    paddingBottom: 14,
+    paddingHorizontal: 22,
+    backgroundColor: "#0D1B2A",
   },
   topRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
   },
   backButton: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     justifyContent: "center",
   },
   headerTitle: {
     color: "#FFFFFF",
-    fontSize: 18,
     fontWeight: "700",
+    textAlign: "center",
   },
   notificationBadge: {
     backgroundColor: "#FFFFFF",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -194,70 +246,94 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   radioButton: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
     backgroundColor: "#C4C4C4",
-    marginVertical: 5,
+    marginVertical: 4,
   },
   radioActive: {
     backgroundColor: "#23BDEE",
   },
   themeLabel: {
     color: "#FFFFFF",
-    fontSize: 13,
     fontWeight: "600",
   },
   contentCard: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
     justifyContent: "space-between",
+    overflow: "hidden",
   },
-  optionsList: {
+
+  optionsListVertical: {
     flex: 1,
-    paddingHorizontal: 22,
-    paddingTop: 16,
-    paddingBottom: 16,
     justifyContent: "space-between",
+    paddingHorizontal: 24,
+    paddingVertical: 22,
+    maxWidth: 680,
+    width: "100%",
+    alignSelf: "center",
   },
-  optionRow: {
+  optionRowVertical: {
     flexDirection: "row",
     alignItems: "center",
+    width: "100%",
   },
-  iconCircle: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  iconCircleVertical: {
     backgroundColor: "#23BDEE",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    marginRight: 18,
   },
-  optionText: {
+  optionTextVertical: {
     flex: 1,
-    fontSize: 14.5,
     fontWeight: "600",
     color: "#263238",
   },
-  bottomNavContainer: {
-    backgroundColor: "#FFFFFF",
+
+  scrollOptionsContainer: {
+    paddingHorizontal: 26,
+    paddingVertical: 14,
+    maxWidth: 680,
+    width: "100%",
+    alignSelf: "center",
   },
+  optionRowLandscape: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    marginVertical: 12,
+  },
+  iconCircleLandscape: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "#23BDEE",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 18,
+  },
+  optionTextLandscape: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#263238",
+  },
+
   bottomNavSafeArea: {
     backgroundColor: "#23BDEE",
-    borderTopLeftRadius: 35,
+    borderTopLeftRadius: 32,
   },
   bottomTabBar: {
-    height: 55,
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "#23BDEE",
-    borderTopLeftRadius: 35,
+    borderTopLeftRadius: 32,
   },
   tabItem: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
