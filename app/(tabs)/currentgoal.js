@@ -48,14 +48,34 @@ export default function SavingsGoalsScreen() {
   const [savedgoal, setSavedgoal] = useState([]);
 
   const { width, height } = useWindowDimensions();
-  const scale = Math.min(width / 390, height / 844);
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
   const s = (value) => Math.round(value * scale);
 
   const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
 
   const savegoal = () => {
-    if (!goal || !amount){
+    if (!goal || !amount) {
       return;
     }
 
@@ -65,7 +85,7 @@ export default function SavingsGoalsScreen() {
         id: Date.now().toString(),
         icon: "bullseye-arrow",
         title: goal,
-        objective:Number(amount.replace("$", "")),
+        objective: Number(amount.replace("$", "")),
         saved: 0,
       },
     ]);
@@ -120,7 +140,8 @@ export default function SavingsGoalsScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            padding: s(20),
+            paddingTop: s(20),
+            paddingHorizontal: horizontalPadding,
             paddingBottom: s(120),
           }}
         >
@@ -609,7 +630,7 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f2f2f2',
     borderRadius: 20,
-     borderWidth: 1,
+    borderWidth: 1,
     borderColor: "#d9e5e8"
   },
 
@@ -617,7 +638,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: "#0b1624"
-    
+
   },
 
   input: {
