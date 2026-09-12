@@ -125,7 +125,7 @@ export default function InvestmentReminder() {
           <Image
             source={require("../../assets/images/invest.png.png")}
             style={{
-              width: size(tablet ? 300 : 240),
+              width: size(tablet ? 360 : 240),
               height: size(tablet ? 220 : 180),
             }}
             resizeMode="contain"
@@ -182,7 +182,7 @@ export default function InvestmentReminder() {
             style={[
               styles.actionButton,
               {
-                width: size(tablet ? 320 : 250),
+                width: size(tablet ? 400 : 250),
                 height: size(tablet ? 56 : 48),
                 borderRadius: size(tablet ? 28 : 24),
                 marginTop: size(tablet ? 24 : 18),
