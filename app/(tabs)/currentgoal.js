@@ -9,8 +9,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
 
 const mainGoal = {
@@ -21,7 +21,13 @@ const mainGoal = {
 };
 
 const otherGoals = [
-  { id: "1", icon: "laptop", title: "New laptop", objective: 800, saved: 320 },
+  {
+    id: "1",
+    icon: "laptop",
+    title: "New laptop",
+    objective: 800,
+    saved: 320,
+  },
   {
     id: "2",
     icon: "book-open-variant",
@@ -29,49 +35,60 @@ const otherGoals = [
     objective: 1000,
     saved: 150,
   },
-  { id: "3", icon: "airplane", title: "Trip", objective: 2400, saved: 1200 },
+  {
+    id: "3",
+    icon: "airplane",
+    title: "Trip",
+    objective: 2400,
+    saved: 1200,
+  },
 ];
 
-const navIcons = [
-  "home-outline",
-  "chart-box-outline",
-  "swap-horizontal",
-  "layers-outline",
-  "account-outline",
+const navItems = [
+  {
+    icon: "home-outline",
+    route: "/home",
+  },
+  {
+    icon: "chart-box-outline",
+    route: "/historial",
+  },
+  {
+    icon: "swap-horizontal",
+    route: "/expensesManagement",
+  },
+  {
+    icon: "layers-outline",
+    route: "/currentgoal",
+  },
+  {
+    icon: "account-outline",
+    route: "/profile",
+  },
 ];
 
-export default function SavingsGoalsScreen() {
+export default function SavingsGoalsScreen({ navigation }) {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [goal, setGoal] = useState("");
   const [amount, setAmount] = useState("");
-
   const [savedgoal, setSavedgoal] = useState([]);
 
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600;
-  const isLargeScreen = width >= 900;
+  const small = width < 350;
+  const tablet = width >= 600;
 
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+  const scale = (value, tabletValue) =>
+    tablet
+      ? tabletValue ?? value * 1.35
+      : small
+        ? value * 0.9
+        : value;
 
-  const horizontalPadding = isSmallScreen
-    ? 18
-    : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
-  const s = (value) => Math.round(value * scale);
+  const progress = Math.round(
+    (mainGoal.saved / mainGoal.target) * 100
+  );
 
-  const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
 
   const savegoal = () => {
@@ -95,267 +112,599 @@ export default function SavingsGoalsScreen() {
     setMostrarFormulario(false);
   };
 
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/currentgoal",
+      },
+    });
+  };
+
   return (
     <View style={styles.screen}>
       <StatusBar
         translucent
-        backgroundColor="#0b1624"
+        backgroundColor="#071426"
         barStyle="light-content"
       />
 
-      <View style={[styles.header, { height: s(130) }]}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
+      <View style={styles.app}>
+        <View
+          style={[
+            styles.header,
+            {
+              height:
+                118 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1),
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                  ? 45
+                  : 25,
+            },
+          ]}
         >
-          <MaterialCommunityIcons name="arrow-left" size={s(24)} color="#fff" />
-        </TouchableOpacity>
-
-        <Text style={[styles.headerTitle, { fontSize: s(20) }]}>
-          Savings Goals
-        </Text>
-
-        <TouchableOpacity style={styles.bellButton}>
-          <MaterialCommunityIcons
-            name="bell-outline"
-            size={s(20)}
-            color="#428574"
-          />
-        </TouchableOpacity>
-      </View>
-
-      <Text style={[styles.subtitle, { fontSize: s(14) }]}>
-        Organize your goals and achieve your dreams.
-      </Text>
-
-      <View
-        style={[
-          styles.main,
-          {
-            borderTopLeftRadius: isTablet ? s(42) : s(36),
-            borderTopRightRadius: isTablet ? s(42) : s(36),
-          },
-        ]}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingTop: s(20),
-            paddingHorizontal: horizontalPadding,
-            paddingBottom: s(120),
-          }}
-        >
-          <View
+          <TouchableOpacity
             style={[
-              styles.mainGoal,
+              styles.back,
               {
-                padding: s(20),
-                borderRadius: s(16),
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1),
+                  },
+                ],
+              },
+            ]}
+            onPress={() =>
+              navigation?.goBack() ?? router.back()
+            }
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1)
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <Text
+            style={[
+              styles.headerTitle,
+              {
+                fontSize:
+                  25 *
+                  (small
+                    ? 0.85
+                    : tablet
+                      ? 1.15
+                      : 1),
+                transform: [
+                  {
+                    translateX:
+                      7 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1),
+                  },
+                  {
+                    translateY:
+                      1 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1),
+                  },
+                ],
               },
             ]}
           >
-            <View style={styles.cardHeader}>
-              <View style={styles.goalIconCircle}>
-                <MaterialCommunityIcons
-                  name="bullseye-arrow"
-                  size={s(28)}
-                  color="#0b1624"
-                />
-              </View>
+            Savings Goals
+          </Text>
 
-              <View style={styles.cardTitles}>
-                <Text style={[styles.status, { fontSize: s(12) }]}>
-                  Main goal
-                </Text>
-
-                <Text style={[styles.cardTitle, { fontSize: s(16) }]}>
-                  {mainGoal.title}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.amounts}>
-              <View>
-                <Text style={[styles.label, { fontSize: s(12) }]}>Goal</Text>
-                <Text style={[styles.amount, { fontSize: s(18) }]}>
-                  ${mainGoal.target}
-                </Text>
-              </View>
-
-              <View style={styles.divider} />
-
-              <View>
-                <Text style={[styles.label, { fontSize: s(12) }]}>Saved</Text>
-                <Text style={[styles.amount, { fontSize: s(18) }]}>
-                  ${mainGoal.saved}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.progressBar}>
-              <View style={[styles.progressDone, { width: `${progress}%` }]} />
-              <View
-                style={[styles.progressLeft, { width: `${100 - progress}%` }]}
-              />
-            </View>
-
-            <View style={styles.progressInfo}>
-              <View style={styles.info}>
-                <MaterialCommunityIcons
-                  name="bullseye-arrow"
-                  size={s(16)}
-                  color="#0b1624"
-                />
-                <Text style={[styles.infoText, { fontSize: s(12) }]}>
-                  {progress}% Completed
-                </Text>
-              </View>
-
-              <View style={styles.info}>
-                <MaterialCommunityIcons
-                  name="cash-minus"
-                  size={s(16)}
-                  color="#0b1624"
-                />
-                <Text style={[styles.infoText, { fontSize: s(12) }]}>
-                  ${remaining} left
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.deadline}>
-              <MaterialCommunityIcons
-                name="calendar-outline"
-                size={s(16)}
-                color="#0b1624"
-              />
-              <Text style={[styles.deadlineText, { fontSize: s(12) }]}>
-                Deadline: <Text style={styles.bold}>{mainGoal.deadline}</Text>
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.section}>
-            <MaterialCommunityIcons
-              name="bullseye-arrow"
-              size={s(20)}
-              color="#0b1624"
-            />
-            <Text style={[styles.sectionTitle, { fontSize: s(20) }]}>
-              My other goals
-            </Text>
-          </View>
-
-          {[...otherGoals, ...savedgoal].map((goal) => {
-            const percentage = Math.round((goal.saved / goal.objective) * 100);
-
-            return (
-              <TouchableOpacity
-                key={goal.id}
-                style={[
-                  styles.goalItem,
+          <TouchableOpacity
+            style={[
+              styles.headerBell,
+              {
+                transform: [
                   {
-                    padding: s(10),
-                    paddingHorizontal: s(16),
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1),
                   },
-                ]}
-              >
+                ],
+              },
+            ]}
+            onPress={abrirNotificaciones}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1)
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.subtitleContainer}>
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                fontSize: scale(14, 17),
+              },
+            ]}
+          >
+            Organize your goals and achieve your dreams.
+          </Text>
+        </View>
+
+        <View
+          style={[
+            styles.main,
+            {
+              borderTopLeftRadius:
+                tablet ? 55 : small ? 35 : 45,
+              borderTopRightRadius:
+                tablet ? 55 : small ? 35 : 45,
+            },
+          ]}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+              styles.content,
+              {
+                width: tablet ? "85%" : "100%",
+                maxWidth: tablet ? 700 : undefined,
+                paddingHorizontal: tablet
+                  ? 0
+                  : small
+                    ? 22
+                    : 30,
+                paddingTop: tablet
+                  ? 35
+                  : small
+                    ? 20
+                    : 28,
+                paddingBottom: 100,
+                gap: tablet
+                  ? 24
+                  : small
+                    ? 15
+                    : 20,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.mainGoal,
+                {
+                  padding: scale(20, 25),
+                  borderRadius: scale(16, 20),
+                },
+              ]}
+            >
+              <View style={styles.cardHeader}>
                 <View
                   style={[
-                    styles.goalIcon,
+                    styles.goalIconCircle,
                     {
-                      width: s(46),
-                      height: s(46),
-                      borderRadius: s(12),
+                      width: scale(50, 60),
+                      height: scale(50, 60),
+                      borderRadius: scale(25, 30),
                     },
                   ]}
                 >
                   <MaterialCommunityIcons
-                    name={goal.icon}
-                    size={s(24)}
-                    color="#fff"
+                    name="bullseye-arrow"
+                    size={scale(28, 34)}
+                    color="#0b1624"
                   />
                 </View>
 
-                <View style={styles.goalInfo}>
-                  <Text style={[styles.goalName, { fontSize: s(16) }]}>
-                    {goal.title}
+                <View style={styles.cardTitles}>
+                  <Text
+                    style={[
+                      styles.status,
+                      {
+                        fontSize: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    Main goal
                   </Text>
 
-                  <Text style={[styles.goalObjective, { fontSize: s(12) }]}>
-                    Goal: ${goal.objective}
+                  <Text
+                    style={[
+                      styles.cardTitle,
+                      {
+                        fontSize: scale(16, 20),
+                      },
+                    ]}
+                  >
+                    {mainGoal.title}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.amounts}>
+                <View>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    Goal
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.amount,
+                      {
+                        fontSize: scale(18, 22),
+                      },
+                    ]}
+                  >
+                    ${mainGoal.target}
                   </Text>
                 </View>
 
-                <View style={styles.goalAmount}>
-                  <Text style={[styles.saved, { fontSize: s(16) }]}>
-                    ${goal.saved}
+                <View style={styles.divider} />
+
+                <View>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    Saved
                   </Text>
 
-                  <Text style={[styles.percentage, { fontSize: s(12) }]}>
-                    {percentage}%
+                  <Text
+                    style={[
+                      styles.amount,
+                      {
+                        fontSize: scale(18, 22),
+                      },
+                    ]}
+                  >
+                    ${mainGoal.saved}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.progressBar}>
+                <View
+                  style={[
+                    styles.progressDone,
+                    {
+                      width: `${progress}%`,
+                    },
+                  ]}
+                />
+
+                <View
+                  style={[
+                    styles.progressLeft,
+                    {
+                      width: `${100 - progress}%`,
+                    },
+                  ]}
+                />
+              </View>
+
+              <View style={styles.progressInfo}>
+                <View style={styles.info}>
+                  <MaterialCommunityIcons
+                    name="bullseye-arrow"
+                    size={scale(16, 19)}
+                    color="#0b1624"
+                  />
+
+                  <Text
+                    style={[
+                      styles.infoText,
+                      {
+                        fontSize: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    {progress}% Completed
                   </Text>
                 </View>
 
+                <View style={styles.info}>
+                  <MaterialCommunityIcons
+                    name="cash-minus"
+                    size={scale(16, 19)}
+                    color="#0b1624"
+                  />
+
+                  <Text
+                    style={[
+                      styles.infoText,
+                      {
+                        fontSize: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    ${remaining} left
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.deadline}>
                 <MaterialCommunityIcons
-                  name="chevron-right"
-                  size={s(24)}
+                  name="calendar-outline"
+                  size={scale(16, 19)}
                   color="#0b1624"
                 />
-              </TouchableOpacity>
-            );
-          })}
 
-          <TouchableOpacity
-            style={[
-              styles.createButton,
-              {
-                height: s(48),
-                borderRadius: s(24),
-                marginTop: s(15),
-              },
-            ]}
-            onPress={() => setMostrarFormulario(true)}
-          >
-            <Text style={[styles.createText, { fontSize: s(14) }]}>
-              Create New Goal
-            </Text>
-          </TouchableOpacity>
-
-          {mostrarFormulario && (
-            <View style={styles.formulario}>
-              <Text style={styles.subtitulo}>New goal</Text>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. Buy a laptop"
-                value={goal}
-                onChangeText={setGoal}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder="Ej. $300"
-                value={amount}
-                onChangeText={setAmount}
-              />
-
-              <Button title="Save goal" onPress={savegoal} />
+                <Text
+                  style={[
+                    styles.deadlineText,
+                    {
+                      fontSize: scale(12, 15),
+                    },
+                  ]}
+                >
+                  Deadline:{" "}
+                  <Text style={styles.bold}>
+                    {mainGoal.deadline}
+                  </Text>
+                </Text>
+              </View>
             </View>
-          )}
-        </ScrollView>
-      </View>
 
-      <View style={[styles.navbar, { height: s(95) }]}>
-        {navIcons.map((icon, index) => (
-          <TouchableOpacity key={icon} style={styles.navButton}>
-            <MaterialCommunityIcons
-              name={icon}
-              size={s(index === 2 ? 28 : 24)}
-              color={index === 0 ? "#fff" : "#a3e6f5"}
-            />
-          </TouchableOpacity>
-        ))}
+            <View style={styles.section}>
+              <MaterialCommunityIcons
+                name="bullseye-arrow"
+                size={scale(20, 24)}
+                color="#0b1624"
+              />
+
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  {
+                    fontSize: scale(20, 24),
+                  },
+                ]}
+              >
+                My other goals
+              </Text>
+            </View>
+
+            {[...otherGoals, ...savedgoal].map((goal) => {
+              const percentage = Math.round(
+                (goal.saved / goal.objective) * 100
+              );
+
+              return (
+                <TouchableOpacity
+                  key={goal.id}
+                  style={[
+                    styles.goalItem,
+                    {
+                      padding: scale(10, 13),
+                      paddingHorizontal: scale(16, 20),
+                    },
+                  ]}
+                >
+                  <View
+                    style={[
+                      styles.goalIcon,
+                      {
+                        width: scale(46, 55),
+                        height: scale(46, 55),
+                        borderRadius: scale(12, 15),
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={goal.icon}
+                      size={scale(24, 29)}
+                      color="#FFFFFF"
+                    />
+                  </View>
+
+                  <View style={styles.goalInfo}>
+                    <Text
+                      style={[
+                        styles.goalName,
+                        {
+                          fontSize: scale(16, 20),
+                        },
+                      ]}
+                    >
+                      {goal.title}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.goalObjective,
+                        {
+                          fontSize: scale(12, 15),
+                        },
+                      ]}
+                    >
+                      Goal: ${goal.objective}
+                    </Text>
+                  </View>
+
+                  <View style={styles.goalAmount}>
+                    <Text
+                      style={[
+                        styles.saved,
+                        {
+                          fontSize: scale(16, 20),
+                        },
+                      ]}
+                    >
+                      ${goal.saved}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.percentage,
+                        {
+                          fontSize: scale(12, 15),
+                        },
+                      ]}
+                    >
+                      {percentage}%
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons
+                    name="chevron-right"
+                    size={scale(24, 29)}
+                    color="#0b1624"
+                  />
+                </TouchableOpacity>
+              );
+            })}
+
+            <TouchableOpacity
+              style={[
+                styles.createButton,
+                {
+                  height: scale(48, 58),
+                  borderRadius: scale(24, 29),
+                  marginTop: scale(15, 18),
+                },
+              ]}
+              onPress={() => setMostrarFormulario(true)}
+            >
+              <Text
+                style={[
+                  styles.createText,
+                  {
+                    fontSize: scale(14, 17),
+                  },
+                ]}
+              >
+                Create New Goal
+              </Text>
+            </TouchableOpacity>
+
+            {mostrarFormulario && (
+              <View style={styles.form}>
+                <Text style={styles.formTitle}>
+                  New Goal
+                </Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Buy a laptop"
+                  value={goal}
+                  onChangeText={setGoal}
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="$300"
+                  value={amount}
+                  onChangeText={setAmount}
+                />
+
+                <Button
+                  title="Save Goal"
+                  onPress={savegoal}
+                />
+              </View>
+            )}
+          </ScrollView>
+        </View>
+
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height:
+                65 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1),
+              borderTopLeftRadius:
+                78 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1),
+            },
+          ]}
+        >
+          {navItems.map((item) => (
+            <TouchableOpacity
+              key={item.route}
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push(item.route)}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={
+                  item.icon === "swap-horizontal"
+                    ? 37 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1)
+                    : 35 *
+                      (small
+                        ? 0.85
+                        : tablet
+                          ? 1.15
+                          : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -364,44 +713,45 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#0b1624",
+    backgroundColor: "#FFF",
+  },
+
+  app: {
+    flex: 1,
+    backgroundColor: "#071426",
   },
 
   header: {
-    backgroundColor: "#0b1624",
+    width: "100%",
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: StatusBar.currentHeight,
   },
 
-  backButton: {
-    width: 46,
-    height: 46,
-    alignItems: "center",
+  back: {
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
-    flex: 1,
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "bold",
+    color: "#FFF",
+    fontWeight: "700",
   },
 
-  bellButton: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: "#d7f3e8",
-    alignItems: "center",
+  headerBell: {
     justifyContent: "center",
   },
 
+  subtitleContainer: {
+    width: "100%",
+    backgroundColor: "#071426",
+    alignItems: "center",
+  },
+
   subtitle: {
-    color: "#fff",
-    backgroundColor: "#0b1624",
+    color: "#FFFFFF",
     textAlign: "center",
     paddingHorizontal: 20,
     paddingBottom: 20,
@@ -409,20 +759,26 @@ const styles = StyleSheet.create({
 
   main: {
     flex: 1,
-    backgroundColor: "#fff",
+    width: "100%",
+    backgroundColor: "#FFFFFF",
     overflow: "hidden",
-    marginTop: -10,
-    zIndex: 2,
-    elevation: 2,
+  },
+
+  content: {
+    alignItems: "center",
+    alignSelf: "center",
   },
 
   mainGoal: {
+    width: "100%",
     backgroundColor: "#25B7D3",
-    marginTop: 20,
-    marginBottom: 30,
+    marginBottom: 10,
     elevation: 4,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.2,
     shadowRadius: 4,
   },
@@ -434,9 +790,6 @@ const styles = StyleSheet.create({
   },
 
   goalIconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
     backgroundColor: "rgba(255,255,255,0.8)",
     alignItems: "center",
     justifyContent: "center",
@@ -532,9 +885,10 @@ const styles = StyleSheet.create({
   },
 
   section: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 5,
   },
 
   sectionTitle: {
@@ -544,14 +898,18 @@ const styles = StyleSheet.create({
   },
 
   goalItem: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
-    marginBottom: 15,
+    marginBottom: 0,
     elevation: 2,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
@@ -587,7 +945,7 @@ const styles = StyleSheet.create({
   },
 
   percentage: {
-    color: "#06b6d4",
+    color: "#0b1624",
   },
 
   createButton: {
@@ -598,38 +956,40 @@ const styles = StyleSheet.create({
   },
 
   createText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontWeight: "bold",
   },
 
-  navbar: {
+  bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
-    right: 0,
-    backgroundColor: "#25B7D3",
+    width: "100%",
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
-    justifyContent: "space-around",
     alignItems: "center",
-    borderTopLeftRadius: 50,
+    justifyContent: "space-around",
+    overflow: "hidden",
   },
 
-  navButton: {
+  navItem: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  formulario: {
+  form: {
     marginTop: 20,
     padding: 20,
     backgroundColor: "#f2f2f2",
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "#d9e5e8",
+    width: "100%",
   },
 
-  subtitulo: {
+  formTitle: {
     fontSize: 20,
     fontWeight: "bold",
     color: "#0b1624",
