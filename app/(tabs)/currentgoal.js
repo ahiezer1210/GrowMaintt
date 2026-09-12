@@ -2,12 +2,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Button, ScrollView,
+  Button,
+  ScrollView,
   StatusBar,
   StyleSheet,
-  Text, TextInput, TouchableOpacity,
+  Text,
+  TextInput,
+  TouchableOpacity,
   View,
-  useWindowDimensions
+  useWindowDimensions,
 } from "react-native";
 
 const mainGoal = {
@@ -129,8 +132,8 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.main,
           {
-            borderTopLeftRadius: s(36),
-            borderTopRightRadius: s(36),
+            borderTopLeftRadius: isTablet ? s(42) : s(36),
+            borderTopRightRadius: isTablet ? s(42) : s(36),
           },
         ]}
       >
