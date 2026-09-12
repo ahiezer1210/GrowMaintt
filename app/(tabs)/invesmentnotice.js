@@ -13,9 +13,18 @@ import {
 export default function InvestmentReminder() {
   const { width, height } = useWindowDimensions();
 
-  const scale = Math.min(width / 390, height / 844);
+  const tablet = width >= 600;
+  const landscape = width > height;
 
-  const s = (value) => Math.round(value * scale);
+  const scale = tablet
+    ? landscape
+      ? Math.min(width / 850, height / 500)
+      : Math.min(width / 650, height / 900)
+    : Math.min(width / 360, height / 780);
+
+  const safeScale = Math.max(scale, 1);
+
+  const size = (value) => Math.round(value * safeScale);
 
   const navIcons = [
     "home-outline",
@@ -24,10 +33,6 @@ export default function InvestmentReminder() {
     "layers-outline",
     "account-outline",
   ];
-
-  const safeScale = Math.max(scale, 0.75);
-
-  const size = (value) => Math.round(value * safeScale);
 
   return (
     <View style={styles.screen}>
@@ -41,7 +46,7 @@ export default function InvestmentReminder() {
         style={[
           styles.header,
           {
-            height: size(115),
+            height: size(tablet ? 125 : 115),
             paddingHorizontal: size(17),
           },
         ]}
@@ -112,15 +117,16 @@ export default function InvestmentReminder() {
           style={[
             styles.content,
             {
-              paddingTop: size(15),
+              paddingTop: size(tablet ? 20 : 15),
+              paddingHorizontal: tablet ? size(30) : size(15),
             },
           ]}
         >
           <Image
             source={require("../../assets/images/invest.png.png")}
             style={{
-              width: size(190),
-              height: size(140),
+              width: size(tablet ? 240 : 220),
+              height: size(tablet ? 175 : 160),
             }}
             resizeMode="contain"
           />
@@ -129,7 +135,7 @@ export default function InvestmentReminder() {
             style={[
               styles.successTitle,
               {
-                fontSize: size(22),
+                fontSize: size(tablet ? 26 : 24),
                 marginTop: size(5),
               },
             ]}
@@ -144,8 +150,9 @@ export default function InvestmentReminder() {
             style={[
               styles.successSubtitle,
               {
-                fontSize: size(13),
-                marginTop: size(30),
+                fontSize: size(tablet ? 16 : 15),
+                lineHeight: size(tablet ? 22 : 20),
+                marginTop: size(tablet ? 35 : 30),
               },
             ]}
             adjustsFontSizeToFit
@@ -160,8 +167,8 @@ export default function InvestmentReminder() {
             style={[
               styles.investQuestion,
               {
-                fontSize: size(13),
-                marginTop: size(35),
+                fontSize: size(tablet ? 16 : 15),
+                marginTop: size(tablet ? 40 : 35),
               },
             ]}
             adjustsFontSizeToFit
@@ -175,10 +182,10 @@ export default function InvestmentReminder() {
             style={[
               styles.actionButton,
               {
-                width: size(210),
-                height: size(40),
+                width: size(tablet ? 260 : 230),
+                height: size(tablet ? 48 : 44),
                 borderRadius: size(22),
-                marginTop: size(18),
+                marginTop: size(tablet ? 22 : 18),
               },
             ]}
             activeOpacity={0.8}
@@ -188,7 +195,7 @@ export default function InvestmentReminder() {
               style={[
                 styles.buttonText,
                 {
-                  fontSize: size(14),
+                  fontSize: size(tablet ? 16 : 15),
                 },
               ]}
             >
@@ -201,7 +208,7 @@ export default function InvestmentReminder() {
           style={[
             styles.bottomBar,
             {
-              height: size(85),
+              height: size(tablet ? 90 : 85),
               borderTopLeftRadius: size(50),
             },
           ]}
