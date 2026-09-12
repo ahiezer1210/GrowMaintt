@@ -30,9 +30,18 @@ export default function NotificationsScreen() {
 
   useEffect(() => {
     const user = auth.currentUser;
-    if (!user) return setNotifications([]);
 
-    const ref = collection(db, "Users", user.uid, "securityAlerts");
+    if (!user) {
+      setNotifications([]);
+      return;
+    }
+
+    const ref = collection(
+      db,
+      "Users",
+      user.uid,
+      "securityAlerts",
+    );
 
     return onSnapshot(
       ref,
@@ -81,13 +90,16 @@ export default function NotificationsScreen() {
           (item) => item.category === selectedCategory,
         );
 
-  const unreadCount = notifications.filter((item) => item.unread).length;
+  const unreadCount = notifications.filter(
+    (item) => item.unread,
+  ).length;
 
   const openNotification = async (notification) => {
     if (notification.category !== "Security") return;
 
     try {
       const user = auth.currentUser;
+
       if (!user) return;
 
       const ref = doc(
@@ -102,7 +114,9 @@ export default function NotificationsScreen() {
 
       router.push({
         pathname: "/security_alert",
-        params: { id: notification.alertId },
+        params: {
+          id: notification.alertId,
+        },
       });
     } catch (error) {
       console.log("Error opening notification:", error);
@@ -138,7 +152,8 @@ export default function NotificationsScreen() {
       ],
     };
 
-    const [icon, title, description] = info[selectedCategory];
+    const [icon, title, description] =
+      info[selectedCategory];
 
     return (
       <View style={styles.empty}>
@@ -162,10 +177,25 @@ export default function NotificationsScreen() {
   };
 
   const volver = () => {
+<<<<<<< HEAD
     if (from) {
       router.replace(from);
     } else {
       router.replace("/home");
+=======
+    if (from === "/profile") {
+      router.push("/profile");
+    } else if (from === "/settings") {
+      router.push("/settings");
+    } else if (from === "/linkeddevices") {
+      router.push("/linkeddevices");
+    } else if (from === "/logoutalldevices") {
+      router.push("/logoutalldevices");
+    } else if (from === "/signout") {
+      router.push("/signout");
+    } else {
+      router.push("/home");
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
     }
   };
 
@@ -192,9 +222,13 @@ export default function NotificationsScreen() {
           />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Notifications</Text>
+        <Text style={styles.headerTitle}>
+          Notifications
+        </Text>
 
-        {unreadCount > 0 && <View style={styles.headerDot} />}
+        {unreadCount > 0 && (
+          <View style={styles.headerDot} />
+        )}
       </View>
 
       <View style={styles.content}>
@@ -207,7 +241,13 @@ export default function NotificationsScreen() {
                 selectedCategory === category &&
                   styles.categoryActive,
               ]}
+<<<<<<< HEAD
               onPress={() => setSelectedCategory(category)}
+=======
+              onPress={() =>
+                setSelectedCategory(category)
+              }
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
               activeOpacity={0.8}
             >
               <Text
@@ -234,7 +274,9 @@ export default function NotificationsScreen() {
                 <TouchableOpacity
                   key={item.id}
                   style={styles.notification}
-                  onPress={() => openNotification(item)}
+                  onPress={() =>
+                    openNotification(item)
+                  }
                   activeOpacity={0.8}
                 >
                   <View style={styles.icon}>
@@ -245,21 +287,41 @@ export default function NotificationsScreen() {
                     />
                   </View>
 
+<<<<<<< HEAD
                   <View style={styles.notificationContent}>
                     <Text style={styles.title}>{item.title}</Text>
+=======
+                  <View
+                    style={styles.notificationContent}
+                  >
+                    <Text style={styles.title}>
+                      {item.title}
+                    </Text>
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
 
                     <Text style={styles.description}>
                       {item.description}
                     </Text>
 
                     <View style={styles.dateRow}>
-                      <Text style={styles.time}>{item.time}</Text>
-                      <Text style={styles.date}>{item.date}</Text>
+                      <Text style={styles.time}>
+                        {item.time}
+                      </Text>
+
+                      <Text style={styles.date}>
+                        {item.date}
+                      </Text>
                     </View>
                   </View>
 
                   {item.unread && (
+<<<<<<< HEAD
                     <View style={styles.notificationDot} />
+=======
+                    <View
+                      style={styles.notificationDot}
+                    />
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
                   )}
                 </TouchableOpacity>
               ))}
@@ -272,10 +334,30 @@ export default function NotificationsScreen() {
           <View style={styles.bottomBar}>
             {[
               ["home", "/home", "home-outline", 35],
-              ["reports", "/reports", "chart-box-outline", 35],
-              ["swap", "/transactions", "swap-horizontal", 37],
-              ["layers", "/savings", "layers-outline", 35],
-              ["account", "/profile", "account-outline", 35],
+              [
+                "reports",
+                "/historial",
+                "chart-box-outline",
+                35,
+              ],
+              [
+                "swap",
+                "/expensesManagement",
+                "swap-horizontal",
+                37,
+              ],
+              [
+                "layers",
+                "/currentgoal",
+                "layers-outline",
+                35,
+              ],
+              [
+                "account",
+                "/profile",
+                "account-outline",
+                35,
+              ],
             ].map(([tab, route, icon, size]) => (
               <TouchableOpacity
                 key={tab}
@@ -286,11 +368,15 @@ export default function NotificationsScreen() {
                 <MaterialCommunityIcons
                   name={icon}
                   size={size}
+<<<<<<< HEAD
                   color={
                     activeTab === tab
                       ? "#FFFFFF"
                       : "rgba(255,255,255,0.6)"
                   }
+=======
+                  color="#FFFFFF"
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
                 />
               </TouchableOpacity>
             ))}
@@ -330,7 +416,11 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "700",
     transform: [
+<<<<<<< HEAD
       { translateX: -5},
+=======
+      { translateX: -5 },
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
       { translateY: 1 },
     ],
   },

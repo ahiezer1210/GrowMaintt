@@ -110,7 +110,7 @@ export default function LogoutScreen({ navigation }) {
   };
 
   const logoutEverywhere = () => {
-    router.push("/logout-everywhere");
+    router.push("/logoutalldevices");
   };
 
   const button = (text, onPress) => (

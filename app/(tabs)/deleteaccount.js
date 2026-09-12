@@ -38,6 +38,8 @@ const COLORS = {
   white: "#FFFFFF",
   gray: "#ACADAD",
   textDark: "#0A3438",
+  inputBorder: "#252833",
+  cardBg: "#EEF5FF",
 };
 
 const NAV = [
@@ -50,40 +52,22 @@ const NAV = [
 
 export default function DeleteAccount({ navigation }) {
   const [password, setPassword] = useState("");
-
   const { width, height } = useWindowDimensions();
 
   const BASE_WIDTH = 390;
   const BASE_HEIGHT = 844;
+  const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
+  const responsiveScale = Math.max(0.85, Math.min(scale, 1.2));
 
-  const scale = Math.min(
-    width / BASE_WIDTH,
-    height / BASE_HEIGHT
-  );
-
-  const responsiveScale = Math.max(
-    0.82,
-    Math.min(scale, 1.12)
-  );
-
-  const s = (value) =>
-    Math.round(value * responsiveScale);
-
-  const horizontalPadding = Math.max(
-    18,
-    Math.min(width * 0.064, 34)
-  );
-
+  const s = (value) => Math.round(value * responsiveScale);
+  const horizontalPadding = Math.max(20, Math.min(width * 0.08, 40));
   const small = width < 360;
 
   const handleDelete = async () => {
     const cleanPassword = password.trim();
 
     if (!cleanPassword) {
-      Alert.alert(
-        "Password Required",
-        "Please enter your password to continue."
-      );
+      Alert.alert("Password Required", "Please enter your password to continue.");
       return;
     }
 
@@ -91,10 +75,7 @@ export default function DeleteAccount({ navigation }) {
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone.",
       [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
+        { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
           style: "destructive",
@@ -103,36 +84,19 @@ export default function DeleteAccount({ navigation }) {
               const user = auth.currentUser;
 
               if (!user) {
-                Alert.alert(
-                  "Error",
-                  "No authenticated user found."
-                );
+                Alert.alert("Error", "No authenticated user found.");
                 return;
               }
 
               if (!user.email) {
-                Alert.alert(
-                  "Error",
-                  "The authenticated user does not have an email address."
-                );
+                Alert.alert("Error", "The authenticated user does not have an email address.");
                 return;
               }
 
-              const credential =
-                EmailAuthProvider.credential(
-                  user.email,
-                  cleanPassword
-                );
+              const credential = EmailAuthProvider.credential(user.email, cleanPassword);
 
-              await reauthenticateWithCredential(
-                user,
-                credential
-              );
-
-              await deleteDoc(
-                doc(db, "Users", user.uid)
-              );
-
+              await reauthenticateWithCredential(user, credential);
+              await deleteDoc(doc(db, "Users", user.uid));
               await deleteUser(user);
 
               Alert.alert(
@@ -145,11 +109,7 @@ export default function DeleteAccount({ navigation }) {
                       if (navigation?.reset) {
                         navigation.reset({
                           index: 0,
-                          routes: [
-                            {
-                              name: "Login",
-                            },
-                          ],
+                          routes: [{ name: "Login" }],
                         });
                       }
                     },
@@ -159,55 +119,23 @@ export default function DeleteAccount({ navigation }) {
 
               setPassword("");
             } catch (error) {
-              console.log(
-                "Delete account error:",
-                error
-              );
+              console.log("Delete account error:", error);
 
               if (
                 error.code === "auth/wrong-password" ||
                 error.code === "auth/invalid-credential"
               ) {
-                Alert.alert(
-                  "Incorrect Password",
-                  "The password you entered is incorrect."
-                );
-              } else if (
-                error.code ===
-                "auth/requires-recent-login"
-              ) {
-                Alert.alert(
-                  "Security",
-                  "Please log in again before deleting your account."
-                );
-              } else if (
-                error.code === "auth/invalid-email"
-              ) {
-                Alert.alert(
-                  "Error",
-                  "The email associated with this account is invalid."
-                );
-              } else if (
-                error.code === "auth/user-disabled"
-              ) {
-                Alert.alert(
-                  "Error",
-                  "This account has been disabled."
-                );
-              } else if (
-                error.code ===
-                "auth/network-request-failed"
-              ) {
-                Alert.alert(
-                  "Connection Error",
-                  "Please check your internet connection and try again."
-                );
+                Alert.alert("Incorrect Password", "The password you entered is incorrect.");
+              } else if (error.code === "auth/requires-recent-login") {
+                Alert.alert("Security", "Please log in again before deleting your account.");
+              } else if (error.code === "auth/invalid-email") {
+                Alert.alert("Error", "The email associated with this account is invalid.");
+              } else if (error.code === "auth/user-disabled") {
+                Alert.alert("Error", "This account has been disabled.");
+              } else if (error.code === "auth/network-request-failed") {
+                Alert.alert("Connection Error", "Please check your internet connection and try again.");
               } else {
-                Alert.alert(
-                  "Error",
-                  error.message ||
-                    "An unexpected error occurred."
-                );
+                Alert.alert("Error", error.message || "An unexpected error occurred.");
               }
             }
           },
@@ -222,78 +150,33 @@ export default function DeleteAccount({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={COLORS.dark}
-      />
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.dark} />
 
       <View style={styles.app}>
-        <View
-          style={[
-            styles.topContent,
-            {
-              paddingHorizontal: horizontalPadding,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.header,
-              {
-                minHeight: s(65),
-                marginTop: s(5),
-                marginBottom: s(20),
-              },
-            ]}
-          >
+
+        <View style={[styles.topContent, { paddingHorizontal: horizontalPadding }]}>
+          <View style={[styles.header, { minHeight: s(55), marginTop: s(8), marginBottom: s(12) }]}>
             <TouchableOpacity
-              style={[
-                styles.backButton,
-                {
-                  width: s(44),
-                  height: s(44),
-                },
-              ]}
+              style={[styles.iconButton, { width: s(40), height: s(40) }]}
               activeOpacity={0.7}
               onPress={handleCancel}
             >
-              <Ionicons
-                name="arrow-back"
-                size={s(24)}
-                color={COLORS.white}
-              />
+              <Ionicons name="arrow-back" size={s(24)} color={COLORS.white} />
             </TouchableOpacity>
 
             <Text
-              style={[
-                styles.headerTitle,
-                {
-                  fontSize: s(18),
-                },
-              ]}
+              style={[styles.headerTitle, { fontSize: s(22) }]}
               numberOfLines={1}
               adjustsFontSizeToFit
-              minimumFontScale={0.8}
             >
               Delete Account
             </Text>
 
             <TouchableOpacity
-              style={[
-                styles.headerNotification,
-                {
-                  width: s(44),
-                  height: s(44),
-                  borderRadius: s(22),
-                },
-              ]}
+              style={[styles.headerNotification, { width: s(38), height: s(38), borderRadius: s(19) }]}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name="notifications-outline"
-                size={s(23)}
-                color={COLORS.white}
-              />
+              <Ionicons name="notifications-outline" size={s(20)} color={COLORS.dark} />
             </TouchableOpacity>
           </View>
         </View>
@@ -302,8 +185,8 @@ export default function DeleteAccount({ navigation }) {
           style={[
             styles.whiteContainer,
             {
-              borderTopLeftRadius: s(45),
-              borderTopRightRadius: s(45),
+              borderTopLeftRadius: s(40),
+              borderTopRightRadius: s(40),
             },
           ]}
         >
@@ -313,8 +196,8 @@ export default function DeleteAccount({ navigation }) {
               styles.scrollContent,
               {
                 paddingHorizontal: horizontalPadding,
-                paddingTop: s(40),
-                paddingBottom: s(140),
+                paddingTop: s(24),
+                paddingBottom: s(90),
               },
             ]}
             showsVerticalScrollIndicator={false}
@@ -322,28 +205,20 @@ export default function DeleteAccount({ navigation }) {
             keyboardDismissMode="on-drag"
           >
             <View style={styles.content}>
-              <View
-                style={[
-                  styles.iconContainer,
-                  {
-                    height: s(155),
-                    marginBottom: s(10),
-                  },
-                ]}
-              >
+              <View style={[styles.iconContainer, { marginBottom: s(20) }]}>
                 <View
                   style={[
                     styles.warningCircle,
                     {
                       width: s(135),
                       height: s(135),
-                      borderRadius: s(68),
+                      borderRadius: s(67.5),
                     },
                   ]}
                 >
                   <MaterialCommunityIcons
                     name="alert"
-                    size={s(85)}
+                    size={s(75)}
                     color="#1769E0"
                   />
                 </View>
@@ -354,112 +229,87 @@ export default function DeleteAccount({ navigation }) {
                   styles.description,
                   {
                     fontSize: s(15),
-                    lineHeight: s(22),
-                    marginBottom: s(28),
+                    lineHeight: s(21),
+                    marginBottom: s(24),
                   },
                 ]}
-                adjustsFontSizeToFit
-                minimumFontScale={0.85}
               >
-                This action will delete all your data
-                and cannot be undone.
+                This action will delete all of your data and this action cannot be undone.
               </Text>
 
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: s(17),
-                    marginBottom: s(10),
-                  },
-                ]}
-              >
-                Enter your password
-              </Text>
-
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    height: s(58),
-                    borderRadius: s(18),
-                    paddingHorizontal: s(18),
-                    fontSize: s(16),
-                    marginBottom: s(25),
-                  },
-                ]}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Enter your password"
-                placeholderTextColor="#A8ADB5"
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-                textContentType="password"
-                returnKeyType="done"
-                onSubmitEditing={handleDelete}
-              />
-
-              <TouchableOpacity
-                style={[
-                  styles.deleteButton,
-                  {
-                    height: s(58),
-                    borderRadius: s(30),
-                  },
-                ]}
-                activeOpacity={0.8}
-                onPress={handleDelete}
-              >
-                <Text
-                  style={[
-                    styles.deleteText,
-                    {
-                      fontSize: s(18),
-                    },
-                  ]}
-                >
-                  Delete Account
+              <View style={styles.formGroup}>
+                <Text style={[styles.label, { fontSize: s(16), marginBottom: s(8) }]}>
+                  Enter your password
                 </Text>
-              </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[
-                  styles.cancelButton,
-                  {
-                    paddingVertical: s(12),
-                  },
-                ]}
-                activeOpacity={0.7}
-                onPress={handleCancel}
-              >
-                <Text
+                <TextInput
                   style={[
-                    styles.cancelText,
+                    styles.input,
                     {
+                      height: s(48),
+                      borderRadius: s(16),
+                      paddingHorizontal: s(16),
                       fontSize: s(15),
+                      marginBottom: s(24),
                     },
                   ]}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder=""
+                  placeholderTextColor="#A8ADB5"
+                  secureTextEntry
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  textContentType="password"
+                  returnKeyType="done"
+                  onSubmitEditing={handleDelete}
+                />
+
+                <TouchableOpacity
+                  style={[
+                    styles.darkButton,
+                    {
+                      height: s(46),
+                      borderRadius: s(23),
+                      marginBottom: s(12),
+                    },
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={handleDelete}
                 >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
+                  <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                    Delete
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[
+                    styles.darkButton,
+                    {
+                      height: s(46),
+                      borderRadius: s(23),
+                    },
+                  ]}
+                  activeOpacity={0.8}
+                  onPress={handleCancel}
+                >
+                  <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </ScrollView>
         </View>
 
-        <BottomNav
-          small={small}
-          scale={responsiveScale}
-        />
+        <BottomNav small={small} scale={responsiveScale} />
       </View>
     </SafeAreaView>
   );
 }
 
 function BottomNav({ small, scale }) {
-  const s = (value) =>
-    Math.round(value * scale);
+  const s = (value) => Math.round(value * scale);
 
   const routes = [
     "../../home",
@@ -474,10 +324,8 @@ function BottomNav({ small, scale }) {
       style={[
         styles.bottom,
         {
-          height: s(small ? 85 : 100),
-          borderTopLeftRadius: s(
-            small ? 45 : 65
-          ),
+          height: s(small ? 68 : 78),
+          borderTopLeftRadius: s(small ? 35 : 45),
         },
       ]}
     >
@@ -491,17 +339,13 @@ function BottomNav({ small, scale }) {
           {type === "ion" ? (
             <Ionicons
               name={icon}
-              size={s(small ? 25 : 31)}
-              color={
-                index === 4
-                  ? COLORS.dark
-                  : COLORS.white
-              }
+              size={s(small ? 22 : 26)}
+              color={COLORS.white}
             />
           ) : (
             <MaterialCommunityIcons
               name={icon}
-              size={s(small ? 28 : 34)}
+              size={s(small ? 24 : 28)}
               color={COLORS.white}
             />
           )}
@@ -516,123 +360,94 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.dark,
   },
-
   app: {
     flex: 1,
     backgroundColor: COLORS.dark,
   },
-
   topContent: {
     backgroundColor: COLORS.dark,
   },
-
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
-
-  backButton: {
+  iconButton: {
     alignItems: "center",
     justifyContent: "center",
   },
-
   headerTitle: {
     color: COLORS.white,
-    fontWeight: "700",
-    flex: 1,
+    fontWeight: "600",
     textAlign: "center",
   },
-
   headerNotification: {
-    backgroundColor: COLORS.cyan,
+    backgroundColor: "#DDF4F8",
     alignItems: "center",
     justifyContent: "center",
   },
-
   whiteContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
     overflow: "hidden",
   },
-
   whiteScroll: {
     flex: 1,
     backgroundColor: COLORS.white,
   },
-
   scrollContent: {
     flexGrow: 1,
+    justifyContent: "center",
   },
-
   content: {
     width: "100%",
     backgroundColor: COLORS.white,
     alignItems: "center",
   },
-
   iconContainer: {
     justifyContent: "center",
     alignItems: "center",
   },
-
   warningCircle: {
-    backgroundColor: "#EEF5FF",
+    backgroundColor: COLORS.cardBg,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#1769E0",
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    elevation: 3,
   },
-
   description: {
-    width: "100%",
-    color: "#777C86",
+    width: "90%",
+    color: "#2C313A",
     textAlign: "center",
     fontWeight: "400",
   },
-
+  formGroup: {
+    width: "88%",
+    maxWidth: 400,
+    alignItems: "center",
+  },
   label: {
     width: "100%",
-    color: "#555B66",
-    fontWeight: "600",
+    color: "#000000",
+    fontWeight: "700",
+    textAlign: "left",
   },
-
   input: {
     width: "100%",
-    borderWidth: 1.5,
-    borderColor: "#C8CCD5",
+    borderWidth: 1,
+    borderColor: COLORS.inputBorder,
     backgroundColor: COLORS.white,
     color: "#252833",
   },
-
-  deleteButton: {
-    width: "100%",
-    backgroundColor: COLORS.cyan,
+  darkButton: {
+    width: "75%",
+    maxWidth: 260,
+    backgroundColor: COLORS.dark,
     justifyContent: "center",
     alignItems: "center",
   },
-
-  deleteText: {
+  buttonText: {
     color: COLORS.white,
-    fontWeight: "700",
+    fontWeight: "600",
   },
-
-  cancelButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 20,
-  },
-
-  cancelText: {
-    color: "#777C86",
-    fontWeight: "500",
-  },
-
   bottom: {
     position: "absolute",
     left: 0,
@@ -644,7 +459,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     zIndex: 20,
   },
-
   navItem: {
     flex: 1,
     height: "100%",

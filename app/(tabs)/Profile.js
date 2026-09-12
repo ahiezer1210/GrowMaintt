@@ -1,5 +1,4 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import { router } from "expo-router";
 
 import {
@@ -7,9 +6,7 @@ import {
     ScrollView,
     StyleSheet,
     Text,
-
     TouchableOpacity,
-
     View
 } from "react-native";
 
@@ -18,93 +15,103 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Profile() {
 
     const menuOptions = [
-
         {
-
             title: "Edite Profile",
-
             icon: "person-outline",
-
             color: "#27b6d1",
+<<<<<<< HEAD
             route: "/Edit_profile"
+=======
+            route: "/edit_profile"
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
         },
-
         {
-
             title: "Security",
-
             icon: "shield-checkmark-outline",
-
             color: "#27b6d1",
             route: "/privacyScreen"
         },
-
         {
-
-            title: "Configuration",
-
+            title: "Settings",
             icon: "settings-outline",
-
             color: "#27b6d1",
+<<<<<<< HEAD
             route: "/Seetings"
+=======
+            route: "/settings"
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
         },
-
         {
-
             title: "Terms and\n Conditions",
-
             icon: "help-circle-outline",
-
             color: "#27b6d1",
             route: "/terminos"
         },
-
         {
-
             title: "Log\n Out",
-
             icon: "log-out-outline",
-
             color: "#27b6d1",
             route: "/signout"
         }
-
     ];
 
+<<<<<<< HEAD
+=======
+    const abrirNotificaciones = () => {
+        router.push({
+            pathname: "/notifications",
+            params: {
+                from: "/profile",
+            },
+        });
+    };
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
 
     return (
         <SafeAreaView style={styles.container}>
+
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
                     <Ionicons
-
                         name="arrow-back"
-
                         size={25}
-
                         color="#ffffff"
-
                     />
                 </TouchableOpacity>
+<<<<<<< HEAD
                 <Text style={styles.title}>Profile</Text>
                 <TouchableOpacity style={styles.notificationButton} onPress={() => router.push("/notifications")}>
+=======
+
+                <Text style={styles.title}>
+                    Profile
+                </Text>
+
+                <TouchableOpacity
+                    style={styles.notificationButton}
+                    onPress={abrirNotificaciones}
+                >
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
                     <Ionicons
-
                         name="notifications-outline"
-
                         size={22}
-
                         color="#081023"
-
                     />
                 </TouchableOpacity>
+
             </View>
+
             <View style={styles.content}>
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.scrollContent}
                 >
+<<<<<<< HEAD
                     <View style={styles.imageContainer}>
                         <Image
 
@@ -202,11 +209,128 @@ export default function Profile() {
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
+=======
+
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={require("../../assets/images/Image.jpg")}
+                            style={styles.logo}
+                        />
+                    </View>
+
+                    <Text style={styles.name}>
+                        Diana Cardoza
+                    </Text>
+
+                    <View style={styles.optionsContainer}>
+
+                        {menuOptions.map((option, index) => (
+
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.opttion}
+                                onPress={() => {
+                                    if (option.route) {
+                                        router.push(option.route);
+                                    }
+                                }}
+                            >
+
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        {
+                                            backgroundColor:
+                                                option.color
+                                        }
+                                    ]}
+                                >
+
+                                    <Ionicons
+                                        name={option.icon}
+                                        size={22}
+                                        color="#FFFFFF"
+                                    />
+
+                                </View>
+
+                                <Text style={styles.optionText}>
+                                    {option.title}
+                                </Text>
+
+                            </TouchableOpacity>
+
+                        ))}
+
+                    </View>
+
+                </ScrollView>
+
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
             </View>
+
+            <View style={styles.bottomBar}>
+
+                <TouchableOpacity
+                    onPress={() => router.push("/home")}
+                >
+                    <Ionicons
+                        name="home-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => router.push("/historial")}
+                >
+                    <Ionicons
+                        name="bar-chart-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/expensesManagement")
+                    }
+                >
+                    <Ionicons
+                        name="swap-horizontal-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/currentgoal")
+                    }
+                >
+                    <Ionicons
+                        name="layers-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/profile")
+                    }
+                >
+                    <Ionicons
+                        name="person-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+            </View>
+
         </SafeAreaView>
-
     );
-
 }
 
 const styles = StyleSheet.create({
@@ -216,7 +340,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#081023",
     },
 
+<<<<<<< HEAD
     scrollContent:{
+=======
+    scrollContent: {
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
         alignItems: "center",
         paddingBottom: 30,
     },
@@ -318,6 +446,10 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         lineHeight: 20,
     },
+<<<<<<< HEAD
+=======
+
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
     bottomBar: {
         height: 70,
         backgroundColor: "#24b6d1",
@@ -326,4 +458,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: -25,
     },
+<<<<<<< HEAD
+=======
+
+>>>>>>> 09e8728d8833f2d2b7132f974edb63ae2f3ee20e
 });
