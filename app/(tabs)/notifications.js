@@ -1,8 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  router,
-  useLocalSearchParams,
-} from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import {
   collection,
   doc,
@@ -22,13 +19,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { auth, db } from "../../firebaseConfig";
 
-const categories = [
-  "All",
-  "Savings",
-  "Investment",
-  "Rewards",
-  "Security",
-];
+const categories = ["All", "Savings", "Investment", "Rewards", "Security"];
 
 export default function NotificationsScreen() {
   const { from } = useLocalSearchParams();
@@ -81,13 +72,10 @@ export default function NotificationsScreen() {
               }),
               icon: "shield-check-outline",
               unread: alert.read !== true,
-              createdAt:
-                alert.createdAt?.toMillis?.() || 0,
+              createdAt: alert.createdAt?.toMillis?.() || 0,
             };
           })
-          .sort(
-            (a, b) => b.createdAt - a.createdAt,
-          );
+          .sort((a, b) => b.createdAt - a.createdAt);
 
         setNotifications(data);
       },
@@ -99,8 +87,7 @@ export default function NotificationsScreen() {
     selectedCategory === "All"
       ? notifications
       : notifications.filter(
-          (item) =>
-            item.category === selectedCategory,
+          (item) => item.category === selectedCategory,
         );
 
   const unreadCount = notifications.filter(
@@ -132,10 +119,7 @@ export default function NotificationsScreen() {
         },
       });
     } catch (error) {
-      console.log(
-        "Error opening notification:",
-        error,
-      );
+      console.log("Error opening notification:", error);
     }
   };
 
@@ -168,11 +152,8 @@ export default function NotificationsScreen() {
       ],
     };
 
-    const [
-      icon,
-      title,
-      description,
-    ] = info[selectedCategory];
+    const [icon, title, description] =
+      info[selectedCategory];
 
     return (
       <View style={styles.empty}>
@@ -184,13 +165,8 @@ export default function NotificationsScreen() {
           />
         </View>
 
-        <Text style={styles.emptyTitle}>
-          {title}
-        </Text>
-
-        <Text style={styles.emptyText}>
-          {description}
-        </Text>
+        <Text style={styles.emptyTitle}>{title}</Text>
+        <Text style={styles.emptyText}>{description}</Text>
       </View>
     );
   };
@@ -219,15 +195,11 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView
       style={styles.container}
-      edges={[
-        "top",
-        "left",
-        "right",
-      ]}
+      edges={["top", "left", "right"]}
     >
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#081023"
+        backgroundColor="#071426"
       />
 
       <View style={styles.header}>
@@ -238,8 +210,8 @@ export default function NotificationsScreen() {
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={28}
-            color="#FFF"
+            size={35}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
 
@@ -259,8 +231,7 @@ export default function NotificationsScreen() {
               key={category}
               style={[
                 styles.category,
-                selectedCategory ===
-                  category &&
+                selectedCategory === category &&
                   styles.categoryActive,
               ]}
               onPress={() =>
@@ -271,8 +242,7 @@ export default function NotificationsScreen() {
               <Text
                 style={[
                   styles.categoryText,
-                  selectedCategory ===
-                    category &&
+                  selectedCategory === category &&
                     styles.categoryTextActive,
                 ]}
               >
@@ -307,17 +277,13 @@ export default function NotificationsScreen() {
                   </View>
 
                   <View
-                    style={
-                      styles.notificationContent
-                    }
+                    style={styles.notificationContent}
                   >
                     <Text style={styles.title}>
                       {item.title}
                     </Text>
 
-                    <Text
-                      style={styles.description}
-                    >
+                    <Text style={styles.description}>
                       {item.description}
                     </Text>
 
@@ -334,9 +300,7 @@ export default function NotificationsScreen() {
 
                   {item.unread && (
                     <View
-                      style={
-                        styles.notificationDot
-                      }
+                      style={styles.notificationDot}
                     />
                   )}
                 </TouchableOpacity>
@@ -349,12 +313,7 @@ export default function NotificationsScreen() {
         >
           <View style={styles.bottomBar}>
             {[
-              [
-                "home",
-                "/home",
-                "home-outline",
-                35,
-              ],
+              ["home", "/home", "home-outline", 35],
               [
                 "reports",
                 "/historial",
@@ -379,29 +338,20 @@ export default function NotificationsScreen() {
                 "account-outline",
                 35,
               ],
-            ].map(
-              ([
-                tab,
-                route,
-                icon,
-                size,
-              ]) => (
-                <TouchableOpacity
-                  key={tab}
-                  style={styles.navItem}
-                  onPress={() =>
-                    nav(tab, route)
-                  }
-                  activeOpacity={0.8}
-                >
-                  <MaterialCommunityIcons
-                    name={icon}
-                    size={size}
-                    color="#FFFFFF"
-                  />
-                </TouchableOpacity>
-              ),
-            )}
+            ].map(([tab, route, icon, size]) => (
+              <TouchableOpacity
+                key={tab}
+                style={styles.navItem}
+                onPress={() => nav(tab, route)}
+                activeOpacity={0.8}
+              >
+                <MaterialCommunityIcons
+                  name={icon}
+                  size={size}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </SafeAreaView>
       </View>
@@ -412,26 +362,30 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
 
   header: {
-    height: 100,
-    backgroundColor: "#081023",
+    height: 118,
+    backgroundColor: "#071426",
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    justifyContent: "space-between",
+    paddingHorizontal: 25,
   },
 
   back: {
-    position: "absolute",
-    left: 24,
-    top: 45,
+    width: 30,
+    alignItems: "flex-start",
+    justifyContent: "center",
+    transform: [{ translateY: 4 }],
   },
 
   headerTitle: {
-    color: "#FFF",
-    fontSize: 27,
+    flex: 1,
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontSize: 25,
     fontWeight: "700",
     transform: [
       { translateX: -5 },
@@ -440,29 +394,27 @@ const styles = StyleSheet.create({
   },
 
   headerDot: {
-    position: "absolute",
-    right: 30,
-    top: 45,
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: "#27B4D0",
+    marginLeft: 10,
   },
 
   content: {
     flex: 1,
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingTop: 20,
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 45,
+    borderTopRightRadius: 45,
+    paddingTop: 28,
     overflow: "hidden",
   },
 
   categories: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    marginBottom: 15,
+    paddingHorizontal: 9,
+    marginBottom: 20,
   },
 
   category: {
@@ -484,7 +436,7 @@ const styles = StyleSheet.create({
   },
 
   categoryTextActive: {
-    color: "#FFF",
+    color: "#FFFFFF",
   },
 
   list: {
