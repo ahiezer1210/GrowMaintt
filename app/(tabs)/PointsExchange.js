@@ -6,6 +6,7 @@ import {
     Text,
     TouchableOpacity,
     View,
+    useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 const rewards = [
@@ -39,23 +40,72 @@ const rewards = [
     }
 ];
 export default function PointExchange() {
+    const { width } = useWindowDimensions();
+
+    const isSmallScreen = width < 360;
+    const isPhone = width < 600;
+    const isTablet = width >= 600;
+    const isLargeTablet = width >= 900;
+
+    const scale = isSmallScreen
+        ? 0.85
+        : isPhone
+            ? 1
+            : isLargeTablet
+                ? 1.35
+                : 1.15;
+
+    const horizontalPadding = isSmallScreen
+        ? 10
+        : isPhone
+            ? 14
+            : isLargeTablet
+                ? 45
+                : 30;
+
+    const headerHeight = isSmallScreen
+        ? 55
+        : isPhone
+            ? 65
+            : isLargeTablet
+                ? 100
+                : 85;
+
+    const bottomHeight = isSmallScreen
+        ? 60
+        : isPhone
+            ? 70
+            : isLargeTablet
+                ? 90
+                : 80;
     return (
         <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+            <View style={[
+                styles.header,
+                {
+                    height: headerHeight,
+                    paddingHorizontal: horizontalPadding,
+                }
+            ]}>
                 <TouchableOpacity>
                     <Ionicons
                         name="arrow-back"
-                        size={23}
+                        size={23 * scale}
                         color="white"
                     />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>
+                <Text style={[
+                    styles.headerTitle,
+                    {
+                        fontSize: 21 * scale,
+                    },
+                ]}>
                     Redeem your points!
                 </Text>
                 <TouchableOpacity onPress={() => router.push("/notifications")}>
                     <Ionicons
                         name="notifications-outline"
-                        size={23}
+                        size={23 * scale}
                         color="white"
                     />
                 </TouchableOpacity>
@@ -63,136 +113,322 @@ export default function PointExchange() {
             <ScrollView
                 style={styles.scroll}
                 contentContainerStyle={{
-                    paddingBottom: 10,
+                    paddingBottom: 20,
                     flexGrow: 1,
                 }}
                 showsVerticalScrollIndicator={false}>
-                <View style={styles.pointsCard}>
-                    <View style={styles.pointsheader}>
-                        <Text style={styles.smallTitle}>Available points</Text>
-                        <Text style={styles.points}>400.0</Text>
+
+                <View style={[
+                    styles.pointsCard,
+                    {
+                        paddingHorizontal: horizontalPadding,
+                        paddingTop: 12 * scale,
+                        paddingBottom: 18 * scale,
+                    },
+                ]}>
+                    <View style={[
+                        styles.pointsheader,
+                        {
+                            height: 75 * scale,
+                            borderRadius: 18 * scale,
+                        }
+                    ]}>
+                        <Text style={[
+                            styles.smallTitle,
+                            {
+                                fontSize: 14 * scale,
+                            }
+                        ]}>Available points</Text>
+                        <Text style={[
+                            styles.points,
+                            {
+                                fontSize: 28 * scale,
+                            }
+                        ]}>400.0</Text>
                     </View>
                     <View style={styles.pointsInfo}>
                         <View>
-                            <Text style={styles.infoTitle}>
+                            <Text style={[
+                                styles.infoTitle,
+                                {
+                                    fontSize: 15 * scale,
+                                }
+                            ]}>
                                 Next points goal
                             </Text>
-                            <Text style={styles.infoNumber}>
+                            <Text style={[
+                                styles.infoNumber,
+                                {
+                                    fontSize: 20 * scale,
+                                }
+                            ]}>
                                 500.0
                             </Text>
                         </View>
-                        <View style={styles.separator} />
+                        <View style={[
+                            styles.separator,
+                            {
+                                height: 35 * scale,
+                            }
+                        ]} />
                         <View>
-                            <Text style={styles.infoTitle}>
+                            <Text style={[
+                                styles.infoTitle,
+                                {
+                                    fontSize: 15 * scale,
+                                }
+                                ]}>
                                 Redeemed points
                             </Text>
-                            <Text style={styles.usedPoints}>
+                            <Text style={[
+                                styles.usedPoints,
+                                {
+                                    fontSize: 20 * scale,
+                                }
+                                ]}>
                                 -1000.0
                             </Text>
                         </View>
                     </View>
-                    <View style={styles.progressContainer}>
-                        <View style={styles.progressBar}>
+                    <View style={[
+                        styles.progressContainer,
+                        {
+                            marginTop: 15 * scale,
+                        }
+                        ]}>
+                        <View style={[
+                            styles.progressBar,
+                            {
+                                height: 15 * scale,
+                                borderRadius: 10 * scale,
+                            }
+                            ]}>
                             <View style={styles.progress} />
                         </View>
-                        <Text style={styles.progressText}>
+                        <Text style={[
+                            styles.progressText,
+                            {
+                                fontSize: 13 * scale,
+                            }
+                            ]}>
                             30%
                         </Text>
-                        <Text style={styles.goal}>
+                        <Text style={[
+                            styles.goal,
+                            {
+                                fontSize: 8 * scale,
+                            }
+                            ]}>
                             10,000
                         </Text>
                     </View>
-                    <Text style={styles.goalText}>
+                    <Text style={[
+                        styles.goalText,
+                        {
+                            fontSize: 14 * scale,
+                            marginTop: 8 * scale,
+                        }
+                        ]}>
                         30% of your goal, ¡You´re making progress!
                     </Text>
                 </View>
-                <View style={styles.content}>
-                    <Text style={styles.sectionTitle}>¡Rewards!</Text>
+                <View style={[
+                    styles.content,
+                    {
+                        paddingHorizontal: horizontalPadding,
+                        paddingTop: 25 * scale,
+                    }
+                    ]}>
+                    <Text style={[
+                        styles.sectionTitle,
+                        {
+                            fontSize: 22 * scale,
+                        }
+                        ]}>¡Rewards!</Text>
                     {rewards.map((item, index) => (
-                        <View style={styles.reward} key={index}>
-                            <View style={styles.iconCircle}>
+                        <View style={[
+                            styles.reward,
+                            {
+                                minHeight: 65 * scale,
+                                marginBottom: 10 * scale,
+                                paddingHorizontal: 8 * scale,
+                            }
+                            ]} key={index}>
+                            <View style={[
+                                styles.iconCircle,
+                                {
+                                    width: 38 * scale,
+                                    height: 38 * scale,
+                                    borderRadius: 19 * scale,
+                                }
+                                ]}>
                                 <Ionicons
                                     name={item.icon}
-                                    size={23}
+                                    size={23 * scale}
                                     color="white"
                                 />
                             </View>
-                            <View style={styles.rewardName}>
-                                <Text style={styles.rewardTitle}>
+                            <View style={[
+                                styles.rewardName,
+                                {
+                                    width: isTablet
+                                    ? 120 * scale
+                                    : 85 * scale,
+                                    paddingLeft: 8 * scale,
+                                }
+                                ]}>
+                                <Text style={[
+                                    styles.rewardTitle,
+                                    {
+                                        fontSize: 14 * scale,
+                                    }
+                                    ]}>
                                     {item.title}
                                 </Text>
-                                <Text style={styles.store}>{item.store}</Text>
+                                <Text style={[
+                                    styles.store,
+                                    {
+                                        fontSize: 13 * scale,
+                                    }
+                                    ]}>{item.store}</Text>
                             </View>
                             <View style={styles.rewardDescription}>
-                                <Text style={styles.description}>
+                                <Text style={[
+                                    styles.description,
+                                    {
+                                        fontSize: 13 * scale,
+                                    }
+                                    ]}>
                                     {item.description}
                                 </Text>
                             </View>
-                            <Text style={styles.rewardPoints}>
+                            <Text style={[
+                                styles.rewardPoints,
+                                {
+                                    width: isTablet
+                                    ? 100 * scale
+                                    : 75 * scale,
+                                    fontSize: 11 *scale,
+                                }
+                                ]}>
                                 {item.points}
                             </Text>
                         </View>
                     ))}
-                    <Text style={styles.sectionTitle}>
+                    <Text style={[
+                        styles.sectionTitle,
+                        {
+                            fontSize: 22 * scale,
+                            marginTop: 10 * scale,
+                        }
+                        ]}>
                         ¡Big reward!
                     </Text>
-                    <View style={styles.reward}>
-                        <View style={styles.iconCircle}>
+                    <View style={[
+                        styles.reward,
+                        {
+                            minHeight: 65 * scale,
+                            marginBottom: 10 * scale,
+                        }
+                        ]}>
+                        <View style={[
+                            styles.iconCircle,
+                            {
+                                width: 38 * scale,
+                                height: 38 * scale,
+                                borderRadius: 19 * scale,
+                            }
+                            ]}>
                             <Ionicons
                                 name="restaurant-outline"
-                                size={23}
+                                size={23 * scale}
                                 color="white"
                             />
                         </View>
-                        <View style={styles.rewardName}>
-                            <Text style={styles.rewardTitle}>Food</Text>
-                            <Text style={styles.store}>Don Li</Text>
+                        <View style={[
+                            styles.rewardName,
+                            {
+                                width: isTablet
+                                ? 120 * scale
+                                : 85 * scale,
+                            }
+                            ]}>
+                            <Text style={[
+                                styles.rewardTitle,
+                                {
+                                    fontSize: 14 * scale,
+                                }
+                                ]}>Food</Text>
+                            <Text style={[
+                                styles.store,
+                                {
+                                    fontSize: 13 * scale,
+                                }
+                                ]}>Don Li</Text>
                         </View>
                         <View style={styles.rewardDescription}>
-                            <Text style={styles.description}>
+                            <Text style={[
+                                styles.description,
+                                {
+                                    fontSize: 13 * scale,
+                                }
+                                ]}>
                                 Free shushi order
                             </Text>
                         </View>
-                        <Text style={styles.rewardPoints}>
+                        <Text style={[
+                            styles.rewardPoints,
+                            {
+                                width: isTablet
+                                ? 100 * scale
+                                : 75 * scale,
+                                fontSize: 11 * scale,
+                            }
+                            ]}>
                             -500.0 points
                         </Text>
 
                     </View>
                 </View>
             </ScrollView>
-            <View style={styles.bottomBar}>
+            <View style={[
+                styles.bottomBar,
+                {
+                    height: bottomHeight,
+                }
+                ]}>
                 <TouchableOpacity onPress={() => router.push("/home")}>
                     <Ionicons
                         name="home-outline"
-                        size={27}
+                        size={27 * scale}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/historial")}>
                     <Ionicons
                         name="bar-chart-outline"
-                        size={27}
+                        size={27 * scale}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
                     <Ionicons
                         name="swap-horizontal-outline"
-                        size={27}
+                        size={27 * scale}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/currentgoal")}>
                     <Ionicons
                         name="layers-outline"
-                        size={27}
+                        size={27 * scale}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => router.push("/Profile")}>
                     <Ionicons
                         name="person-outline"
-                        size={27}
+                        size={27 * scale}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
@@ -207,7 +443,7 @@ const styles = StyleSheet.create({
     },
     scroll: {
         flex: 1,
-        backgroundColor: "#081023"
+        backgroundColor: "#ffffff"
     },
     pointsheader: {
         backgroundColor: "#ffffff",
@@ -216,7 +452,7 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 18,
         borderBottomRightRadius: 18,
         height: 75,
-        marginTop: 3,
+        marginTop: 6,
         alignItems: "center",
         justifyContent: "flex-end"
     },
@@ -227,7 +463,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 18,
-        marginTop: 20
+        marginTop: 30
     },
     headerTitle: {
         color: "white",
@@ -237,7 +473,7 @@ const styles = StyleSheet.create({
     pointsCard: {
         backgroundColor: "#081023",
         padding: 14,
-        marginTop: 5,
+        marginTop: -9,
     },
     smallTitle: {
         textAlign: "center",
