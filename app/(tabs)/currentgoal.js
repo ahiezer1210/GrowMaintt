@@ -1,5 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
+import { Button } from "react-native";
+import { TextInput } from "react-native";
 import {
   ScrollView,
   StatusBar,
@@ -38,12 +41,59 @@ const navIcons = [
 ];
 
 export default function SavingsGoalsScreen() {
+  const [mostrarFormulario, setMostrarFormulario] = useState(false);
+  const [goal, setGoal] = useState("");
+  const [amount, setAmount] = useState("");
+
+  const [savedgoal, setSavedgoal] = useState([]);
+
   const { width, height } = useWindowDimensions();
-  const scale = Math.min(width / 390, height / 844);
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
   const s = (value) => Math.round(value * scale);
 
   const progress = Math.round((mainGoal.saved / mainGoal.target) * 100);
   const remaining = mainGoal.target - mainGoal.saved;
+
+  const savegoal = () => {
+    if (!goal || !amount) {
+      return;
+    }
+
+    setSavedgoal([
+      ...savedgoal,
+      {
+        id: Date.now().toString(),
+        icon: "bullseye-arrow",
+        title: goal,
+        objective: Number(amount.replace("$", "")),
+        saved: 0,
+      },
+    ]);
+
+    setGoal("");
+    setAmount("");
+    setMostrarFormulario(false);
+  };
 
   return (
     <View style={styles.screen}>
@@ -90,7 +140,8 @@ export default function SavingsGoalsScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            padding: s(20),
+            paddingTop: s(20),
+            paddingHorizontal: horizontalPadding,
             paddingBottom: s(120),
           }}
         >
@@ -195,7 +246,7 @@ export default function SavingsGoalsScreen() {
             </Text>
           </View>
 
-          {otherGoals.map((goal) => {
+          {[...otherGoals, ...savedgoal].map((goal) => {
             const percentage = Math.round((goal.saved / goal.objective) * 100);
 
             return (
@@ -264,11 +315,41 @@ export default function SavingsGoalsScreen() {
                 marginTop: s(15),
               },
             ]}
+            onPress={() => setMostrarFormulario(true)}
           >
             <Text style={[styles.createText, { fontSize: s(14) }]}>
               Create New Goal
             </Text>
           </TouchableOpacity>
+
+          {mostrarFormulario && (
+            <View style={styles.formulario}>
+              <Text style={styles.subtitulo}>
+                New goal
+              </Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. Buy a laptop"
+                value={goal}
+                onChangeText={setGoal}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Ej. $300"
+                value={amount}
+                onChangeText={setAmount}
+              />
+
+              <Button
+                title="Save goal"
+                onPress={savegoal}
+              />
+
+            </View>
+
+          )}
         </ScrollView>
       </View>
 
@@ -542,5 +623,32 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  formulario: {
+    marginTop: 20,
+    padding: 20,
+    backgroundColor: '#f2f2f2',
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#d9e5e8"
+  },
+
+  subtitulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: "#0b1624"
+
+  },
+
+  input: {
+    backgroundColor: 'white',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 12,
+    padding: 13,
+    marginBottom: 15,
+    fontSize: 14,
+    color: "#0b1624",
   },
 });

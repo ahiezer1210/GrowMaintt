@@ -4,22 +4,33 @@ import { updatePassword } from "firebase/auth";
 import { useRef, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { auth } from "../../firebaseConfig";
 
 export default function ChangePassword() {
-  // Refs en vez de estado: escribir no dispara re-render de toda la pantalla.
   const newPasswordRef = useRef("");
   const confirmPasswordRef = useRef("");
 
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { width } = useWindowDimensions();
+
+  const small = width < 360;
+  const tablet = width >= 600;
+  const horizontalPadding = tablet ? 50 : small ? 18 : 25;
 
   const changePassword = async () => {
     const newPassword = newPasswordRef.current;
@@ -31,10 +42,7 @@ export default function ChangePassword() {
     }
 
     if (newPassword.length < 6) {
-      Alert.alert(
-        "Error",
-        "The password must be at least 6 characters long."
-      );
+      Alert.alert("Error", "The password must be at least 6 characters long.");
       return;
     }
 
@@ -46,31 +54,23 @@ export default function ChangePassword() {
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert(
-        "Error",
-        "There is no user currently signed in."
-      );
+      Alert.alert("Error", "There is no user currently signed in.");
       return;
     }
 
     try {
       setLoading(true);
-
       await updatePassword(user, newPassword);
 
       newPasswordRef.current = "";
       confirmPasswordRef.current = "";
 
-      Alert.alert(
-        "Success",
-        "Your password was changed successfully.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/login"),
-          },
-        ]
-      );
+      Alert.alert("Success", "Your password was changed successfully.", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/login"),
+        },
+      ]);
     } catch (error) {
       console.log(error);
 
@@ -78,23 +78,14 @@ export default function ChangePassword() {
         error instanceof FirebaseError &&
         error.code === "auth/requires-recent-login"
       ) {
-        Alert.alert(
-          "Session expired",
-          "You need to sign in again."
-        );
+        Alert.alert("Session expired", "You need to sign in again.");
       } else if (
         error instanceof FirebaseError &&
         error.code === "auth/weak-password"
       ) {
-        Alert.alert(
-          "Weak password",
-          "The password must be stronger."
-        );
+        Alert.alert("Weak password", "The password must be stronger.");
       } else {
-        Alert.alert(
-          "Error",
-          "The password could not be changed."
-        );
+        Alert.alert("Error", "The password could not be changed.");
       }
     } finally {
       setLoading(false);
@@ -102,101 +93,113 @@ export default function ChangePassword() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>
-          Change Password
-        </Text>
-      </View>
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" backgroundColor="#081023" />
 
-      <View style={styles.card}>
-        <Text style={styles.label}>
-          New Password
-        </Text>
-
-        <View style={styles.passwordBox}>
-          <TextInput
-            placeholder="Enter your new password"
-            placeholderTextColor="#ACADAD"
-            style={styles.password}
-            defaultValue=""
-            onChangeText={(text) => {
-              newPasswordRef.current = text;
-            }}
-            secureTextEntry={!showNew}
-            autoCapitalize="none"
-            autoCorrect={false}
-            spellCheck={false}
-            autoComplete="off"
-            textContentType="oneTimeCode"
-            importantForAutofill="no"
-          />
-
-          <TouchableOpacity
-            onPress={() => setShowNew(!showNew)}
-          >
-            <Text style={styles.show}>
-              {showNew ? "Hide" : "Show"}
-            </Text>
-          </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Change Password</Text>
         </View>
 
-        <Text style={styles.label}>
-          Confirm Password
-        </Text>
-
-        <View style={styles.passwordBox}>
-          <TextInput
-            placeholder="Confirm your password"
-            placeholderTextColor="#ACADAD"
-            style={styles.password}
-            defaultValue=""
-            onChangeText={(text) => {
-              confirmPasswordRef.current = text;
-            }}
-            secureTextEntry={!showConfirm}
-            autoCapitalize="none"
-            autoCorrect={false}
-            spellCheck={false}
-            autoComplete="off"
-            textContentType="oneTimeCode"
-            importantForAutofill="no"
-          />
-
-          <TouchableOpacity
-            onPress={() => setShowConfirm(!showConfirm)}
+        {/* Contenedor blanco */}
+        <View style={styles.whiteContainer}>
+          <ScrollView
+            style={styles.whiteScroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingHorizontal: horizontalPadding },
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            alwaysBounceVertical={true} // 
+            overScrollMode="always" // 
           >
-            <Text style={styles.show}>
-              {showConfirm ? "Hide" : "Show"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.card}>
+              <Text style={styles.label}>New Password</Text>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={changePassword}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Changing..." : "Change Password"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+              <View style={styles.passwordBox}>
+                <TextInput
+                  placeholder="Enter your new password"
+                  placeholderTextColor="#ACADAD"
+                  style={styles.password}
+                  defaultValue=""
+                  onChangeText={(text) => {
+                    newPasswordRef.current = text;
+                  }}
+                  secureTextEntry={!showNew}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  spellCheck={false}
+                  autoComplete="off"
+                  textContentType="oneTimeCode"
+                  importantForAutofill="no"
+                />
+
+                <TouchableOpacity onPress={() => setShowNew(!showNew)}>
+                  <Text style={styles.show}>{showNew ? "Hide" : "Show"}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.label}>Confirm Password</Text>
+
+              <View style={styles.passwordBox}>
+                <TextInput
+                  placeholder="Confirm your password"
+                  placeholderTextColor="#ACADAD"
+                  style={styles.password}
+                  defaultValue=""
+                  onChangeText={(text) => {
+                    confirmPasswordRef.current = text;
+                  }}
+                  secureTextEntry={!showConfirm}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  spellCheck={false}
+                  autoComplete="off"
+                  textContentType="oneTimeCode"
+                  importantForAutofill="no"
+                />
+
+                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                  <Text style={styles.show}>
+                    {showConfirm ? "Hide" : "Show"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.7 }]}
+                onPress={changePassword}
+                disabled={loading}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.buttonText}>
+                  {loading ? "Changing..." : "Change Password"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     backgroundColor: "#081023",
   },
 
   header: {
-    height: 205,
     alignItems: "center",
-    paddingTop: 55,
-    paddingBottom: 30,
+    paddingTop: 65,
+    paddingBottom: 100,
+    backgroundColor: "#081023",
   },
 
   title: {
@@ -205,13 +208,28 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  card: {
+  whiteContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
-    paddingHorizontal: 30,
-    paddingTop: 30,
+    overflow: "hidden",
+  },
+
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: 40,
+    paddingBottom: 350, 
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 40,
   },
 
   label: {
@@ -219,16 +237,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "600",
     marginBottom: 10,
-  },
-
-  input: {
-    height: 55,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#000000",
-    paddingHorizontal: 18,
-    marginBottom: 35,
   },
 
   passwordBox: {
@@ -240,12 +248,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    marginBottom: 15,
+    marginBottom: 20,
   },
 
   password: {
     flex: 1,
     fontSize: 14,
+    color: "#081023",
   },
 
   show: {
@@ -254,12 +263,12 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    height: 58,
+    height: 55,
     backgroundColor: "#25B7D3",
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 25,
+    marginTop: 15,
   },
 
   buttonText: {

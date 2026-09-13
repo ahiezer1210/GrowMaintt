@@ -1,4 +1,6 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { collection, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -10,7 +12,9 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { usePeriods } from "../../context/PeriodContext";
+
+import { usePeriods } from "../../context/PeriodContext.js";
+import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
   cyan: "#25B7D3",
@@ -58,40 +62,69 @@ const DATA = {
 };
 
 const ACTIONS = [
-  ["card-outline", "Expense\nManagement", "ion"],
-  ["book-outline", "User\nManual", "ion"],
-  ["trending-up-outline", "Investments", "ion"],
-  ["swap-horizontal", "Points\nExchange", "material"],
+  ["card-outline", "Expense\nManagement", "ion", "/ExpensesManagement"],
+  ["book-outline", "User\nManual", "ion", "/manualScreen"],
+  ["trending-up-outline", "Investments", "ion", "/investments"],
+  ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
 ];
 
 const NAV = [
-  ["home-outline", "ion"],
-  ["bar-chart-outline", "ion"],
-  ["swap-horizontal", "material"],
-  ["layers-outline", "material"],
-  ["person-outline", "ion"],
+  ["home-outline", "ion", "/"],
+  ["bar-chart-outline", "ion", "/historial"],
+  ["swap-horizontal", "material", "/ExpensesManagement"],
+  ["layers-outline", "material", "/currentgoal"],
+  ["person-outline", "ion", "/Profile"],
 ];
 
 export default function App() {
   const { selectedPeriods } = usePeriods();
+
   const [period, setPeriod] = useState("Monthly");
+  const [hasNotification, setHasNotification] = useState(false);
+
   const { width } = useWindowDimensions();
 
   const small = width < 360;
   const scale = small ? 0.88 : width > 430 ? 1.08 : 1;
 
-
-  const availableFilters = ["Daily", "Weekly", "Monthly"].filter((item) =>
-    selectedPeriods.includes(item.toLowerCase())
+  const availablePeriods = selectedPeriods.map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1),
   );
 
   useEffect(() => {
-    if (availableFilters.length > 0 && !availableFilters.includes(period)) {
-      setPeriod(availableFilters[0]);
+    if (availablePeriods.length > 0 && !availablePeriods.includes(period)) {
+      setPeriod(availablePeriods[0]);
     }
   }, [selectedPeriods]);
 
-  const data = DATA[period] || DATA.Monthly;
+  const data = DATA[period];
+
+  useEffect(() => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      setHasNotification(false);
+      return;
+    }
+
+    const alertsRef = collection(db, "Users", user.uid, "securityAlerts");
+
+    const unsubscribe = onSnapshot(
+      alertsRef,
+      (snapshot) => {
+        const hasUnread = snapshot.docs.some(
+          (item) => item.data().read !== true,
+        );
+
+        setHasNotification(hasUnread);
+      },
+      () => {
+        setHasNotification(false);
+      },
+    );
+
+    return unsubscribe;
+  }, []);
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -102,60 +135,69 @@ export default function App() {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.content,
-            { paddingHorizontal: small ? 18 : width > 430 ? 34 : 25 },
+            {
+              paddingHorizontal: small ? 18 : width > 430 ? 34 : 25,
+            },
           ]}
         >
-          <Header small={small} scale={scale} />
+          <Header
+            small={small}
+            scale={scale}
+            hasNotification={hasNotification}
+          />
+
           <Balance data={data} small={small} scale={scale} />
+
           <Savings data={data} scale={scale} />
+
           <Actions scale={scale} />
 
-          {availableFilters.length > 0 && (
-            <View style={styles.filters}>
-              {availableFilters.map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  onPress={() => setPeriod(item)}
+          <View style={styles.filters}>
+            {availablePeriods.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setPeriod(item)}
+                style={[styles.filter, period === item && styles.activeFilter]}
+              >
+                <Text
                   style={[
-                    styles.filter,
-                    period === item && styles.activeFilter,
+                    styles.filterText,
+                    small && { fontSize: 13 },
+                    period === item && styles.activeFilterText,
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      small && { fontSize: 13 },
-                      period === item && styles.activeFilterText,
-                    ]}
-                  >
-                    {item}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
+                  {item}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
 
-          {data.transactions.map((item, index) => (
+          {data?.transactions.map((item, index) => (
             <Transaction key={index} data={item} small={small} />
           ))}
         </ScrollView>
 
-        <BottomNav small={small} />
+        <BottomNav small={small} scale={scale} />
       </View>
     </SafeAreaView>
   );
 }
 
-function Header({ small, scale }) {
+function Header({ small, scale, hasNotification }) {
   const size = small ? 55 : 68;
 
   return (
     <View style={styles.header}>
-      <View
+      <TouchableOpacity
         style={[
           styles.profile,
-          { width: size, height: size, borderRadius: size / 2 },
+          {
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+          },
         ]}
+        onPress={() => router.push("/Profile")}
       />
 
       <View style={styles.welcome}>
@@ -165,20 +207,27 @@ function Header({ small, scale }) {
         >
           Hello, User!
         </Text>
+
         <Text style={styles.welcomeText}>Welcome back</Text>
       </View>
 
       <TouchableOpacity
         style={[
           styles.notification,
-          { width: small ? 44 : 52, height: small ? 44 : 52 },
+          {
+            width: small ? 44 : 52,
+            height: small ? 44 : 52,
+          },
         ]}
+        onPress={() => router.push("/notifications")}
       >
         <Ionicons
           name="notifications-outline"
           size={small ? 24 : 29}
           color={COLORS.white}
         />
+
+        {hasNotification && <View style={styles.notificationDot} />}
       </TouchableOpacity>
     </View>
   );
@@ -213,11 +262,8 @@ function BalanceItem({ icon, title, value, size, expense, small }) {
   return (
     <View style={styles.balanceItem}>
       <View style={styles.titleRow}>
-        <Ionicons
-          name={icon}
-          size={small ? 16 : 18}
-          color={COLORS.white}
-        />
+        <Ionicons name={icon} size={small ? 16 : 18} color={COLORS.white} />
+
         <Text style={[styles.balanceTitle, small && { fontSize: 12 }]}>
           {title}
         </Text>
@@ -241,12 +287,7 @@ function Savings({ data, scale }) {
   return (
     <View style={styles.savings}>
       <View style={styles.progress}>
-        <View
-          style={[
-            styles.progressFill,
-            { width: `${data.progress}%` },
-          ]}
-        >
+        <View style={[styles.progressFill, { width: `${data.progress}%` }]}>
           <Text style={[styles.progressText, { fontSize: 15 * scale }]}>
             {data.progress}%
           </Text>
@@ -267,8 +308,12 @@ function Savings({ data, scale }) {
 function Actions({ scale }) {
   return (
     <View style={styles.actions}>
-      {ACTIONS.map(([icon, text, type]) => (
-        <TouchableOpacity key={text} style={styles.action}>
+      {ACTIONS.map(([icon, text, type, route]) => (
+        <TouchableOpacity
+          key={text}
+          style={[styles.action, { height: 84 * scale }]}
+          onPress={() => router.push(route)}
+        >
           <View
             style={[
               styles.actionIcon,
@@ -280,11 +325,7 @@ function Actions({ scale }) {
             ]}
           >
             {type === "ion" ? (
-              <Ionicons
-                name={icon}
-                size={27 * scale}
-                color={COLORS.cyan}
-              />
+              <Ionicons name={icon} size={27 * scale} color={COLORS.cyan} />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
@@ -305,6 +346,7 @@ function Actions({ scale }) {
 
 function Transaction({ data, small }) {
   const [icon, title, date, type, amount] = data;
+
   const negative = amount.startsWith("-");
 
   return (
@@ -321,15 +363,20 @@ function Transaction({ data, small }) {
       >
         <Ionicons
           name={icon}
-          size={small ? 24 : 30}
+          size={27}
           color={COLORS.white}
+          style={{
+            transform: [{ translateY: 1 }],
+          }}
         />
       </View>
 
       <View
         style={[
           styles.transactionInfo,
-          { width: small ? 82 : 112 },
+          {
+            width: small ? 82 : 112,
+          },
         ]}
       >
         <Text
@@ -352,7 +399,10 @@ function Transaction({ data, small }) {
       <Text
         style={[
           styles.transactionType,
-          small && { fontSize: 10, width: 48 },
+          small && {
+            fontSize: 10,
+            width: 48,
+          },
         ]}
         numberOfLines={1}
       >
@@ -376,25 +426,25 @@ function Transaction({ data, small }) {
   );
 }
 
-function BottomNav({ small }) {
+function BottomNav({ small, scale }) {
   return (
     <View
       style={[
         styles.bottom,
         {
-          height: small ? 85 : 100,
-          borderTopLeftRadius: small ? 45 : 65,
+          height: 65 * scale,
+          borderTopLeftRadius: 78 * scale,
         },
       ]}
     >
-      {NAV.map(([icon, type], index) => (
-        <TouchableOpacity key={index} style={styles.navItem}>
+      {NAV.map(([icon, type, route], index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.navItem}
+          onPress={() => router.push(route)}
+        >
           {type === "ion" ? (
-            <Ionicons
-              name={icon}
-              size={small ? 25 : 31}
-              color={COLORS.white}
-            />
+            <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
           ) : (
             <MaterialCommunityIcons
               name={icon}
@@ -413,77 +463,107 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.dark,
   },
+
   app: {
     flex: 1,
     backgroundColor: COLORS.dark,
   },
+
   content: {
     paddingTop: 24,
     paddingBottom: 125,
   },
+
   header: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 34,
   },
+
   profile: {
     backgroundColor: "#172037",
     marginRight: 14,
   },
+
   welcome: {
     flex: 1,
     minWidth: 0,
   },
+
   hello: {
     color: COLORS.white,
     fontWeight: "700",
   },
+
   welcomeText: {
     color: COLORS.white,
     fontSize: 15,
     marginTop: 2,
   },
+
   notification: {
     borderRadius: 30,
     backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
   },
+
+  notificationDot: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#FF3B30",
+    borderWidth: 2,
+    borderColor: COLORS.cyan,
+  },
+
   balance: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 28,
   },
+
   balanceItem: {
     flex: 1,
     minWidth: 0,
   },
+
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 5,
   },
+
   balanceTitle: {
     color: COLORS.white,
     fontSize: 14,
     marginLeft: 6,
   },
+
   balanceValue: {
     color: COLORS.white,
     fontWeight: "700",
   },
+
   expense: {
     color: COLORS.cyan,
     fontWeight: "700",
   },
+
   divider: {
     width: 2,
     backgroundColor: COLORS.gray,
     marginHorizontal: 12,
   },
+
   savings: {
     marginBottom: 34,
   },
+
   progress: {
     height: 45,
     borderRadius: 25,
@@ -491,6 +571,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     justifyContent: "center",
   },
+
   progressFill: {
     position: "absolute",
     top: 0,
@@ -501,18 +582,22 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingLeft: 25,
   },
+
   progressText: {
     color: COLORS.white,
   },
+
   goalAmount: {
     color: COLORS.white,
     position: "absolute",
     right: 28,
   },
+
   goalText: {
     color: COLORS.white,
     marginTop: 9,
   },
+
   actions: {
     backgroundColor: COLORS.cyan,
     borderRadius: 38,
@@ -522,9 +607,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 34,
   },
+
   action: {
     width: "48%",
-    height: 84,
     borderRadius: 24,
     backgroundColor: COLORS.white,
     alignItems: "center",
@@ -535,76 +620,95 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 5,
   },
+
   actionIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: COLORS.lightCyan,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 5,
   },
+
   actionText: {
     color: COLORS.dark,
     textAlign: "center",
     fontWeight: "600",
   },
+
   filters: {
-    height: 55,
+    minHeight: 55,
     borderRadius: 30,
     backgroundColor: COLORS.white,
     flexDirection: "row",
     padding: 5,
     marginBottom: 28,
   },
+
   filter: {
     flex: 1,
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
+    minHeight: 45,
   },
+
   activeFilter: {
     backgroundColor: COLORS.cyan,
   },
+
   filterText: {
     color: COLORS.dark,
     fontSize: 15,
   },
+
   activeFilterText: {
     fontWeight: "600",
   },
+
   transaction: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 22,
   },
+
   transactionIcon: {
     backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
+
   transactionInfo: {
     minWidth: 0,
   },
+
   transactionTitle: {
     color: COLORS.white,
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 5,
   },
+
   transactionDate: {
     color: COLORS.cyan,
     fontSize: 11,
   },
+
   transactionDivider: {
     width: 2,
     height: 52,
     backgroundColor: COLORS.darkCyan,
     marginHorizontal: 8,
   },
+
   transactionType: {
     color: COLORS.white,
     fontSize: 13,
     width: 62,
   },
+
   amount: {
     flex: 1,
     color: COLORS.white,
@@ -612,19 +716,23 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     textAlign: "right",
   },
+
   negative: {
     color: COLORS.cyan,
   },
+
   bottom: {
     position: "absolute",
-    left: 0,
-    right: 0,
     bottom: 0,
+    left: 0,
+    width: "100%",
     backgroundColor: COLORS.cyan,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+    overflow: "hidden",
   },
+
   navItem: {
     flex: 1,
     alignItems: "center",

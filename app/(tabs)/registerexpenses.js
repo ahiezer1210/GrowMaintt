@@ -2,6 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Switch,
   Text,
@@ -10,6 +14,183 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+
+export default function Registerexpenses() {
+  const { width, height } = useWindowDimensions();
+  const scale = Math.min(width / 390, height / 844);
+  const s = (value) => Math.round(value * scale);
+
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("");
+  const [date, setDate] = useState("");
+  const [description, setDescription] = useState("");
+  const [isRecurrent, setIsRecurrent] = useState(false);
+
+  const cancelExpenses = () => {
+    setAmount("");
+    setCategory("");
+    setDate("");
+    setDescription("");
+    setIsRecurrent(false);
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: s(55),
+              paddingBottom: s(30),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={[styles.backButton, { width: s(35) }]}
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={s(25)} color="#FFFFFF" />
+          </TouchableOpacity>
+
+          <Text
+            style={[
+              styles.title,
+              {
+                fontSize: s(28),
+                marginLeft: s(25),
+              },
+            ]}
+          >
+            Register expenses
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.notificationButton,
+              {
+                width: s(34),
+                height: s(34),
+                borderRadius: s(18),
+                marginRight: 10,
+              },
+            ]}
+          >
+            <Ionicons name="notifications-outline" size={s(25)} color="#081023" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.card}>
+          <ScrollView
+            style={styles.whiteScroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: s(100) }, 
+            ]}
+            showsVerticalScrollIndicator={false}
+            alwaysBounceVertical={true}
+            overScrollMode="always"
+            keyboardShouldPersistTaps="handled" 
+          >
+            <Text style={styles.label}>Amount</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Eje. $5"
+              keyboardType="numeric"
+              value={amount}
+              onChangeText={setAmount}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text style={styles.label}>Category</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Eje. Transport"
+              value={category}
+              onChangeText={setCategory}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text style={styles.label}>Date</Text>
+
+            <TextInput
+              style={styles.date}
+              placeholder="23 June 2026"
+              value={date}
+              onChangeText={setDate}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text style={styles.label}>Description (optional)</Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Eje. Go out with friends"
+              value={description}
+              onChangeText={setDescription}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text style={styles.label}>It's a recurring expense?</Text>
+
+            <View style={styles.optionsContainer}>
+              <Text style={styles.recurrentText}>
+                Activate the option if it is{"\n"}recurrent
+              </Text>
+
+              <Switch
+                value={isRecurrent}
+                onValueChange={setIsRecurrent}
+                trackColor={{
+                  false: "#BDBDBD",
+                  true: "#168AFF",
+                }}
+                thumbColor="#FFFFFF"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  height: s(48),
+                  marginTop: s(15),
+                  borderRadius: s(18),
+                },
+              ]}
+            >
+              <Text style={[styles.buttonText, { fontSize: s(17) }]}>
+                Save expenses
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  height: s(34),
+                  marginTop: s(15),
+                  borderRadius: s(18),
+                  backgroundColor: "#E5E5E5", 
+                },
+              ]}
+              onPress={cancelExpenses}
+            >
+              <Text style={[styles.buttonText, { fontSize: s(17), color: "#333" }]}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -40,6 +221,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
+    overflow: "hidden", 
+  },
+  whiteScroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1, 
     paddingHorizontal: 30,
     paddingTop: 25,
   },
@@ -91,159 +279,3 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
-
-export default function Registerexpenses() {
-  const { width, height } = useWindowDimensions();
-  const scale = Math.min(width / 390, height / 844);
-  const s = (value) => Math.round(value * scale);
-
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [isRecurrent, setIsRecurrent] = useState(false);
-
-  const cancelExpenses = () => {
-    setAmount("");
-    setCategory("");
-    setDate("");
-    setDescription("");
-    setIsRecurrent(false);
-  };
-
-  return (
-    <View style={styles.container}>
-      <View
-        style={[
-          styles.header,
-          {
-            paddingTop: s(55),
-            paddingBottom: s(30),
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={[styles.backButton, { width: s(35) }]}
-          onPress={() => router.back()}
-        >
-          <Ionicons name="arrow-back" size={s(25)} color="#FFFFFF" />
-        </TouchableOpacity>
-
-        <Text
-          style={[
-            styles.title,
-            {
-              fontSize: s(28),
-              marginLeft: s(25),
-            },
-          ]}
-        >
-          Register expenses
-        </Text>
-
-        <TouchableOpacity
-          style={[
-            styles.notificationButton,
-            {
-              width: s(34),
-              height: s(34),
-              borderRadius: s(18),
-            },
-          ]}
-        >
-          <Ionicons name="notifications-outline" size={s(25)} color="#081023" />
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>Amount</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Eje. $5"
-          keyboardType="numeric"
-          value={amount}
-          onChangeText={setAmount}
-          placeholderTextColor="#ACADAD"
-        />
-
-        <Text style={styles.label}>Category</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Eje. Transport"
-          value={category}
-          onChangeText={setCategory}
-          placeholderTextColor="#ACADAD"
-        />
-
-        <Text style={styles.label}>Date</Text>
-
-        <TextInput
-          style={styles.date}
-          placeholder="23 June 2026"
-          value={date}
-          onChangeText={setDate}
-          placeholderTextColor="#ACADAD"
-        />
-
-        <Text style={styles.label}>Description (optional)</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Eje. Go out with friends"
-          value={description}
-          onChangeText={setDescription}
-          placeholderTextColor="#ACADAD"
-        />
-
-        <Text style={styles.label}>It's a recurring expense?</Text>
-
-        <View style={styles.optionsContainer}>
-          <Text style={styles.recurrentText}>
-            Activa la opción si es{"\n"}recurrente
-          </Text>
-
-          <Switch
-            value={isRecurrent}
-            onValueChange={setIsRecurrent}
-            trackColor={{
-              false: "#BDBDBD",
-              true: "#168AFF",
-            }}
-            thumbColor="#FFFFFF"
-          />
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              height: s(48),
-              marginTop: s(15),
-              borderRadius: s(18),
-            },
-          ]}
-        >
-          <Text style={[styles.buttonText, { fontSize: s(17) }]}>
-            Save expenses
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              height: s(34),
-              marginTop: s(15),
-              borderRadius: s(18),
-            },
-          ]}
-          onPress={cancelExpenses}
-        >
-          <Text style={[styles.buttonText, { fontSize: s(17) }]}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-}

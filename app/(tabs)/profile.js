@@ -1,179 +1,234 @@
 import { Ionicons } from "@expo/vector-icons";
-
 import { router } from "expo-router";
 
 import {
-
     Image,
-
+    ScrollView,
     StyleSheet,
-
     Text,
-
     TouchableOpacity,
-
-    View
-
+    View,
+    useWindowDimensions,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
 
+    const { width } = useWindowDimensions();
+
+    const small = width < 360;
+    const tablet = width >= 600;
+    const horizontalPadding = tablet ? 50 : small ? 18 : 25;
+
     const menuOptions = [
-
         {
-
             title: "Edite Profile",
-
             icon: "person-outline",
-
             color: "#27b6d1",
-
-            route: "/editProfile"
-
+            route: "/edit_profile"
         },
-
         {
-
             title: "Security",
-
             icon: "shield-checkmark-outline",
-
             color: "#27b6d1",
-
-            route: "/security"
-
+            route: "/privacyScreen"
         },
-
         {
-
-            title: "Configuration",
-
+            title: "Settings",
             icon: "settings-outline",
-
             color: "#27b6d1",
-
-            route: "/configuration"
-
+            route: "/settings"
         },
-
         {
-
             title: "Terms and\n Conditions",
-
             icon: "help-circle-outline",
-
             color: "#27b6d1",
-
-            route: "/terms"
-
+            route: "/terminos"
         },
-
         {
-
             title: "Log\n Out",
-
             icon: "log-out-outline",
-
             color: "#27b6d1",
-
-            route: "/null"
-
+            route: "/signout"
         }
-
     ];
+
+    const abrirNotificaciones = () => {
+        router.push({
+            pathname: "/notifications",
+            params: {
+                from: "/profile",
+            },
+        });
+    };
 
     return (
         <SafeAreaView style={styles.container}>
+
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                    <Ionicons
 
+                <TouchableOpacity
+                    style={styles.backButton}
+                    onPress={() => router.back()}
+                >
+                    <Ionicons
                         name="arrow-back"
-
                         size={25}
-
                         color="#ffffff"
-
                     />
                 </TouchableOpacity>
-                <Text style={styles.title}>Profile</Text>
-                <TouchableOpacity style={styles.notificationButton}>
+
+                <Text style={styles.title}>
+                    Profile
+                </Text>
+
+                <TouchableOpacity
+                    style={styles.notificationButton}
+                    onPress={abrirNotificaciones}
+                >
                     <Ionicons
-
                         name="notifications-outline"
-
                         size={22}
-
                         color="#081023"
-
                     />
                 </TouchableOpacity>
+
             </View>
+
             <View style={styles.content}>
-                <View style={styles.imageContainer}>
-                    <Image
 
-                        source={require("../../assets/images/Image.jpg")}
+                <ScrollView
+                    style={styles.whiteScroll}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
+                >
 
-                        style={styles.logo}
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={require("../../assets/images/Image.jpg")}
+                            style={styles.logo}
+                        />
+                    </View>
 
-                    />
-                </View>
-                <Text style={styles.name}>Diana Cardoza</Text>
-                <View style={styles.optionsContainer}>
+                    <Text style={styles.name}>
+                        Diana Cardoza
+                    </Text>
 
-                    {menuOptions.map((option, index) => (
-                        <TouchableOpacity
+                    <View style={styles.optionsContainer}>
 
-                            key={index}
+                        {menuOptions.map((option, index) => (
 
-                            style={styles.opttion}
-
-                            onPress={() => {
-
-                                if (option.route) {
-
-                                    router.push(option.route);
-
-                                }
-
-                            }}
-                        >
-                            <View
-
-                                style={[
-
-                                    styles.iconContainer,
-
-                                    { backgroundColor: option.color }
-
-                                ]}
+                            <TouchableOpacity
+                                key={index}
+                                style={styles.option}
+                                onPress={() => {
+                                    if (option.route) {
+                                        router.push(option.route);
+                                    }
+                                }}
                             >
-                                <Ionicons
 
-                                    name={option.icon}
+                                <View
+                                    style={[
+                                        styles.iconContainer,
+                                        {
+                                            backgroundColor:
+                                                option.color
+                                        }
+                                    ]}
+                                >
 
-                                    size={22}
+                                    <Ionicons
+                                        name={option.icon}
+                                        size={22}
+                                        color="#FFFFFF"
+                                    />
 
-                                    color="#FFFFFF"
+                                </View>
 
-                                />
-                            </View>
-                            <Text style={styles.optionText}>
+                                <Text style={styles.optionText}>
+                                    {option.title}
+                                </Text>
 
-                                {option.title}
-                            </Text>
-                        </TouchableOpacity>
+                            </TouchableOpacity>
 
-                    ))}
-                </View>
+                        ))}
+
+                    </View>
+
+                </ScrollView>
+
             </View>
+
+            <View style={styles.bottomBar}>
+
+                <TouchableOpacity
+                    onPress={() => router.push("/home")}
+                >
+                    <Ionicons
+                        name="home-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() => router.push("/historial")}
+                >
+                    <Ionicons
+                        name="bar-chart-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/expensesManagement")
+                    }
+                >
+                    <Ionicons
+                        name="swap-horizontal-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/currentgoal")
+                    }
+                >
+                    <Ionicons
+                        name="layers-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    onPress={() =>
+                        router.push("/profile")
+                    }
+                >
+                    <Ionicons
+                        name="person-outline"
+                        size={27}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+            </View>
+
         </SafeAreaView>
-
     );
-
 }
 
 const styles = StyleSheet.create({
@@ -188,8 +243,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#0e2738",
+        backgroundColor: "#081023",
+        marginTop: -30,
     },
+
     backButton: {
         width: 45,
         height: 45,
@@ -203,26 +260,50 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "700",
         fontSize: 25,
+        marginTop: 30,
     },
 
     notificationButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#d8f2e2",
+        backgroundColor: "#ffffff",
         alignItems: "center",
         justifyContent: "center"
+    },
+
+    content: {
+        backgroundColor: "#FFFFFF",
+        flex: 1,
+        marginTop: 60,
+        borderTopLeftRadius: 35,
+        borderTopRightRadius: 35,
+        alignItems: "center",
+        width: "100%",
+        overflow: "hidden",
+    },
+
+    whiteScroll: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: 20,
+        paddingBottom: 140,
+        alignItems: "center",
     },
 
     imageContainer: {
         width: 90,
         height: 90,
         borderRadius: 45,
-        position: "absolute",
-        top: -25,
+        marginBottom: 15,
         overflow: "hidden",
         borderWidth: 3,
         borderColor: "#0e2738",
+        alignSelf: "center",
     },
 
     logo: {
@@ -231,32 +312,22 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
     },
 
-    content: {
-        backgroundColor: "#FFFFFF",
-        flex: 1,
-        paddingTop: 55,
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        alignItems: "center",
-        width:"100%"
-    },
-
     name: {
         color: "#0e2738",
         fontSize: 18,
-        marginTop: 0,
+        marginBottom: 20,
         fontWeight: "700",
+        textAlign: "center",
     },
 
     optionsContainer: {
         width: "100%",
-        paddingHorizontal: 30,
-        marginTop: 35,
+        paddingHorizontal: 0,
     },
 
-    opttion: {
+    option: {
         width: "100%",
-        minHeight:60,
+        minHeight: 60,
         alignItems: "center",
         flexDirection: "row",
         marginBottom: 18,
@@ -274,9 +345,23 @@ const styles = StyleSheet.create({
     optionText: {
         color: "#0e2738",
         fontSize: 16,
-        fontWeight: "500",
+        fontWeight: "600",
         lineHeight: 20,
     },
 
-});
+    bottomBar: {
+        height: 85,
+        backgroundColor: "#24b6d1",
+        flexDirection: "row",
+        justifyContent: "space-around",
+        alignItems: "center",
+        marginBottom: -5,
+        borderTopLeftRadius: 70,
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        overflow: "hidden",
+    },
 
+});

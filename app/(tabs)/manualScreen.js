@@ -1,22 +1,21 @@
-import React, { useState } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-  useWindowDimensions,
   Alert,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 export default function ManualScreen({ navigation }) {
   const { width, height } = useWindowDimensions();
   const [activeTab, setActiveTab] = useState('home');
   const [hasNotification, setHasNotification] = useState(true);
 
-  // Escalas responsivas basadas en el ancho y alto de pantalla
   const scale = width / 375;
   const verticalScale = height / 812;
 
@@ -68,7 +67,6 @@ export default function ManualScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Main Content Area - Estática sin Scroll */}
       <View style={styles.main}>
         <View style={styles.content}>
           <Text style={[styles.mainTitle, { fontSize: 20 * scale }]}>
@@ -83,7 +81,6 @@ export default function ManualScreen({ navigation }) {
             </Text>
           </View>
 
-          {/* Lista de Secciones Distribuidas */}
           <View style={styles.sectionsContainer}>
             <View style={styles.section}>
               <Text style={[styles.sectionTitle, { fontSize: 13.5 * scale }]}>1. Home</Text>

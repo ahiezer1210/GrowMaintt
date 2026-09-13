@@ -1,22 +1,14 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function AgeConfirmation() {
-  const navIcons = [
-    "home-outline",
-    "chart-box-outline",
-    "swap-horizontal",
-    "layers-outline",
-    "account-outline",
-  ];
-
   return (
     <View style={styles.screen}>
       <StatusBar
@@ -28,7 +20,7 @@ export default function AgeConfirmation() {
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.push("/register")}
         >
           <MaterialCommunityIcons name="arrow-left" size={22} color="#FFFFFF" />
         </TouchableOpacity>
@@ -46,29 +38,20 @@ export default function AgeConfirmation() {
           </Text>
 
           <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.actionButton} onPress={() => {}}>
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => router.push("/verificationage")}
+            >
               <Text style={styles.buttonText}>I Am 18 Or Older</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.actionButton, styles.secondButton]}
-              onPress={() => {}}
+              onPress={() => router.push("/login")}
             >
               <Text style={styles.buttonText}>I Am Under 18</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        <View style={styles.bottomBar}>
-          {navIcons.map((icon, index) => (
-            <TouchableOpacity key={icon} style={styles.navButton}>
-              <MaterialCommunityIcons
-                name={icon}
-                size={index === 2 ? 28 : 24}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-          ))}
         </View>
       </View>
     </View>
@@ -156,21 +139,5 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "600",
-  },
-
-  bottomBar: {
-    height: 85,
-    backgroundColor: "#25B7D3",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    borderTopLeftRadius: 50,
-  },
-
-  navButton: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

@@ -1,14 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 
 const COLORS = {
@@ -19,14 +19,32 @@ const COLORS = {
 };
 
 export default function TermsScreen() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const [accepted, setAccepted] = useState(false);
 
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
 
-  const isSmallScreen = width < 350;
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
 
-  const horizontalPadding = width < 380 ? 20 : 28;
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
+
+  const buttonHeight = Math.round(50 * scale);
+  const buttonRadius = buttonHeight / 2;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -36,67 +54,76 @@ export default function TermsScreen() {
       />
 
       <View style={styles.container}>
-
-     
-        <View style={styles.header}>
-
-          
+       
+        <View style={[styles.header, { height: 160 * scale }]}>
           <TouchableOpacity
-            style={styles.backButton}
+            style={[
+              styles.backButton,
+              {
+                left: horizontalPadding,
+                top: isSmallScreen ? 45 : 55,
+                width: 42 * scale,
+                height: 42 * scale,
+              },
+            ]}
             activeOpacity={0.7}
           >
             <Ionicons
               name="arrow-back"
-              size={28}
+              size={Math.round(28 * scale)}
               color={COLORS.white}
             />
           </TouchableOpacity>
 
-       
           <Text
             style={[
               styles.headerTitle,
-              isSmallScreen && styles.headerTitleSmall,
+              { fontSize: Math.round(23 * scale) },
             ]}
           >
             Terms & Conditions
           </Text>
 
-         
           <TouchableOpacity
-            style={styles.profileButton}
+            style={[
+              styles.profileButton,
+              {
+                right: horizontalPadding,
+                top: isSmallScreen ? 42 : 50,
+                width: 48 * scale,
+                height: 48 * scale,
+                borderRadius: (48 * scale) / 2,
+              },
+            ]}
             activeOpacity={0.7}
           >
             <Ionicons
               name="person-outline"
-              size={22}
+              size={Math.round(22 * scale)}
               color={COLORS.blue}
             />
           </TouchableOpacity>
-
         </View>
 
-
-        <View style={styles.main}>
-
-          
+        <View style={styles.cardContainer}>
           <ScrollView
             style={styles.scroll}
             contentContainerStyle={[
               styles.scrollContent,
               {
                 paddingHorizontal: horizontalPadding,
+                paddingBottom: isSmallScreen ? 35 : 50,
               },
             ]}
             showsVerticalScrollIndicator={false}
           >
-
-           
-
             <Text
               style={[
                 styles.intro,
-                isSmallScreen && styles.textSmall,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
               ]}
             >
               By using our application, you expressly agree to
@@ -104,217 +131,267 @@ export default function TermsScreen() {
               them carefully before getting started.
             </Text>
 
-
-           
-            <Text style={styles.heading}>
+            <Text
+              style={[
+                styles.heading,
+                {
+                  fontSize: Math.round(17 * scale),
+                  lineHeight: Math.round(24 * scale),
+                },
+              ]}
+            >
               1. User Requirements and Account
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Age and Accuracy: You must be at least 18 years
               old to use GrowMaint and agree to provide accurate
               and up-to-date information.
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Security: You are solely responsible for
               maintaining the confidentiality of your account
               and password, as well as all activities carried
               out through your account.
             </Text>
 
-
-           
-
-            <Text style={styles.heading}>
+            <Text
+              style={[
+                styles.heading,
+                {
+                  fontSize: Math.round(17 * scale),
+                  lineHeight: Math.round(24 * scale),
+                },
+              ]}
+            >
               2. Permitted Use of the Platform
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Purpose: GrowMaint is a tool designed exclusively
               to help you manage your personal finances.
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Prohibitions: It is strictly prohibited to use
               the platform for illegal, fraudulent, or
               unauthorized activities.
             </Text>
 
-
-            
-
-            <Text style={styles.heading}>
+            <Text
+              style={[
+                styles.heading,
+                {
+                  fontSize: Math.round(17 * scale),
+                  lineHeight: Math.round(24 * scale),
+                },
+              ]}
+            >
               3. Limitation of Liability
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Exclusion of Damages: GrowMaint is not responsible
               for direct or indirect damages resulting from the
               use of the application, except where applicable
               law requires otherwise.
             </Text>
 
-
-           
-            <Text style={styles.heading}>
+            <Text
+              style={[
+                styles.heading,
+                {
+                  fontSize: Math.round(17 * scale),
+                  lineHeight: Math.round(24 * scale),
+                },
+              ]}
+            >
               4. Changes and Updates
             </Text>
 
-            <Text style={styles.paragraph}>
+            <Text
+              style={[
+                styles.paragraph,
+                {
+                  fontSize: Math.round(16 * scale),
+                  lineHeight: Math.round(23 * scale),
+                },
+              ]}
+            >
               • Changes: We reserve the right to update these
               terms at any time. We will notify you of important
               changes directly within the application.
             </Text>
 
-          </ScrollView>
-
-
-          
-          <View
-            style={[
-              styles.bottom,
-              {
-                paddingHorizontal: horizontalPadding,
-              },
-            ]}
-          >
-
-            
-
-            <TouchableOpacity
-              style={styles.checkboxRow}
-              onPress={() => setAccepted(!accepted)}
-              activeOpacity={0.7}
-            >
-
-              <View
-                style={[
-                  styles.checkbox,
-                  accepted && styles.checkboxChecked,
-                ]}
+            <View style={styles.bottomInsideScroll}>
+              <TouchableOpacity
+                style={styles.checkboxRow}
+                onPress={() => setAccepted(!accepted)}
+                activeOpacity={0.7}
               >
-                {accepted && (
-                  <Ionicons
-                    name="checkmark"
-                    size={16}
-                    color={COLORS.white}
-                  />
-                )}
-              </View>
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      width: Math.round(22 * scale),
+                      height: Math.round(22 * scale),
+                    },
+                    accepted && styles.checkboxChecked,
+                  ]}
+                >
+                  {accepted && (
+                    <Ionicons
+                      name="checkmark"
+                      size={Math.round(16 * scale)}
+                      color={COLORS.white}
+                    />
+                  )}
+                </View>
 
-              <Text style={styles.checkboxText}>
-                I accept all terms and conditions
-              </Text>
+                <Text
+                  style={[
+                    styles.checkboxText,
+                    { fontSize: Math.round(14 * scale) },
+                  ]}
+                >
+                  I accept all terms and conditions
+                </Text>
+              </TouchableOpacity>
 
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  {
+                    height: buttonHeight,
+                    borderRadius: buttonRadius,
+                  },
+                ]}
+                onPress={() => setAccepted(true)}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.buttonText,
+                    { fontSize: Math.round(17 * scale) },
+                  ]}
+                >
+                  Accept
+                </Text>
+              </TouchableOpacity>
 
-
-            
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => setAccepted(true)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonText}>
-                Accept
-              </Text>
-            </TouchableOpacity>
-
-
-            
-
-            <TouchableOpacity
-              style={styles.actionButton}
-              onPress={() => setAccepted(false)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonText}>
-                Reject
-              </Text>
-            </TouchableOpacity>
-
-          </View>
-
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  {
+                    height: buttonHeight,
+                    borderRadius: buttonRadius,
+                  },
+                ]}
+                onPress={() => setAccepted(false)}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={[
+                    styles.buttonText,
+                    { fontSize: Math.round(17 * scale) },
+                  ]}
+                >
+                  Reject
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
         </View>
-
       </View>
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
-
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.blue,
   },
 
   container: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: COLORS.blue,
   },
 
   header: {
-    height: 170,
     backgroundColor: COLORS.blue,
-
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
     position: "relative",
-
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
   },
 
   backButton: {
     position: "absolute",
-    left: 28,
-    top: 65,
-
-    width: 42,
-    height: 42,
-
     alignItems: "center",
     justifyContent: "center",
   },
 
   headerTitle: {
     color: COLORS.white,
-
-    fontSize: 23,
     fontWeight: "700",
-
     textAlign: "center",
-  },
-
-  headerTitleSmall: {
-    fontSize: 20,
   },
 
   profileButton: {
     position: "absolute",
-    right: 28,
-    top: 58,
-
-    width: 48,
-    height: 48,
-
-    borderRadius: 24,
-
     backgroundColor: COLORS.cyan,
-
     alignItems: "center",
     justifyContent: "center",
   },
 
-  main: {
+  cardContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
+    borderTopLeftRadius: 36,
+    borderTopRightRadius: 36,
+    overflow: "hidden",
   },
 
   scroll: {
@@ -323,87 +400,50 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     paddingTop: 30,
-    paddingBottom: 25,
   },
 
   intro: {
     color: COLORS.blue,
-
-    fontSize: 16,
-    lineHeight: 23,
-
     fontWeight: "400",
-
     textAlign: "left",
-
     marginBottom: 12,
-  },
-
-  textSmall: {
-    fontSize: 15,
-    lineHeight: 21,
   },
 
   heading: {
     color: COLORS.blue,
-
-    fontSize: 17,
-    lineHeight: 24,
-
     fontWeight: "800",
-
     marginTop: 10,
-    marginBottom: 3,
-
+    marginBottom: 4,
     textAlign: "left",
   },
 
   paragraph: {
     color: COLORS.blue,
-
-    fontSize: 16,
-    lineHeight: 23,
-
     fontWeight: "400",
-
     textAlign: "left",
-
-    marginBottom: 7,
-
+    marginBottom: 8,
     width: "100%",
   },
 
-
-  bottom: {
-    backgroundColor: COLORS.white,
-
-    paddingTop: 8,
-    paddingBottom: 18,
-
+  bottomInsideScroll: {
+    marginTop: 25,
     alignItems: "center",
+    width: "100%",
   },
 
   checkboxRow: {
     flexDirection: "row",
-
     alignItems: "center",
     justifyContent: "center",
-
-    marginBottom: 12,
+    marginBottom: 18,
   },
 
   checkbox: {
-    width: 24,
-    height: 24,
-
     borderWidth: 1.5,
     borderColor: COLORS.gray,
-
-    borderRadius: 3,
-
+    borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
-
     marginRight: 10,
   },
 
@@ -414,32 +454,20 @@ const styles = StyleSheet.create({
 
   checkboxText: {
     color: COLORS.blue,
-
-    fontSize: 13,
-
     textAlign: "left",
   },
 
   actionButton: {
-    width: 205,
-    height: 53,
-
-    borderRadius: 28,
-
     backgroundColor: COLORS.cyan,
-
     alignItems: "center",
     justifyContent: "center",
-
-    marginTop: 7,
+    marginTop: 12,
+    width: "82%",
+    maxWidth: 400,
   },
 
   buttonText: {
     color: COLORS.white,
-
-    fontSize: 17,
-
     fontWeight: "700",
   },
-
 });

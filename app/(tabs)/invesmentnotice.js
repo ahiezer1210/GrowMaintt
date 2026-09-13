@@ -13,9 +13,18 @@ import {
 export default function InvestmentReminder() {
   const { width, height } = useWindowDimensions();
 
-  const scale = Math.min(width / 390, height / 844);
+  const tablet = width >= 600;
+  const landscape = width > height;
 
-  const s = (value) => Math.round(value * scale);
+  const scale = tablet
+    ? landscape
+      ? Math.min(width / 700, height / 430)
+      : Math.min(width / 520, height / 760)
+    : Math.min(width / 330, height / 700);
+
+  const safeScale = Math.max(scale, 1);
+
+  const size = (value) => Math.round(value * safeScale);
 
   const navIcons = [
     "home-outline",
@@ -24,10 +33,6 @@ export default function InvestmentReminder() {
     "layers-outline",
     "account-outline",
   ];
-
-  const safeScale = Math.max(scale, 0.75);
-
-  const size = (value) => Math.round(value * safeScale);
 
   return (
     <View style={styles.screen}>
@@ -41,8 +46,8 @@ export default function InvestmentReminder() {
         style={[
           styles.header,
           {
-            height: size(115),
-            paddingHorizontal: size(17),
+            height: size(tablet ? 125 : 115),
+            paddingHorizontal: size(tablet ? 25 : 17),
           },
         ]}
       >
@@ -50,8 +55,8 @@ export default function InvestmentReminder() {
           style={[
             styles.backButton,
             {
-              width: size(41),
-              height: size(46),
+              width: size(tablet ? 50 : 41),
+              height: size(tablet ? 52 : 46),
             },
           ]}
           activeOpacity={0.7}
@@ -63,7 +68,7 @@ export default function InvestmentReminder() {
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={size(22)}
+            size={size(tablet ? 26 : 22)}
             color="#FFFF"
           />
         </TouchableOpacity>
@@ -72,8 +77,8 @@ export default function InvestmentReminder() {
           style={[
             styles.headerTitle,
             {
-              fontSize: size(19),
-              lineHeight: size(23),
+              fontSize: size(tablet ? 22 : 19),
+              lineHeight: size(tablet ? 27 : 23),
             },
           ]}
           numberOfLines={2}
@@ -85,15 +90,15 @@ export default function InvestmentReminder() {
           style={[
             styles.bellButton,
             {
-              width: size(30),
-              height: size(30),
-              borderRadius: size(15),
+              width: size(tablet ? 36 : 30),
+              height: size(tablet ? 36 : 30),
+              borderRadius: size(tablet ? 18 : 15),
             },
           ]}
         >
           <MaterialCommunityIcons
             name="bell-outline"
-            size={size(17)}
+            size={size(tablet ? 20 : 17)}
             color="#428574"
           />
         </View>
@@ -103,8 +108,8 @@ export default function InvestmentReminder() {
         style={[
           styles.main,
           {
-            borderTopLeftRadius: size(36),
-            borderTopRightRadius: size(36),
+            borderTopLeftRadius: size(tablet ? 42 : 36),
+            borderTopRightRadius: size(tablet ? 42 : 36),
           },
         ]}
       >
@@ -112,15 +117,16 @@ export default function InvestmentReminder() {
           style={[
             styles.content,
             {
-              paddingTop: size(15),
+              paddingTop: size(tablet ? 25 : 15),
+              paddingHorizontal: tablet ? size(30) : size(15),
             },
           ]}
         >
           <Image
             source={require("../../assets/images/invest.png.png")}
             style={{
-              width: size(190),
-              height: size(140),
+              width: size(tablet ? 300 : 240),
+              height: size(tablet ? 220 : 180),
             }}
             resizeMode="contain"
           />
@@ -129,8 +135,8 @@ export default function InvestmentReminder() {
             style={[
               styles.successTitle,
               {
-                fontSize: size(22),
-                marginTop: size(5),
+                fontSize: size(tablet ? 30 : 25),
+                marginTop: size(tablet ? 8 : 5),
               },
             ]}
             adjustsFontSizeToFit
@@ -144,8 +150,9 @@ export default function InvestmentReminder() {
             style={[
               styles.successSubtitle,
               {
-                fontSize: size(13),
-                marginTop: size(30),
+                fontSize: size(tablet ? 18 : 16),
+                lineHeight: size(tablet ? 25 : 21),
+                marginTop: size(tablet ? 38 : 30),
               },
             ]}
             adjustsFontSizeToFit
@@ -160,8 +167,8 @@ export default function InvestmentReminder() {
             style={[
               styles.investQuestion,
               {
-                fontSize: size(13),
-                marginTop: size(35),
+                fontSize: size(tablet ? 18 : 16),
+                marginTop: size(tablet ? 42 : 35),
               },
             ]}
             adjustsFontSizeToFit
@@ -175,21 +182,20 @@ export default function InvestmentReminder() {
             style={[
               styles.actionButton,
               {
-                width: size(210),
-                height: size(40),
-                borderRadius: size(22),
-                marginTop: size(18),
+                width: size(tablet ? 320 : 250),
+                height: size(tablet ? 56 : 48),
+                borderRadius: size(tablet ? 28 : 24),
+                marginTop: size(tablet ? 24 : 18),
               },
             ]}
             activeOpacity={0.8}
-            onPress={() => {
-            }}
+            onPress={() => router.push("/investments")}
           >
             <Text
               style={[
                 styles.buttonText,
                 {
-                  fontSize: size(14),
+                  fontSize: size(tablet ? 18 : 15),
                 },
               ]}
             >
@@ -202,8 +208,8 @@ export default function InvestmentReminder() {
           style={[
             styles.bottomBar,
             {
-              height: size(85),
-              borderTopLeftRadius: size(50),
+              height: size(tablet ? 100 : 85),
+              borderTopLeftRadius: size(tablet ? 60 : 50),
             },
           ]}
         >
@@ -215,7 +221,7 @@ export default function InvestmentReminder() {
             >
               <MaterialCommunityIcons
                 name={icon}
-                size={size(index === 2 ? 28 : 24)}
+                size={size(index === 2 ? (tablet ? 32 : 28) : tablet ? 28 : 24)}
                 color="#FFFF"
               />
             </TouchableOpacity>

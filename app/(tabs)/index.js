@@ -2,11 +2,11 @@ import { router } from "expo-router";
 import { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withSpring,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 
 export default function Inicio() {
@@ -47,7 +47,7 @@ export default function Inicio() {
   return (
     <View style={styles.container}>
       <Text style={styles.welcome}>
-        ¡Bienvenido!
+        ¡Welcome!
       </Text>
 
       <Animated.Image
