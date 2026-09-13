@@ -64,7 +64,7 @@ export default function SignupScreen() {
       Alert.alert("Registration successfully", "", [
         {
           text: "Ok",
-          onPress: () => router.push("/home"),
+          onPress: () => router.push("/verificationage"),
         },
       ]);
     } catch (error) {

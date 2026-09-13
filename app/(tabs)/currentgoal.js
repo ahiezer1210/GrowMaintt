@@ -1,17 +1,30 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { useState } from "react";
 import {
+  Alert,
   Button,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TextInput,
+  TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
+import { auth, db } from "../../firebaseConfig";
 
 const mainGoal = {
   title: "Beach trip",
@@ -67,11 +80,78 @@ const navItems = [
   },
 ];
 
+export default function SavingsGoalsScreen() {
+  const { width, height } = useWindowDimensions();
+  const s = (size) => (width / 390) * size;
+  const isLargeScreen = width >= 768;
+
+  const [mainGoal, setMainGoal] = useState(null);
 export default function SavingsGoalsScreen({ navigation }) {
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [goal, setGoal] = useState("");
   const [amount, setAmount] = useState("");
   const [savedgoal, setSavedgoal] = useState([]);
+  const [expandedGoal, setExpandedGoal] = useState(null);
+  const [abono, setAbono] = useState("");
+  const [addingMoney, setAddingMoney] = useState(false);
+
+  useEffect(() => {
+    let unsubscribeGoals;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        setMainGoal(null);
+        setSavedgoal([]);
+        return;
+      }
+
+      const goalsQuery = query(
+        collection(db, "Metas de Ahorro"),
+        where("uid", "==", user.uid)
+      );
+
+      unsubscribeGoals = onSnapshot(
+        goalsQuery,
+        (snapshot) => {
+          const goals = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+
+          const main = goals.find(
+            (item) => item.isMainGoal === true
+          );
+
+          const others = goals.filter(
+            (item) => item.isMainGoal !== true
+          );
+
+          setMainGoal(main || null);
+          setSavedgoal(others);
+        },
+        (error) => {
+          console.log("ERROR LOADING GOALS:", error);
+          setMainGoal(null);
+          setSavedgoal([]);
+        }
+      );
+    });
+
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeGoals) {
+        unsubscribeGoals();
+      }
+    };
+  }, []);
+
+  const mainTarget = mainGoal
+    ? Number(mainGoal.targetAmount || 0)
+    : 0;
+
+  const mainSaved = mainGoal
+    ? Number(mainGoal.currentSavings || 0)
+    : 0;
 
   const { width } = useWindowDimensions();
 
@@ -85,31 +165,91 @@ export default function SavingsGoalsScreen({ navigation }) {
         ? value * 0.9
         : value;
 
+  const progress =
+    mainTarget > 0
+      ? Math.min(
+          100,
+          Math.round((mainSaved / mainTarget) * 100)
+        )
+      : 0;
+
+  const remaining = Math.max(
+    0,
+    mainTarget - mainSaved
+  );
+
+  const hasGoals =
+    mainGoal !== null || savedgoal.length > 0;
   const progress = Math.round(
     (mainGoal.saved / mainGoal.target) * 100
   );
 
   const remaining = mainGoal.target - mainGoal.saved;
 
-  const savegoal = () => {
-    if (!goal || !amount) {
+  const toggleGoal = (goalId) => {
+    if (expandedGoal === goalId) {
+      setExpandedGoal(null);
+      setAbono("");
+    } else {
+      setExpandedGoal(goalId);
+      setAbono("");
+    }
+  };
+
+  const handleAddMoney = async (selectedGoal) => {
+    const value = Number(abono);
+
+    if (!abono || isNaN(value) || value <= 0) {
+      Alert.alert(
+        "Invalid amount",
+        "Please enter a valid amount."
+      );
       return;
     }
 
-    setSavedgoal([
-      ...savedgoal,
-      {
-        id: Date.now().toString(),
-        icon: "bullseye-arrow",
-        title: goal,
-        objective: Number(amount.replace("$", "")),
-        saved: 0,
-      },
-    ]);
+    const current = Number(
+      selectedGoal.currentSavings || 0
+    );
 
-    setGoal("");
-    setAmount("");
-    setMostrarFormulario(false);
+    const target = Number(
+      selectedGoal.targetAmount || 0
+    );
+
+    if (current + value > target) {
+      const available = Math.max(0, target - current);
+
+      Alert.alert(
+        "Amount too high",
+        `You can add up to $${available.toFixed(2)} to complete this goal.`
+      );
+      return;
+    }
+
+    try {
+      setAddingMoney(true);
+
+      await updateDoc(
+        doc(db, "Metas de Ahorro", selectedGoal.id),
+        {
+          currentSavings: current + value,
+        }
+      );
+
+      setAbono("");
+      Alert.alert(
+        "Amount added",
+        "Your savings have been updated successfully."
+      );
+    } catch (error) {
+      console.log("ERROR ADDING MONEY:", error);
+
+      Alert.alert(
+        "Error",
+        "The amount could not be added."
+      );
+    } finally {
+      setAddingMoney(false);
+    }
   };
 
   const abrirNotificaciones = () => {
@@ -122,13 +262,26 @@ export default function SavingsGoalsScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.screen}>
+    <View style={styles.container}>
       <StatusBar
+        barStyle="light-content"
+        backgroundColor="#0b1624"
         translucent
         backgroundColor="#071426"
         barStyle="light-content"
       />
 
+      <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => router.back()}
+          style={styles.backButton}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={s(25)}
+            color="#fff"
+          />
+        </TouchableOpacity>
       <View style={styles.app}>
         <View
           style={[
@@ -185,6 +338,15 @@ export default function SavingsGoalsScreen({ navigation }) {
             />
           </TouchableOpacity>
 
+        <Text
+          style={[
+            styles.headerTitle,
+            { fontSize: s(22) },
+          ]}
+        >
+          Savings Goals
+        </Text>
+      </View>
           <Text
             style={[
               styles.headerTitle,
@@ -257,6 +419,60 @@ export default function SavingsGoalsScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {!hasGoals ? (
+          <View style={styles.noGoalsContainer}>
+            <Text
+              style={[
+                styles.noGoalsText,
+                { fontSize: s(16) },
+              ]}
+            >
+              No goals
+            </Text>
+          </View>
+        ) : (
+          <>
+            {mainGoal && (
+              <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => toggleGoal(mainGoal.id)}
+              >
+                <View style={styles.mainGoalCard}>
+                  <View style={styles.mainGoalHeader}>
+                    <View>
+                      <Text
+                        style={[
+                          styles.mainGoalLabel,
+                          { fontSize: s(13) },
+                        ]}
+                      >
+                        MAIN GOAL
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.mainGoalTitle,
+                          { fontSize: s(27) },
+                        ]}
+                      >
+                        {mainGoal.goalName}
+                      </Text>
+                    </View>
+
+                    <MaterialCommunityIcons
+                      name={
+                        expandedGoal === mainGoal.id
+                          ? "chevron-up"
+                          : "chevron-down"
+                      }
+                      size={s(25)}
+                      color="#fff"
+                    />
+                  </View>
         <View style={styles.subtitleContainer}>
           <Text
             style={[
@@ -334,6 +550,16 @@ export default function SavingsGoalsScreen({ navigation }) {
                   />
                 </View>
 
+                  <View style={styles.amountRow}>
+                    <View>
+                      <Text
+                        style={[
+                          styles.amountLabel,
+                          { fontSize: s(12) },
+                        ]}
+                      >
+                        SAVED
+                      </Text>
                 <View style={styles.cardTitles}>
                   <Text
                     style={[
@@ -346,6 +572,15 @@ export default function SavingsGoalsScreen({ navigation }) {
                     Main goal
                   </Text>
 
+                      <Text
+                        style={[
+                          styles.savedAmount,
+                          { fontSize: s(24) },
+                        ]}
+                      >
+                        ${mainSaved.toFixed(2)}
+                      </Text>
+                    </View>
                   <Text
                     style={[
                       styles.cardTitle,
@@ -384,6 +619,26 @@ export default function SavingsGoalsScreen({ navigation }) {
                   </Text>
                 </View>
 
+                    <View style={styles.targetContainer}>
+                      <Text
+                        style={[
+                          styles.amountLabel,
+                          { fontSize: s(12) },
+                        ]}
+                      >
+                        TARGET
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.targetAmount,
+                          { fontSize: s(18) },
+                        ]}
+                      >
+                        ${mainTarget.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
                 <View style={styles.divider} />
 
                 <View>
@@ -411,6 +666,16 @@ export default function SavingsGoalsScreen({ navigation }) {
                 </View>
               </View>
 
+                  <View style={styles.progressBackground}>
+                    <View
+                      style={[
+                        styles.progressBar,
+                        {
+                          width: `${progress}%`,
+                        },
+                      ]}
+                    />
+                  </View>
               <View style={styles.progressBar}>
                 <View
                   style={[
@@ -431,6 +696,25 @@ export default function SavingsGoalsScreen({ navigation }) {
                 />
               </View>
 
+                  <View style={styles.progressInfo}>
+                    <Text
+                      style={[
+                        styles.progressText,
+                        { fontSize: s(12) },
+                      ]}
+                    >
+                      {progress}% completed
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.progressText,
+                        { fontSize: s(12) },
+                      ]}
+                    >
+                      ${remaining.toFixed(2)} left
+                    </Text>
+                  </View>
               <View style={styles.progressInfo}>
                 <View style={styles.info}>
                   <MaterialCommunityIcons
@@ -451,6 +735,111 @@ export default function SavingsGoalsScreen({ navigation }) {
                   </Text>
                 </View>
 
+                  <Text
+                    style={[
+                      styles.deadline,
+                      { fontSize: s(12) },
+                    ]}
+                  >
+                    Deadline:{" "}
+                    {mainGoal.endDate || "No deadline"}
+                  </Text>
+
+                  {expandedGoal === mainGoal.id && (
+                    <View style={styles.expandedContent}>
+                      <Text
+                        style={[
+                          styles.descriptionTitle,
+                          { fontSize: s(14) },
+                        ]}
+                      >
+                        Description
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.descriptionText,
+                          { fontSize: s(13) },
+                        ]}
+                      >
+                        {mainGoal.description ||
+                          "No description"}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.addMoneyTitle,
+                          { fontSize: s(14) },
+                        ]}
+                      >
+                        Add amount
+                      </Text>
+
+                      <TextInput
+                        style={[
+                          styles.addMoneyInput,
+                          { fontSize: s(14) },
+                        ]}
+                        placeholder="Enter amount"
+                        placeholderTextColor="#999"
+                        keyboardType="decimal-pad"
+                        value={abono}
+                        onChangeText={setAbono}
+                      />
+
+                      <TouchableOpacity
+                        style={styles.addMoneyButton}
+                        onPress={() =>
+                          handleAddMoney(mainGoal)
+                        }
+                        disabled={addingMoney}
+                      >
+                        <Text
+                          style={[
+                            styles.addMoneyButtonText,
+                            { fontSize: s(14) },
+                          ]}
+                        >
+                          {addingMoney
+                            ? "Adding..."
+                            : "Add amount"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+
+            {savedgoal.length > 0 && (
+              <>
+                <Text
+                  style={[
+                    styles.sectionTitle,
+                    { fontSize: s(19) },
+                  ]}
+                >
+                  My other goals
+                </Text>
+
+                {savedgoal.map((goal) => {
+                  const target = Number(
+                    goal.targetAmount || 0
+                  );
+
+                  const saved = Number(
+                    goal.currentSavings || 0
+                  );
+
+                  const goalProgress =
+                    target > 0
+                      ? Math.min(
+                          100,
+                          Math.round(
+                            (saved / target) * 100
+                          )
+                        )
+                      : 0;
                 <View style={styles.info}>
                   <MaterialCommunityIcons
                     name="cash-minus"
@@ -518,6 +907,32 @@ export default function SavingsGoalsScreen({ navigation }) {
                 (goal.saved / goal.objective) * 100
               );
 
+                  return (
+                    <TouchableOpacity
+                      key={goal.id}
+                      activeOpacity={0.9}
+                      onPress={() => toggleGoal(goal.id)}
+                    >
+                      <View
+                        style={[
+                          styles.otherGoalCard,
+                          expandedGoal === goal.id &&
+                            styles.expandedOtherGoal,
+                        ]}
+                      >
+                        <View style={styles.otherGoalTop}>
+                          <View
+                            style={styles.goalIconContainer}
+                          >
+                            <MaterialCommunityIcons
+                              name={
+                                goal.icon ||
+                                "wallet-outline"
+                              }
+                              size={s(24)}
+                              color="#0b1624"
+                            />
+                          </View>
               return (
                 <TouchableOpacity
                   key={goal.id}
@@ -546,6 +961,17 @@ export default function SavingsGoalsScreen({ navigation }) {
                     />
                   </View>
 
+                          <View
+                            style={styles.otherGoalInfo}
+                          >
+                            <Text
+                              style={[
+                                styles.otherGoalTitle,
+                                { fontSize: s(16) },
+                              ]}
+                            >
+                              {goal.goalName}
+                            </Text>
                   <View style={styles.goalInfo}>
                     <Text
                       style={[
@@ -558,6 +984,16 @@ export default function SavingsGoalsScreen({ navigation }) {
                       {goal.title}
                     </Text>
 
+                            <Text
+                              style={[
+                                styles.otherGoalAmount,
+                                { fontSize: s(13) },
+                              ]}
+                            >
+                              ${saved.toFixed(2)} / $
+                              {target.toFixed(2)}
+                            </Text>
+                          </View>
                     <Text
                       style={[
                         styles.goalObjective,
@@ -594,6 +1030,63 @@ export default function SavingsGoalsScreen({ navigation }) {
                     </Text>
                   </View>
 
+                          <MaterialCommunityIcons
+                            name={
+                              expandedGoal === goal.id
+                                ? "chevron-up"
+                                : "chevron-down"
+                            }
+                            size={s(23)}
+                            color="#0b1624"
+                          />
+                        </View>
+
+                        <View
+                          style={
+                            styles.otherProgressBackground
+                          }
+                        >
+                          <View
+                            style={[
+                              styles.otherProgressBar,
+                              {
+                                width: `${goalProgress}%`,
+                              },
+                            ]}
+                          />
+                        </View>
+
+                        {expandedGoal === goal.id && (
+                          <View
+                            style={styles.expandedContent}
+                          >
+                            <Text
+                              style={[
+                                styles.descriptionTitle,
+                                { fontSize: s(14) },
+                              ]}
+                            >
+                              Description
+                            </Text>
+
+                            <Text
+                              style={[
+                                styles.descriptionText,
+                                { fontSize: s(13) },
+                              ]}
+                            >
+                              {goal.description ||
+                                "No description"}
+                            </Text>
+
+                            <Text
+                              style={[
+                                styles.addMoneyTitle,
+                                { fontSize: s(14) },
+                              ]}
+                            >
+                              Add amount
+                            </Text>
                   <MaterialCommunityIcons
                     name="chevron-right"
                     size={scale(24, 29)}
@@ -632,6 +1125,49 @@ export default function SavingsGoalsScreen({ navigation }) {
                   New Goal
                 </Text>
 
+                            <TextInput
+                              style={[
+                                styles.addMoneyInput,
+                                { fontSize: s(14) },
+                              ]}
+                              placeholder="Enter amount"
+                              placeholderTextColor="#999"
+                              keyboardType="decimal-pad"
+                              value={abono}
+                              onChangeText={setAbono}
+                            />
+
+                            <TouchableOpacity
+                              style={
+                                styles.addMoneyButton
+                              }
+                              onPress={() =>
+                                handleAddMoney(goal)
+                              }
+                              disabled={addingMoney}
+                            >
+                              <Text
+                                style={[
+                                  styles.addMoneyButtonText,
+                                  { fontSize: s(14) },
+                                ]}
+                              >
+                                {addingMoney
+                                  ? "Adding..."
+                                  : "Add amount"}
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
+              </>
+            )}
+          </>
+        )}
+      </ScrollView>
                 <TextInput
                   style={styles.input}
                   placeholder="Buy a laptop"
@@ -711,8 +1247,9 @@ export default function SavingsGoalsScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  container: {
     flex: 1,
+    backgroundColor: "#0b1624",
     backgroundColor: "#FFF",
   },
 
@@ -722,24 +1259,42 @@ const styles = StyleSheet.create({
   },
 
   header: {
+    height: 90,
     width: "100%",
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 20,
+    backgroundColor: "#0b1624",
     justifyContent: "space-between",
   },
 
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
   back: {
     width: 30,
     alignItems: "flex-start",
     justifyContent: "center",
+    marginRight: 10,
   },
 
   headerTitle: {
+    color: "#fff",
+    fontWeight: "bold",
     color: "#FFF",
     fontWeight: "700",
   },
 
+  scrollContent: {
+    backgroundColor: "#fff",
+    minHeight: "100%",
+    borderTopLeftRadius: 35,
+    borderTopRightRadius: 35,
+    padding: 20,
+    paddingBottom: 40,
   headerBell: {
     justifyContent: "center",
   },
@@ -769,9 +1324,13 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 
+  mainGoalCard: {
   mainGoal: {
     width: "100%",
     backgroundColor: "#25B7D3",
+    borderRadius: 25,
+    padding: 22,
+    marginBottom: 30,
     marginBottom: 10,
     elevation: 4,
     shadowColor: "#000",
@@ -783,12 +1342,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 
-  cardHeader: {
+  mainGoalHeader: {
     flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 15,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
 
+  mainGoalLabel: {
+    color: "rgba(255,255,255,0.75)",
+    fontWeight: "bold",
+    marginBottom: 4,
   goalIconCircle: {
     backgroundColor: "rgba(255,255,255,0.8)",
     alignItems: "center",
@@ -805,68 +1368,66 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
 
-  cardTitle: {
-    color: "#0b1624",
+  mainGoalTitle: {
+    color: "#fff",
     fontWeight: "bold",
   },
 
-  amounts: {
+  amountRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    marginVertical: 10,
+    alignItems: "flex-end",
+    marginTop: 25,
   },
 
-  divider: {
-    width: 1,
-    height: 30,
-    backgroundColor: "#0b1624",
-    opacity: 0.3,
-  },
-
-  label: {
-    color: "#0b1624",
-    opacity: 0.7,
-  },
-
-  amount: {
-    color: "#0b1624",
+  amountLabel: {
+    color: "rgba(255,255,255,0.75)",
     fontWeight: "bold",
+  },
+
+  savedAmount: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginTop: 3,
+  },
+
+  targetContainer: {
+    alignItems: "flex-end",
+  },
+
+  targetAmount: {
+    color: "#fff",
+    fontWeight: "bold",
+    marginTop: 3,
+  },
+
+  progressBackground: {
+    height: 8,
+    backgroundColor: "rgba(255,255,255,0.35)",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginTop: 20,
   },
 
   progressBar: {
-    flexDirection: "row",
-    height: 8,
-    borderRadius: 4,
-    marginVertical: 15,
-    overflow: "hidden",
-  },
-
-  progressDone: {
-    backgroundColor: "#0b1624",
-  },
-
-  progressLeft: {
-    backgroundColor: "#e0f7fa",
+    height: "100%",
+    backgroundColor: "#fff",
+    borderRadius: 10,
   },
 
   progressInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginTop: 8,
   },
 
-  info: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  infoText: {
-    color: "#0b1624",
-    marginLeft: 5,
+  progressText: {
+    color: "#fff",
   },
 
   deadline: {
+    color: "rgba(255,255,255,0.85)",
+    marginTop: 15,
     flexDirection: "row",
     alignItems: "center",
     marginTop: 5,
@@ -894,13 +1455,32 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: "#0b1624",
     fontWeight: "bold",
-    marginLeft: 10,
+    marginBottom: 15,
   },
 
+  otherGoalCard: {
+    backgroundColor: "#f2f2f2",
+    borderRadius: 18,
+    padding: 16,
+    marginBottom: 15,
+  },
+
+  expandedOtherGoal: {
+    backgroundColor: "#f2f2f2",
+  },
+
+  otherGoalTop: {
   goalItem: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
+  },
+
+  goalIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: "#fff",
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     marginBottom: 0,
@@ -917,49 +1497,89 @@ const styles = StyleSheet.create({
   goalIcon: {
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#25B7D3",
+    marginRight: 13,
   },
 
-  goalInfo: {
+  otherGoalInfo: {
     flex: 1,
-    paddingHorizontal: 15,
   },
 
-  goalName: {
+  otherGoalTitle: {
     color: "#0b1624",
     fontWeight: "bold",
+    marginBottom: 4,
   },
 
-  goalObjective: {
+  otherGoalAmount: {
     color: "#6b7280",
   },
 
-  goalAmount: {
-    alignItems: "flex-end",
-    marginRight: 10,
+  otherProgressBackground: {
+    height: 6,
+    backgroundColor: "#d8d8d8",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginTop: 13,
   },
 
-  saved: {
-    color: "#0b1624",
+  otherProgressBar: {
+    height: "100%",
+    backgroundColor: "#25B7D3",
+    borderRadius: 10,
+  },
+
+  expandedContent: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(11,24,38,0.15)",
+  },
+
+  descriptionTitle: {
     fontWeight: "bold",
+    color: "#0b1624",
+    marginBottom: 5,
   },
 
+  descriptionText: {
+    color: "#4b5563",
+    marginBottom: 15,
+  },
+
+  addMoneyTitle: {
+    fontWeight: "bold",
+    color: "#0b1624",
+    marginBottom: 8,
+  },
+
+  addMoneyInput: {
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 12,
+    padding: 12,
+    color: "#0b1624",
+    marginBottom: 10,
   percentage: {
     color: "#0b1624",
   },
 
-  createButton: {
-    width: "100%",
+  addMoneyButton: {
     backgroundColor: "#0b1624",
+    borderRadius: 20,
+    height: 42,
     alignItems: "center",
     justifyContent: "center",
   },
 
+  addMoneyButtonText: {
+    color: "#fff",
   createText: {
     color: "#FFFFFF",
     fontWeight: "bold",
   },
 
+  noGoalsContainer: {
   bottomBar: {
     position: "absolute",
     bottom: 0,
@@ -977,6 +1597,12 @@ const styles = StyleSheet.create({
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
+    paddingVertical: 30,
+  },
+
+  noGoalsText: {
+    color: "#6b7280",
+    fontWeight: "bold",
   },
 
   form: {

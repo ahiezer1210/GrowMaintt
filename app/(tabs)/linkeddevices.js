@@ -2,8 +2,22 @@ import {
   Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Device from "expo-device";
 import { router } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
 import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,33 +25,13 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-
-const devices = [
-  {
-    icon: "phone-portrait-outline",
-    name: "My device",
-    details: "Samsung A06\nEl Salvador",
-    active: true,
-    status: "Active now",
-  },
-  {
-    icon: "laptop-outline",
-    name: "Windows 11",
-    details: "El Salvador\nChrome · Windows",
-    active: false,
-    status: "Last active: yesterday",
-  },
-  {
-    icon: "phone-portrait-outline",
-    name: "Samsung Galaxy A06",
-    details: "Sign in: 12/01\nEl Salvador",
-    active: false,
-    status: "Last active: 3 months ago",
-  },
-];
+import { auth, db } from "../../firebaseConfig.js";
 
 export default function Devices() {
   const { width } = useWindowDimensions();
+
+  const [devices, setDevices] = useState([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState(null);
 
   const small = width < 350;
   const tablet = width >= 600;
@@ -90,6 +84,324 @@ export default function Devices() {
     },
   ];
 
+  useEffect(() => {
+    let unsubscribeAuth;
+    let unsubscribeDevices;
+
+    const registerDevice = async (user) => {
+      try {
+        let deviceId = await AsyncStorage.getItem(
+          "growmaint_device_id"
+        );
+
+        if (!deviceId) {
+          deviceId =
+            `${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2, 12)}`;
+
+          await AsyncStorage.setItem(
+            "growmaint_device_id",
+            deviceId
+          );
+        }
+
+        setCurrentDeviceId(deviceId);
+
+        let deviceName =
+          Device.deviceName ||
+          Device.modelName ||
+          "My device";
+
+        let deviceType = "phone";
+
+        if (Platform.OS === "web") {
+          deviceType = "desktop";
+          deviceName = "Web Browser";
+        } else if (
+          Device.deviceType === Device.DeviceType.TABLET
+        ) {
+          deviceType = "tablet";
+        } else if (
+          Device.deviceType === Device.DeviceType.DESKTOP
+        ) {
+          deviceType = "desktop";
+        }
+
+        const systemName =
+          Device.osName || Platform.OS;
+
+        const deviceRef = doc(
+          db,
+          "Dispositivos Vinculados",
+          user.uid,
+          "linkedDevices",
+          deviceId
+        );
+
+        await setDoc(
+          deviceRef,
+          {
+            deviceId,
+            deviceName,
+            deviceType,
+            systemName,
+            modelName: Device.modelName || "",
+            osVersion: Device.osVersion || "",
+            lastActive: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        const devicesRef = collection(
+          db,
+          "Dispositivos Vinculados",
+          user.uid,
+          "linkedDevices"
+        );
+
+        unsubscribeDevices = onSnapshot(
+          devicesRef,
+          (snapshot) => {
+            const deviceList = snapshot.docs.map(
+              (item) => ({
+                id: item.id,
+                ...item.data(),
+              })
+            );
+
+            deviceList.sort((a, b) => {
+              if (a.id === deviceId) return -1;
+              if (b.id === deviceId) return 1;
+
+              const dateA =
+                a.lastActive?.toDate
+                  ? a.lastActive.toDate()
+                  : new Date(0);
+
+              const dateB =
+                b.lastActive?.toDate
+                  ? b.lastActive.toDate()
+                  : new Date(0);
+
+              return dateB - dateA;
+            });
+
+            setDevices(deviceList);
+          },
+          (error) => {
+            console.log(
+              "Error loading linked devices:",
+              error
+            );
+
+            Alert.alert(
+              "Error",
+              "The linked devices could not be loaded."
+            );
+          }
+        );
+      } catch (error) {
+        console.log(
+          "Error registering device:",
+          error
+        );
+
+        Alert.alert(
+          "Error",
+          "The device could not be registered."
+        );
+      }
+    };
+
+    unsubscribeAuth = onAuthStateChanged(
+      auth,
+      async (user) => {
+        if (!user) {
+          setDevices([]);
+          setCurrentDeviceId(null);
+          return;
+        }
+
+        await registerDevice(user);
+      }
+    );
+
+    return () => {
+      if (unsubscribeAuth) {
+        unsubscribeAuth();
+      }
+
+      if (unsubscribeDevices) {
+        unsubscribeDevices();
+      }
+    };
+  }, []);
+
+  const getDeviceIcon = (device) => {
+    if (device.deviceType === "desktop") {
+      return "laptop-outline";
+    }
+
+    if (device.deviceType === "tablet") {
+      return "tablet-portrait-outline";
+    }
+
+    return "phone-portrait-outline";
+  };
+
+  const getDeviceName = (device) => {
+    if (device.id === currentDeviceId) {
+      return "My device";
+    }
+
+    if (device.deviceName) {
+      return device.deviceName;
+    }
+
+    return "Unknown device";
+  };
+
+  const getDeviceDetails = (device) => {
+    const location = "El Salvador";
+
+    if (device.deviceType === "desktop") {
+      return `${location}\n${
+        device.systemName || "Desktop"
+      }`;
+    }
+
+    const model =
+      device.modelName ||
+      device.systemName ||
+      "Mobile device";
+
+    return `${model}\n${location}`;
+  };
+
+  const getDeviceStatus = (device) => {
+    if (device.id === currentDeviceId) {
+      return {
+        active: true,
+        text: "Active now",
+      };
+    }
+
+    if (!device.lastActive?.toDate) {
+      return {
+        active: false,
+        text: "Last active: unknown",
+      };
+    }
+
+    const lastActive = device.lastActive.toDate();
+    const now = new Date();
+
+    const difference = now - lastActive;
+
+    const minutes = Math.floor(
+      difference / 60000
+    );
+
+    const hours = Math.floor(
+      difference / 3600000
+    );
+
+    const days = Math.floor(
+      difference / 86400000
+    );
+
+    if (minutes < 1) {
+      return {
+        active: false,
+        text: "Last active: just now",
+      };
+    }
+
+    if (minutes < 60) {
+      return {
+        active: false,
+        text: `Last active: ${minutes} min ago`,
+      };
+    }
+
+    if (hours < 24) {
+      return {
+        active: false,
+        text: `Last active: ${hours}h ago`,
+      };
+    }
+
+    if (days === 1) {
+      return {
+        active: false,
+        text: "Last active: yesterday",
+      };
+    }
+
+    return {
+      active: false,
+      text: `Last active: ${days} days ago`,
+    };
+  };
+
+  const unlinkDevice = (device) => {
+    if (device.id === currentDeviceId) {
+      Alert.alert(
+        "Current device",
+        "You cannot unlink the device you are currently using."
+      );
+
+      return;
+    }
+
+    Alert.alert(
+      "Unlink device",
+      `Are you sure you want to unlink ${getDeviceName(
+        device
+      )}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Unlink",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const user = auth.currentUser;
+
+              if (!user) {
+                return;
+              }
+
+              await deleteDoc(
+                doc(
+                  db,
+                  "Dispositivos Vinculados",
+                  user.uid,
+                  "linkedDevices",
+                  device.id
+                )
+              );
+            } catch (error) {
+              console.log(
+                "Error unlinking device:",
+                error
+              );
+
+              Alert.alert(
+                "Error",
+                "The device could not be unlinked."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const abrirNotificaciones = () => {
     router.push({
       pathname: "/notifications",
@@ -101,8 +413,6 @@ export default function Devices() {
 
   return (
     <View style={styles.container}>
-
-      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -119,8 +429,12 @@ export default function Devices() {
             styles.backButton,
             {
               transform: [
-                { translateY: 4 * scale },
-                { translateX: -4 * scale },
+                {
+                  translateY: 4 * scale,
+                },
+                {
+                  translateX: -4 * scale,
+                },
               ],
             },
           ]}
@@ -139,17 +453,37 @@ export default function Devices() {
             styles.title,
             {
               fontSize:
-                25 * (small ? 0.85 : tablet ? 1.15 : 1),
+                25 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1),
               lineHeight:
-                23 * (small ? 0.85 : tablet ? 1.15 : 1),
+                23 *
+                (small
+                  ? 0.85
+                  : tablet
+                    ? 1.15
+                    : 1),
               transform: [
                 {
                   translateX:
-                    4 * (small ? 0.85 : tablet ? 1.15 : 1),
+                    4 *
+                    (small
+                      ? 0.85
+                      : tablet
+                        ? 1.15
+                        : 1),
                 },
                 {
                   translateY:
-                    14 * (small ? 0.85 : tablet ? 1.15 : 1),
+                    14 *
+                    (small
+                      ? 0.85
+                      : tablet
+                        ? 1.15
+                        : 1),
                 },
               ],
             },
@@ -163,7 +497,9 @@ export default function Devices() {
             styles.headerBell,
             {
               transform: [
-                { translateY: 3 * scale },
+                {
+                  translateY: 3 * scale,
+                },
               ],
             },
           ]}
@@ -178,7 +514,6 @@ export default function Devices() {
         </TouchableOpacity>
       </View>
 
-      {/* CARD PRINCIPAL */}
       <View
         style={[
           styles.main,
@@ -206,96 +541,118 @@ export default function Devices() {
             Devices
           </Text>
 
-          {devices.map((device, index) => (
-            <View
-              key={index}
-              style={[
-                styles.deviceCard,
-                {
-                  padding: sizes.padding,
-                  borderRadius: sizes.cardRadius,
-                },
-                small && styles.deviceCardSmall,
-                tablet && styles.deviceCardTablet,
-              ]}
-            >
+          {devices.map((device) => {
+            const status =
+              getDeviceStatus(device);
+
+            return (
               <View
+                key={device.id}
                 style={[
-                  styles.deviceIcon,
-                  small && styles.deviceIconSmall,
+                  styles.deviceCard,
+                  {
+                    padding: sizes.padding,
+                    borderRadius:
+                      sizes.cardRadius,
+                  },
+                  small &&
+                    styles.deviceCardSmall,
+                  tablet &&
+                    styles.deviceCardTablet,
                 ]}
               >
-                <Ionicons
-                  name={device.icon}
-                  size={sizes.icon}
-                  color="#3A7AFE"
-                />
-              </View>
-
-              <View style={styles.deviceInfo}>
-                <Text
+                <View
                   style={[
-                    styles.deviceName,
-                    small && styles.deviceNameSmall,
-                  ]}
-                  numberOfLines={1}
-                >
-                  {device.name}
-                </Text>
-
-                <Text
-                  style={[
-                    styles.deviceDetails,
-                    small && styles.deviceDetailsSmall,
+                    styles.deviceIcon,
+                    small &&
+                      styles.deviceIconSmall,
                   ]}
                 >
-                  {device.details}
-                </Text>
-
-                <View style={styles.status}>
-                  <View
-                    style={[
-                      device.active
-                        ? styles.activeDot
-                        : styles.dot,
-                      small && styles.dotSmall,
-                    ]}
+                  <Ionicons
+                    name={getDeviceIcon(device)}
+                    size={sizes.icon}
+                    color="#3A7AFE"
                   />
+                </View>
 
+                <View style={styles.deviceInfo}>
                   <Text
                     style={[
-                      device.active
-                        ? styles.activeText
-                        : styles.lastActive,
+                      styles.deviceName,
                       small &&
-                        (device.active
-                          ? styles.activeTextSmall
-                          : styles.lastActiveSmall),
+                        styles.deviceNameSmall,
                     ]}
                     numberOfLines={1}
                   >
-                    {device.status}
+                    {getDeviceName(device)}
                   </Text>
-                </View>
-              </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.unlinkButton,
-                  small && styles.unlinkButtonSmall,
-                ]}
-              >
-                <Text
+                  <Text
+                    style={[
+                      styles.deviceDetails,
+                      small &&
+                        styles.deviceDetailsSmall,
+                    ]}
+                  >
+                    {getDeviceDetails(device)}
+                  </Text>
+
+                  <View style={styles.status}>
+                    <View
+                      style={[
+                        status.active
+                          ? styles.activeDot
+                          : styles.dot,
+                        small &&
+                          styles.dotSmall,
+                      ]}
+                    />
+
+                    <Text
+                      style={[
+                        status.active
+                          ? styles.activeText
+                          : styles.lastActive,
+                        small &&
+                          (status.active
+                            ? styles.activeTextSmall
+                            : styles.lastActiveSmall),
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {status.text}
+                    </Text>
+                  </View>
+                </View>
+
+                <TouchableOpacity
                   style={[
-                    styles.unlinkText,
-                    small && styles.unlinkTextSmall,
+                    styles.unlinkButton,
+                    small &&
+                      styles.unlinkButtonSmall,
+                    device.id ===
+                      currentDeviceId && {
+                      opacity: 0.35,
+                    },
                   ]}
+                  onPress={() =>
+                    unlinkDevice(device)
+                  }
+                  activeOpacity={0.7}
                 >
-                  Unlink
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+                  <Text
+                    style={[
+                      styles.unlinkText,
+                      small &&
+                        styles.unlinkTextSmall,
+                    ]}
+                  >
+                    Unlink
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
 
           <View
             style={[
@@ -309,11 +666,14 @@ export default function Devices() {
               color="#3A7AFE"
             />
 
-            <View style={styles.infoTextContainer}>
+            <View
+              style={styles.infoTextContainer}
+            >
               <Text
                 style={[
                   styles.infoTitle,
-                  small && styles.infoTitleSmall,
+                  small &&
+                    styles.infoTitleSmall,
                 ]}
               >
                 Keep your account secure
@@ -322,23 +682,24 @@ export default function Devices() {
               <Text
                 style={[
                   styles.infoText,
-                  small && styles.infoTextSmall,
+                  small &&
+                    styles.infoTextSmall,
                 ]}
               >
-                If you don't recognize a device, unlink it to protect your
-                account.
+                If you don't recognize a device,
+                unlink it to protect your account.
               </Text>
             </View>
           </View>
         </ScrollView>
 
-        {/* NAVBAR */}
         <View
           style={[
             styles.bottomBar,
             {
               height: 65 * scale,
-              borderTopLeftRadius: 78 * scale,
+              borderTopLeftRadius:
+                78 * scale,
             },
           ]}
         >
@@ -346,7 +707,9 @@ export default function Devices() {
             <TouchableOpacity
               key={item.icon}
               style={styles.navButton}
-              onPress={() => router.push(item.route)}
+              onPress={() =>
+                router.push(item.route)
+              }
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons

@@ -1,8 +1,10 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
+import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   StatusBar,
   StyleSheet,
@@ -10,18 +12,70 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { auth, db } from "../../firebaseConfig";
 
 export default function VerifyAge() {
   const [documentUri, setDocumentUri] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      quality: 1,
-      allowsEditing: false,
-    });
+    try {
+      const permission =
+        await ImagePicker.requestCameraPermissionsAsync();
 
-    if (!result.canceled) {
-      setDocumentUri(result.assets[0].uri);
+      if (!permission.granted) {
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: false,
+        quality: 0.2,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets?.length > 0) {
+        const asset = result.assets[0];
+
+        if (asset.base64) {
+          const newPhotoUrl =
+            `data:image/jpeg;base64,${asset.base64}`;
+
+          setDocumentUri(newPhotoUrl);
+        }
+      }
+    } catch (error) {
+      console.log("Error tomando foto:", error);
+    }
+  };
+
+  const saveDocument = async () => {
+    const user = auth.currentUser;
+
+    try {
+      setLoading(true);
+
+      if (user && documentUri) {
+        const userRef = doc(db, "Users", user.uid);
+
+        await setDoc(
+          userRef,
+          {
+            identityDocumentUrl: documentUri,
+            identityDocumentUpdatedAt: new Date(),
+          },
+          {
+            merge: true,
+          }
+        );
+      }
+
+      // Ir al Home después de guardar
+      router.replace("/(tabs)/home");
+
+    } catch (error) {
+      console.log("Error guardando documento:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,6 +87,7 @@ export default function VerifyAge() {
         barStyle="light-content"
       />
 
+      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -52,6 +107,7 @@ export default function VerifyAge() {
         <View style={{ width: 30 }} />
       </View>
 
+      {/* CONTENIDO */}
       <View style={styles.main}>
         <Text style={styles.title}>
           Scan your identity document
@@ -62,6 +118,7 @@ export default function VerifyAge() {
           verify that you are 18 years old or older.
         </Text>
 
+        {/* SI NO HAY FOTO */}
         {!documentUri ? (
           <TouchableOpacity
             style={styles.scanButton}
@@ -72,17 +129,20 @@ export default function VerifyAge() {
               size={32}
               color="#FFFFFF"
             />
+
             <Text style={styles.scanText}>
               Scan Document
             </Text>
           </TouchableOpacity>
         ) : (
           <>
+            {/* PREVISUALIZACIÓN */}
             <Image
               source={{ uri: documentUri }}
               style={styles.preview}
             />
 
+            {/* RETOMAR FOTO */}
             <TouchableOpacity
               style={styles.retakeButton}
               onPress={takePhoto}
@@ -92,15 +152,22 @@ export default function VerifyAge() {
               </Text>
             </TouchableOpacity>
 
+            {/* CONTINUAR */}
             <TouchableOpacity
               style={styles.continueButton}
-              onPress={() =>
-                router.push("/(tabs)/home")
-              }
+              onPress={saveDocument}
+              disabled={loading}
             >
-              <Text style={styles.continueText}>
-                Continue
-              </Text>
+              {loading ? (
+                <ActivityIndicator
+                  size="small"
+                  color="#FFFFFF"
+                />
+              ) : (
+                <Text style={styles.continueText}>
+                  Continue
+                </Text>
+              )}
             </TouchableOpacity>
           </>
         )}
