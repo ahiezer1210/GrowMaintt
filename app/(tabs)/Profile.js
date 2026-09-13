@@ -7,7 +7,8 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
+    useWindowDimensions
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -19,7 +20,7 @@ export default function Profile() {
             title: "Edite Profile",
             icon: "person-outline",
             color: "#27b6d1",
-            route: "/edit_profile"
+            route: "/Edit_profile"
         },
         {
             title: "Security",
@@ -56,10 +57,43 @@ export default function Profile() {
         });
     };
 
+    const { width, height } = useWindowDimensions();
+
+    const isSmallScreen = width < 360;
+    const isMediumScreen = width >= 360 && width < 600;
+    const isTablet = width >= 600;
+    const isLargeScreen = width >= 900;
+
+    const scale = isSmallScreen
+        ? 0.85
+        : isMediumScreen
+            ? 1
+            : isTablet
+                ? 1.35
+                : 1.5;
+
+    const horizontalPadding = isSmallScreen
+        ? 15
+        : isMediumScreen
+            ? 25
+            : isTablet
+                ? 60
+                : 45;
+
     return (
         <SafeAreaView style={styles.container}>
 
-            <View style={styles.header}>
+            <View style={[
+                styles.header,
+                {
+                    height: isSmallScreen
+                        ? 80
+                        : isTablet
+                            ? 100
+                            : 30,
+                    paddingHorizontal: isSmallScreen ? 15: isTablet ? 35: 20,
+                },
+            ]}>
 
                 <TouchableOpacity
                     style={styles.backButton}
@@ -67,22 +101,34 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="arrow-back"
-                        size={25}
+                        size={25 * scale}
                         color="#ffffff"
                     />
                 </TouchableOpacity>
 
-                <Text style={styles.title}>
+                <Text style={[
+                    styles.title,
+                    {
+                        fontSize: 25 * scale,
+                    },
+                ]}>
                     Profile
                 </Text>
 
                 <TouchableOpacity
-                    style={styles.notificationButton}
+                    style={[
+                        styles.notificationButton,
+                        {
+                            width: 40 * scale,
+                            height: 40 * scale,
+                            borderRadius: 20 * scale,
+                        },
+                    ]}
                     onPress={abrirNotificaciones}
                 >
                     <Ionicons
                         name="notifications-outline"
-                        size={22}
+                        size={22 * scale}
                         color="#081023"
                     />
                 </TouchableOpacity>
@@ -93,17 +139,36 @@ export default function Profile() {
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}
                 >
 
-                    <View style={styles.imageContainer}>
+                    <View style={[
+                        styles.imageContainer,
+                        {
+                            width: isTablet ? 120 : 90 ,
+                            height:  isTablet ? 120 : 90,
+                            borderRadius: isTablet ? 60 :45,
+                            top: 0,
+                        },
+                    ]}>
                         <Image
                             source={require("../../assets/images/Image.jpg")}
                             style={styles.logo}
                         />
                     </View>
 
-                    <Text style={styles.name}>
+                    <Text style={[
+                        styles.name,
+                        {
+                            fontSize: 18 * scale,
+                            marginTop: 100 * scale,
+                        },
+                    ]}>
                         Diana Cardoza
                     </Text>
 
@@ -113,7 +178,13 @@ export default function Profile() {
 
                             <TouchableOpacity
                                 key={index}
-                                style={styles.opttion}
+                                style={[
+                                    styles.opttion,
+                                    {
+                                        minHeight: 60 * scale,
+                                        marginBottom: 18 * scale,
+                                    },
+                                ]}
                                 onPress={() => {
                                     if (option.route) {
                                         router.push(option.route);
@@ -125,21 +196,30 @@ export default function Profile() {
                                     style={[
                                         styles.iconContainer,
                                         {
-                                            backgroundColor:
-                                                option.color
+                                            backgroundColor: option.color,
+                                            width: 45 * scale,
+                                            height: 45 * scale,
+                                            borderRadius: 12 * scale,
+                                            marginRight: 15 * scale,
                                         }
                                     ]}
                                 >
 
                                     <Ionicons
                                         name={option.icon}
-                                        size={22}
+                                        size={22 * scale}
                                         color="#FFFFFF"
                                     />
 
                                 </View>
 
-                                <Text style={styles.optionText}>
+                                <Text style={[
+                                    styles.optionText,
+                                    {
+                                        fontSize: 16 * scale,
+                                        lineHeight: 20 * scale,
+                                    },
+                                ]}>
                                     {option.title}
                                 </Text>
 
@@ -153,14 +233,29 @@ export default function Profile() {
 
             </View>
 
-            <View style={styles.bottomBar}>
+            <View style={[
+                styles.bottomBar,
+                {
+                    height: isSmallScreen
+                        ? 65
+                        : isTablet
+                            ? 85
+                            : 60,
+
+                            marginBottom: isSmallScreen
+                            ? 0
+                            : isTablet
+                            ? 0
+                            : -30,
+                }
+            ]}>
 
                 <TouchableOpacity
                     onPress={() => router.push("/home")}
                 >
                     <Ionicons
                         name="home-outline"
-                        size={27}
+                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -170,7 +265,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="bar-chart-outline"
-                        size={27}
+                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -182,7 +277,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="swap-horizontal-outline"
-                        size={27}
+                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -194,7 +289,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="layers-outline"
-                        size={27}
+                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -206,7 +301,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="person-outline"
-                        size={27}
+                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -230,12 +325,11 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        height: 105,
-        paddingHorizontal: 20,
+        height:85,
+        paddingHorizontal: 18,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#081023",
-        marginTop: -30,
     },
 
     backButton: {
@@ -251,7 +345,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "700",
         fontSize: 25,
-        marginTop: 30,
+        marginTop: 0,
     },
 
     notificationButton: {
@@ -264,11 +358,8 @@ const styles = StyleSheet.create({
     },
 
     imageContainer: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
         position: "absolute",
-        top: -40,
+        alignSelf: "center",
         overflow: "hidden",
         borderWidth: 3,
         borderColor: "#0e2738",
@@ -283,57 +374,55 @@ const styles = StyleSheet.create({
     content: {
         backgroundColor: "#FFFFFF",
         flex: 1,
-        marginTop: 60,
+        marginTop: 70,
+        paddingTop: 15,
         borderTopLeftRadius: 35,
         borderTopRightRadius: 35,
-        alignItems: "center",
         width: "100%"
     },
 
     name: {
         color: "#0e2738",
         fontSize: 18,
-        marginTop: 50,
+        marginTop: 40,
         fontWeight: "700",
     },
 
     optionsContainer: {
         width: "100%",
-        paddingHorizontal: 30,
         marginTop: 15,
     },
 
     opttion: {
         width: "100%",
-        minHeight: 60,
+        minHeight: 70,
         alignItems: "center",
         flexDirection: "row",
-        marginBottom: 18,
+        marginBottom: 25,
     },
 
     iconContainer: {
-        width: 45,
-        height: 45,
-        borderRadius: 12,
-        marginRight: 15,
+        width: 55,
+        height: 55,
+        borderRadius: 15,
+        marginRight: 20,
         justifyContent: "center",
         alignItems: "center",
     },
 
     optionText: {
         color: "#0e2738",
-        fontSize: 16,
+        fontSize: 19,
         fontWeight: "600",
-        lineHeight: 20,
+        lineHeight: 24,
     },
 
     bottomBar: {
-        height: 70,
         backgroundColor: "#24b6d1",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        marginBottom: -25,
     },
 
 });
+
