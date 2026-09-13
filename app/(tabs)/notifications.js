@@ -19,7 +19,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { auth, db } from "../../firebaseConfig";
 
-const categories = ["All", "Savings", "Investment", "Rewards", "Security"];
+const categories = [
+  "All",
+  "Savings",
+  "Investment",
+  "Rewards",
+  "Security",
+];
 
 export default function NotificationsScreen() {
   const { from } = useLocalSearchParams();
@@ -40,7 +46,7 @@ export default function NotificationsScreen() {
       db,
       "Users",
       user.uid,
-      "securityAlerts",
+      "securityAlerts"
     );
 
     return onSnapshot(
@@ -72,14 +78,17 @@ export default function NotificationsScreen() {
               }),
               icon: "shield-check-outline",
               unread: alert.read !== true,
-              createdAt: alert.createdAt?.toMillis?.() || 0,
+              createdAt:
+                alert.createdAt?.toMillis?.() || 0,
             };
           })
-          .sort((a, b) => b.createdAt - a.createdAt);
+          .sort(
+            (a, b) => b.createdAt - a.createdAt
+          );
 
         setNotifications(data);
       },
-      () => setNotifications([]),
+      () => setNotifications([])
     );
   }, []);
 
@@ -87,30 +96,37 @@ export default function NotificationsScreen() {
     selectedCategory === "All"
       ? notifications
       : notifications.filter(
-          (item) => item.category === selectedCategory,
+          (item) =>
+            item.category === selectedCategory
         );
 
   const unreadCount = notifications.filter(
-    (item) => item.unread,
+    (item) => item.unread
   ).length;
 
   const openNotification = async (notification) => {
-    if (notification.category !== "Security") return;
+    if (notification.category !== "Security") {
+      return;
+    }
 
     try {
       const user = auth.currentUser;
 
-      if (!user) return;
+      if (!user) {
+        return;
+      }
 
       const ref = doc(
         db,
         "Users",
         user.uid,
         "securityAlerts",
-        notification.alertId,
+        notification.alertId
       );
 
-      await updateDoc(ref, { read: true });
+      await updateDoc(ref, {
+        read: true,
+      });
 
       router.push({
         pathname: "/security_alert",
@@ -119,7 +135,10 @@ export default function NotificationsScreen() {
         },
       });
     } catch (error) {
-      console.log("Error opening notification:", error);
+      console.log(
+        "Error opening notification:",
+        error
+      );
     }
   };
 
@@ -130,21 +149,25 @@ export default function NotificationsScreen() {
         "No notifications",
         "You don't have any notifications here yet.",
       ],
+
       Savings: [
         "cash-multiple",
         "No savings reminders",
         "You don't have any savings reminders yet.",
       ],
+
       Investment: [
         "finance",
         "No investment notices",
         "You don't have any investment notifications yet.",
       ],
+
       Rewards: [
         "medal-outline",
         "No rewards updates",
         "You don't have any rewards notifications yet.",
       ],
+
       Security: [
         "shield-check-outline",
         "No security alerts",
@@ -152,8 +175,11 @@ export default function NotificationsScreen() {
       ],
     };
 
-    const [icon, title, description] =
-      info[selectedCategory];
+    const [
+      icon,
+      title,
+      description,
+    ] = info[selectedCategory];
 
     return (
       <View style={styles.empty}>
@@ -165,8 +191,13 @@ export default function NotificationsScreen() {
           />
         </View>
 
-        <Text style={styles.emptyTitle}>{title}</Text>
-        <Text style={styles.emptyText}>{description}</Text>
+        <Text style={styles.emptyTitle}>
+          {title}
+        </Text>
+
+        <Text style={styles.emptyText}>
+          {description}
+        </Text>
       </View>
     );
   };
@@ -179,6 +210,8 @@ export default function NotificationsScreen() {
   const volver = () => {
     if (from === "/profile") {
       router.push("/profile");
+    } else if (from === "/Edit_profile") {
+      router.push("/Edit_profile");
     } else if (from === "/settings") {
       router.push("/settings");
     } else if (from === "/linkeddevices") {
@@ -189,6 +222,10 @@ export default function NotificationsScreen() {
       router.push("/signout");
     } else if (from === "/currentgoal") {
       router.push("/currentgoal");
+    } else if (from === "/investments") {
+      router.push("/investments");
+    } else if (from === "/ExpensesManagement") {
+      router.push("/expensesManagement");
     } else {
       router.push("/home");
     }
@@ -204,11 +241,12 @@ export default function NotificationsScreen() {
         backgroundColor="#071426"
       />
 
+      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.back}
           onPress={volver}
-          activeOpacity={0.8}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="arrow-left"
@@ -226,6 +264,7 @@ export default function NotificationsScreen() {
         )}
       </View>
 
+      {/* CONTENT */}
       <View style={styles.content}>
         <View style={styles.categories}>
           {categories.map((category) => (
@@ -279,13 +318,17 @@ export default function NotificationsScreen() {
                   </View>
 
                   <View
-                    style={styles.notificationContent}
+                    style={
+                      styles.notificationContent
+                    }
                   >
                     <Text style={styles.title}>
                       {item.title}
                     </Text>
 
-                    <Text style={styles.description}>
+                    <Text
+                      style={styles.description}
+                    >
                       {item.description}
                     </Text>
 
@@ -302,20 +345,28 @@ export default function NotificationsScreen() {
 
                   {item.unread && (
                     <View
-                      style={styles.notificationDot}
+                      style={
+                        styles.notificationDot
+                      }
                     />
                   )}
                 </TouchableOpacity>
               ))}
         </ScrollView>
 
+        {/* BOTTOM NAVIGATION */}
         <SafeAreaView
           edges={["bottom"]}
           style={styles.bottomContainer}
         >
           <View style={styles.bottomBar}>
             {[
-              ["home", "/home", "home-outline", 35],
+              [
+                "home",
+                "/home",
+                "home-outline",
+                35,
+              ],
               [
                 "reports",
                 "/historial",
@@ -340,20 +391,24 @@ export default function NotificationsScreen() {
                 "account-outline",
                 35,
               ],
-            ].map(([tab, route, icon, size]) => (
-              <TouchableOpacity
-                key={tab}
-                style={styles.navItem}
-                onPress={() => nav(tab, route)}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons
-                  name={icon}
-                  size={size}
-                  color="#FFFFFF"
-                />
-              </TouchableOpacity>
-            ))}
+            ].map(
+              ([tab, route, icon, size]) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={styles.navItem}
+                  onPress={() =>
+                    nav(tab, route)
+                  }
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons
+                    name={icon}
+                    size={size}
+                    color="#FFFFFF"
+                  />
+                </TouchableOpacity>
+              )
+            )}
           </View>
         </SafeAreaView>
       </View>
@@ -377,10 +432,15 @@ const styles = StyleSheet.create({
   },
 
   back: {
-    width: 30,
-    alignItems: "flex-start",
+    position: "absolute",
+    left: 15,
+    top: 34,
+    width: 55,
+    height: 55,
+    alignItems: "center",
     justifyContent: "center",
-    transform: [{ translateY: 4 }],
+    zIndex: 999,
+    elevation: 10,
   },
 
   headerTitle: {
@@ -390,7 +450,7 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "700",
     transform: [
-      { translateX: -5 },
+      { translateX: 10 },
       { translateY: 1 },
     ],
   },

@@ -62,18 +62,18 @@ const DATA = {
 };
 
 const ACTIONS = [
-  ["card-outline", "Expense\nManagement", "ion", "/ExpensesManagement"],
+  ["card-outline", "expense\nManagement", "ion", "/expensesManagement"],
   ["book-outline", "User\nManual", "ion", "/manualScreen"],
   ["trending-up-outline", "Investments", "ion", "/investments"],
   ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
 ];
 
 const NAV = [
-  ["home-outline", "ion", "/"],
-  ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/ExpensesManagement"],
-  ["layers-outline", "material", "/currentgoal"],
-  ["person-outline", "ion", "/Profile"],
+  ["home-outline", "/home"],
+  ["chart-box-outline", "/historial"],
+  ["swap-horizontal", "/expensesManagement"],
+  ["layers-outline", "/currentgoal"],
+  ["account-outline", "/profile"],
 ];
 
 export default function App() {
@@ -197,7 +197,7 @@ function Header({ small, scale, hasNotification }) {
             borderRadius: size / 2,
           },
         ]}
-        onPress={() => router.push("/Profile")}
+        onPress={() => router.push("/profile")}
       />
 
       <View style={styles.welcome}>
@@ -212,18 +212,20 @@ function Header({ small, scale, hasNotification }) {
       </View>
 
       <TouchableOpacity
-        style={[
-          styles.notification,
-          {
-            width: small ? 44 : 52,
-            height: small ? 44 : 52,
-          },
-        ]}
-        onPress={() => router.push("/notifications")}
+        style={styles.notification}
+        onPress={() =>
+          router.push({
+            pathname: "/notifications",
+            params: {
+              from: "/home",
+            },
+          })
+        }
+        activeOpacity={0.7}
       >
-        <Ionicons
-          name="notifications-outline"
-          size={small ? 24 : 29}
+        <MaterialCommunityIcons
+          name="bell-circle-outline"
+          size={40 * scale}
           color={COLORS.white}
         />
 
@@ -437,21 +439,17 @@ function BottomNav({ small, scale }) {
         },
       ]}
     >
-      {NAV.map(([icon, type, route], index) => (
+      {NAV.map(([icon, route], index) => (
         <TouchableOpacity
           key={index}
           style={styles.navItem}
           onPress={() => router.push(route)}
         >
-          {type === "ion" ? (
-            <Ionicons name={icon} size={small ? 25 : 31} color={COLORS.white} />
-          ) : (
-            <MaterialCommunityIcons
-              name={icon}
-              size={small ? 28 : 34}
-              color={COLORS.white}
-            />
-          )}
+          <MaterialCommunityIcons
+            name={icon}
+            size={icon === "swap-horizontal" ? 37 * scale : 35 * scale}
+            color={COLORS.white}
+          />
         </TouchableOpacity>
       ))}
     </View>
@@ -502,8 +500,6 @@ const styles = StyleSheet.create({
   },
 
   notification: {
-    borderRadius: 30,
-    backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -518,7 +514,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#FF3B30",
     borderWidth: 2,
-    borderColor: COLORS.cyan,
+    borderColor: COLORS.dark,
   },
 
   balance: {
