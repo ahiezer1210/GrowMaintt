@@ -2,6 +2,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -69,10 +70,8 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView
-      edges={["top"]}
-      style={styles.container}
-    >
+    <SafeAreaView edges={["top"]} style={styles.container}>
+      {/* Header original */}
       <View style={styles.header}>
         <View style={styles.topRow}>
           <TouchableOpacity
@@ -91,16 +90,13 @@ export default function SettingsScreen() {
             style={[
               styles.headerTitle,
               {
-                fontSize:
-                  25 * (small ? 0.85 : tablet ? 1.15 : 1),
+                fontSize: 25 * (small ? 0.85 : tablet ? 1.15 : 1),
                 transform: [
                   {
-                    translateX:
-                      7 * (small ? 0.85 : tablet ? 1.15 : 1),
+                    translateX: 7 * (small ? 0.85 : tablet ? 1.15 : 1),
                   },
                   {
-                    translateY:
-                      1 * (small ? 0.85 : tablet ? 1.15 : 1),
+                    translateY: 1 * (small ? 0.85 : tablet ? 1.15 : 1),
                   },
                 ],
               },
@@ -128,23 +124,16 @@ export default function SettingsScreen() {
             onPress={() => setSelectedTheme("light")}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="sunny-outline"
-              size={38}
-              color="#FFFFFF"
-            />
+            <Ionicons name="sunny-outline" size={38} color="#FFFFFF" />
 
             <View
               style={[
                 styles.radioButton,
-                selectedTheme === "light" &&
-                  styles.radioActive,
+                selectedTheme === "light" && styles.radioActive,
               ]}
             />
 
-            <Text style={styles.themeLabel}>
-              Light theme
-            </Text>
+            <Text style={styles.themeLabel}>Light theme</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -152,29 +141,28 @@ export default function SettingsScreen() {
             onPress={() => setSelectedTheme("dark")}
             activeOpacity={0.8}
           >
-            <Ionicons
-              name="moon-outline"
-              size={38}
-              color="#FFFFFF"
-            />
+            <Ionicons name="moon-outline" size={38} color="#FFFFFF" />
 
             <View
               style={[
                 styles.radioButton,
-                selectedTheme === "dark" &&
-                  styles.radioActive,
+                selectedTheme === "dark" && styles.radioActive,
               ]}
             />
 
-            <Text style={styles.themeLabel}>
-              Dark theme
-            </Text>
+            <Text style={styles.themeLabel}>Dark theme</Text>
           </TouchableOpacity>
         </View>
       </View>
 
+      {/* Contenedor con ScrollView adaptable */}
       <View style={styles.contentCard}>
-        <View style={styles.optionsList}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+        >
           {OPTIONS.map(([icon, text, route]) => (
             <TouchableOpacity
               style={styles.optionRow}
@@ -183,16 +171,10 @@ export default function SettingsScreen() {
               onPress={() => handleOptionPress(route)}
             >
               <View style={styles.iconCircle}>
-                <Ionicons
-                  name={icon}
-                  size={22}
-                  color="#FFFFFF"
-                />
+                <Ionicons name={icon} size={22} color="#FFFFFF" />
               </View>
 
-              <Text style={styles.optionText}>
-                {text}
-              </Text>
+              <Text style={styles.optionText}>{text}</Text>
 
               <Ionicons
                 name="chevron-forward"
@@ -201,13 +183,11 @@ export default function SettingsScreen() {
               />
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
 
+        {/* Menú inferior */}
         <View style={styles.bottomNavContainer}>
-          <SafeAreaView
-            edges={["bottom"]}
-            style={styles.bottomNavSafeArea}
-          >
+          <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
             <View style={styles.bottomTabBar}>
               {NAV_ITEMS.map((item) => (
                 <TouchableOpacity
@@ -218,11 +198,7 @@ export default function SettingsScreen() {
                 >
                   <MaterialCommunityIcons
                     name={item.icon}
-                    size={
-                      item.icon === "swap-horizontal"
-                        ? 37
-                        : 35
-                    }
+                    size={item.icon === "swap-horizontal" ? 37 : 35}
                     color="#FFFFFF"
                   />
                 </TouchableOpacity>
@@ -279,13 +255,13 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 4 }],
   },
 
-  themesContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingHorizontal: 10,
-  },
-
+ themesContainer: {
+  flexDirection: "row",
+  justifyContent: "space-evenly",
+  alignItems: "center",
+  paddingHorizontal: 10,
+  columnGap: 55,
+},
   themeOption: {
     alignItems: "center",
   },
@@ -314,20 +290,26 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
     overflow: "hidden",
-    justifyContent: "space-between",
+    justify: "space-between",
   },
 
-  optionsList: {
+  scrollView: {
     flex: 1,
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 22,
-    paddingTop: 16,
-    paddingBottom: 16,
+    paddingTop: 20,
+    paddingBottom: 20,
     justifyContent: "space-between",
+    minHeight: 320, // Garantiza buena separación si hay poco espacio
   },
 
   optionRow: {
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 6,
   },
 
   iconCircle: {
@@ -359,7 +341,7 @@ const styles = StyleSheet.create({
   bottomTabBar: {
     height: 65,
     flexDirection: "row",
-    justifyContent: "space-around",
+    justify: "space-around",
     alignItems: "center",
     backgroundColor: "#25B5D1",
     borderTopLeftRadius: 78,
