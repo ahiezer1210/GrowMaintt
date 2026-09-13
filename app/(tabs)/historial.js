@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import {
   collection,
   onSnapshot,
-  orderBy,
   query,
+  orderBy,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -18,36 +18,36 @@ import {
 import { auth, db } from "../../firebaseConfig.js";
 
 export default function HistorialScreen() {
+  const [showAll, setShowAll] = useState(false);
+  const [movements, setMovements] = useState([]);
+  const [selectedMovement, setSelectedMovement] = useState(null);
+
   const { width, height } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600 && width < 900;
+  const isTablet = width >= 600;
   const isLargeScreen = width >= 900;
 
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-    ? 1
-    : isTablet
-    ? 1.15
-    : isLargeScreen
-    ? 1.25
-    : 1;
+      ? 1
+      : isTablet
+        ? 1.15
+        : isLargeScreen
+          ? 1.25
+          : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-    ? 25
-    : isTablet
-    ? 45
-    : 60;
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
 
   const s = (size) => Math.round(size * scale);
-
-  const [showAll, setShowAll] = useState(false);
-  const [movements, setMovements] = useState([]);
-  const [selectedMovement, setSelectedMovement] = useState(null);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -57,127 +57,96 @@ export default function HistorialScreen() {
       return;
     }
 
+    const savingsRef = collection(db, "Ahorros");
+
     const savingsQuery = query(
-      collection(db, "Ahorros"),
+      savingsRef,
       orderBy("createdAt", "desc")
     );
 
     const unsubscribeSavings = onSnapshot(
       savingsQuery,
-      (savingsSnapshot) => {
-        const savingsData = savingsSnapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
+      (snapshot) => {
+        const savingsData = snapshot.docs
+          .map((document) => ({
+            id: document.id,
+            ...document.data(),
           }))
-          .filter((item) => item.uid === user.uid);
+          .filter((saving) => saving.uid === user.uid);
 
-        const expensesQuery = query(
-          collection(db, "Registro de gastos"),
-          orderBy("createdAt", "desc")
-        );
+        const expensesRef = collection(db, "Registro de gastos");
 
         const unsubscribeExpenses = onSnapshot(
-          expensesQuery,
-          (expensesSnapshot) => {
-            const expensesData = expensesSnapshot.docs
-              .map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
+          expensesRef,
+          (expenseSnapshot) => {
+            const expensesData = expenseSnapshot.docs
+              .map((document) => ({
+                id: document.id,
+                ...document.data(),
               }))
-              .filter((item) => item.uid === user.uid);
+              .filter((expense) => expense.uid === user.uid);
 
             const combinedMovements = savingsData.map((saving) => {
-              const matchingExpense = expensesData.find(
-                (expense) =>
-                  expense.id === saving.expenseId ||
-                  expense.expenseId === saving.expenseId
+              const expense = expensesData.find(
+                (item) => item.id === saving.expenseId
               );
 
               return {
                 id: saving.id,
                 name:
-                  saving.name ||
                   saving.category ||
-                  matchingExpense?.category ||
+                  expense?.category ||
                   "Savings",
-                type:
-                  saving.type ||
+                type: getMovementType(
                   saving.category ||
-                  matchingExpense?.category ||
-                  "Savings",
-                savings: Number(
-                  saving.savings ??
-                    saving.amount ??
-                    saving.roundingAmount ??
-                    0
+                  expense?.category ||
+                  ""
                 ),
+                savings: Number(saving.amount || 0),
                 description:
+                  expense?.description ||
                   saving.description ||
-                  matchingExpense?.description ||
-                  "No description",
+                  "",
                 amount: Number(
-                  matchingExpense?.amount ??
-                    saving.amount ??
-                    0
+                  expense?.amount ??
+                  saving.originalAmount ??
+                  0
                 ),
                 roundingAmount: Number(
+                  expense?.roundingAmount ??
                   saving.roundingAmount ??
-                    matchingExpense?.roundingAmount ??
-                    saving.savings ??
-                    0
+                  0
                 ),
                 date:
+                  expense?.date ||
                   saving.date ||
-                  matchingExpense?.date ||
-                  saving.createdAt ||
-                  matchingExpense?.createdAt ||
-                  null,
+                  "",
                 expenseType:
-                  saving.expenseType ||
-                  matchingExpense?.expenseType ||
+                  expense?.expenseType ||
                   "",
                 isRecurrent:
-                  saving.isRecurrent ??
-                  matchingExpense?.isRecurrent ??
+                  expense?.isRecurrent ||
                   false,
               };
             });
 
             setMovements(combinedMovements);
           },
-          () => {
-            setMovements(
-              savingsData.map((saving) => ({
-                id: saving.id,
-                name: saving.name || saving.category || "Savings",
-                type: saving.type || saving.category || "Savings",
-                savings: Number(
-                  saving.savings ??
-                    saving.amount ??
-                    saving.roundingAmount ??
-                    0
-                ),
-                description:
-                  saving.description || "No description",
-                amount: Number(saving.amount ?? 0),
-                roundingAmount: Number(
-                  saving.roundingAmount ??
-                    saving.savings ??
-                    0
-                ),
-                date: saving.date || saving.createdAt || null,
-                expenseType: saving.expenseType || "",
-                isRecurrent: saving.isRecurrent ?? false,
-              }))
+          (error) => {
+            console.log(
+              "ERROR READING EXPENSES:",
+              error
             );
           }
         );
 
         return unsubscribeExpenses;
       },
-      () => {
-        setMovements([]);
+      (error) => {
+        console.log(
+          "ERROR READING SAVINGS:",
+          error
+        );
       }
     );
 
@@ -187,7 +156,8 @@ export default function HistorialScreen() {
   }, []);
 
   const totalSaved = movements.reduce(
-    (total, movement) => total + Number(movement.savings || 0),
+    (total, movement) =>
+      total + Number(movement.savings || 0),
     0
   );
 
@@ -195,369 +165,46 @@ export default function HistorialScreen() {
     ? movements
     : movements.slice(0, 6);
 
-  const getMovementType = (movement) => {
-    const value = String(
-      movement.type ||
-        movement.name ||
-        movement.category ||
-        ""
-    ).toLowerCase();
-
-    if (
-      value.includes("food") ||
-      value.includes("restaurant") ||
-      value.includes("meal")
-    ) {
-      return {
-        icon: "fast-food-outline",
-        color: "#168AFF",
-      };
-    }
-
-    if (
-      value.includes("transport") ||
-      value.includes("gas") ||
-      value.includes("bus")
-    ) {
-      return {
-        icon: "car-outline",
-        color: "#168AFF",
-      };
-    }
-
-    if (
-      value.includes("shopping") ||
-      value.includes("clothes") ||
-      value.includes("shop")
-    ) {
-      return {
-        icon: "bag-outline",
-        color: "#168AFF",
-      };
-    }
-
-    if (
-      value.includes("health") ||
-      value.includes("medicine")
-    ) {
-      return {
-        icon: "medkit-outline",
-        color: "#168AFF",
-      };
-    }
-
-    if (
-      value.includes("education") ||
-      value.includes("school")
-    ) {
-      return {
-        icon: "school-outline",
-        color: "#168AFF",
-      };
-    }
-
-    return {
-      icon: "wallet-outline",
-      color: "#168AFF",
-    };
-  };
-
-  const formatDate = (value) => {
-    if (!value) return "No date";
-
-    try {
-      if (value?.toDate) {
-        return value.toDate().toLocaleDateString();
-      }
-
-      const date = new Date(value);
-
-      if (Number.isNaN(date.getTime())) {
-        return String(value);
-      }
-
-      return date.toLocaleDateString();
-    } catch {
-      return String(value);
+  const toggleMovement = (movement) => {
+    if (selectedMovement?.id === movement.id) {
+      setSelectedMovement(null);
+    } else {
+      setSelectedMovement(movement);
     }
   };
 
-  const formatAmount = (amount) => {
-    return `$${Number(amount || 0).toFixed(2)}`;
-  };
-
-  const toggleMovement = (id) => {
-    setSelectedMovement((current) =>
-      current === id ? null : id
-    );
-  };
-
-  const renderMovement = ({ item }) => {
-    const movementType = getMovementType(item);
-    const isSelected = selectedMovement === item.id;
-
-    return (
-      <View>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          style={[
-            styles.movementItem,
-            {
-              paddingVertical: s(13),
-            },
-          ]}
-          onPress={() => toggleMovement(item.id)}
-        >
-          <View
-            style={[
-              styles.iconContainer,
-              {
-                width: s(42),
-                height: s(42),
-                borderRadius: s(12),
-                marginRight: s(12),
-              },
-            ]}
-          >
-            <Ionicons
-              name={movementType.icon}
-              size={s(21)}
-              color={movementType.color}
-            />
-          </View>
-
-          <View style={styles.movementInfo}>
-            <Text
-              style={[
-                styles.movementName,
-                {
-                  fontSize: s(15),
-                },
-              ]}
-              numberOfLines={1}
-            >
-              {item.name}
-            </Text>
-
-            <Text
-              style={[
-                styles.movementDate,
-                {
-                  fontSize: s(12),
-                  marginTop: s(3),
-                },
-              ]}
-            >
-              {formatDate(item.date)}
-            </Text>
-          </View>
-
-          <View style={styles.movementAmountContainer}>
-            <Text
-              style={[
-                styles.movementAmount,
-                {
-                  fontSize: s(15),
-                },
-              ]}
-            >
-              {formatAmount(item.savings)}
-            </Text>
-
-            <Ionicons
-              name={
-                isSelected
-                  ? "chevron-up-outline"
-                  : "chevron-down-outline"
-              }
-              size={s(17)}
-              color="#777777"
-              style={{
-                marginTop: s(3),
-              }}
-            />
-          </View>
-        </TouchableOpacity>
-
-        {isSelected && (
-          <View
-            style={[
-              styles.details,
-              {
-                paddingHorizontal: s(12),
-                paddingVertical: s(12),
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.detailRow,
-                {
-                  marginBottom: s(8),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.detailLabel,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                Description
-              </Text>
-
-              <Text
-                style={[
-                  styles.detailValue,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                {item.description}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.detailRow,
-                {
-                  marginBottom: s(8),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.detailLabel,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                Expense
-              </Text>
-
-              <Text
-                style={[
-                  styles.detailValue,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                {formatAmount(item.amount)}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.detailRow,
-                {
-                  marginBottom: s(8),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.detailLabel,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                Round-up to
-              </Text>
-
-              <Text
-                style={[
-                  styles.detailValue,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                {formatAmount(
-                  item.amount + item.roundingAmount
-                )}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.detailRow,
-                {
-                  marginBottom: s(8),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.detailLabel,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                Date
-              </Text>
-
-              <Text
-                style={[
-                  styles.detailValue,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                {formatDate(item.date)}
-              </Text>
-            </View>
-
-            <View style={styles.detailRow}>
-              <Text
-                style={[
-                  styles.detailLabel,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                Savings
-              </Text>
-
-              <Text
-                style={[
-                  styles.detailSavings,
-                  {
-                    fontSize: s(12),
-                  },
-                ]}
-              >
-                {formatAmount(item.savings)}
-              </Text>
-            </View>
-          </View>
-        )}
-      </View>
-    );
+  const getIcon = (type) => {
+    switch (type) {
+      case "coffee":
+        return "cafe-outline";
+      case "supermarket":
+        return "cart-outline";
+      case "cinema":
+      case "movie":
+        return "videocam-outline";
+      case "restaurant":
+        return "restaurant-outline";
+      case "shopping":
+        return "bag-handle-outline";
+      default:
+        return "wallet-outline";
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={styles.screen}>
       <StatusBar
+        translucent
+        backgroundColor="#071426"
         barStyle="light-content"
-        backgroundColor="#081023"
       />
 
       <View
         style={[
           styles.header,
           {
+            height: s(145),
             paddingHorizontal: horizontalPadding,
-            paddingTop: s(20),
-            paddingBottom: s(25),
           },
         ]}
       >
@@ -565,23 +212,11 @@ export default function HistorialScreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(25),
+              fontSize: s(24),
             },
           ]}
         >
-          History
-        </Text>
-
-        <Text
-          style={[
-            styles.headerSubtitle,
-            {
-              fontSize: s(13),
-              marginTop: s(5),
-            },
-          ]}
-        >
-          Track your expenses and savings
+          Savings History
         </Text>
       </View>
 
@@ -589,68 +224,90 @@ export default function HistorialScreen() {
         style={[
           styles.whitePanel,
           {
+            borderTopLeftRadius: s(45),
+            borderTopRightRadius: s(45),
             paddingHorizontal: horizontalPadding,
-            paddingTop: s(22),
+            paddingTop: s(28),
           },
         ]}
       >
         <View
           style={[
-            styles.savingsCard,
+            styles.blueCard,
             {
-              padding: s(18),
-              borderRadius: s(18),
+              height: s(108),
+              borderRadius: s(10),
+              paddingHorizontal: s(18),
             },
           ]}
         >
-          <View>
-            <Text
-              style={[
-                styles.savingsLabel,
-                {
-                  fontSize: s(13),
-                },
-              ]}
-            >
-              Total Savings
-            </Text>
-
-            <Text
-              style={[
-                styles.savingsAmount,
-                {
-                  fontSize: s(30),
-                  marginTop: s(4),
-                },
-              ]}
-            >
-              {formatAmount(totalSaved)}
-            </Text>
-          </View>
-
           <View
             style={[
-              styles.savingsIcon,
+              styles.walletBox,
               {
-                width: s(45),
-                height: s(45),
-                borderRadius: s(14),
+                width: s(82),
+                height: s(82),
+                marginRight: s(15),
               },
             ]}
           >
             <Ionicons
               name="wallet-outline"
-              size={s(23)}
-              color="#FFFFFF"
+              size={s(48)}
+              color="#172B3A"
             />
+          </View>
+
+          <View style={styles.cardInfo}>
+            <Text
+              style={[
+                styles.cardTitle,
+                {
+                  fontSize: s(15),
+                },
+              ]}
+            >
+              The Power of Saving
+            </Text>
+
+            <Text
+              style={[
+                styles.totalSaved,
+                {
+                  fontSize: s(24),
+                },
+              ]}
+            >
+              ${totalSaved.toFixed(2)}
+            </Text>
+
+            <Text
+              style={[
+                styles.keepSaving,
+                {
+                  fontSize: s(13),
+                },
+              ]}
+            >
+              Keep saving!
+            </Text>
           </View>
         </View>
 
         <View
           style={[
+            styles.divider,
+            {
+              marginTop: s(18),
+              marginBottom: s(14),
+            },
+          ]}
+        />
+
+        <View
+          style={[
             styles.sectionHeader,
             {
-              marginTop: s(24),
               paddingHorizontal: s(2),
               marginBottom: s(3),
             },
@@ -660,7 +317,7 @@ export default function HistorialScreen() {
             style={[
               styles.sectionTitle,
               {
-                fontSize: s(18),
+                fontSize: s(17),
               },
             ]}
           >
@@ -669,119 +326,301 @@ export default function HistorialScreen() {
 
           <Text
             style={[
-              styles.sectionCount,
+              styles.sectionTitle,
               {
-                fontSize: s(12),
+                fontSize: s(17),
               },
             ]}
           >
-            {movements.length}
+            Round-up
           </Text>
         </View>
-
-        <View style={styles.divider} />
 
         <FlatList
           data={visibleMovements}
           keyExtractor={(item) => item.id}
-          renderItem={renderMovement}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: s(2),
-          }}
-          ListEmptyComponent={
-            <View
-              style={[
-                styles.emptyContainer,
-                {
-                  paddingVertical: s(45),
-                },
-              ]}
-            >
-              <Ionicons
-                name="wallet-outline"
-                size={s(42)}
-                color="#B3B3B3"
-              />
+          contentContainerStyle={[
+            styles.list,
+            {
+              paddingBottom: s(2),
+            },
+          ]}
+          renderItem={({ item }) => {
+            const isSelected =
+              selectedMovement?.id === item.id;
 
-              <Text
-                style={[
-                  styles.emptyText,
-                  {
-                    fontSize: s(14),
-                    marginTop: s(12),
-                  },
-                ]}
-              >
-                No movements yet
-              </Text>
-            </View>
-          }
-          ListFooterComponent={
-            movements.length > 6 ? (
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[
-                  styles.seeAllButton,
-                  {
-                    paddingVertical: s(12),
-                  },
-                ]}
-                onPress={() => setShowAll((current) => !current)}
-              >
-                <Text
+            return (
+              <View>
+                <TouchableOpacity
                   style={[
-                    styles.seeAllText,
+                    styles.movement,
                     {
-                      fontSize: s(14),
+                      minHeight: s(70),
                     },
                   ]}
+                  onPress={() => toggleMovement(item)}
+                  activeOpacity={0.7}
                 >
-                  {showAll ? "Show less" : "See all"}
-                </Text>
+                  <View
+                    style={[
+                      styles.movementIcon,
+                      {
+                        width: s(58),
+                        height: s(58),
+                        marginRight: s(12),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={getIcon(item.type)}
+                      size={s(34)}
+                      color="#172B3A"
+                    />
+                  </View>
 
-                <Ionicons
-                  name={
-                    showAll
-                      ? "chevron-up-outline"
-                      : "chevron-down-outline"
-                  }
-                  size={s(17)}
-                  color="#168AFF"
-                />
-              </TouchableOpacity>
-            ) : null
-          }
+                  <Text
+                    style={[
+                      styles.movementName,
+                      {
+                        fontSize: s(15),
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.movementAmount,
+                      {
+                        fontSize: s(15),
+                        marginLeft: s(8),
+                      },
+                    ]}
+                  >
+                    + ${item.savings.toFixed(2)}
+                  </Text>
+                </TouchableOpacity>
+
+                {isSelected && (
+                  <View
+                    style={[
+                      styles.details,
+                      {
+                        paddingHorizontal: s(12),
+                        paddingVertical: s(12),
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Description
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        {item.description || "No description"}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Expense
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        ${item.amount.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Round-up to
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        ${item.roundingAmount.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Date
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        {item.date || "No date"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.detailRow}>
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Savings
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailSavings,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        + ${item.savings.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                )}
+              </View>
+            );
+          }}
         />
+
+        <TouchableOpacity
+          style={[
+            styles.seeAll,
+            {
+              paddingVertical: s(10),
+              paddingRight: s(4),
+            },
+          ]}
+          onPress={() => setShowAll(!showAll)}
+          activeOpacity={0.7}
+        >
+          <Text
+            style={[
+              styles.seeAllText,
+              {
+                fontSize: s(15),
+                marginRight: s(4),
+              },
+            ]}
+          >
+            {showAll ? "Show less" : "See all"}
+          </Text>
+
+          <Ionicons
+            name={
+              showAll
+                ? "chevron-up"
+                : "arrow-forward"
+            }
+            size={s(22)}
+            color="#172B3A"
+          />
+        </TouchableOpacity>
 
         <View
           style={[
             styles.bottomTotal,
             {
-              paddingVertical: s(17),
+              height: s(42),
+              borderRadius: s(8),
+              marginBottom: s(8),
             },
           ]}
         >
           <Text
             style={[
-              styles.bottomTotalLabel,
+              styles.bottomText,
               {
-                fontSize: s(13),
+                fontSize: s(15),
               },
             ]}
           >
-            Total saved
-          </Text>
-
-          <Text
-            style={[
-              styles.bottomTotalAmount,
-              {
-                fontSize: s(18),
-              },
-            ]}
-          >
-            {formatAmount(totalSaved)}
+            Total saved: ${totalSaved.toFixed(2)}
           </Text>
         </View>
       </View>
@@ -789,114 +628,147 @@ export default function HistorialScreen() {
   );
 }
 
+function getMovementType(category) {
+  const value = category.toLowerCase();
+
+  if (
+    value.includes("coffee") ||
+    value.includes("cafe")
+  ) {
+    return "coffee";
+  }
+
+  if (
+    value.includes("supermarket") ||
+    value.includes("grocery") ||
+    value.includes("market")
+  ) {
+    return "supermarket";
+  }
+
+  if (
+    value.includes("cinema") ||
+    value.includes("movie")
+  ) {
+    return "cinema";
+  }
+
+  if (
+    value.includes("restaurant") ||
+    value.includes("food") ||
+    value.includes("mcdonald")
+  ) {
+    return "restaurant";
+  }
+
+  if (
+    value.includes("shopping") ||
+    value.includes("amazon") ||
+    value.includes("store")
+  ) {
+    return "shopping";
+  }
+
+  return "wallet";
+}
+
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
 
   header: {
-    backgroundColor: "#081023",
+    width: "100%",
+    backgroundColor: "#071426",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   headerTitle: {
     color: "#FFFFFF",
-    fontWeight: "700",
-  },
-
-  headerSubtitle: {
-    color: "#ACADAD",
-    fontWeight: "500",
+    fontWeight: "600",
+    textAlign: "center",
   },
 
   whitePanel: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    width: "100%",
+    backgroundColor: "#FAFAF7",
     overflow: "hidden",
   },
 
-  savingsCard: {
-    backgroundColor: "#168AFF",
+  blueCard: {
+    backgroundColor: "#20A9D8",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
   },
 
-  savingsLabel: {
-    color: "#EAF5FF",
-    fontWeight: "600",
-  },
-
-  savingsAmount: {
-    color: "#FFFFFF",
-    fontWeight: "800",
-  },
-
-  savingsIcon: {
-    backgroundColor: "rgba(255,255,255,0.18)",
+  walletBox: {
     justifyContent: "center",
     alignItems: "center",
   },
 
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  cardInfo: {
+    flex: 1,
   },
 
-  sectionTitle: {
+  cardTitle: {
     color: "#172B3A",
     fontWeight: "700",
   },
 
-  sectionCount: {
-    color: "#777777",
-    fontWeight: "600",
+  totalSaved: {
+    color: "#172B3A",
+    fontWeight: "800",
+    marginTop: 2,
+  },
+
+  keepSaving: {
+    color: "#172B3A",
+    marginTop: 1,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#EEEEEE",
+    backgroundColor: "#D9D9D9",
   },
 
-  movementItem: {
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  sectionTitle: {
+    color: "#222222",
+    fontWeight: "700",
+  },
+
+  list: {
+    paddingBottom: 0,
+  },
+
+  movement: {
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
     borderBottomColor: "#EEEEEE",
   },
 
-  iconContainer: {
-    backgroundColor: "#EEF7FF",
+  movementIcon: {
     justifyContent: "center",
     alignItems: "center",
   },
 
-  movementInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-
   movementName: {
-    color: "#172B3A",
-    fontWeight: "700",
-  },
-
-  movementDate: {
-    color: "#999999",
-    fontWeight: "500",
-  },
-
-  movementAmountContainer: {
-    alignItems: "flex-end",
-    marginLeft: 8,
+    flex: 1,
+    color: "#222222",
+    fontWeight: "600",
   },
 
   movementAmount: {
-    color: "#168AFF",
-    fontWeight: "700",
+    color: "#172B3A",
+    fontWeight: "600",
   },
 
   details: {
@@ -931,43 +803,25 @@ const styles = StyleSheet.create({
     textAlign: "right",
   },
 
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  emptyText: {
-    color: "#999999",
-    fontWeight: "600",
-  },
-
-  seeAllButton: {
+  seeAll: {
     flexDirection: "row",
+    justifyContent: "flex-end",
     alignItems: "center",
-    justifyContent: "center",
-    gap: 5,
   },
 
   seeAllText: {
-    color: "#168AFF",
-    fontWeight: "700",
+    color: "#172B3A",
+    fontWeight: "500",
   },
 
   bottomTotal: {
-    borderTopWidth: 1,
-    borderTopColor: "#EEEEEE",
-    flexDirection: "row",
+    backgroundColor: "#55C9D5",
+    justifyContent: "center",
     alignItems: "center",
-    justifyContent: "space-between",
   },
 
-  bottomTotalLabel: {
-    color: "#777777",
-    fontWeight: "600",
-  },
-
-  bottomTotalAmount: {
-    color: "#168AFF",
-    fontWeight: "800",
+  bottomText: {
+    color: "#172B3A",
+    fontWeight: "700",
   },
 });
