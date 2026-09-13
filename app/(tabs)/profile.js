@@ -8,26 +8,20 @@ import {
     Text,
     TouchableOpacity,
     View,
-    useWindowDimensions,
+    useWindowDimensions
 } from "react-native";
+import { RollInRight } from "react-native-reanimated";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Profile() {
-
-    const { width } = useWindowDimensions();
-
-    // ✅ VALORES RESPONSIVOS
-    const small = width < 360;
-    const tablet = width >= 600;
-    const horizontalPadding = tablet ? 50 : small ? 18 : 25;
 
     const menuOptions = [
         {
             title: "Edite Profile",
             icon: "person-outline",
             color: "#27b6d1",
-            route: "/edit_profile"
+            route: "/Edit_profile"
         },
         {
             title: "Security",
@@ -64,6 +58,29 @@ export default function Profile() {
         });
     };
 
+    const { width } = useWindowDimensions();
+
+    const isSmallScreen = width < 360;
+    const isMediumScreen = width >= 360 && width < 600;
+    const isTablet = width >= 600;
+    const isLargeScreen = width >= 900;
+
+    const scale = isSmallScreen
+        ? 0.85
+        : isMediumScreen
+            ? 1
+            : isTablet
+                ? 1.15
+                : 1.25;
+
+    const horizontalPadding = isSmallScreen
+        ? 18
+        : isMediumScreen
+            ? 25
+            : isTablet
+                ? 45
+                : 60;
+
     return (
         <SafeAreaView style={styles.container}>
 
@@ -80,57 +97,99 @@ export default function Profile() {
                     />
                 </TouchableOpacity>
 
-                <Text style={styles.title}>
+                <Text style={[
+                    styles.title,
+                    {
+                        fontSize: 25 * scale,
+                    },
+                ]}>
                     Profile
                 </Text>
 
                 <TouchableOpacity
-                    style={styles.notificationButton}
+                    style={[
+                        styles.notificationButton,
+                        {
+                            width: 40 * scale,
+                            height: 40 * scale,
+                            borderRadius: 20 * scale,
+                        },
+                    ]}
                     onPress={abrirNotificaciones}
                 >
                     <Ionicons
                         name="notifications-outline"
-                        size={22}
+                        size={22 * scale}
                         color="#081023"
                     />
                 </TouchableOpacity>
 
             </View>
 
-            {/* ✅ CONTENEDOR BLANCO CON SCROLL */}
-            <View style={styles.content}>
+            <View style={[
+                styles.content,
+                {
+                    marginTop: isTablet ?  70 : 40,
+                }
+                ]}>
 
-                <ScrollView
-                    style={styles.whiteScroll}
-                    contentContainerStyle={[
-                        styles.scrollContent,
+                <View style={[
+                        styles.imageContainer,
                         {
-                            paddingHorizontal: horizontalPadding,
+                            width: isTablet ? 120 : 90,
+                            height: isTablet ? 120 : 90,
+                            borderRadius: isTablet ? 60 : 45,
+                            top: -40,
                         },
-                    ]}
-                    showsVerticalScrollIndicator={false}
-                    keyboardShouldPersistTaps="handled"
-                >
-
-                    {/* ✅ IMAGEN DENTRO DEL SCROLL */}
-                    <View style={styles.imageContainer}>
+                    ]}>
                         <Image
                             source={require("../../assets/images/Image.jpg")}
                             style={styles.logo}
                         />
                     </View>
 
-                    <Text style={styles.name}>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}
+                >
+
+
+                    <Text style={[
+                        styles.name,
+                        {
+                            fontSize: isTablet ? 28 : 18,
+                            marginTop: isTablet ?  80 : 60,
+                            marginRight: isTablet ?  40 : 20,
+                        },
+                    ]}>
                         Diana Cardoza
                     </Text>
 
-                    <View style={styles.optionsContainer}>
+                    <View style={[
+                        styles.optionsContainer,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}>
 
                         {menuOptions.map((option, index) => (
 
                             <TouchableOpacity
                                 key={index}
-                                style={styles.option}
+                                style={[
+                                    styles.opttion,
+                                    {
+                                        minHeight: isTablet ? 98 * scale : 60 * scale,
+                                        marginBottom: 18 * scale,
+                                        marginRight: isTablet ? 380 * scale : 120 * scale,
+                                        
+                                    },
+                                ]}
                                 onPress={() => {
                                     if (option.route) {
                                         router.push(option.route);
@@ -142,21 +201,30 @@ export default function Profile() {
                                     style={[
                                         styles.iconContainer,
                                         {
-                                            backgroundColor:
-                                                option.color
+                                            backgroundColor: option.color,
+                                            width: isTablet ? 70 * scale : 45 * scale,
+                                            height: isTablet ? 70 * scale : 45 * scale,
+                                            borderRadius: 12 * scale,
+                                            marginRight: 16 * scale,
                                         }
                                     ]}
                                 >
 
                                     <Ionicons
                                         name={option.icon}
-                                        size={22}
+                                        size={25 * scale}
                                         color="#FFFFFF"
                                     />
 
                                 </View>
 
-                                <Text style={styles.optionText}>
+                                <Text style={[
+                                    styles.optionText,
+                                    {
+                                        fontSize: isTablet ? 20 * scale : 16 * scale,
+                                        lineHeight: 28 * scale,
+                                    },
+                                ]}>
                                     {option.title}
                                 </Text>
 
@@ -170,14 +238,19 @@ export default function Profile() {
 
             </View>
 
-            <View style={styles.bottomBar}>
+            <View style={[
+                styles.bottomBar,
+                {
+                    height: isSmallScreen ? 60 : isTablet ? 95 : 70,
+                }
+            ]}>
 
                 <TouchableOpacity
                     onPress={() => router.push("/home")}
                 >
                     <Ionicons
                         name="home-outline"
-                        size={27}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -187,7 +260,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="bar-chart-outline"
-                        size={27}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -199,7 +272,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="swap-horizontal-outline"
-                        size={27}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -211,7 +284,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="layers-outline"
-                        size={27}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -223,7 +296,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="person-outline"
-                        size={27}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -239,6 +312,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#081023",
+    },
+
+    scrollContent: {
+        alignItems: "center",
+        paddingBottom: 30,
     },
 
     header: {
@@ -270,43 +348,17 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#d8f2e2",
         alignItems: "center",
         justifyContent: "center"
     },
 
-    content: {
-        backgroundColor: "#FFFFFF",
-        flex: 1,
-        marginTop: 60,
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        alignItems: "center",
-        width: "100%",
-        overflow: "hidden",
-    },
-
-    whiteScroll: {
-        flex: 1,
-        backgroundColor: "#FFFFFF",
-    },
-
-    scrollContent: {
-        flexGrow: 1,
-        paddingTop: 30,
-        paddingBottom: 140,
-        alignItems: "center",
-    },
-
     imageContainer: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
-        marginBottom: 15,
+        position: "absolute",
+        top: -40,
         overflow: "hidden",
         borderWidth: 3,
         borderColor: "#0e2738",
-        alignSelf: "center",
     },
 
     logo: {
@@ -315,20 +367,30 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
     },
 
+    content: {
+        backgroundColor: "#FFFFFF",
+        flex: 1,
+        marginTop: 70,
+        borderTopLeftRadius: 35,
+        borderTopRightRadius: 35,
+        alignItems: "center",
+        width: "100%"
+    },
+
     name: {
         color: "#0e2738",
         fontSize: 18,
-        marginBottom: 20,
+        marginTop: 40,
         fontWeight: "700",
-        textAlign: "center",
     },
 
     optionsContainer: {
         width: "100%",
-        paddingHorizontal: 0,
+        paddingHorizontal: 30,
+        marginTop: 15,
     },
 
-    option: {
+    opttion: {
         width: "100%",
         minHeight: 60,
         alignItems: "center",
