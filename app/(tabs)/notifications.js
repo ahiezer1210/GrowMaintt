@@ -187,6 +187,8 @@ export default function NotificationsScreen() {
       router.push("/logoutalldevices");
     } else if (from === "/signout") {
       router.push("/signout");
+    } else if (from === "/currentgoal") {
+      router.push("/currentgoal");
     } else {
       router.push("/home");
     }

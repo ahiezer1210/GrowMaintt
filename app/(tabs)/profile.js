@@ -17,6 +17,7 @@ export default function Profile() {
 
     const { width } = useWindowDimensions();
 
+    // ✅ VALORES RESPONSIVOS
     const small = width < 360;
     const tablet = width >= 600;
     const horizontalPadding = tablet ? 50 : small ? 18 : 25;
@@ -96,6 +97,7 @@ export default function Profile() {
 
             </View>
 
+            {/* ✅ CONTENEDOR BLANCO CON SCROLL */}
             <View style={styles.content}>
 
                 <ScrollView
@@ -110,6 +112,7 @@ export default function Profile() {
                     keyboardShouldPersistTaps="handled"
                 >
 
+                    {/* ✅ IMAGEN DENTRO DEL SCROLL */}
                     <View style={styles.imageContainer}>
                         <Image
                             source={require("../../assets/images/Image.jpg")}
@@ -290,7 +293,7 @@ const styles = StyleSheet.create({
 
     scrollContent: {
         flexGrow: 1,
-        paddingTop: 20,
+        paddingTop: 30,
         paddingBottom: 140,
         alignItems: "center",
     },
@@ -350,18 +353,12 @@ const styles = StyleSheet.create({
     },
 
     bottomBar: {
-        height: 85,
+        height: 70,
         backgroundColor: "#24b6d1",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        marginBottom: -5,
-        borderTopLeftRadius: 70,
-        position: "absolute",
-        bottom: 0,
-        left: 0,
-        right: 0,
-        overflow: "hidden",
+        marginBottom: -25,
     },
 
 });

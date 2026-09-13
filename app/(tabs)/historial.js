@@ -31,8 +31,26 @@ export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
   const { width, height } = useWindowDimensions();
 
-  const scale = Math.min(width / 390, height / 844);
-  const s = (value) => Math.round(value * scale);
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
 
   const totalSaved = movements.reduce(
     (total, movement) => total + movement.savings,
@@ -71,8 +89,8 @@ export default function HistorialScreen() {
         style={[
           styles.header,
           {
-            height: s(145),
-            paddingHorizontal: s(22),
+            height: 145 * scale,
+            paddingHorizontal: 22 * scale,
           },
         ]}
       >
@@ -80,7 +98,7 @@ export default function HistorialScreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(24),
+              fontSize: 24 * scale,
             },
           ]}
         >
@@ -92,10 +110,10 @@ export default function HistorialScreen() {
         style={[
           styles.whitePanel,
           {
-            borderTopLeftRadius: s(45),
-            borderTopRightRadius: s(45),
-            paddingHorizontal: s(22),
-            paddingTop: s(28),
+            borderTopLeftRadius: 45 * scale,
+            borderTopRightRadius: 45 * scale,
+            paddingHorizontal: 22 * scale,
+            paddingTop: 28 * scale,
           },
         ]}
       >
@@ -103,9 +121,9 @@ export default function HistorialScreen() {
           style={[
             styles.blueCard,
             {
-              height: s(108),
-              borderRadius: s(10),
-              paddingHorizontal: s(18),
+              height: 108 * scale,
+              borderRadius: 10 * scale,
+              paddingHorizontal: 18 * scale,
             },
           ]}
         >
@@ -113,13 +131,13 @@ export default function HistorialScreen() {
             style={[
               styles.walletBox,
               {
-                width: s(82),
-                height: s(82),
-                marginRight: s(15),
+                width: 82 * scale,
+                height: 82 * scale,
+                marginRight: 15 * scale,
               },
             ]}
           >
-            <Ionicons name="wallet-outline" size={s(48)} color="#172B3A" />
+            <Ionicons name="wallet-outline" size={48 * scale} color="#172B3A" />
           </View>
 
           <View style={styles.cardInfo}>
@@ -127,7 +145,7 @@ export default function HistorialScreen() {
               style={[
                 styles.cardTitle,
                 {
-                  fontSize: s(15),
+                  fontSize: 15 * scale,
                 },
               ]}
             >
@@ -138,7 +156,7 @@ export default function HistorialScreen() {
               style={[
                 styles.totalSaved,
                 {
-                  fontSize: s(24),
+                  fontSize: 24 * scale,
                 },
               ]}
             >
@@ -149,7 +167,7 @@ export default function HistorialScreen() {
               style={[
                 styles.keepSaving,
                 {
-                  fontSize: s(13),
+                  fontSize: 13 * scale,
                 },
               ]}
             >
@@ -162,8 +180,8 @@ export default function HistorialScreen() {
           style={[
             styles.divider,
             {
-              marginTop: s(18),
-              marginBottom: s(14),
+              marginTop: 18 * scale,
+              marginBottom: 14 * scale,
             },
           ]}
         />
@@ -173,7 +191,7 @@ export default function HistorialScreen() {
             style={[
               styles.sectionTitle,
               {
-                fontSize: s(17),
+                fontSize: 17 * scale,
               },
             ]}
           >
@@ -184,7 +202,7 @@ export default function HistorialScreen() {
             style={[
               styles.sectionTitle,
               {
-                fontSize: s(17),
+                fontSize: 17 * scale,
               },
             ]}
           >
@@ -202,7 +220,7 @@ export default function HistorialScreen() {
               style={[
                 styles.movement,
                 {
-                  height: s(70),
+                  height: 70 * scale,
                 },
               ]}
             >
@@ -210,15 +228,15 @@ export default function HistorialScreen() {
                 style={[
                   styles.movementIcon,
                   {
-                    width: s(58),
-                    height: s(58),
-                    marginRight: s(12),
+                    width: 58 * scale,
+                    height: 58 * scale,
+                    marginRight: 12 * scale,
                   },
                 ]}
               >
                 <Ionicons
                   name={getIcon(item.type)}
-                  size={s(34)}
+                  size={34 * scale}
                   color="#172B3A"
                 />
               </View>
@@ -227,7 +245,7 @@ export default function HistorialScreen() {
                 style={[
                   styles.movementName,
                   {
-                    fontSize: s(15),
+                    fontSize: 15 * scale,
                   },
                 ]}
                 numberOfLines={1}
@@ -239,8 +257,8 @@ export default function HistorialScreen() {
                 style={[
                   styles.movementAmount,
                   {
-                    fontSize: s(15),
-                    marginLeft: s(8),
+                    fontSize: 15 * scale,
+                    marginLeft: 8  * scale,
                   },
                 ]}
               >
@@ -254,8 +272,8 @@ export default function HistorialScreen() {
           style={[
             styles.seeAll,
             {
-              paddingVertical: s(10),
-              paddingRight: s(4),
+              paddingVertical: 10 * scale,
+              paddingRight: 4 * scale,
             },
           ]}
           onPress={() => setShowAll(!showAll)}
@@ -265,8 +283,8 @@ export default function HistorialScreen() {
             style={[
               styles.seeAllText,
               {
-                fontSize: s(15),
-                marginRight: s(4),
+                fontSize: 15 * scale,
+                marginRight: 4 * scale,
               },
             ]}
           >
@@ -275,7 +293,7 @@ export default function HistorialScreen() {
 
           <Ionicons
             name={showAll ? "chevron-up" : "arrow-forward"}
-            size={s(22)}
+            size={22 * scale}
             color="#172B3A"
           />
         </TouchableOpacity>
@@ -284,9 +302,9 @@ export default function HistorialScreen() {
           style={[
             styles.bottomTotal,
             {
-              height: s(42),
-              borderRadius: s(8),
-              marginBottom: s(8),
+              height: 42 * scale,
+              borderRadius: 8 * scale,
+              marginBottom: 8 * scale,
             },
           ]}
         >
@@ -294,7 +312,7 @@ export default function HistorialScreen() {
             style={[
               styles.bottomText,
               {
-                fontSize: s(15),
+                fontSize: 15 * scale,
               },
             ]}
           >

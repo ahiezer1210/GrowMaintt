@@ -1,35 +1,28 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
 
 export default function ExpenseManagement() {
   const { width, height } = useWindowDimensions();
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600;
+  const tablet = width >= 600;
+  const landscape = width > height;
 
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.18
-        : 1.25;
+  const scale = tablet
+    ? landscape
+      ? Math.min(width / 700, height / 430) * 1.15
+      : Math.min(width / 520, height / 760) * 1.15
+    : Math.min(width / 330, height / 700);
 
-  const s = (value) => Math.round(value * scale);
-
-  const horizontalPadding = isSmallScreen ? 16 : isMediumScreen ? 20 : 35;
+  const safeScale = Math.max(scale, 1);
+  const size = (value) => Math.round(value * safeScale);
 
   const weeklyExpenses = [
     {
@@ -38,7 +31,7 @@ export default function ExpenseManagement() {
       icon: "fast-food-outline",
     },
     {
-      name: "transport",
+      name: "Transport",
       amount: "$10",
       icon: "bus-outline",
     },
@@ -73,258 +66,424 @@ export default function ExpenseManagement() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <View
-          style={[
-            styles.header,
-            {
-              height: s(110),
-              paddingHorizontal: horizontalPadding,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={[styles.backButton, { width: s(35) }]}
-            onPress={() => router.back()}
-          >
-            <Ionicons name="arrow-back" size={s(25)} color="#FFFFFF" />
-          </TouchableOpacity>
+    <View style={styles.container}>
 
+      {/* HEADER */}
+      <View
+        style={[
+          styles.header,
+          {
+            height: size(130),
+            paddingHorizontal: size(15),
+            marginTop: size(30),
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35 * safeScale}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+
+        <View style={styles.headerTitleContainer}>
           <Text
             style={[
               styles.headertitle,
               {
-                fontSize: s(24),
-                lineHeight: s(26),
+                fontSize: size(25),
               },
             ]}
+            numberOfLines={2}
           >
-            Expense{"\n"}Management
+            Expense Management
           </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.notification,
-              {
-                width: s(34),
-                height: s(34),
-                borderRadius: s(17),
-              },
-            ]}
-            onPress={() => router.push("/notifications")}
-          >
-            <Ionicons
-              name="notifications-outline"
-              size={s(22)}
-              color="#0E2738"
-            />
-          </TouchableOpacity>
         </View>
 
+        <TouchableOpacity
+          style={styles.headerBell}
+          onPress={() =>
+            router.push({
+              pathname: "/notifications",
+              params: {
+                from: "/ExpensesManagement",
+              },
+            })
+          }
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={35 * safeScale}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* WHITE CARD */}
+      <ScrollView
+        style={[
+          styles.content,
+          {
+            borderTopLeftRadius: size(35),
+            borderTopRightRadius: size(35),
+            paddingHorizontal: size(20),
+          },
+        ]}
+        contentContainerStyle={{
+          paddingTop: size(12),
+          paddingBottom: size(100),
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+
+        {/* WEEKLY EXPENSES */}
         <View
           style={[
-            styles.card,
+            styles.section,
             {
-              borderTopLeftRadius: s(35),
-              borderTopRightRadius: s(35),
+              marginBottom: size(10),
             },
           ]}
         >
-          <ScrollView
-            style={styles.whiteScroll}
-            contentContainerStyle={[
-              styles.scrollContent,
+          <View
+            style={[
+              styles.sectionTitleContainer,
               {
-                paddingHorizontal: horizontalPadding,
-                paddingTop: s(20),
-                paddingBottom: s(110), 
+                height: size(35),
               },
             ]}
-            showsVerticalScrollIndicator={false}
-            alwaysBounceVertical={true}
-            overScrollMode="always"
           >
-            <View style={styles.section}>
-              <View style={styles.sectionTitleContainer}>
-                <Ionicons
-                  name="card-outline"
-                  size={s(28)}
-                  color="#0E2738"
-                />
-                <Text style={[styles.sectiontitle, { fontSize: s(22) }]}>
-                  Weekly expenses
-                </Text>
-              </View>
-              <View style={styles.line} />
-              {weeklyExpenses.map((expense, index) => (
-                <ExpenseItem
-                  key={index}
-                  name={expense.name}
-                  amount={expense.amount}
-                  icon={expense.icon}
-                  s={s}
-                />
-              ))}
-            </View>
+            <Ionicons
+              name="card-outline"
+              size={size(30)}
+              color="#0E2738"
+            />
 
-            <View style={[styles.section, { marginTop: s(15) }]}>
-              <View style={styles.sectionTitleContainer}>
-                <Ionicons
-                  name="coins-outline"
-                  size={s(28)}
-                  color="#0E2738"
-                />
-                <Text style={[styles.sectiontitle, { fontSize: s(22) }]}>
-                  Unnecesary expenses
-                </Text>
-              </View>
-              <View style={styles.line} />
-              {unnecesaryExpenses.map((expense, index) => (
-                <ExpenseItem
-                  key={index}
-                  name={expense.name}
-                  amount={expense.amount}
-                  icon={expense.icon}
-                  s={s}
-                />
-              ))}
-            </View>
-
-            <View style={[styles.section, { marginTop: s(15) }]}>
-              <View style={styles.sectionTitleContainer}>
-                <Ionicons
-                  name="calendar-outline"
-                  size={s(28)}
-                  color="#0E2738"
-                />
-                <Text style={[styles.sectiontitle, { fontSize: s(22) }]}>
-                  Scheduled expenses
-                </Text>
-              </View>
-              <View style={styles.line} />
-              {scheduledExpenses.map((expense, index) => (
-                <ScheduledExpense
-                  key={index}
-                  name={expense.name}
-                  date={expense.date}
-                  amount={expense.amount}
-                  icon={expense.icon}
-                  s={s}
-                />
-              ))}
-            </View>
-          </ScrollView>
+            <Text
+              style={[
+                styles.sectiontitle,
+                {
+                  fontSize: size(24),
+                  marginLeft: size(6),
+                },
+              ]}
+            >
+              Weekly expenses
+            </Text>
+          </View>
 
           <View
             style={[
-              styles.bottomBar,
+              styles.line,
               {
-                height: s(65),
-                borderTopLeftRadius: s(78),
+                marginTop: size(12),
+                marginBottom: size(5),
+              },
+            ]}
+          />
+
+          {weeklyExpenses.map((expense, index) => (
+            <ExpenseItem
+              key={index}
+              name={expense.name}
+              amount={expense.amount}
+              icon={expense.icon}
+              size={size}
+            />
+          ))}
+        </View>
+
+        {/* UNNECESSARY EXPENSES */}
+        <View
+          style={[
+            styles.section,
+            {
+              marginBottom: size(10),
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.sectionTitleContainer,
+              {
+                height: size(35),
               },
             ]}
           >
-            <TouchableOpacity onPress={() => router.push("/home")}>
-              <Ionicons
-                name="home-outline"
-                size={s(27)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+            <Ionicons
+              name="coins-outline"
+              size={size(30)}
+              color="#0E2738"
+            />
 
-            <TouchableOpacity onPress={() => router.push("/historial")}>
-              <Ionicons
-                name="bar-chart-outline"
-                size={s(27)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => router.push("/ExpensesManagement")}
+            <Text
+              style={[
+                styles.sectiontitle,
+                {
+                  fontSize: size(24),
+                  marginLeft: size(6),
+                },
+              ]}
             >
-              <Ionicons
-                name="swap-horizontal-outline"
-                size={s(27)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/currentgoal")}>
-              <Ionicons
-                name="layers-outline"
-                size={s(27)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => router.push("/Profile")}>
-              <Ionicons
-                name="person-outline"
-                size={s(27)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+              Unnecessary expenses
+            </Text>
           </View>
+
+          <View
+            style={[
+              styles.line,
+              {
+                marginTop: size(12),
+                marginBottom: size(5),
+              },
+            ]}
+          />
+
+          {unnecesaryExpenses.map((expense, index) => (
+            <ExpenseItem
+              key={index}
+              name={expense.name}
+              amount={expense.amount}
+              icon={expense.icon}
+              size={size}
+            />
+          ))}
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+        {/* SCHEDULED EXPENSES */}
+        <View
+          style={[
+            styles.section,
+            {
+              marginBottom: size(10),
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.sectionTitleContainer,
+              {
+                height: size(35),
+              },
+            ]}
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={size(30)}
+              color="#0E2738"
+            />
+
+            <Text
+              style={[
+                styles.sectiontitle,
+                {
+                  fontSize: size(24),
+                  marginLeft: size(6),
+                },
+              ]}
+            >
+              Scheduled expenses
+            </Text>
+          </View>
+
+          <View
+            style={[
+              styles.line,
+              {
+                marginTop: size(12),
+                marginBottom: size(5),
+              },
+            ]}
+          />
+
+          {scheduledExpenses.map((expense, index) => (
+            <ScheduledExpense
+              key={index}
+              name={expense.name}
+              date={expense.date}
+              amount={expense.amount}
+              icon={expense.icon}
+              size={size}
+            />
+          ))}
+        </View>
+      </ScrollView>
+
+      {/* BOTTOM NAVIGATION */}
+      <BottomNav scale={safeScale} />
+    </View>
   );
 }
 
-function ExpenseItem({ name, amount, icon, s }) {
+function ExpenseItem({ name, amount, icon, size }) {
   return (
-    <View style={[styles.expenseRow, { minHeight: s(46), marginVertical: s(4) }]}>
+    <View
+      style={[
+        styles.expenseRow,
+        {
+          minHeight: size(45),
+        },
+      ]}
+    >
       <View
         style={[
           styles.expenseIcon,
           {
-            width: s(42),
-            height: s(38),
-            borderRadius: s(14),
+            width: size(45),
+            height: size(40),
+            borderRadius: size(16),
           },
         ]}
       >
-        <Ionicons name={icon} size={s(24)} color="#FFFFFF" />
+        <Ionicons
+          name={icon}
+          size={size(28)}
+          color="#FFFFFF"
+        />
       </View>
-      <Text style={[styles.expensename, { fontSize: s(15), marginLeft: s(10) }]}>
+
+      <Text
+        style={[
+          styles.expensename,
+          {
+            marginLeft: size(9),
+            fontSize: size(15),
+          },
+        ]}
+      >
         {name}
       </Text>
-      <Text style={[styles.amount, { fontSize: s(15), minWidth: s(45) }]}>
+
+      <Text
+        style={[
+          styles.amount,
+          {
+            fontSize: size(14),
+            minWidth: size(35),
+          },
+        ]}
+      >
         {amount}
       </Text>
     </View>
   );
 }
 
-function ScheduledExpense({ name, date, amount, icon, s }) {
+function ScheduledExpense({
+  name,
+  date,
+  amount,
+  icon,
+  size,
+}) {
   return (
-    <View style={[styles.expenseRow, { minHeight: s(46), marginVertical: s(4) }]}>
+    <View
+      style={[
+        styles.expenseRow,
+        {
+          minHeight: size(45),
+        },
+      ]}
+    >
       <View
         style={[
           styles.expenseIcon,
           {
-            width: s(42),
-            height: s(38),
-            borderRadius: s(14),
+            width: size(45),
+            height: size(40),
+            borderRadius: size(16),
           },
         ]}
       >
-        <Ionicons name={icon} size={s(24)} color="#FFFFFF" />
+        <Ionicons
+          name={icon}
+          size={size(28)}
+          color="#FFFFFF"
+        />
       </View>
-      <Text style={[styles.expensename, { fontSize: s(15), marginLeft: s(10) }]}>
+
+      <Text
+        style={[
+          styles.expensename,
+          {
+            marginLeft: size(9),
+            fontSize: size(15),
+          },
+        ]}
+      >
         {name}
       </Text>
-      <Text style={[styles.date, { fontSize: s(12), marginRight: s(15) }]}>
+
+      <Text
+        style={[
+          styles.date,
+          {
+            fontSize: size(11),
+            marginRight: size(18),
+          },
+        ]}
+      >
         {date}
       </Text>
-      <Text style={[styles.amount, { fontSize: s(15), minWidth: s(45) }]}>
+
+      <Text
+        style={[
+          styles.amount,
+          {
+            fontSize: size(14),
+            minWidth: size(35),
+          },
+        ]}
+      >
         {amount}
       </Text>
+    </View>
+  );
+}
+
+function BottomNav({ scale }) {
+  const NAV = [
+    ["home-outline", "/home"],
+    ["chart-box-outline", "/historial"],
+    ["swap-horizontal", "/expensesManagement"],
+    ["layers-outline", "/currentgoal"],
+    ["account-outline", "/profile"],
+  ];
+
+  return (
+    <View
+      style={[
+        styles.bottomBar,
+        {
+          height: 65 * scale,
+          borderTopLeftRadius: 78 * scale,
+        },
+      ]}
+    >
+      {NAV.map(([icon, route], index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.navItem}
+          onPress={() => router.push(route)}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name={icon}
+            size={
+              icon === "swap-horizontal"
+                ? 37 * scale
+                : 35 * scale
+            }
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+      ))}
     </View>
   );
 }
@@ -334,87 +493,102 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#081023",
   },
+
   header: {
-    width: "100%",
-    backgroundColor: "#081023",
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#081023",
   },
+
   backButton: {
+    width: 50,
     justifyContent: "center",
-    alignItems: "flex-start",
   },
-  headertitle: {
+
+  headerTitleContainer: {
     flex: 1,
-    color: "#FFFFFF",
-    fontWeight: "600",
-    textAlign: "center",
-  },
-  notification: {
-    backgroundColor: "#D8F2E2",
     alignItems: "center",
     justifyContent: "center",
   },
-  card: {
+
+  headertitle: {
+    color: "#FFFFFF",
+    fontWeight: "400",
+    textAlign: "center",
+  },
+
+  headerBell: {
+    width: 50,
+    justifyContent: "center",
+    alignItems: "flex-end",
+  },
+
+  content: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    overflow: "hidden", 
+    overflow: "hidden",
   },
-  whiteScroll: {
-    flex: 1,
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
+
+  section: {},
+
   sectionTitleContainer: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 35,
   },
+
   sectiontitle: {
     color: "#172128",
-    fontWeight: "600",
-    marginLeft: 8,
+    fontWeight: "400",
   },
+
   line: {
     height: 1,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "#777777",
     width: "100%",
-    marginTop: 8,
-    marginBottom: 8,
   },
+
   expenseRow: {
     flexDirection: "row",
     alignItems: "center",
   },
+
   expenseIcon: {
-    backgroundColor: "#25B5D1",
+    backgroundColor: "#24B6D1",
     justifyContent: "center",
     alignItems: "center",
   },
+
   expensename: {
     flex: 1,
-    color: "#26313b",
+    color: "#26313B",
     fontWeight: "400",
   },
+
   amount: {
-    color: "#25B7D3",
+    color: "#0066FF",
     fontWeight: "700",
     textAlign: "right",
   },
+
   date: {
-    color: "#25B7D3",
-    fontWeight: "500",
+    color: "#0066FF",
   },
+
   bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
+    backgroundColor: "#25B7D3",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
     overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
