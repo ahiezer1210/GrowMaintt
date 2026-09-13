@@ -1,9 +1,10 @@
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   Image,
   Linking,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -40,11 +41,24 @@ export default function InversionesScreen() {
   };
 
   const abrirNotificaciones = () => {
-    router.push("/notifications");
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/investments",
+      },
+    });
   };
 
+  const navItems = [
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
+  ];
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safe}>
       <View
         style={[
           styles.header,
@@ -112,137 +126,142 @@ export default function InversionesScreen() {
           },
         ]}
       >
-        <View
-          style={[
-            styles.investmentContent,
+        <ScrollView
+          style={styles.whiteScroll}
+          contentContainerStyle={[
+            styles.scrollContent,
             {
               paddingHorizontal: horizontalPadding,
             },
           ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          <Image
-            source={require("../../assets/images/investment-circle.png")}
-            style={[
-              styles.investmentImage,
-              {
-                width: 220 * scale,
-                height: 300 * scale,
-                transform: [{ translateY: -70 * scale }],
-              },
-            ]}
-          />
-
-          <View
-            style={[
-              styles.logoContainer,
-              {
-                height: 45 * scale,
-              },
-            ]}
-          >
+          <View style={styles.investmentContent}>
             <Image
-              source={require("../../assets/images/interactive-brokers.png")}
+              source={require("../../assets/images/investment-circle.png")}
               style={[
-                styles.interactiveSymbol,
+                styles.investmentImage,
                 {
-                  width: 75 * scale,
-                  height: 55 * scale,
-                  marginRight: 4 * scale,
-                  transform: [
-                    { translateX: -15 * scale },
-                    { translateY: -120 * scale },
-                  ],
+                  width: 220 * scale,
+                  height: 300 * scale,
+                  transform: [{ translateY: -70 * scale }],
                 },
               ]}
             />
 
             <View
               style={[
-                styles.logoTextContainer,
+                styles.logoContainer,
                 {
+                  height: 45 * scale,
+                },
+              ]}
+            >
+              <Image
+                source={require("../../assets/images/interactive-brokers.png")}
+                style={[
+                  styles.interactiveSymbol,
+                  {
+                    width: 75 * scale,
+                    height: 55 * scale,
+                    marginRight: 4 * scale,
+                    transform: [
+                      { translateX: -15 * scale },
+                      { translateY: -120 * scale },
+                    ],
+                  },
+                ]}
+              />
+
+              <View
+                style={[
+                  styles.logoTextContainer,
+                  {
+                    transform: [
+                      { translateX: -17 * scale },
+                      { translateY: -117 * scale },
+                    ],
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.interactiveText,
+                    {
+                      fontSize: 21 * scale,
+                      lineHeight: 21 * scale,
+                    },
+                  ]}
+                >
+                  Interactive
+                </Text>
+
+                <Text
+                  style={[
+                    styles.brokersText,
+                    {
+                      fontSize: 21 * scale,
+                      lineHeight: 21 * scale,
+                    },
+                  ]}
+                >
+                  Brokers
+                </Text>
+              </View>
+            </View>
+
+            <Text
+              style={[
+                styles.subtitle,
+                {
+                  fontSize: 19 * scale,
                   transform: [
-                    { translateX: -17 * scale },
-                    { translateY: -117 * scale },
+                    { translateX: 5 * scale },
+                    { translateY: -100 * scale },
                   ],
                 },
               ]}
             >
-              <Text
-                style={[
-                  styles.interactiveText,
-                  {
-                    fontSize: 21 * scale,
-                    lineHeight: 21 * scale,
-                  },
-                ]}
-              >
-                Interactive
-              </Text>
+              Take the next step
+            </Text>
 
-              <Text
-                style={[
-                  styles.brokersText,
-                  {
-                    fontSize: 21 * scale,
-                    lineHeight: 21 * scale,
-                  },
-                ]}
-              >
-                Brokers
-              </Text>
-            </View>
-          </View>
-
-          <Text
-            style={[
-              styles.subtitle,
-              {
-                fontSize: 19 * scale,
-                transform: [
-                  { translateX: 5 * scale },
-                  { translateY: -100 * scale },
-                ],
-              },
-            ]}
-          >
-            Take the next step
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.linkButton,
-              {
-                width: isSmallScreen
-                  ? "80%"
-                  : isMediumScreen
-                    ? "70%"
-                    : isTablet
-                      ? "60%"
-                      : "55%",
-                height: 71 * scale,
-                borderRadius: 25 * scale,
-                paddingHorizontal: 30 * scale,
-                transform: [
-                  { translateX: 4 * scale },
-                  { translateY: -100 * scale },
-                ],
-              },
-            ]}
-            onPress={abrirInteractiveBrokers}
-            activeOpacity={0.7}
-          >
-            <Text
+            <TouchableOpacity
               style={[
-                styles.linkText,
+                styles.linkButton,
                 {
-                  fontSize: 10 * scale,
+                  width: isSmallScreen
+                    ? "80%"
+                    : isMediumScreen
+                      ? "70%"
+                      : isTablet
+                        ? "60%"
+                        : "55%",
+                  height: 71 * scale,
+                  borderRadius: 25 * scale,
+                  paddingHorizontal: 30 * scale,
+                  transform: [
+                    { translateX: 4 * scale },
+                    { translateY: -100 * scale },
+                  ],
                 },
               ]}
+              onPress={abrirInteractiveBrokers}
+              activeOpacity={0.7}
             >
-              Go to Interactive Brokers
-            </Text>
-          </TouchableOpacity>
-        </View>
+              <Text
+                style={[
+                  styles.linkText,
+                  {
+                    fontSize: 10 * scale,
+                  },
+                ]}
+              >
+                Go to Interactive Brokers
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
 
         <View
           style={[
@@ -253,52 +272,32 @@ export default function InversionesScreen() {
             },
           ]}
         >
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="chart-box-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="swap-horizontal"
-              size={37 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="layers-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+          {navItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              onPress={() => router.push(item.route)}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={item.icon === "swap-horizontal" ? 37 * scale : 35 * scale}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#111C2E",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#111C2E",
@@ -331,6 +330,17 @@ const styles = StyleSheet.create({
     width: "100%",
     backgroundColor: "#FFFFFF",
     overflow: "hidden",
+  },
+
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: 20,
+    paddingBottom: 140,
   },
 
   investmentContent: {

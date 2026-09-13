@@ -35,15 +35,15 @@ const ACTIONS = [
   ["card-outline", "Register\nexpenses", "ion", "/registerexpenses"],
   ["book-outline", "Register\ngoals", "ion", "/registergoals"],
   ["trending-up-outline", "Investments", "ion", "/investments"],
-  ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
+  ["hand-coin-outline", "Points\nExchange", "material", "/pointsExchange"],
 ];
 
 const NAV = [
   ["home-outline", "ion", "/"],
   ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/ExpensesManagement"],
+  ["swap-horizontal", "material", "/expensesManagement"],
   ["layers-outline", "material", "/currentgoal"],
-  ["person-outline", "ion", "/Profile"],
+  ["person-outline", "ion", "/profile"],
 ];
 
 const getField = (item, fields) => {
@@ -393,14 +393,34 @@ export default function App() {
   const { width } =
     useWindowDimensions();
 
-  const small = width < 360;
+  const isSmallScreen = width < 360;
+  const isMediumScreen =
+    width >= 360 && width < 600;
+  const isTablet =
+    width >= 600 && width < 900;
+  const isLargeScreen =
+    width >= 900;
 
-  const scale =
-    small
-      ? 0.88
-      : width > 430
-        ? 1.08
-        : 1;
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : isLargeScreen
+          ? 1.25
+          : 1;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (size) =>
+    Math.round(size * scale);
 
   const availablePeriods =
     selectedPeriods.map(
@@ -450,12 +470,12 @@ export default function App() {
 
             setUsername(
               userData.username ||
-                "User"
+              "User"
             );
 
             setProfilePhoto(
               userData.identityDocumentUrl ||
-                null
+              null
             );
           } else {
             setUsername("User");
@@ -550,8 +570,8 @@ export default function App() {
                 documentData.createdAt?.toDate
                   ? documentData.createdAt.toDate()
                   : convertDate(
-                      documentData.date
-                    );
+                    documentData.date
+                  );
 
               expensesRecords.push({
                 category:
@@ -722,10 +742,10 @@ export default function App() {
   const savingsPercentage =
     totalMoney > 0
       ? Math.round(
-          (totalSavings /
-            totalMoney) *
-            100
-        )
+        (totalSavings /
+          totalMoney) *
+        100
+      )
       : 0;
 
   return (
@@ -748,17 +768,16 @@ export default function App() {
             styles.content,
             {
               paddingHorizontal:
-                small
-                  ? 18
-                  : width > 430
-                    ? 34
-                    : 25,
+                horizontalPadding,
+              paddingTop: s(24),
+              paddingBottom: s(125),
             },
           ]}
         >
           <Header
-            small={small}
+            small={isSmallScreen}
             scale={scale}
+            s={s}
             hasNotification={
               hasNotification
             }
@@ -775,8 +794,9 @@ export default function App() {
             expenses={
               totalExpenses
             }
-            small={small}
+            small={isSmallScreen}
             scale={scale}
+            s={s}
           />
 
           <Savings
@@ -787,14 +807,24 @@ export default function App() {
               savingsPercentage
             }
             scale={scale}
+            s={s}
           />
 
           <Actions
             scale={scale}
+            s={s}
           />
 
           <View
-            style={styles.filters}
+            style={[
+              styles.filters,
+              {
+                minHeight: s(55),
+                borderRadius: s(30),
+                padding: s(5),
+                marginBottom: s(28),
+              },
+            ]}
           >
             {availablePeriods.map(
               (item) => (
@@ -807,20 +837,27 @@ export default function App() {
                   }
                   style={[
                     styles.filter,
+                    {
+                      borderRadius:
+                        s(25),
+                      minHeight:
+                        s(45),
+                    },
                     period ===
                       item &&
-                      styles.activeFilter,
+                    styles.activeFilter,
                   ]}
                 >
                   <Text
                     style={[
                       styles.filterText,
-                      small && {
-                        fontSize: 13,
+                      {
+                        fontSize:
+                          s(15),
                       },
                       period ===
                         item &&
-                        styles.activeFilterText,
+                      styles.activeFilterText,
                     ]}
                   >
                     {item}
@@ -831,34 +868,45 @@ export default function App() {
           </View>
 
           {filteredRecords.length >
-          0 ? (
+            0 ? (
             filteredRecords.map(
               (item, index) => (
                 <Transaction
                   key={`${item.type}-${index}`}
                   data={item}
-                  small={small}
+                  small={isSmallScreen}
+                  s={s}
                 />
               )
             )
           ) : (
             <View
-              style={
-                styles.emptyContainer
-              }
+              style={[
+                styles.emptyContainer,
+                {
+                  paddingVertical:
+                    s(40),
+                },
+              ]}
             >
               <Ionicons
                 name="receipt-outline"
-                size={42}
+                size={s(42)}
                 color={
                   COLORS.gray
                 }
               />
 
               <Text
-                style={
-                  styles.emptyText
-                }
+                style={[
+                  styles.emptyText,
+                  {
+                    fontSize:
+                      s(15),
+                    marginTop:
+                      s(10),
+                  },
+                ]}
               >
                 No records for this period
               </Text>
@@ -867,8 +915,9 @@ export default function App() {
         </ScrollView>
 
         <BottomNav
-          small={small}
+          small={isSmallScreen}
           scale={scale}
+          s={s}
         />
       </View>
     </SafeAreaView>
@@ -878,16 +927,21 @@ export default function App() {
 function Header({
   small,
   scale,
+  s,
   hasNotification,
   username,
   profilePhoto,
 }) {
-  const size =
-    small ? 55 : 68;
+  const size = s(68);
 
   return (
     <View
-      style={styles.header}
+      style={[
+        styles.header,
+        {
+          marginBottom: s(34),
+        },
+      ]}
     >
       <TouchableOpacity
         style={[
@@ -897,13 +951,12 @@ function Header({
             height: size,
             borderRadius:
               size / 2,
-            overflow:
-              "hidden",
+            marginRight: s(14),
           },
         ]}
         onPress={() =>
           router.push(
-            "/Profile"
+            "/profile"
           )
         }
       >
@@ -928,18 +981,23 @@ function Header({
             styles.hello,
             {
               fontSize:
-                24 * scale,
+                s(24),
             },
           ]}
           numberOfLines={1}
+          adjustsFontSizeToFit
         >
           Hello, {username}!
         </Text>
 
         <Text
-          style={
-            styles.welcomeText
-          }
+          style={[
+            styles.welcomeText,
+            {
+              fontSize: s(15),
+              marginTop: s(2),
+            },
+          ]}
         >
           Welcome back
         </Text>
@@ -949,12 +1007,10 @@ function Header({
         style={[
           styles.notification,
           {
-            width: small
-              ? 44
-              : 52,
-            height: small
-              ? 44
-              : 52,
+            width: s(52),
+            height: s(52),
+            borderRadius:
+              s(30),
           },
         ]}
         onPress={() =>
@@ -965,9 +1021,7 @@ function Header({
       >
         <Ionicons
           name="notifications-outline"
-          size={
-            small ? 24 : 29
-          }
+          size={s(29)}
           color={
             COLORS.white
           }
@@ -975,9 +1029,19 @@ function Header({
 
         {hasNotification && (
           <View
-            style={
-              styles.notificationDot
-            }
+            style={[
+              styles.notificationDot,
+              {
+                top: s(6),
+                right: s(6),
+                width: s(10),
+                height: s(10),
+                borderRadius:
+                  s(5),
+                borderWidth:
+                  s(2),
+              },
+            ]}
           />
         )}
       </TouchableOpacity>
@@ -990,10 +1054,16 @@ function Balance({
   expenses,
   small,
   scale,
+  s,
 }) {
   return (
     <View
-      style={styles.balance}
+      style={[
+        styles.balance,
+        {
+          marginBottom: s(28),
+        },
+      ]}
     >
       <BalanceItem
         icon="wallet-outline"
@@ -1003,16 +1073,16 @@ function Balance({
         )}
         size={29 * scale}
         small={small}
+        s={s}
       />
 
       <View
         style={[
           styles.divider,
           {
-            height:
-              small
-                ? 55
-                : 70,
+            height: s(70),
+            width: s(2),
+            marginHorizontal: s(12),
           },
         ]}
       />
@@ -1026,6 +1096,7 @@ function Balance({
         size={28 * scale}
         expense
         small={small}
+        s={s}
       />
     </View>
   );
@@ -1038,6 +1109,7 @@ function BalanceItem({
   size,
   expense,
   small,
+  s,
 }) {
   return (
     <View
@@ -1046,15 +1118,16 @@ function BalanceItem({
       }
     >
       <View
-        style={
-          styles.titleRow
-        }
+        style={[
+          styles.titleRow,
+          {
+            marginBottom: s(5),
+          },
+        ]}
       >
         <Ionicons
           name={icon}
-          size={
-            small ? 16 : 18
-          }
+          size={s(18)}
           color={
             COLORS.white
           }
@@ -1063,8 +1136,9 @@ function BalanceItem({
         <Text
           style={[
             styles.balanceTitle,
-            small && {
-              fontSize: 12,
+            {
+              fontSize: s(14),
+              marginLeft: s(6),
             },
           ]}
         >
@@ -1094,19 +1168,33 @@ function Savings({
   savings,
   percentage,
   scale,
+  s,
 }) {
   return (
     <View
-      style={styles.savings}
+      style={[
+        styles.savings,
+        {
+          marginBottom: s(34),
+        },
+      ]}
     >
       <View
-        style={styles.progress}
+        style={[
+          styles.progress,
+          {
+            height: s(45),
+            borderRadius: s(25),
+          },
+        ]}
       >
         <View
           style={[
             styles.progressFill,
             {
               width: `${percentage}%`,
+              borderRadius: s(25),
+              paddingLeft: s(25),
             },
           ]}
         >
@@ -1115,7 +1203,7 @@ function Savings({
               styles.progressText,
               {
                 fontSize:
-                  15 * scale,
+                  s(15),
               },
             ]}
           >
@@ -1128,7 +1216,8 @@ function Savings({
             styles.goalAmount,
             {
               fontSize:
-                15 * scale,
+                s(15),
+              right: s(28),
             },
           ]}
         >
@@ -1143,7 +1232,8 @@ function Savings({
           styles.goalText,
           {
             fontSize:
-              17 * scale,
+              s(17),
+            marginTop: s(9),
           },
         ]}
       >
@@ -1155,10 +1245,18 @@ function Savings({
 
 function Actions({
   scale,
+  s,
 }) {
   return (
     <View
-      style={styles.actions}
+      style={[
+        styles.actions,
+        {
+          borderRadius: s(38),
+          padding: s(20),
+          marginBottom: s(34),
+        },
+      ]}
     >
       {ACTIONS.map(
         ([
@@ -1173,7 +1271,11 @@ function Actions({
               styles.action,
               {
                 height:
-                  84 * scale,
+                  s(84),
+                borderRadius:
+                  s(24),
+                marginBottom:
+                  s(12),
               },
             ]}
             onPress={() =>
@@ -1187,20 +1289,22 @@ function Actions({
                 styles.actionIcon,
                 {
                   width:
-                    38 * scale,
+                    s(38),
                   height:
-                    38 * scale,
+                    s(38),
                   borderRadius:
-                    19 * scale,
+                    s(19),
+                  marginBottom:
+                    s(5),
                 },
               ]}
             >
               {type ===
-              "ion" ? (
+                "ion" ? (
                 <Ionicons
                   name={icon}
                   size={
-                    27 * scale
+                    s(27)
                   }
                   color={
                     COLORS.cyan
@@ -1210,7 +1314,7 @@ function Actions({
                 <MaterialCommunityIcons
                   name={icon}
                   size={
-                    29 * scale
+                    s(29)
                   }
                   color={
                     COLORS.cyan
@@ -1224,7 +1328,7 @@ function Actions({
                 styles.actionText,
                 {
                   fontSize:
-                    14 * scale,
+                    s(14),
                 },
               ]}
             >
@@ -1240,6 +1344,7 @@ function Actions({
 function Transaction({
   data,
   small,
+  s,
 }) {
   const icon = getIcon(
     data.category,
@@ -1249,42 +1354,39 @@ function Transaction({
   const amount =
     data.type === "Expense"
       ? `-${formatMoney(
-          Math.abs(
-            data.amount
-          )
-        )}`
+        Math.abs(
+          data.amount
+        )
+      )}`
       : `+${formatMoney(
-          Math.abs(
-            data.amount
-          )
-        )}`;
+        Math.abs(
+          data.amount
+        )
+      )}`;
 
   return (
     <View
-      style={
-        styles.transaction
-      }
+      style={[
+        styles.transaction,
+        {
+          marginBottom: s(22),
+        },
+      ]}
     >
       <View
         style={[
           styles.transactionIcon,
           {
-            width: small
-              ? 50
-              : 62,
-            height: small
-              ? 50
-              : 62,
-            borderRadius:
-              small
-                ? 25
-                : 31,
+            width: s(62),
+            height: s(62),
+            borderRadius: s(31),
+            marginRight: s(12),
           },
         ]}
       >
         <Ionicons
           name={icon}
-          size={27}
+          size={s(27)}
           color={
             COLORS.white
           }
@@ -1302,17 +1404,16 @@ function Transaction({
         style={[
           styles.transactionInfo,
           {
-            width: small
-              ? 82
-              : 112,
+            width: s(112),
           },
         ]}
       >
         <Text
           style={[
             styles.transactionTitle,
-            small && {
-              fontSize: 15,
+            {
+              fontSize: s(18),
+              marginBottom: s(5),
             },
           ]}
           numberOfLines={1}
@@ -1323,8 +1424,8 @@ function Transaction({
         <Text
           style={[
             styles.transactionDate,
-            small && {
-              fontSize: 9,
+            {
+              fontSize: s(11),
             },
           ]}
           numberOfLines={1}
@@ -1336,8 +1437,10 @@ function Transaction({
       <View
         style={[
           styles.transactionDivider,
-          small && {
-            height: 42,
+          {
+            width: s(2),
+            height: s(52),
+            marginHorizontal: s(8),
           },
         ]}
       />
@@ -1345,9 +1448,9 @@ function Transaction({
       <Text
         style={[
           styles.transactionType,
-          small && {
-            fontSize: 10,
-            width: 48,
+          {
+            fontSize: s(13),
+            width: s(62),
           },
         ]}
         numberOfLines={1}
@@ -1358,8 +1461,10 @@ function Transaction({
       <View
         style={[
           styles.transactionDivider,
-          small && {
-            height: 42,
+          {
+            width: s(2),
+            height: s(52),
+            marginHorizontal: s(8),
           },
         ]}
       />
@@ -1369,12 +1474,12 @@ function Transaction({
           styles.amount,
           data.type ===
             "Expense" &&
-            styles.negative,
+          styles.negative,
           data.type ===
             "Savings" &&
-            styles.positive,
-          small && {
-            fontSize: 11,
+          styles.positive,
+          {
+            fontSize: s(14),
           },
         ]}
         numberOfLines={1}
@@ -1389,16 +1494,16 @@ function Transaction({
 function BottomNav({
   small,
   scale,
+  s,
 }) {
   return (
     <View
       style={[
         styles.bottom,
         {
-          height:
-            65 * scale,
+          height: s(65),
           borderTopLeftRadius:
-            78 * scale,
+            s(78),
         },
       ]}
     >
@@ -1423,14 +1528,10 @@ function BottomNav({
             }
           >
             {type ===
-            "ion" ? (
+              "ion" ? (
               <Ionicons
                 name={icon}
-                size={
-                  small
-                    ? 25
-                    : 31
-                }
+                size={s(31)}
                 color={
                   COLORS.white
                 }
@@ -1438,11 +1539,7 @@ function BottomNav({
             ) : (
               <MaterialCommunityIcons
                 name={icon}
-                size={
-                  small
-                    ? 28
-                    : 34
-                }
+                size={s(34)}
                 color={
                   COLORS.white
                 }
@@ -1469,20 +1566,18 @@ const styles = StyleSheet.create({
   },
 
   content: {
-    paddingTop: 24,
-    paddingBottom: 125,
+    flexGrow: 1,
   },
 
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 34,
   },
 
   profile: {
     backgroundColor:
       "#172037",
-    marginRight: 14,
+    overflow: "hidden",
   },
 
   profileImage: {
@@ -1502,12 +1597,9 @@ const styles = StyleSheet.create({
 
   welcomeText: {
     color: COLORS.white,
-    fontSize: 15,
-    marginTop: 2,
   },
 
   notification: {
-    borderRadius: 30,
     backgroundColor:
       COLORS.cyan,
     alignItems: "center",
@@ -1518,14 +1610,8 @@ const styles = StyleSheet.create({
 
   notificationDot: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
     backgroundColor:
       "#FF3B30",
-    borderWidth: 2,
     borderColor:
       COLORS.cyan,
   },
@@ -1533,7 +1619,6 @@ const styles = StyleSheet.create({
   balance: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 28,
   },
 
   balanceItem: {
@@ -1544,13 +1629,10 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 5,
   },
 
   balanceTitle: {
     color: COLORS.white,
-    fontSize: 14,
-    marginLeft: 6,
   },
 
   balanceValue: {
@@ -1564,19 +1646,15 @@ const styles = StyleSheet.create({
   },
 
   divider: {
-    width: 2,
     backgroundColor:
       COLORS.gray,
-    marginHorizontal: 12,
   },
 
   savings: {
-    marginBottom: 34,
+    width: "100%",
   },
 
   progress: {
-    height: 45,
-    borderRadius: 25,
     backgroundColor:
       COLORS.darkCyan,
     overflow: "hidden",
@@ -1591,10 +1669,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor:
       COLORS.cyan,
-    borderRadius: 25,
     justifyContent:
       "center",
-    paddingLeft: 25,
     minWidth: 0,
   },
 
@@ -1606,35 +1682,28 @@ const styles = StyleSheet.create({
   goalAmount: {
     color: COLORS.white,
     position: "absolute",
-    right: 28,
   },
 
   goalText: {
     color: COLORS.white,
-    marginTop: 9,
   },
 
   actions: {
     backgroundColor:
       COLORS.cyan,
-    borderRadius: 38,
-    padding: 20,
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent:
       "space-between",
-    marginBottom: 34,
   },
 
   action: {
     width: "48%",
-    borderRadius: 24,
     backgroundColor:
       COLORS.white,
     alignItems: "center",
     justifyContent:
       "center",
-    marginBottom: 12,
     elevation: 4,
     shadowColor: "#000",
     shadowOpacity: 0.12,
@@ -1647,7 +1716,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent:
       "center",
-    marginBottom: 5,
   },
 
   actionText: {
@@ -1657,22 +1725,16 @@ const styles = StyleSheet.create({
   },
 
   filters: {
-    minHeight: 55,
-    borderRadius: 30,
     backgroundColor:
       COLORS.white,
     flexDirection: "row",
-    padding: 5,
-    marginBottom: 28,
   },
 
   filter: {
     flex: 1,
-    borderRadius: 25,
     alignItems: "center",
     justifyContent:
       "center",
-    minHeight: 45,
   },
 
   activeFilter: {
@@ -1682,7 +1744,6 @@ const styles = StyleSheet.create({
 
   filterText: {
     color: COLORS.dark,
-    fontSize: 15,
   },
 
   activeFilterText: {
@@ -1692,7 +1753,6 @@ const styles = StyleSheet.create({
   transaction: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 22,
   },
 
   transactionIcon: {
@@ -1701,7 +1761,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent:
       "center",
-    marginRight: 12,
   },
 
   transactionInfo: {
@@ -1710,34 +1769,25 @@ const styles = StyleSheet.create({
 
   transactionTitle: {
     color: COLORS.white,
-    fontSize: 18,
     fontWeight: "600",
-    marginBottom: 5,
   },
 
   transactionDate: {
     color: COLORS.cyan,
-    fontSize: 11,
   },
 
   transactionDivider: {
-    width: 2,
-    height: 52,
     backgroundColor:
       COLORS.darkCyan,
-    marginHorizontal: 8,
   },
 
   transactionType: {
     color: COLORS.white,
-    fontSize: 13,
-    width: 62,
   },
 
   amount: {
     flex: 1,
     color: COLORS.white,
-    fontSize: 14,
     fontWeight: "500",
     textAlign: "right",
   },
@@ -1754,13 +1804,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent:
       "center",
-    paddingVertical: 40,
   },
 
   emptyText: {
     color: COLORS.gray,
-    fontSize: 15,
-    marginTop: 10,
   },
 
   bottom: {

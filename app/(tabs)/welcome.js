@@ -2,159 +2,174 @@ import { router } from "expo-router";
 import {
   Image,
   Pressable,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function Welcome() {
+  const { width } = useWindowDimensions();
+
+  const small = width < 360;
+  const tablet = width >= 600;
+  const horizontalPadding = tablet ? 50 : small ? 18 : 25;
+  const logoSize = tablet ? 400 : 340;
+  const appNameSize = tablet ? 52 : 43;
+  const buttonHeight = tablet ? 72 : 64;
+  const buttonFontSize = tablet ? 32 : 29;
+
   return (
-    <View style={styles.screen}>
-      <View style={styles.container}>
+    <SafeAreaView style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: horizontalPadding,
+          paddingTop: 40,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.container}>
 
-        <Image
-          source={require("../../assets/images/logo.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-
-        <Text style={styles.appName}>
-          GrowMaint
-        </Text>
-
-        <View style={styles.buttonsContainer}>
-
-          <Pressable
-            onPress={() => router.push("/login")}
-            style={({ pressed }) => [
-              styles.loginButton,
-              pressed && styles.pressed,
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={[
+              styles.logo,
+              {
+                width: logoSize,
+                height: logoSize,
+              },
             ]}
-          >
-            <Text style={styles.loginText}>
-              Log In
-            </Text>
-          </Pressable>
+            resizeMode="contain"
+          />
 
-          <Pressable
-            onPress={() => router.push("/register")}
-            style={({ pressed }) => [
-              styles.registerButton,
-              pressed && styles.pressed,
-            ]}
-          >
-            <Text style={styles.registerText}>
-              Sign Up
-            </Text>
-          </Pressable>
+          <Text style={[
+            styles.appName,
+            {
+              fontSize: appNameSize,
+            },
+          ]}>
+            GrowMaint
+          </Text>
+
+          <View style={styles.buttonsContainer}>
+
+            <Pressable
+              onPress={() => router.push("/login")}
+              style={({ pressed }) => [
+                styles.loginButton,
+                {
+                  height: buttonHeight,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[
+                styles.loginText,
+                {
+                  fontSize: buttonFontSize,
+                },
+              ]}>
+                Log In
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push("/register")}
+              style={({ pressed }) => [
+                styles.registerButton,
+                {
+                  height: buttonHeight,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[
+                styles.registerText,
+                {
+                  fontSize: buttonFontSize,
+                },
+              ]}>
+                Sign Up
+              </Text>
+            </Pressable>
+
+          </View>
 
         </View>
-
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
-    flex: 1
+    flex: 1,
+    backgroundColor: "#0D1E2D",
   },
 
   container: {
     flex: 1,
-
     backgroundColor: "#0D1E2D",
-
     alignItems: "center",
-
-    paddingTop: 65,
-    paddingBottom: 5,
-    paddingHorizontal: 25,
-
+    justifyContent: "center",
+    paddingVertical: 40,
     overflow: "hidden",
   },
 
   logo: {
-    width: 340,
-    height: 340,
-
     marginTop: 20,
+    marginBottom: 10,
   },
 
   appName: {
     color: "#FFFFFF",
-
-    fontSize: 43,
-
     fontWeight: "800",
-
     marginTop: -5,
-
     letterSpacing: -1,
+    textAlign: "center",
   },
-
 
   buttonsContainer: {
     width: "100%",
-
     alignItems: "center",
-
     marginTop: "auto",
-
     marginBottom: 20,
+    gap: 20,
   },
-
 
   loginButton: {
     width: "92%",
-
-    height: 64,
-
     backgroundColor: "#08AEEF",
-
     borderRadius: 40,
-
     alignItems: "center",
-
     justifyContent: "center",
-
-    marginBottom: 20,
   },
 
   loginText: {
     color: "#FFFFFF",
-
-    fontSize: 29,
-
     fontWeight: "700",
   },
 
-
   registerButton: {
     width: "92%",
-
-    height: 64,
-
     backgroundColor: "#FFFFFF",
-
     borderRadius: 40,
-
     alignItems: "center",
-
     justifyContent: "center",
   },
 
   registerText: {
     color: "#0D1E2D",
-
-    fontSize: 29,
-
     fontWeight: "700",
   },
 
   pressed: {
     opacity: 0.8,
-
     transform: [
       {
         scale: 0.97,

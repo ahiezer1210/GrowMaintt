@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { doc, setDoc } from "firebase/firestore";
-import { useState } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -17,6 +17,39 @@ import { auth, db } from "../../firebaseConfig";
 export default function VerifyAge() {
   const [documentUri, setDocumentUri] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingPhoto, setLoadingPhoto] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(Date.now());
+
+  useEffect(() => {
+    loadSavedPhoto();
+  }, []);
+
+  const loadSavedPhoto = async () => {
+    try {
+      const user = auth.currentUser;
+
+      if (!user) {
+        setLoadingPhoto(false);
+        return;
+      }
+
+      const userRef = doc(db, "Users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (userSnap.exists()) {
+        const data = userSnap.data();
+
+        if (data.identityDocumentUrl) {
+          setDocumentUri(data.identityDocumentUrl);
+          setRefreshKey(Date.now());
+        }
+      }
+    } catch (error) {
+      console.log("Error cargando documento:", error);
+    } finally {
+      setLoadingPhoto(false);
+    }
+  };
 
   const takePhoto = async () => {
     try {
@@ -41,6 +74,7 @@ export default function VerifyAge() {
             `data:image/jpeg;base64,${asset.base64}`;
 
           setDocumentUri(newPhotoUrl);
+          setRefreshKey(Date.now());
         }
       }
     } catch (error) {
@@ -51,27 +85,31 @@ export default function VerifyAge() {
   const saveDocument = async () => {
     const user = auth.currentUser;
 
+    if (!user || !documentUri) {
+      return;
+    }
+
     try {
       setLoading(true);
 
-      if (user && documentUri) {
-        const userRef = doc(db, "Users", user.uid);
+      const userRef = doc(db, "Users", user.uid);
 
-        await setDoc(
-          userRef,
-          {
-            identityDocumentUrl: documentUri,
-            identityDocumentUpdatedAt: new Date(),
-          },
-          {
-            merge: true,
-          }
-        );
-      }
+      await setDoc(
+        userRef,
+        {
+          identityDocumentUrl: documentUri,
+          identityDocumentUpdatedAt: new Date(),
+        },
+        {
+          merge: true,
+        }
+      );
 
-      // Ir al Home después de guardar
+      setRefreshKey(Date.now());
+
+      await loadSavedPhoto();
+
       router.replace("/(tabs)/home");
-
     } catch (error) {
       console.log("Error guardando documento:", error);
     } finally {
@@ -87,7 +125,6 @@ export default function VerifyAge() {
         barStyle="light-content"
       />
 
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -107,7 +144,6 @@ export default function VerifyAge() {
         <View style={{ width: 30 }} />
       </View>
 
-      {/* CONTENIDO */}
       <View style={styles.main}>
         <Text style={styles.title}>
           Scan your identity document
@@ -118,8 +154,14 @@ export default function VerifyAge() {
           verify that you are 18 years old or older.
         </Text>
 
-        {/* SI NO HAY FOTO */}
-        {!documentUri ? (
+        {loadingPhoto ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator
+              size="large"
+              color="#25B7D3"
+            />
+          </View>
+        ) : !documentUri ? (
           <TouchableOpacity
             style={styles.scanButton}
             onPress={takePhoto}
@@ -136,23 +178,22 @@ export default function VerifyAge() {
           </TouchableOpacity>
         ) : (
           <>
-            {/* PREVISUALIZACIÓN */}
             <Image
+              key={refreshKey}
               source={{ uri: documentUri }}
               style={styles.preview}
             />
 
-            {/* RETOMAR FOTO */}
             <TouchableOpacity
               style={styles.retakeButton}
               onPress={takePhoto}
+              disabled={loading}
             >
               <Text style={styles.retakeText}>
                 Retake Photo
               </Text>
             </TouchableOpacity>
 
-            {/* CONTINUAR */}
             <TouchableOpacity
               style={styles.continueButton}
               onPress={saveDocument}
@@ -226,6 +267,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#555",
     lineHeight: 22,
+  },
+
+  loadingContainer: {
+    marginTop: 90,
   },
 
   scanButton: {

@@ -1,156 +1,412 @@
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Device from "expo-device";
 import { router } from "expo-router";
 import {
-  addDoc,
   collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
-import { useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useState } from "react";
 import {
   Alert,
+  Platform,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
 
-export default function Registerexpenses() {
+export default function Devices() {
   const { width, height } = useWindowDimensions();
-  const scale = Math.min(width / 390, height / 844);
-  const s = (value) => Math.round(value * scale);
 
-  const [amount, setAmount] = useState("");
-  const [category, setCategory] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [expenseType, setExpenseType] = useState("");
-  const [isRecurrent, setIsRecurrent] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [devices, setDevices] = useState([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState(null);
 
-  const resetForm = () => {
-    setAmount("");
-    setCategory("");
-    setDate("");
-    setDescription("");
-    setExpenseType("");
-    setIsRecurrent(false);
-  };
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
 
-  const cancelExpenses = () => {
-    resetForm();
-    router.replace("/home");
-  };
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isLargeScreen
+        ? 1.25
+        : isTablet
+          ? 1.15
+          : 1;
 
-  const saveExpenses = async () => {
-    if (!amount.trim()) {
-      Alert.alert("Error", "Please enter the expense amount.");
-      return;
-    }
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isLargeScreen
+        ? 60
+        : isTablet
+          ? 45
+          : 25;
 
-    if (!category.trim()) {
-      Alert.alert("Error", "Please enter the category.");
-      return;
-    }
+  const s = (size) => Math.round(size * scale);
 
-    if (!date.trim()) {
-      Alert.alert("Error", "Please enter the date.");
-      return;
-    }
+  const navItems = [
+    {
+      icon: "home-outline",
+      route: "/home",
+    },
+    {
+      icon: "chart-box-outline",
+      route: "/historial",
+    },
+    {
+      icon: "swap-horizontal",
+      route: "/expensesManagement",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/profile",
+    },
+  ];
 
-    if (!expenseType) {
-      Alert.alert("Error", "Please select the expense type.");
-      return;
-    }
+  useEffect(() => {
+    let unsubscribeAuth;
+    let unsubscribeDevices;
 
-    const user = auth.currentUser;
+    const registerDevice = async (user) => {
+      try {
+        let deviceId = await AsyncStorage.getItem(
+          "growmaint_device_id"
+        );
 
-    if (!user) {
-      Alert.alert("Error", "There is no authenticated user.");
-      return;
-    }
+        if (!deviceId) {
+          deviceId =
+            `${Date.now()}-${Math.random()
+              .toString(36)
+              .substring(2, 12)}`;
 
-    const amountNumber = Number(amount.replace(",", "."));
-
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      Alert.alert("Error", "The entered amount is not valid.");
-      return;
-    }
-
-    try {
-      setSaving(true);
-
-      const roundedAmount = Math.ceil(amountNumber);
-
-      const savingsAmount = Number(
-        (roundedAmount - amountNumber).toFixed(2)
-      );
-
-      const expenseRef = await addDoc(
-        collection(db, "Registro de gastos"),
-        {
-          uid: user.uid,
-          amount: amountNumber,
-          category: category.trim(),
-          date: date.trim(),
-          description: description.trim(),
-          roundingAmount: roundedAmount,
-          savingsGenerated: savingsAmount,
-          expenseType: expenseType,
-          isRecurrent: isRecurrent,
-          createdAt: serverTimestamp(),
+          await AsyncStorage.setItem(
+            "growmaint_device_id",
+            deviceId
+          );
         }
-      );
 
-      if (savingsAmount > 0) {
-        await addDoc(
-          collection(db, "Ahorros"),
+        setCurrentDeviceId(deviceId);
+
+        let deviceName =
+          Device.deviceName ||
+          Device.modelName ||
+          "My device";
+
+        let deviceType = "phone";
+
+        if (Platform.OS === "web") {
+          deviceType = "desktop";
+          deviceName = "Web Browser";
+        } else if (
+          Device.deviceType === Device.DeviceType.TABLET
+        ) {
+          deviceType = "tablet";
+        } else if (
+          Device.deviceType === Device.DeviceType.DESKTOP
+        ) {
+          deviceType = "desktop";
+        }
+
+        const systemName =
+          Device.osName || Platform.OS;
+
+        const deviceRef = doc(
+          db,
+          "Dispositivos Vinculados",
+          user.uid,
+          "linkedDevices",
+          deviceId
+        );
+
+        await setDoc(
+          deviceRef,
           {
-            uid: user.uid,
-            amount: savingsAmount,
-            originalAmount: amountNumber,
-            roundingAmount: roundedAmount,
-            expenseId: expenseRef.id,
-            category: category.trim(),
-            date: date.trim(),
-            description: description.trim(),
-            source: "rounding",
-            createdAt: serverTimestamp(),
+            deviceId,
+            deviceName,
+            deviceType,
+            systemName,
+            modelName: Device.modelName || "",
+            osVersion: Device.osVersion || "",
+            lastActive: serverTimestamp(),
+          },
+          { merge: true }
+        );
+
+        const devicesRef = collection(
+          db,
+          "Dispositivos Vinculados",
+          user.uid,
+          "linkedDevices"
+        );
+
+        unsubscribeDevices = onSnapshot(
+          devicesRef,
+          (snapshot) => {
+            const deviceList = snapshot.docs.map(
+              (item) => ({
+                id: item.id,
+                ...item.data(),
+              })
+            );
+
+            deviceList.sort((a, b) => {
+              if (a.id === deviceId) return -1;
+              if (b.id === deviceId) return 1;
+
+              const dateA =
+                a.lastActive?.toDate
+                  ? a.lastActive.toDate()
+                  : new Date(0);
+
+              const dateB =
+                b.lastActive?.toDate
+                  ? b.lastActive.toDate()
+                  : new Date(0);
+
+              return dateB - dateA;
+            });
+
+            setDevices(deviceList);
+          },
+          (error) => {
+            console.log(
+              "Error loading linked devices:",
+              error
+            );
+
+            Alert.alert(
+              "Error",
+              "The linked devices could not be loaded."
+            );
           }
         );
+      } catch (error) {
+        console.log(
+          "Error registering device:",
+          error
+        );
+
+        Alert.alert(
+          "Error",
+          "The device could not be registered."
+        );
+      }
+    };
+
+    unsubscribeAuth = onAuthStateChanged(
+      auth,
+      async (user) => {
+        if (!user) {
+          setDevices([]);
+          setCurrentDeviceId(null);
+          return;
+        }
+
+        await registerDevice(user);
+      }
+    );
+
+    return () => {
+      if (unsubscribeAuth) {
+        unsubscribeAuth();
       }
 
-      resetForm();
+      if (unsubscribeDevices) {
+        unsubscribeDevices();
+      }
+    };
+  }, []);
 
-      Alert.alert(
-        "Expense Registered",
-        savingsAmount > 0
-          ? `Expense saved successfully.\n\nExpense: $${amountNumber.toFixed(
-              2
-            )}\nRounded to: $${roundedAmount.toFixed(
-              2
-            )}\nSavings generated: $${savingsAmount.toFixed(2)}`
-          : "Expense saved successfully.\n\nNo savings were generated because the amount was already a whole number.",
-        [
-          {
-            text: "OK",
-          },
-        ]
-      );
-    } catch (error) {
-      console.log("ERROR SAVING EXPENSE:", error);
-
-      Alert.alert(
-        "Error",
-        "The expense could not be saved. Please try again."
-      );
-    } finally {
-      setSaving(false);
+  const getDeviceIcon = (device) => {
+    if (device.deviceType === "desktop") {
+      return "laptop-outline";
     }
+
+    if (device.deviceType === "tablet") {
+      return "tablet-portrait-outline";
+    }
+
+    return "phone-portrait-outline";
+  };
+
+  const getDeviceName = (device) => {
+    if (device.id === currentDeviceId) {
+      return "My device";
+    }
+
+    if (device.deviceName) {
+      return device.deviceName;
+    }
+
+    return "Unknown device";
+  };
+
+  const getDeviceDetails = (device) => {
+    const location = "El Salvador";
+
+    if (device.deviceType === "desktop") {
+      return `${location}\n${device.systemName || "Desktop"
+        }`;
+    }
+
+    const model =
+      device.modelName ||
+      device.systemName ||
+      "Mobile device";
+
+    return `${model}\n${location}`;
+  };
+
+  const getDeviceStatus = (device) => {
+    if (device.id === currentDeviceId) {
+      return {
+        active: true,
+        text: "Active now",
+      };
+    }
+
+    if (!device.lastActive?.toDate) {
+      return {
+        active: false,
+        text: "Last active: unknown",
+      };
+    }
+
+    const lastActive = device.lastActive.toDate();
+    const now = new Date();
+
+    const difference = now - lastActive;
+
+    const minutes = Math.floor(
+      difference / 60000
+    );
+
+    const hours = Math.floor(
+      difference / 3600000
+    );
+
+    const days = Math.floor(
+      difference / 86400000
+    );
+
+    if (minutes < 1) {
+      return {
+        active: false,
+        text: "Last active: just now",
+      };
+    }
+
+    if (minutes < 60) {
+      return {
+        active: false,
+        text: `Last active: ${minutes} min ago`,
+      };
+    }
+
+    if (hours < 24) {
+      return {
+        active: false,
+        text: `Last active: ${hours}h ago`,
+      };
+    }
+
+    if (days === 1) {
+      return {
+        active: false,
+        text: "Last active: yesterday",
+      };
+    }
+
+    return {
+      active: false,
+      text: `Last active: ${days} days ago`,
+    };
+  };
+
+  const unlinkDevice = (device) => {
+    if (device.id === currentDeviceId) {
+      Alert.alert(
+        "Current device",
+        "You cannot unlink the device you are currently using."
+      );
+
+      return;
+    }
+
+    Alert.alert(
+      "Unlink device",
+      `Are you sure you want to unlink ${getDeviceName(
+        device
+      )}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Unlink",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const user = auth.currentUser;
+
+              if (!user) {
+                return;
+              }
+
+              await deleteDoc(
+                doc(
+                  db,
+                  "Dispositivos Vinculados",
+                  user.uid,
+                  "linkedDevices",
+                  device.id
+                )
+              );
+            } catch (error) {
+              console.log(
+                "Error unlinking device:",
+                error
+              );
+
+              Alert.alert(
+                "Error",
+                "The device could not be unlinked."
+              );
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/linkeddevices",
+      },
+    });
   };
 
   return (
@@ -159,18 +415,31 @@ export default function Registerexpenses() {
         style={[
           styles.header,
           {
-            paddingTop: s(55),
-            paddingBottom: s(30),
+            height: s(115),
+            paddingHorizontal: horizontalPadding,
           },
         ]}
       >
         <TouchableOpacity
-          style={[styles.backButton, { width: s(35) }]}
-          onPress={() => router.back()}
+          style={[
+            styles.backButton,
+            {
+              transform: [
+                {
+                  translateY: s(4),
+                },
+                {
+                  translateX: -s(4),
+                },
+              ],
+            },
+          ]}
+          onPress={() => router.push("/settings")}
+          activeOpacity={0.7}
         >
-          <Ionicons
-            name="arrow-back"
-            size={s(25)}
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={s(35)}
             color="#FFFFFF"
           />
         </TouchableOpacity>
@@ -179,219 +448,288 @@ export default function Registerexpenses() {
           style={[
             styles.title,
             {
-              fontSize: s(28),
-              marginLeft: s(25),
+              fontSize: s(25),
+              lineHeight: s(23),
+              transform: [
+                {
+                  translateX: s(4),
+                },
+                {
+                  translateY: s(14),
+                },
+              ],
             },
           ]}
         >
-          Register expenses
+          Linked{"\n"}Devices
         </Text>
 
         <TouchableOpacity
           style={[
-            styles.notificationButton,
+            styles.headerBell,
             {
-              width: s(34),
-              height: s(34),
-              borderRadius: s(18),
+              transform: [
+                {
+                  translateY: s(3),
+                },
+              ],
             },
           ]}
+          onPress={abrirNotificaciones}
+          activeOpacity={0.7}
         >
-          <Ionicons
-            name="notifications-outline"
-            size={s(25)}
-            color="#081023"
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={s(35)}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.main,
+          {
+            borderTopLeftRadius: s(36),
+            borderTopRightRadius: s(36),
+          },
+        ]}
+      >
         <ScrollView
+          style={styles.content}
+          contentContainerStyle={[
+            styles.contentContainer,
+            {
+              paddingHorizontal: horizontalPadding,
+              paddingTop: s(15),
+              paddingBottom: s(90),
+            },
+          ]}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.label}>Amount</Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="E.g. $4.60"
-            keyboardType="numeric"
-            value={amount}
-            onChangeText={setAmount}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text style={styles.roundingInfo}>
-            The amount will be automatically rounded up to generate savings.
+          <Text
+            style={[
+              styles.sectionTitle,
+              {
+                fontSize: s(18),
+                marginBottom: s(15),
+              },
+            ]}
+          >
+            Devices
           </Text>
 
-          <Text style={styles.label}>Category</Text>
+          {devices.map((device) => {
+            const status =
+              getDeviceStatus(device);
 
-          <TextInput
-            style={styles.input}
-            placeholder="E.g. Transport"
-            value={category}
-            onChangeText={setCategory}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text style={styles.label}>Date</Text>
-
-          <TextInput
-            style={styles.date}
-            placeholder="June 23, 2026"
-            value={date}
-            onChangeText={setDate}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text style={styles.label}>
-            Description (optional)
-          </Text>
-
-          <TextInput
-            style={styles.input}
-            placeholder="E.g. Going out with friends"
-            value={description}
-            onChangeText={setDescription}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text style={styles.label}>
-            Expense type
-          </Text>
-
-          <View style={styles.typeContainer}>
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                expenseType === "weekly" &&
-                  styles.typeButtonActive,
-              ]}
-              onPress={() => setExpenseType("weekly")}
-            >
-              <Text
+            return (
+              <View
+                key={device.id}
                 style={[
-                  styles.typeText,
-                  expenseType === "weekly" &&
-                    styles.typeTextActive,
+                  styles.deviceCard,
+                  {
+                    minHeight: s(110),
+                    padding: s(16),
+                    borderRadius: s(20),
+                    marginBottom: s(14),
+                  },
                 ]}
               >
-                Weekly
-              </Text>
-            </TouchableOpacity>
+                <View
+                  style={[
+                    styles.deviceIcon,
+                    {
+                      width: s(55),
+                      height: s(55),
+                      borderRadius: s(16),
+                      marginRight: s(14),
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={getDeviceIcon(device)}
+                    size={s(28)}
+                    color="#3A7AFE"
+                  />
+                </View>
 
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                expenseType === "unnecessary" &&
-                  styles.typeButtonActive,
-              ]}
-              onPress={() =>
-                setExpenseType("unnecessary")
-              }
-            >
-              <Text
-                style={[
-                  styles.typeText,
-                  expenseType === "unnecessary" &&
-                    styles.typeTextActive,
-                ]}
-              >
-                Unnecessary
-              </Text>
-            </TouchableOpacity>
+                <View style={styles.deviceInfo}>
+                  <Text
+                    style={[
+                      styles.deviceName,
+                      {
+                        fontSize: s(16),
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {getDeviceName(device)}
+                  </Text>
 
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                expenseType === "monthly" &&
-                  styles.typeButtonActive,
-              ]}
-              onPress={() => setExpenseType("monthly")}
-            >
-              <Text
-                style={[
-                  styles.typeText,
-                  expenseType === "monthly" &&
-                    styles.typeTextActive,
-                ]}
-              >
-                Monthly
-              </Text>
-            </TouchableOpacity>
-          </View>
+                  <Text
+                    style={[
+                      styles.deviceDetails,
+                      {
+                        fontSize: s(13),
+                        lineHeight: s(18),
+                        marginTop: s(3),
+                      },
+                    ]}
+                  >
+                    {getDeviceDetails(device)}
+                  </Text>
 
-          <Text style={styles.label}>
-            It's a recurring expense?
-          </Text>
+                  <View
+                    style={[
+                      styles.status,
+                      {
+                        marginTop: s(4),
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        status.active
+                          ? styles.activeDot
+                          : styles.dot,
+                        {
+                          width: s(7),
+                          height: s(7),
+                          borderRadius: s(4),
+                          marginRight: s(6),
+                        },
+                      ]}
+                    />
 
-          <View style={styles.optionsContainer}>
-            <Text style={styles.recurrentText}>
-              Activate the option if it is{"\n"}recurring
-            </Text>
+                    <Text
+                      style={[
+                        status.active
+                          ? styles.activeText
+                          : styles.lastActive,
+                        {
+                          fontSize: s(12),
+                        },
+                      ]}
+                      numberOfLines={1}
+                    >
+                      {status.text}
+                    </Text>
+                  </View>
+                </View>
 
-            <Switch
-              value={isRecurrent}
-              onValueChange={setIsRecurrent}
-              trackColor={{
-                false: "#BDBDBD",
-                true: "#168AFF",
-              }}
-              thumbColor="#FFFFFF"
+                <TouchableOpacity
+                  style={[
+                    styles.unlinkButton,
+                    {
+                      paddingVertical: s(9),
+                      paddingHorizontal: s(12),
+                      borderRadius: s(10),
+                      marginLeft: s(8),
+                    },
+                    device.id ===
+                    currentDeviceId && {
+                      opacity: 0.35,
+                    },
+                  ]}
+                  onPress={() =>
+                    unlinkDevice(device)
+                  }
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.unlinkText,
+                      {
+                        fontSize: s(12),
+                      },
+                    ]}
+                  >
+                    Unlink
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
+
+          <View
+            style={[
+              styles.infoCard,
+              {
+                borderRadius: s(18),
+                padding: s(16),
+                marginTop: s(8),
+              },
+            ]}
+          >
+            <Ionicons
+              name="shield-checkmark-outline"
+              size={s(25)}
+              color="#3A7AFE"
             />
+
+            <View
+              style={[
+                styles.infoTextContainer,
+                {
+                  marginLeft: s(12),
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.infoTitle,
+                  {
+                    fontSize: s(14),
+                    marginBottom: s(5),
+                  },
+                ]}
+              >
+                Keep your account secure
+              </Text>
+
+              <Text
+                style={[
+                  styles.infoText,
+                  {
+                    fontSize: s(12),
+                    lineHeight: s(18),
+                  },
+                ]}
+              >
+                If you don't recognize a device,
+                unlink it to protect your account.
+              </Text>
+            </View>
           </View>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                height: s(48),
-                marginTop: s(15),
-                borderRadius: s(18),
-                opacity: saving ? 0.6 : 1,
-              },
-            ]}
-            onPress={saveExpenses}
-            disabled={saving}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                {
-                  fontSize: s(17),
-                },
-              ]}
-            >
-              {saving ? "Saving..." : "Save expenses"}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                height: s(34),
-                marginTop: s(15),
-                borderRadius: s(18),
-              },
-            ]}
-            onPress={cancelExpenses}
-            disabled={saving}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                {
-                  fontSize: s(17),
-                },
-              ]}
-            >
-              Cancel
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
+
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height: s(65),
+              borderTopLeftRadius: s(78),
+            },
+          ]}
+        >
+          {navItems.map((item) => (
+            <TouchableOpacity
+              key={item.icon}
+              style={styles.navButton}
+              onPress={() =>
+                router.push(item.route)
+              }
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={s(35)}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -400,117 +738,152 @@ export default function Registerexpenses() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
+
   header: {
+    width: "100%",
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
   },
+
   backButton: {
+    justifyContent: "center",
     alignItems: "flex-start",
-    marginLeft: 10,
   },
+
   title: {
-    color: "#FFFFFF",
-    fontWeight: "600",
     flex: 1,
-  },
-  notificationButton: {
-    backgroundColor: "#E0F5E7",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  card: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingHorizontal: 30,
-    paddingTop: 25,
-  },
-  scrollContent: {
-    paddingBottom: 30,
-  },
-  label: {
-    color: "#081023",
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  input: {
-    height: 48,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#000000",
-    paddingHorizontal: 18,
-    marginBottom: 22,
-  },
-  date: {
-    height: 48,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#000000",
-    paddingHorizontal: 18,
-    marginBottom: 22,
-  },
-  roundingInfo: {
-    color: "#ACADAD",
-    fontSize: 12,
-    marginTop: -12,
-    marginBottom: 22,
-  },
-  optionsContainer: {
-    height: 40,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 13,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-    paddingHorizontal: 8,
-    marginBottom: 17,
-  },
-  recurrentText: {
-    color: "#081023",
-    fontSize: 13,
-  },
-  typeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 17,
-  },
-  typeButton: {
-    flex: 1,
-    height: 42,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 3,
-  },
-  typeButtonActive: {
-    backgroundColor: "#25B7D3",
-    borderColor: "#25B7D3",
-  },
-  typeText: {
-    color: "#081023",
-    fontSize: 12,
-    fontWeight: "600",
-  },
-  typeTextActive: {
-    color: "#FFFFFF",
-  },
-  button: {
-    backgroundColor: "#25B7D3",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
     color: "#FFFFFF",
     fontWeight: "700",
+    textAlign: "center",
+  },
+
+  headerBell: {
+    justifyContent: "center",
+  },
+
+  main: {
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+  },
+
+  content: {
+    flex: 1,
+  },
+
+  contentContainer: {
+    paddingBottom: 90,
+  },
+
+  sectionTitle: {
+    fontWeight: "700",
+    color: "#222",
+  },
+
+  deviceCard: {
+    backgroundColor: "#FFF",
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.07,
+    shadowRadius: 8,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+  },
+
+  deviceIcon: {
+    backgroundColor: "#EEF4FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  deviceInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+
+  deviceName: {
+    fontWeight: "700",
+    color: "#222",
+  },
+
+  deviceDetails: {
+    color: "#777",
+  },
+
+  status: {
+    flexDirection: "row",
+    alignItems: "center",
+    minWidth: 0,
+  },
+
+  dot: {
+    backgroundColor: "#999",
+  },
+
+  activeDot: {
+    backgroundColor: "#25B7D3",
+  },
+
+  activeText: {
+    color: "#259E8C",
+    fontWeight: "600",
+  },
+
+  lastActive: {
+    color: "#030101",
+  },
+
+  unlinkButton: {
+    backgroundColor: "#FFF1F1",
+  },
+
+  unlinkText: {
+    color: "#081023",
+    fontWeight: "700",
+  },
+
+  infoCard: {
+    backgroundColor: "#EEF4FF",
+    flexDirection: "row",
+  },
+
+  infoTextContainer: {
+    flex: 1,
+  },
+
+  infoTitle: {
+    fontWeight: "700",
+    color: "#222",
+  },
+
+  infoText: {
+    color: "#666",
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navButton: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

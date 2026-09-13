@@ -6,6 +6,9 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -42,19 +45,19 @@ export default function RecuperarContrasena({ navigation }) {
       if (error.code === "auth/user-not-found") {
         Alert.alert(
           "Email not found",
-          "We don't find a count with that email.",
+          "We don't find a count with that email."
         );
       } else if (error.code === "auth/invalid-email") {
-        Alert.alert("too many attempts", "the email entered is incorrect");
+        Alert.alert("Too many attempts", "The email entered is incorrect");
       } else if (error.code === "auth/too-many-requests") {
         Alert.alert(
-          "too many attempts",
-          "Wait a few minutes before try again.",
+          "Too many attempts",
+          "Wait a few minutes before try again."
         );
       } else if (error.code === "auth/network-request-failed") {
         Alert.alert(
           "Without connection",
-          "Could not connect to Firebase. Check your Internet connection.",
+          "Could not connect to Firebase. Check your Internet connection."
         );
       } else {
         Alert.alert("Error", "The recovery email couldn't be sent. Try again.");
@@ -70,121 +73,135 @@ export default function RecuperarContrasena({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.botonRegresar}
-          onPress={() => navigation.goBack()}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={26} color="#FFFFFF" />
-        </TouchableOpacity>
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" backgroundColor="#081023" />
 
-        <Text style={styles.titulo}>Password{"\n"}Recovery</Text>
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        {/* Header Azul */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.botonRegresar}
+            onPress={() => navigation.goBack()}
+          >
+            <MaterialCommunityIcons name="arrow-left" size={26} color="#FFFFFF" />
+          </TouchableOpacity>
 
-      <View style={styles.card}>
-        <View style={styles.iconContainer}>
-          <MaterialCommunityIcons
-            name="lock-reset"
-            size={125}
-            color="#252833"
-          />
-
-          <View style={styles.checkCircle}>
-            <MaterialCommunityIcons name="check" size={21} color="#FFFFFF" />
-          </View>
+          <Text style={styles.titulo}>Password{"\n"}Recovery</Text>
         </View>
 
-        {!enviado ? (
-          <>
-            <Text style={styles.label}>User or email</Text>
-
-            <TextInput
-              style={styles.input}
-              value={correo}
-              onChangeText={setCorreo}
-              placeholder="Ingresa tu correo"
-              placeholderTextColor="#A8ADB5"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              editable={!cargando}
-            />
-
-            <Text style={styles.descripcion}>
-              A link will be sent to your email
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.botonSiguiente,
-                cargando && styles.botonDeshabilitado,
-              ]}
-              onPress={recuperarContrasena}
-              disabled={cargando}
-            >
-              {cargando ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.textoSiguiente}>Next</Text>
-              )}
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.botonIntentar}
-              onPress={() => navigation.goBack()}
-              disabled={cargando}
-            >
-              <Text style={styles.textoIntentar}>Cancel</Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <View style={styles.confirmacion}>
-            <View style={styles.checkGrande}>
+        <View style={styles.whiteContainer}>
+          <ScrollView
+            style={styles.whiteScroll}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            alwaysBounceVertical={true} 
+            overScrollMode="always" 
+          >
+            <View style={styles.iconContainer}>
               <MaterialCommunityIcons
-                name="email-check-outline"
-                size={55}
-                color="#38BDF8"
+                name="lock-reset"
+                size={125}
+                color="#252833"
               />
+
+              <View style={styles.checkCircle}>
+                <MaterialCommunityIcons name="check" size={21} color="#FFFFFF" />
+              </View>
             </View>
 
-            <Text style={styles.tituloConfirmacion}>¡Sent email!</Text>
+            {!enviado ? (
+              <>
+                <Text style={styles.label}>User or email</Text>
 
-            <Text style={styles.mensajeConfirmacion}>
-              We've sent a link to recover your password to:
-            </Text>
+                <TextInput
+                  style={styles.input}
+                  value={correo}
+                  onChangeText={setCorreo}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#A8ADB5"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  editable={!cargando}
+                />
 
-            <Text style={styles.correoConfirmacion}>{correo}</Text>
+                <Text style={styles.descripcion}>
+                  A link will be sent to your email
+                </Text>
 
-            <Text style={styles.mensajePequeno}>
-              Check your inbox and also the spam folder.
-            </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.botonSiguiente,
+                    cargando && styles.botonDeshabilitado,
+                  ]}
+                  onPress={recuperarContrasena}
+                  disabled={cargando}
+                >
+                  {cargando ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <Text style={styles.textoSiguiente}>Next</Text>
+                  )}
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.botonSiguiente}
-              onPress={() => navigation.goBack()}
-            >
-              <Text style={styles.textoSiguiente}>Back to the login</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.botonIntentar}
+                  onPress={() => navigation.goBack()}
+                  disabled={cargando}
+                >
+                  <Text style={styles.textoIntentar}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <View style={styles.confirmacion}>
+                <View style={styles.checkGrande}>
+                  <MaterialCommunityIcons
+                    name="email-check-outline"
+                    size={55}
+                    color="#38BDF8"
+                  />
+                </View>
 
-            <TouchableOpacity
-              style={styles.botonIntentar}
-              onPress={volverAIntentar}
-            >
-              <Text style={styles.textoIntentar}>Use another email.</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </KeyboardAvoidingView>
+                <Text style={styles.tituloConfirmacion}>¡Sent email!</Text>
+
+                <Text style={styles.mensajeConfirmacion}>
+                  We've sent a link to recover your password to:
+                </Text>
+
+                <Text style={styles.correoConfirmacion}>{correo}</Text>
+
+                <Text style={styles.mensajePequeno}>
+                  Check your inbox and also the spam folder.
+                </Text>
+
+                <TouchableOpacity
+                  style={styles.botonSiguiente}
+                  onPress={() => navigation.goBack()}
+                >
+                  <Text style={styles.textoSiguiente}>Back to the login</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.botonIntentar}
+                  onPress={volverAIntentar}
+                >
+                  <Text style={styles.textoIntentar}>Use another email.</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     backgroundColor: "#081023",
   },
@@ -193,6 +210,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 55,
     paddingBottom: 30,
+    backgroundColor: "#081023",
   },
 
   botonRegresar: {
@@ -204,6 +222,7 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     justifyContent: "center",
     alignItems: "center",
+    zIndex: 10, 
   },
 
   titulo: {
@@ -214,13 +233,24 @@ const styles = StyleSheet.create({
     lineHeight: 40,
   },
 
-  card: {
+  whiteContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
+    overflow: "hidden", 
+  },
+
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     paddingHorizontal: 30,
     paddingTop: 40,
+    paddingBottom: 250, 
   },
 
   iconContainer: {

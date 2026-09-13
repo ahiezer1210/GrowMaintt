@@ -10,6 +10,7 @@ import {
     View,
     useWindowDimensions
 } from "react-native";
+import { RollInRight } from "react-native-reanimated";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -57,7 +58,7 @@ export default function Profile() {
         });
     };
 
-    const { width, height } = useWindowDimensions();
+    const { width } = useWindowDimensions();
 
     const isSmallScreen = width < 360;
     const isMediumScreen = width >= 360 && width < 600;
@@ -69,31 +70,21 @@ export default function Profile() {
         : isMediumScreen
             ? 1
             : isTablet
-                ? 1.35
-                : 1.5;
+                ? 1.15
+                : 1.25;
 
     const horizontalPadding = isSmallScreen
-        ? 15
+        ? 18
         : isMediumScreen
             ? 25
             : isTablet
-                ? 60
-                : 45;
+                ? 45
+                : 60;
 
     return (
         <SafeAreaView style={styles.container}>
 
-            <View style={[
-                styles.header,
-                {
-                    height: isSmallScreen
-                        ? 80
-                        : isTablet
-                            ? 100
-                            : 30,
-                    paddingHorizontal: isSmallScreen ? 15: isTablet ? 35: 30,
-                },
-            ]}>
+            <View style={styles.header}>
 
                 <TouchableOpacity
                     style={styles.backButton}
@@ -101,7 +92,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="arrow-back"
-                        size={25 * scale}
+                        size={25}
                         color="#ffffff"
                     />
                 </TouchableOpacity>
@@ -110,7 +101,6 @@ export default function Profile() {
                     styles.title,
                     {
                         fontSize: 25 * scale,
-                        marginTop: isSmallScreen ? 20: isTablet ? 35: 0,
                     },
                 ]}>
                     Profile
@@ -136,7 +126,27 @@ export default function Profile() {
 
             </View>
 
-            <View style={styles.content}>
+            <View style={[
+                styles.content,
+                {
+                    marginTop: isTablet ?  70 : 40,
+                }
+                ]}>
+
+                <View style={[
+                        styles.imageContainer,
+                        {
+                            width: isTablet ? 120 : 90,
+                            height: isTablet ? 120 : 90,
+                            borderRadius: isTablet ? 60 : 45,
+                            top: -40,
+                        },
+                    ]}>
+                        <Image
+                            source={require("../../assets/images/Image.jpg")}
+                            style={styles.logo}
+                        />
+                    </View>
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -148,32 +158,24 @@ export default function Profile() {
                     ]}
                 >
 
-                    <View style={[
-                        styles.imageContainer,
-                        {
-                            width: isTablet ? 120 : 90 ,
-                            height:  isTablet ? 120 : 90,
-                            borderRadius: isTablet ? 60 :45,
-                            top: 0,
-                        },
-                    ]}>
-                        <Image
-                            source={require("../../assets/images/Image.jpg")}
-                            style={styles.logo}
-                        />
-                    </View>
 
                     <Text style={[
                         styles.name,
                         {
-                            fontSize: 18 * scale,
-                            marginTop: 100 * scale,
+                            fontSize: isTablet ? 28 : 18,
+                            marginTop: isTablet ?  80 : 60,
+                            marginRight: isTablet ?  40 : 20,
                         },
                     ]}>
                         Diana Cardoza
                     </Text>
 
-                    <View style={styles.optionsContainer}>
+                    <View style={[
+                        styles.optionsContainer,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}>
 
                         {menuOptions.map((option, index) => (
 
@@ -182,8 +184,10 @@ export default function Profile() {
                                 style={[
                                     styles.opttion,
                                     {
-                                        minHeight: 60 * scale,
+                                        minHeight: isTablet ? 98 * scale : 60 * scale,
                                         marginBottom: 18 * scale,
+                                        marginRight: isTablet ? 380 * scale : 120 * scale,
+                                        
                                     },
                                 ]}
                                 onPress={() => {
@@ -198,17 +202,17 @@ export default function Profile() {
                                         styles.iconContainer,
                                         {
                                             backgroundColor: option.color,
-                                            width: 45 * scale,
-                                            height: 45 * scale,
+                                            width: isTablet ? 70 * scale : 45 * scale,
+                                            height: isTablet ? 70 * scale : 45 * scale,
                                             borderRadius: 12 * scale,
-                                            marginRight: 15 * scale,
+                                            marginRight: 16 * scale,
                                         }
                                     ]}
                                 >
 
                                     <Ionicons
                                         name={option.icon}
-                                        size={22 * scale}
+                                        size={25 * scale}
                                         color="#FFFFFF"
                                     />
 
@@ -217,8 +221,8 @@ export default function Profile() {
                                 <Text style={[
                                     styles.optionText,
                                     {
-                                        fontSize: 16 * scale,
-                                        lineHeight: 20 * scale,
+                                        fontSize: isTablet ? 20 * scale : 16 * scale,
+                                        lineHeight: 28 * scale,
                                     },
                                 ]}>
                                     {option.title}
@@ -237,17 +241,7 @@ export default function Profile() {
             <View style={[
                 styles.bottomBar,
                 {
-                    height: isSmallScreen
-                        ? 65
-                        : isTablet
-                            ? 85
-                            : 60,
-
-                            marginBottom: isSmallScreen
-                            ? 0
-                            : isTablet
-                            ? 0
-                            : -30,
+                    height: isSmallScreen ? 60 : isTablet ? 95 : 70,
                 }
             ]}>
 
@@ -256,7 +250,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="home-outline"
-                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -266,7 +260,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="bar-chart-outline"
-                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -278,7 +272,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="swap-horizontal-outline"
-                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -290,7 +284,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="layers-outline"
-                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -302,7 +296,7 @@ export default function Profile() {
                 >
                     <Ionicons
                         name="person-outline"
-                        size={isSmallScreen ? 24 : isTablet ? 34 : 29}
+                        size={isSmallScreen ? 23 : isTablet ? 32 : 27}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -326,11 +320,12 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        height:85,
-        paddingHorizontal: 18,
+        height: 105,
+        paddingHorizontal: 20,
         flexDirection: "row",
         alignItems: "center",
         backgroundColor: "#081023",
+        marginTop: -30,
     },
 
     backButton: {
@@ -346,7 +341,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "700",
         fontSize: 25,
-        marginTop: 0,
+        marginTop: 30,
     },
 
     notificationButton: {
@@ -360,7 +355,7 @@ const styles = StyleSheet.create({
 
     imageContainer: {
         position: "absolute",
-        alignSelf: "center",
+        top: -40,
         overflow: "hidden",
         borderWidth: 3,
         borderColor: "#0e2738",
@@ -376,9 +371,9 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFFFF",
         flex: 1,
         marginTop: 70,
-        paddingTop: 15,
         borderTopLeftRadius: 35,
         borderTopRightRadius: 35,
+        alignItems: "center",
         width: "100%"
     },
 
@@ -391,39 +386,41 @@ const styles = StyleSheet.create({
 
     optionsContainer: {
         width: "100%",
+        paddingHorizontal: 30,
         marginTop: 15,
     },
 
     opttion: {
         width: "100%",
-        minHeight: 70,
+        minHeight: 60,
         alignItems: "center",
         flexDirection: "row",
-        marginBottom: 25,
+        marginBottom: 18,
     },
 
     iconContainer: {
-        width: 55,
-        height: 55,
-        borderRadius: 15,
-        marginRight: 20,
+        width: 45,
+        height: 45,
+        borderRadius: 12,
+        marginRight: 15,
         justifyContent: "center",
         alignItems: "center",
     },
 
     optionText: {
         color: "#0e2738",
-        fontSize: 19,
+        fontSize: 16,
         fontWeight: "600",
-        lineHeight: 24,
+        lineHeight: 20,
     },
 
     bottomBar: {
+        height: 70,
         backgroundColor: "#24b6d1",
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
+        marginBottom: -25,
     },
 
 });
-

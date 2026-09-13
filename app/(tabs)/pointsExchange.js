@@ -115,6 +115,7 @@ export default function PointExchange() {
                 contentContainerStyle={{
                     paddingBottom: 20,
                     flexGrow: 1,
+                    backgroundColor: "white",
                 }}
                 showsVerticalScrollIndicator={false}>
 
@@ -235,8 +236,9 @@ export default function PointExchange() {
                 <View style={[
                     styles.content,
                     {
-                        paddingHorizontal: horizontalPadding,
+
                         paddingTop: 25 * scale,
+                        marginTop: isTablet ? -40 : -70
                     }
                     ]}>
                     <Text style={[
@@ -394,7 +396,7 @@ export default function PointExchange() {
             <View style={[
                 styles.bottomBar,
                 {
-                    height: bottomHeight,
+                    height:isTablet ? 95 * scale : 70 * scale,
                 }
                 ]}>
                 <TouchableOpacity onPress={() => router.push("/home")}>
@@ -443,7 +445,7 @@ const styles = StyleSheet.create({
     },
     scroll: {
         flex: 1,
-        backgroundColor: "#ffffff"
+        backgroundColor: "transparent"
     },
     pointsheader: {
         backgroundColor: "#ffffff",
@@ -463,7 +465,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: 18,
-        marginTop: 30
+        marginTop: -10
     },
     headerTitle: {
         color: "white",
@@ -473,7 +475,9 @@ const styles = StyleSheet.create({
     pointsCard: {
         backgroundColor: "#081023",
         padding: 14,
-        marginTop: -9,
+        marginTop: 0,
+        height: 300,
+        paddingBottom: -75,
     },
     smallTitle: {
         textAlign: "center",
@@ -551,12 +555,13 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
     },
     content: {
+        width: "100%",
         backgroundColor: "white",
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
+        borderTopLeftRadius: 45,
+        borderTopRightRadius: 45,
         paddingHorizontal: 14,
-        paddingTop: 30,
-        margingBottom: -40,
+        marginTop: -40,
+        marginBottom: -20,
         overflow: "hidden",
     },
     sectionTitle: {
@@ -617,6 +622,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        marginBottom: -30
+        marginBottom: -30,
     },
 })
