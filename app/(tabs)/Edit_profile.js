@@ -1,3 +1,4 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -14,11 +15,6 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-
-import {
-  Ionicons,
-  MaterialCommunityIcons,
-} from "@expo/vector-icons";
 
 import { router } from "expo-router";
 
@@ -41,8 +37,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db, storage } from "../../firebaseConfig";
 
 const COLORS = {
-  cyan: "#25B7D3",
-  dark: "#081023",
+  cyan: "#25B5D1",
+  dark: "#071426",
   white: "#FFFFFF",
   gray: "#ACADAD",
   textDark: "#0A3438",
@@ -50,186 +46,166 @@ const COLORS = {
 };
 
 const NAV = [
-  ["home-outline", "ion"],
-  ["bar-chart-outline", "ion"],
-  ["swap-horizontal", "material"],
-  ["layers-outline", "material"],
-  ["person-outline", "ion"],
+  { icon: "home-outline", route: "/home" },
+  { icon: "chart-box-outline", route: "/historial" },
+  { icon: "swap-horizontal", route: "/expensesManagement" },
+  { icon: "layers-outline", route: "/currentgoal" },
+  { icon: "account-outline", route: "/profile" },
 ];
 
 export default function App() {
   const [user, setUser] = useState(null);
-
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setPhotoURL] = useState(null);
-
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   const { width } = useWindowDimensions();
 
-  const small = width < 360;
+  const isSmall = width < 360;
+  const isTablet = width >= 768;
 
-  const scale =
-    small
-      ? 0.88
-      : width > 430
-        ? 1.08
-        : 1;
+  const scale = isSmall
+    ? 0.85
+    : isTablet
+    ? 1.15
+    : 1;
 
-  const horizontalPadding =
-    small
-      ? 18
-      : width > 430
-        ? 34
-        : 25;
+  const horizontalPadding = isSmall
+    ? 18
+    : isTablet
+    ? 45
+    : 25;
 
   useEffect(() => {
-    const unsubscribe =
-      onAuthStateChanged(
-        auth,
-        async (currentUser) => {
-          if (!currentUser) {
-            setLoading(false);
-            return;
-          }
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      async (currentUser) => {
+        if (!currentUser) {
+          setLoading(false);
+          return;
+        }
 
-          setUser(currentUser);
+        setUser(currentUser);
 
-          try {
-            const userRef = doc(
-              db,
-              "Users",
-              currentUser.uid
-            );
+        try {
+          const userRef = doc(
+            db,
+            "Users",
+            currentUser.uid
+          );
 
-            const userSnap =
-              await getDoc(userRef);
+          const userSnap = await getDoc(userRef);
 
-            if (userSnap.exists()) {
-              const data =
-                userSnap.data();
+          if (userSnap.exists()) {
+            const data = userSnap.data();
 
-              setUsername(
-                data.username || ""
-              );
+            setUsername(data.username || "");
+            setPhone(data.phone || "");
 
-              setPhone(
-                data.phone || ""
-              );
-
-              setEmail(
-                data.email ||
+            setEmail(
+              data.email ||
                 currentUser.email ||
                 ""
-              );
-
-              setPhotoURL(
-                data.photoURL || null
-              );
-
-              setNotifications(
-                data.notifications !==
-                  undefined
-                  ? data.notifications
-                  : true
-              );
-
-              setDarkMode(
-                data.darkMode !==
-                  undefined
-                  ? data.darkMode
-                  : false
-              );
-            } else {
-              setEmail(
-                currentUser.email || ""
-              );
-            }
-          } catch (error) {
-            console.log(
-              "Error loading profile:",
-              error
             );
 
-            Alert.alert(
-              "Error",
-              "Unable to load your profile data."
+            setPhotoURL(
+              data.photoURL || null
+            );
+
+            setNotifications(
+              data.notifications !== undefined
+                ? data.notifications
+                : true
+            );
+
+            setDarkMode(
+              data.darkMode !== undefined
+                ? data.darkMode
+                : false
+            );
+          } else {
+            setEmail(
+              currentUser.email || ""
             );
           }
+        } catch (error) {
+          console.log(
+            "Error loading profile:",
+            error
+          );
 
-          setLoading(false);
+          Alert.alert(
+            "Error",
+            "Unable to load your profile data."
+          );
         }
-      );
+
+        setLoading(false);
+      }
+    );
 
     return unsubscribe;
   }, []);
 
-  const selectFromGallery =
-    async () => {
-      try {
-        const permission =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const selectFromGallery = async () => {
+    try {
+      const permission =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-        if (!permission.granted) {
-          Alert.alert(
-            "Permission Required",
-            "We need access to your gallery to change your profile picture."
-          );
-
-          return;
-        }
-
-        const result =
-          await ImagePicker.launchImageLibraryAsync(
-            {
-              mediaTypes: ["images"],
-              allowsEditing: true,
-              aspect: [1, 1],
-              quality: 0.8,
-            }
-          );
-
-        if (result.canceled) {
-          return;
-        }
-
-        const selectedImage =
-          result.assets[0].uri;
-
-        setPhotoURL(
-          selectedImage
-        );
-      } catch (error) {
-        console.log(
-          "Error selecting image:",
-          error
-        );
-
+      if (!permission.granted) {
         Alert.alert(
-          "Error",
-          "Unable to select the image."
+          "Permission Required",
+          "We need access to your gallery to change your profile picture."
         );
+
+        return;
       }
-    };
+
+      const result =
+        await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ["images"],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.8,
+        });
+
+      if (result.canceled) {
+        return;
+      }
+
+      setPhotoURL(
+        result.assets[0].uri
+      );
+    } catch (error) {
+      console.log(
+        "Error selecting image:",
+        error
+      );
+
+      Alert.alert(
+        "Error",
+        "Unable to select the image."
+      );
+    }
+  };
 
   const takePhoto = async () => {
     try {
       const permission =
         await ImagePicker.requestCameraPermissionsAsync();
 
-      console.log("Camera permission:", permission);
-
       if (!permission.granted) {
         Alert.alert(
           "Permission Required",
-          "Camera permission status: " + permission.status
+          "Camera permission status: " +
+            permission.status
         );
+
         return;
       }
 
@@ -240,13 +216,16 @@ export default function App() {
           quality: 0.8,
         });
 
-      console.log("Camera result:", result);
-
       if (result.canceled) return;
 
-      setPhotoURL(result.assets[0].uri);
+      setPhotoURL(
+        result.assets[0].uri
+      );
     } catch (error) {
-      console.log("Camera error:", error);
+      console.log(
+        "Camera error:",
+        error
+      );
     }
   };
 
@@ -290,8 +269,7 @@ export default function App() {
         },
         {
           text: "Choose from Gallery",
-          onPress:
-            selectFromGallery,
+          onPress: selectFromGallery,
         },
         {
           text: "Delete Photo",
@@ -306,20 +284,15 @@ export default function App() {
     );
   };
 
-  const uploadPhoto = async (
-    uri
-  ) => {
+  const uploadPhoto = async (uri) => {
     if (!user) {
       throw new Error(
         "No authenticated user."
       );
     }
 
-    const response =
-      await fetch(uri);
-
-    const blob =
-      await response.blob();
+    const response = await fetch(uri);
+    const blob = await response.blob();
 
     const imageRef = ref(
       storage,
@@ -345,6 +318,7 @@ export default function App() {
         "Error",
         "No authenticated user."
       );
+
       return;
     }
 
@@ -353,6 +327,7 @@ export default function App() {
         "Required Field",
         "Please enter your username."
       );
+
       return;
     }
 
@@ -361,6 +336,7 @@ export default function App() {
         "Required Field",
         "Please enter your phone number."
       );
+
       return;
     }
 
@@ -369,29 +345,18 @@ export default function App() {
         "Required Field",
         "Please enter your email address."
       );
+
       return;
     }
 
     try {
       setSaving(true);
 
-      console.log("========== DEBUG ==========");
-      console.log("USER:", user);
-      console.log("USER UID:", user?.uid);
-      console.log("DB:", db);
-      console.log("STORAGE:", storage);
-      console.log("PHOTO URL:", photoURL);
-
-      let finalPhotoURL = photoURL;
-
       const userRef = doc(
         db,
         "Users",
         user.uid
       );
-
-      console.log("USER REF:", userRef);
-      console.log("Intentando guardar...");
 
       await setDoc(
         userRef,
@@ -406,25 +371,20 @@ export default function App() {
         }
       );
 
-      console.log("Guardado correctamente");
-
-      setPhotoURL(finalPhotoURL);
-
       Alert.alert(
         "Profile Updated",
         "Your profile has been updated successfully."
       );
     } catch (error) {
-      console.log("========== ERROR ==========");
-      console.log(error);
-      console.log("MESSAGE:", error?.message);
-      console.log("CODE:", error?.code);
-      console.log("STACK:", error?.stack);
+      console.log(
+        "Error:",
+        error
+      );
 
       Alert.alert(
         "Error",
         error?.message ||
-        "Unable to save your changes."
+          "Unable to save your changes."
       );
     } finally {
       setSaving(false);
@@ -434,103 +394,178 @@ export default function App() {
   if (loading) {
     return (
       <SafeAreaView
-        style={
-          styles.loadingContainer
-        }
+        style={styles.loadingContainer}
       >
         <ActivityIndicator
           size="large"
-          color={
-            COLORS.cyan
-          }
+          color={COLORS.cyan}
         />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView
-      style={styles.safe}
-    >
+    <SafeAreaView style={styles.safe}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor={
-          COLORS.dark
-        }
+        backgroundColor={COLORS.dark}
       />
 
       <View style={styles.app}>
+
         <View
           style={[
-            styles.topContent,
+            styles.header,
             {
-              paddingHorizontal:
-                horizontalPadding,
+              height:
+                118 *
+                (isSmall
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1),
+              paddingHorizontal: isSmall
+                ? 18
+                : isTablet
+                ? 45
+                : 25,
             },
           ]}
         >
-          <View
-            style={styles.header}
+          <TouchableOpacity
+            style={[
+              styles.headerButton,
+              {
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
+            onPress={() =>
+              router.push("/profile")
+            }
+            activeOpacity={0.7}
           >
-            <TouchableOpacity
-              style={
-                styles.backButton
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={
+                35 *
+                (isSmall
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1)
               }
-              onPress={() =>
-                router.push("/settings")
+              color={COLORS.white}
+            />
+          </TouchableOpacity>
+
+          <Text
+            style={[
+              styles.headerTitle,
+              {
+                fontSize:
+                  25 *
+                  (isSmall
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                transform: [
+                  {
+                    translateX:
+                      7 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1),
+                  },
+                  {
+                    translateY:
+                      1 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
+          >
+            Edit My Profile
+          </Text>
+
+          <TouchableOpacity
+            style={[
+              styles.notificationButton,
+              {
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
+            onPress={() =>
+              router.push({
+                pathname: "/notifications",
+                params: {
+                  from: "/Edit_profile",
+                },
+              })
+            }
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={
+                35 *
+                (isSmall
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1)
               }
-            >
-              <Ionicons
-                name="arrow-back"
-                size={
-                  24 * scale
-                }
-                color={
-                  COLORS.white
-                }
-              />
-            </TouchableOpacity>
-
-            <Text
-              style={[
-                styles.headerTitle,
-                {
-                  fontSize:
-                    18 * scale,
-                },
-              ]}
-            >
-              Edit My Profile
-            </Text>
-
-            <TouchableOpacity
-              style={[
-                styles.headerNotification,
-                {
-                  width:
-                    44 * scale,
-                  height:
-                    44 * scale,
-                  borderRadius:
-                    22 * scale,
-                },
-              ]}
-            >
-              <Ionicons
-                name="notifications-outline"
-                size={
-                  23 * scale
-                }
-                color={
-                  COLORS.white
-                }
-              />
-            </TouchableOpacity>
-          </View>
+              color={COLORS.white}
+            />
+          </TouchableOpacity>
         </View>
 
         <View
-          style={styles.whiteContainer}
+          style={[
+            styles.whiteContainer,
+            {
+              borderTopLeftRadius:
+                isTablet
+                  ? 55
+                  : isSmall
+                  ? 35
+                  : 45,
+
+              borderTopRightRadius:
+                isTablet
+                  ? 55
+                  : isSmall
+                  ? 35
+                  : 45,
+            },
+          ]}
         >
           <ScrollView
             style={styles.whiteScroll}
@@ -539,21 +574,16 @@ export default function App() {
               {
                 paddingHorizontal:
                   horizontalPadding,
+                paddingBottom:
+                  45 * scale,
               },
             ]}
-            showsVerticalScrollIndicator={
-              false
-            }
+            showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
-            <View
-              style={styles.profileCard}
-            >
-              <View
-                style={
-                  styles.photoContainer
-                }
-              >
+            <View style={styles.profileCard}>
+
+              <View style={styles.photoContainer}>
                 {photoURL ? (
                   <Image
                     source={{
@@ -563,14 +593,11 @@ export default function App() {
                       styles.profileImage,
                       {
                         width:
-                          82 *
-                          scale,
+                          82 * scale,
                         height:
-                          82 *
-                          scale,
+                          82 * scale,
                         borderRadius:
-                          41 *
-                          scale,
+                          41 * scale,
                       },
                     ]}
                   />
@@ -580,26 +607,20 @@ export default function App() {
                       styles.profilePlaceholder,
                       {
                         width:
-                          82 *
-                          scale,
+                          82 * scale,
                         height:
-                          82 *
-                          scale,
+                          82 * scale,
                         borderRadius:
-                          41 *
-                          scale,
+                          41 * scale,
                       },
                     ]}
                   >
-                    <Ionicons
-                      name="person"
+                    <MaterialCommunityIcons
+                      name="account"
                       size={
-                        40 *
-                        scale
+                        40 * scale
                       }
-                      color={
-                        COLORS.gray
-                      }
+                      color={COLORS.gray}
                     />
                   </View>
                 )}
@@ -609,29 +630,21 @@ export default function App() {
                     styles.cameraButton,
                     {
                       width:
-                        27 *
-                        scale,
+                        27 * scale,
                       height:
-                        27 *
-                        scale,
+                        27 * scale,
                       borderRadius:
-                        14 *
-                        scale,
+                        14 * scale,
                     },
                   ]}
-                  onPress={
-                    changePhoto
-                  }
+                  onPress={changePhoto}
                 >
-                  <Ionicons
+                  <MaterialCommunityIcons
                     name="camera-outline"
                     size={
-                      16 *
-                      scale
+                      16 * scale
                     }
-                    color={
-                      COLORS.white
-                    }
+                    color={COLORS.white}
                   />
                 </TouchableOpacity>
               </View>
@@ -641,14 +654,12 @@ export default function App() {
                   styles.name,
                   {
                     fontSize:
-                      20 *
-                      scale,
+                      20 * scale,
                   },
                 ]}
                 numberOfLines={1}
               >
-                {username ||
-                  "User"}
+                {username || "User"}
               </Text>
 
               <Text
@@ -656,8 +667,7 @@ export default function App() {
                   styles.id,
                   {
                     fontSize:
-                      11 *
-                      scale,
+                      11 * scale,
                   },
                 ]}
               >
@@ -665,22 +675,16 @@ export default function App() {
                 {user?.uid?.slice(
                   0,
                   8
-                ) ||
-                  "00000000"}
+                ) || "00000000"}
               </Text>
 
-              <View
-                style={
-                  styles.section
-                }
-              >
+              <View style={styles.section}>
                 <Text
                   style={[
                     styles.sectionTitle,
                     {
                       fontSize:
-                        21 *
-                        scale,
+                        21 * scale,
                     },
                   ]}
                 >
@@ -692,8 +696,7 @@ export default function App() {
                     styles.label,
                     {
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                     },
                   ]}
                 >
@@ -705,19 +708,14 @@ export default function App() {
                     styles.input,
                     {
                       height:
-                        48 *
-                        scale,
+                        48 * scale,
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                       borderRadius:
-                        9 *
-                        scale,
+                        9 * scale,
                     },
                   ]}
-                  value={
-                    username
-                  }
+                  value={username}
                   onChangeText={
                     setUsername
                   }
@@ -730,8 +728,7 @@ export default function App() {
                     styles.label,
                     {
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                     },
                   ]}
                 >
@@ -743,20 +740,15 @@ export default function App() {
                     styles.input,
                     {
                       height:
-                        48 *
-                        scale,
+                        48 * scale,
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                       borderRadius:
-                        9 *
-                        scale,
+                        9 * scale,
                     },
                   ]}
                   value={phone}
-                  onChangeText={
-                    setPhone
-                  }
+                  onChangeText={setPhone}
                   placeholder="+503 0000 0000"
                   placeholderTextColor="#777"
                   keyboardType="phone-pad"
@@ -767,8 +759,7 @@ export default function App() {
                     styles.label,
                     {
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                     },
                   ]}
                 >
@@ -780,20 +771,15 @@ export default function App() {
                     styles.input,
                     {
                       height:
-                        48 *
-                        scale,
+                        48 * scale,
                       fontSize:
-                        14 *
-                        scale,
+                        14 * scale,
                       borderRadius:
-                        9 *
-                        scale,
+                        9 * scale,
                     },
                   ]}
                   value={email}
-                  onChangeText={
-                    setEmail
-                  }
+                  onChangeText={setEmail}
                   placeholder="email@gmail.com"
                   placeholderTextColor="#777"
                   keyboardType="email-address"
@@ -801,17 +787,14 @@ export default function App() {
                 />
 
                 <View
-                  style={
-                    styles.optionRow
-                  }
+                  style={styles.optionRow}
                 >
                   <Text
                     style={[
                       styles.optionText,
                       {
                         fontSize:
-                          14 *
-                          scale,
+                          14 * scale,
                       },
                     ]}
                   >
@@ -819,17 +802,13 @@ export default function App() {
                   </Text>
 
                   <Switch
-                    value={
-                      notifications
-                    }
+                    value={notifications}
                     onValueChange={
                       setNotifications
                     }
                     trackColor={{
-                      false:
-                        "#D7D7D7",
-                      true:
-                        COLORS.dark,
+                      false: "#D7D7D7",
+                      true: COLORS.dark,
                     }}
                     thumbColor={
                       COLORS.white
@@ -838,17 +817,14 @@ export default function App() {
                 </View>
 
                 <View
-                  style={
-                    styles.optionRow
-                  }
+                  style={styles.optionRow}
                 >
                   <Text
                     style={[
                       styles.optionText,
                       {
                         fontSize:
-                          14 *
-                          scale,
+                          14 * scale,
                       },
                     ]}
                   >
@@ -856,17 +832,13 @@ export default function App() {
                   </Text>
 
                   <Switch
-                    value={
-                      darkMode
-                    }
+                    value={darkMode}
                     onValueChange={
                       setDarkMode
                     }
                     trackColor={{
-                      false:
-                        "#D7D7D7",
-                      true:
-                        COLORS.cyan,
+                      false: "#D7D7D7",
+                      true: COLORS.cyan,
                     }}
                     thumbColor={
                       COLORS.white
@@ -879,21 +851,17 @@ export default function App() {
                     styles.updateButton,
                     {
                       height:
-                        48 *
-                        scale,
+                        48 * scale,
                       borderRadius:
-                        24 *
-                        scale,
+                        24 * scale,
                     },
                     saving &&
-                    styles.updateButtonDisabled,
+                      styles.updateButtonDisabled,
                   ]}
                   onPress={
                     updateProfile
                   }
-                  disabled={
-                    saving
-                  }
+                  disabled={saving}
                 >
                   {saving ? (
                     <ActivityIndicator
@@ -908,8 +876,7 @@ export default function App() {
                         styles.updateText,
                         {
                           fontSize:
-                            14 *
-                            scale,
+                            14 * scale,
                         },
                       ]}
                     >
@@ -922,342 +889,241 @@ export default function App() {
           </ScrollView>
         </View>
 
-        <BottomNav
-          small={small}
-        />
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height:
+                65 *
+                (isSmall
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1),
+
+              borderTopLeftRadius:
+                78 *
+                (isSmall
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1),
+            },
+          ]}
+        >
+          {NAV.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              activeOpacity={0.7}
+              onPress={() =>
+                router.push(item.route)
+              }
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={
+                  item.icon ===
+                  "swap-horizontal"
+                    ? 37 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1)
+                    : 35 *
+                      (isSmall
+                        ? 0.85
+                        : isTablet
+                        ? 1.15
+                        : 1)
+                }
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
-function BottomNav({
-  small,
-}) {
-  const routes = [
-    "../../home",
-    "",
-    "",
-    "",
-    "../../profile",
-  ];
+const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: COLORS.dark,
+  },
 
-  return (
-    <View
-      style={[
-        styles.bottom,
-        {
-          height:
-            small
-              ? 85
-              : 100,
+  app: {
+    flex: 1,
+    backgroundColor: COLORS.dark,
+  },
 
-          borderTopLeftRadius:
-            small
-              ? 45
-              : 65,
-        },
-      ]}
-    >
-      {NAV.map(
-        (
-          [icon, type],
-          index
-        ) => (
-          <TouchableOpacity
-            key={index}
-            style={
-              styles.navItem
-            }
-            activeOpacity={0.7}
-            onPress={() =>
-              router.push(
-                routes[index]
-              )
-            }
-          >
-            {type ===
-              "ion" ? (
-              <Ionicons
-                name={icon}
-                size={
-                  small
-                    ? 25
-                    : 31
-                }
-                color={
-                  index === 4
-                    ? COLORS.dark
-                    : COLORS.white
-                }
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name={icon}
-                size={
-                  small
-                    ? 28
-                    : 34
-                }
-                color={
-                  COLORS.white
-                }
-              />
-            )}
-          </TouchableOpacity>
-        )
-      )}
-    </View>
-  );
-}
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: COLORS.dark,
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
-const styles =
-  StyleSheet.create({
-    safe: {
-      flex: 1,
-      backgroundColor:
-        COLORS.dark,
-    },
+  header: {
+    width: "100%",
+    backgroundColor: COLORS.dark,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 
-    app: {
-      flex: 1,
-      backgroundColor:
-        COLORS.dark,
-    },
+  headerButton: {
+    width: 30,
+    alignItems: "flex-start",
+    justifyContent: "center",
+  },
 
-    loadingContainer: {
-      flex: 1,
-      backgroundColor:
-        COLORS.dark,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-    },
+  headerTitle: {
+    color: COLORS.white,
+    fontWeight: "700",
+  },
 
-    topContent: {
-      backgroundColor:
-        COLORS.dark,
-    },
+  notificationButton: {
+    justifyContent: "center",
+  },
 
-    header: {
-      flexDirection:
-        "row",
-      alignItems:
-        "center",
-      minHeight: 65,
-      marginTop: 5,
-      marginBottom: 20,
-    },
+  whiteContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    overflow: "hidden",
+  },
 
-    backButton: {
-      width: 44,
-      height: 44,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-    },
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
 
-    headerTitle: {
-      color:
-        COLORS.white,
-      fontWeight:
-        "700",
-      flex: 1,
-      textAlign:
-        "center",
-    },
+  profileScroll: {
+    flexGrow: 1,
+    paddingTop: 65,
+  },
 
-    headerNotification: {
-      backgroundColor:
-        COLORS.cyan,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-    },
+  profileCard: {
+    width: "100%",
+    backgroundColor: COLORS.white,
+    paddingBottom: 50,
+  },
 
-    whiteContainer: {
-      flex: 1,
-      backgroundColor:
-        COLORS.white,
-      borderTopLeftRadius:
-        45,
-      borderTopRightRadius:
-        45,
-      overflow: "hidden",
-    },
+  photoContainer: {
+    alignSelf: "center",
+    marginTop: -65,
+    marginBottom: 15,
+  },
 
-    whiteScroll: {
-      flex: 1,
-      backgroundColor:
-        COLORS.white,
-    },
+  profileImage: {
+    borderWidth: 2,
+    borderColor: COLORS.white,
+  },
 
-    profileScroll: {
-      flexGrow: 1,
-      paddingTop: 65,
-      paddingBottom: 140,
-    },
+  profilePlaceholder: {
+    backgroundColor: "#172037",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: COLORS.white,
+  },
 
-    profileCard: {
-      width: "100%",
-      backgroundColor:
-        COLORS.white,
-      paddingBottom: 50,
-    },
+  cameraButton: {
+    position: "absolute",
+    right: -2,
+    bottom: 1,
+    backgroundColor: COLORS.cyan,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: COLORS.white,
+  },
 
-    photoContainer: {
-      alignSelf:
-        "center",
-      marginTop: -65,
-      marginBottom: 15,
-    },
+  name: {
+    textAlign: "center",
+    color: COLORS.textDark,
+    fontWeight: "700",
+  },
 
-    profileImage: {
-      borderWidth: 2,
-      borderColor:
-        COLORS.white,
-    },
+  id: {
+    textAlign: "center",
+    color: "#777",
+    marginTop: 3,
+  },
 
-    profilePlaceholder: {
-      backgroundColor:
-        "#172037",
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-      borderWidth: 2,
-      borderColor:
-        COLORS.white,
-    },
+  section: {
+    marginTop: 30,
+  },
 
-    cameraButton: {
-      position:
-        "absolute",
-      right: -2,
-      bottom: 1,
-      backgroundColor:
-        COLORS.cyan,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-      borderWidth: 2,
-      borderColor:
-        COLORS.white,
-    },
+  sectionTitle: {
+    color: COLORS.textDark,
+    fontWeight: "700",
+    marginBottom: 22,
+  },
 
-    name: {
-      textAlign:
-        "center",
-      color:
-        COLORS.textDark,
-      fontWeight:
-        "700",
-    },
+  label: {
+    color: COLORS.textDark,
+    fontWeight: "600",
+    marginBottom: 7,
+  },
 
-    id: {
-      textAlign:
-        "center",
-      color: "#777",
-      marginTop: 3,
-    },
+  input: {
+    width: "100%",
+    backgroundColor: COLORS.lightGray,
+    paddingHorizontal: 15,
+    color: "#333",
+    marginBottom: 17,
+  },
 
-    section: {
-      marginTop: 30,
-      paddingHorizontal: 0,
-    },
+  optionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 5,
+    marginBottom: 8,
+  },
 
-    sectionTitle: {
-      color:
-        COLORS.textDark,
-      fontWeight:
-        "700",
-      marginBottom: 22,
-    },
+  optionText: {
+    color: COLORS.textDark,
+    fontWeight: "500",
+  },
 
-    label: {
-      color:
-        COLORS.textDark,
-      fontWeight:
-        "600",
-      marginBottom: 7,
-    },
+  updateButton: {
+    width: "60%",
+    alignSelf: "center",
+    backgroundColor: COLORS.dark,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 22,
+  },
 
-    input: {
-      width: "100%",
-      backgroundColor:
-        COLORS.lightGray,
-      paddingHorizontal:
-        15,
-      color: "#333",
-      marginBottom: 17,
-    },
+  updateButtonDisabled: {
+    opacity: 0.7,
+  },
 
-    optionRow: {
-      flexDirection:
-        "row",
-      alignItems:
-        "center",
-      justifyContent:
-        "space-between",
-      marginTop: 5,
-      marginBottom: 8,
-    },
+  updateText: {
+    color: COLORS.white,
+    fontWeight: "600",
+  },
 
-    optionText: {
-      color:
-        COLORS.textDark,
-      fontWeight:
-        "500",
-    },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: COLORS.cyan,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
 
-    updateButton: {
-      width: "60%",
-      alignSelf:
-        "center",
-      backgroundColor:
-        COLORS.dark,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-      marginTop: 22,
-    },
-
-    updateButtonDisabled: {
-      opacity: 0.7,
-    },
-
-    updateText: {
-      color:
-        COLORS.white,
-      fontWeight:
-        "600",
-    },
-
-    bottom: {
-      position:
-        "absolute",
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor:
-        COLORS.cyan,
-      flexDirection:
-        "row",
-      alignItems:
-        "center",
-      justifyContent:
-        "space-around",
-    },
-
-    navItem: {
-      flex: 1,
-      alignItems:
-        "center",
-      justifyContent:
-        "center",
-    },
-  });
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

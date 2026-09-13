@@ -1,4 +1,3 @@
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
@@ -40,8 +39,21 @@ export default function InversionesScreen() {
   };
 
   const abrirNotificaciones = () => {
-    router.push("/notifications");
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/investments",
+      },
+    });
   };
+
+  const navItems = [
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
+  ];
 
   return (
     <View style={styles.container}>
@@ -253,45 +265,20 @@ export default function InversionesScreen() {
             },
           ]}
         >
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="chart-box-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="swap-horizontal"
-              size={37 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="layers-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.navItem}>
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={35 * scale}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+          {navItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              onPress={() => router.push(item.route)}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={item.icon === "swap-horizontal" ? 37 * scale : 35 * scale}
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     </View>

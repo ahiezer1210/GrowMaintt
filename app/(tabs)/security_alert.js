@@ -1,5 +1,11 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { doc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -13,478 +19,344 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-
 import { auth, db } from "../../firebaseConfig";
 
 export default function SecurityAlertScreen() {
-  const { width, height } = useWindowDimensions();
   const { id } = useLocalSearchParams();
+  const { width } = useWindowDimensions();
 
-  const small = width < 350;
-  const short = height < 700;
+  const [alertData, setAlertData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const [loading, setLoading] = useState(false);
-  const [loadingAlert, setLoadingAlert] = useState(true);
-  const [deviceName, setDeviceName] = useState("Unknown device");
-  const [location, setLocation] = useState("Unknown location");
+  const isSmall = width < 360;
+  const isTablet = width >= 768;
+
+  const scale = isSmall ? 0.85 : isTablet ? 1.15 : 1;
 
   useEffect(() => {
     const loadAlert = async () => {
       try {
-        const user = auth.currentUser;
-
-        if (!user || !id) return;
-
-        const ref = doc(db, "Users", user.uid, "securityAlerts", String(id));
-
-        const snapshot = await getDoc(ref);
-
-        if (!snapshot.exists()) {
-          Alert.alert(
-            "Alert not found",
-            "This security alert no longer exists.",
-            [{ text: "OK", onPress: () => router.back() }],
-          );
+        if (!id || !auth.currentUser) {
+          setLoading(false);
           return;
         }
 
-        const data = snapshot.data();
-        setDeviceName(data.deviceName || "Unknown device");
-        setLocation(data.location || "Unknown location");
+        const alertRef = doc(
+          db,
+          "Users",
+          auth.currentUser.uid,
+          "securityAlerts",
+          id
+        );
+
+        const snap = await getDoc(alertRef);
+
+        if (snap.exists()) {
+          setAlertData({
+            id: snap.id,
+            ...snap.data(),
+          });
+
+          if (snap.data().read !== true) {
+            await updateDoc(alertRef, {
+              read: true,
+              readAt: serverTimestamp(),
+            });
+          }
+        }
       } catch (error) {
-        console.log("Error loading alert:", error);
-        Alert.alert("Error", "Could not load the security alert.");
+        console.log("Error cargando alerta:", error);
+        Alert.alert(
+          "Error",
+          "No se pudo cargar la alerta de seguridad."
+        );
       } finally {
-        setLoadingAlert(false);
+        setLoading(false);
       }
     };
 
     loadAlert();
   }, [id]);
 
-  const respond = async (response) => {
-    if (loading || !id) return;
-
-    setLoading(true);
-
-    try {
-      const user = auth.currentUser;
-
-      if (!user) {
-        Alert.alert("Sesión requerida", "Debes iniciar sesión para continuar.");
-        return;
-      }
-
-      const alertRef = doc(db, "Users", user.uid, "securityAlerts", String(id));
-
-      await updateDoc(alertRef, {
-        status: response,
-        read: true,
-        respondedAt: serverTimestamp(),
-      });
-
-      if (response === "recognized") {
-        const alertSnapshot = await getDoc(alertRef);
-        const data = alertSnapshot.data();
-
-        if (data?.deviceId) {
-          const deviceRef = doc(
-            db,
-            "Users",
-            user.uid,
-            "devices",
-            data.deviceId,
-          );
-
-          await updateDoc(deviceRef, {
-            trusted: true,
-          });
-        }
-
-        Alert.alert(
-          "Login confirmado",
-          "Este dispositivo ha sido reconocido correctamente.",
-          [{ text: "OK", onPress: () => router.back() }],
-        );
-      } else {
-        Alert.alert(
-          "Login no reconocido",
-          "La alerta de seguridad fue registrada.",
-          [{ text: "OK", onPress: () => router.back() }],
-        );
-      }
-    } catch (error) {
-      console.log("Error:", error);
-      Alert.alert("Error", "No se pudo procesar tu respuesta.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loadingAlert) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle="light-content" backgroundColor="#0B1C2D" />
-        <View style={styles.loading}>
-          <ActivityIndicator size="large" color="#2B6CE5" />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const navItems = [
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
+  ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#0B1C2D" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#071426"
+      />
 
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.back} onPress={() => router.back()}>
-          <Icon name="chevron-back" size={small ? 22 : 24} color="#FFF" />
-        </TouchableOpacity>
+      <View style={styles.container}>
 
-        <Text style={styles.headerTitle}>Security Alert</Text>
-
-        <TouchableOpacity
-          style={styles.checkCircle}
-          onPress={() => router.push("/notifications")}
+        {/* HEADER */}
+        <View
+          style={[
+            styles.header,
+            {
+              height: 118 * scale,
+              paddingHorizontal: isSmall
+                ? 18
+                : isTablet
+                ? 45
+                : 25,
+            },
+          ]}
         >
-          <Icon name="notifications" size={small ? 24 : 26} color="#FFF" />
-        </TouchableOpacity>
-      </View>
-
-      <View
-        style={[
-          styles.content,
-          small && styles.contentSmall,
-          short && styles.contentShort,
-        ]}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scroll}
-        >
-          <View style={[styles.iconContainer, small && styles.iconSmall]}>
-            <View style={[styles.outerCircle, small && styles.outerSmall]}>
-              <View style={[styles.warning, small && styles.warningSmall]}>
-                <Text
-                  style={[styles.exclamation, small && styles.exclamationSmall]}
-                >
-                  !
-                </Text>
-              </View>
-            </View>
-
-            <View style={[styles.line, styles.topLeft]} />
-            <View style={[styles.line, styles.topRight]} />
-            <View style={[styles.line, styles.bottomLeft]} />
-            <View style={[styles.line, styles.bottomRight]} />
-          </View>
-
-          <Text style={[styles.mainTitle, small && styles.mainTitleSmall]}>
-            New Login Attempt
-          </Text>
-
-          <View style={styles.infoRow}>
-            <MaterialIcons
-              name="smartphone"
-              size={small ? 65 : 75}
-              color="#333"
+          <TouchableOpacity
+            style={styles.headerButton}
+            onPress={() => router.push("/notifications")}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={35 * scale}
+              color="#FFFFFF"
             />
+          </TouchableOpacity>
 
-            <View style={styles.infoText}>
-              <Text style={[styles.label, small && styles.textSmall]}>
-                Device
-              </Text>
-              <Text style={[styles.value, small && styles.textSmall]}>
-                {deviceName}
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.infoRow}>
-            <Icon name="location-outline" size={small ? 27 : 30} color="#333" />
-            <Text style={[styles.location, small && styles.locationSmall]}>
-              {location}
-            </Text>
-          </View>
-
-          <Text style={[styles.question, small && styles.questionSmall]}>
-            Was this you?
+          <Text
+            style={[
+              styles.headerTitle,
+              {
+                fontSize: 25 * scale,
+                transform: [
+                  {
+                    translateX: 7 * scale,
+                  },
+                  {
+                    translateY: 1 * scale,
+                  },
+                ],
+              },
+            ]}
+          >
+            Security Alert
           </Text>
+        </View>
 
-          <TouchableOpacity
-            style={[styles.button, small && styles.buttonSmall]}
-            disabled={loading}
-            onPress={() => respond("recognized")}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFF" />
-            ) : (
+        {/* CONTENIDO */}
+        <View
+          style={[
+            styles.contentCard,
+            {
+              borderTopLeftRadius: isTablet
+                ? 55
+                : isSmall
+                ? 35
+                : 45,
+              borderTopRightRadius: isTablet
+                ? 55
+                : isSmall
+                ? 35
+                : 45,
+            },
+          ]}
+        >
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator
+                size="large"
+                color="#25B5D1"
+              />
+            </View>
+          ) : (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={[
+                styles.scrollContent,
+                {
+                  paddingBottom: 100 * scale,
+                },
+              ]}
+            >
+              <View style={styles.alertIconContainer}>
+                <MaterialCommunityIcons
+                  name="shield-alert-outline"
+                  size={58 * scale}
+                  color="#25B5D1"
+                />
+              </View>
+
               <Text
-                style={[styles.buttonText, small && styles.buttonTextSmall]}
+                style={[
+                  styles.alertTitle,
+                  {
+                    fontSize: 24 * scale,
+                  },
+                ]}
               >
-                Yes, It Was Me
+                {alertData?.title || "Security Alert"}
               </Text>
-            )}
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.button, small && styles.buttonSmall]}
-            disabled={loading}
-            onPress={() => respond("not_recognized")}
-          >
-            <Text style={[styles.buttonText, small && styles.buttonTextSmall]}>
-              No, It Was Not Me
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.alertMessage,
+                  {
+                    fontSize: 16 * scale,
+                  },
+                ]}
+              >
+                {alertData?.message ||
+                  "There is no additional information available for this alert."}
+              </Text>
 
-          <View style={{ height: 100 }} />
-        </ScrollView>
-      </View>
+              {alertData?.createdAt && (
+                <Text
+                  style={[
+                    styles.alertDate,
+                    {
+                      fontSize: 13 * scale,
+                    },
+                  ]}
+                >
+                  {alertData.createdAt?.toDate
+                    ? alertData.createdAt.toDate().toLocaleString()
+                    : ""}
+                </Text>
+              )}
+            </ScrollView>
+          )}
+        </View>
 
-      <View style={styles.bottomNav}>
-        {[
-          ["home-outline", "/home"],
-          ["bar-chart-outline", "/reports"],
-          ["swap-horizontal-outline", "/transactions"],
-          ["layers-outline", "/notifications"],
-          ["person-outline", "/profile"],
-        ].map(([icon, route]) => (
-          <TouchableOpacity
-            key={route}
-            style={styles.navItem}
-            onPress={() => router.push(route)}
-          >
-            <Icon name={icon} size={small ? 22 : 24} color="#FFF" />
-          </TouchableOpacity>
-        ))}
+        {/* NAVBAR */}
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height: 65 * scale,
+              borderTopLeftRadius: 78 * scale,
+            },
+          ]}
+        >
+          {navItems.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              activeOpacity={0.7}
+              onPress={() => router.push(item.route)}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={
+                  item.icon === "swap-horizontal"
+                    ? 37 * scale
+                    : 35 * scale
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#071426",
+  },
+
   container: {
     flex: 1,
-    backgroundColor: "#0B1C2D",
+    backgroundColor: "#071426",
   },
+
+  /* HEADER */
   header: {
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "#0B1C2D",
   },
-  back: {
-    width: 40,
-    height: 40,
+
+  headerButton: {
+    width: 45,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
+
   headerTitle: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "600",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    marginLeft: 8,
   },
-  checkCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: "#FFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  content: {
+
+  /* CARD */
+  contentCard: {
     flex: 1,
-    backgroundColor: "#FFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingTop: 24,
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
   },
-  contentSmall: {
-    paddingHorizontal: 18,
-    paddingTop: 18,
-  },
-  contentShort: {
-    paddingTop: 12,
-  },
-  scroll: {
+
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
-    paddingBottom: 30,
+    paddingHorizontal: 25,
+    paddingTop: 35,
   },
-  iconContainer: {
-    width: 160,
-    height: 160,
+
+  loadingContainer: {
+    flex: 1,
+    alignItems: "center",
     justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 24,
   },
-  iconSmall: {
-    width: 135,
-    height: 135,
+
+  alertIconContainer: {
+    width: 105,
+    height: 105,
+    borderRadius: 52.5,
+    backgroundColor: "#EAF9FC",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+    marginBottom: 25,
+  },
+
+  alertTitle: {
+    color: "#071426",
+    fontWeight: "700",
+    textAlign: "center",
     marginBottom: 15,
   },
-  outerCircle: {
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-    backgroundColor: "#E8F0FE",
-    justifyContent: "center",
-    alignItems: "center",
+
+  alertMessage: {
+    color: "#555555",
+    textAlign: "center",
+    lineHeight: 24,
+    maxWidth: 500,
   },
-  outerSmall: {
-    width: 115,
-    height: 115,
-    borderRadius: 58,
-  },
-  warning: {
-    width: 72,
-    height: 72,
-    backgroundColor: "#2B6CE5",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  warningSmall: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-  },
-  exclamation: {
-    color: "#FFF",
-    fontSize: 42,
-    fontWeight: "bold",
-  },
-  exclamationSmall: {
-    fontSize: 36,
-  },
-  line: {
-    position: "absolute",
-    width: 16,
-    height: 3,
-    backgroundColor: "#2B6CE5",
-    borderRadius: 2,
-  },
-  topLeft: {
-    top: 18,
-    left: 12,
-    transform: [{ rotate: "-40deg" }],
-  },
-  topRight: {
-    top: 18,
-    right: 12,
-    transform: [{ rotate: "40deg" }],
-  },
-  bottomLeft: {
-    bottom: 22,
-    left: 12,
-    transform: [{ rotate: "40deg" }],
-  },
-  bottomRight: {
-    bottom: 22,
-    right: 12,
-    transform: [{ rotate: "-40deg" }],
-  },
-  mainTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 28,
+
+  alertDate: {
+    color: "#999999",
+    marginTop: 20,
     textAlign: "center",
   },
-  mainTitleSmall: {
-    fontSize: 19,
-    marginBottom: 20,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 18,
-    paddingHorizontal: 8,
-  },
-  infoText: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  label: {
-    fontSize: 13,
-    color: "#666",
-  },
-  value: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
-  },
-  textSmall: {
-    fontSize: 13,
-  },
-  location: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#1A1A1A",
-    paddingLeft: 12,
-  },
-  locationSmall: {
-    fontSize: 13,
-    marginLeft: 8,
-    paddingLeft: 8,
-  },
-  question: {
-    fontSize: 16,
-    color: "#555",
-    marginTop: 12,
-    marginBottom: 24,
-  },
-  questionSmall: {
-    fontSize: 13,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  button: {
-    width: "65%",
-    backgroundColor: "#0B1C2D",
-    paddingVertical: 16,
-    borderRadius: 30,
-    alignItems: "center",
-    marginBottom: 14,
-  },
-  buttonSmall: {
-    paddingVertical: 13,
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  buttonTextSmall: {
-    fontSize: 14,
-  },
-  bottomNav: {
-    flexDirection: "row",
-    backgroundColor: "#00B4D8",
-    paddingVertical: 14,
-    paddingBottom: 20,
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopLeftRadius: 65,
+
+  /* NAVBAR */
+  bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
-    right: 0,
-  },
-  navItem: {
-    padding: 8,
-  },
-  loading: {
-    flex: 1,
-    backgroundColor: "#FFF",
-    justifyContent: "center",
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

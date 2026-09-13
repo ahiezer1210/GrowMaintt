@@ -44,7 +44,11 @@ export default function LogoutScreen({ navigation }) {
   const tablet = width >= 600;
 
   const scale = (value, tabletValue) =>
-    tablet ? (tabletValue ?? value * 1.35) : small ? value * 0.9 : value;
+    tablet
+      ? (tabletValue ?? value * 1.35)
+      : small
+      ? value * 0.9
+      : value;
 
   const ui = {
     header: tablet ? 125 : small ? 100 : 118,
@@ -98,14 +102,17 @@ export default function LogoutScreen({ navigation }) {
               await signOut(auth);
               router.replace("/login");
             } catch (error) {
-              Alert.alert("Error", "Could not log out. Please try again.");
+              Alert.alert(
+                "Error",
+                "Could not log out. Please try again."
+              );
             }
           },
         },
       ],
       {
         cancelable: true,
-      },
+      }
     );
   };
 
@@ -152,8 +159,18 @@ export default function LogoutScreen({ navigation }) {
           style={[
             styles.header,
             {
-              height: 118 * (small ? 0.85 : tablet ? 1.15 : 1),
-              paddingHorizontal: small ? 18 : tablet ? 45 : 25,
+              height:
+                118 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                ? 45
+                : 25,
             },
           ]}
         >
@@ -164,17 +181,29 @@ export default function LogoutScreen({ navigation }) {
                 transform: [
                   {
                     translateY:
-                      4 * (small ? 0.85 : tablet ? 1.15 : 1),
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
                   },
                 ],
               },
             ]}
-            onPress={() => navigation?.goBack()}
+            onPress={() => router.push("/settings")}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={35 * (small ? 0.85 : tablet ? 1.15 : 1)}
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
               color="#FFFFFF"
             />
           </TouchableOpacity>
@@ -184,15 +213,30 @@ export default function LogoutScreen({ navigation }) {
               styles.headerTitle,
               {
                 fontSize:
-                  25 * (small ? 0.85 : tablet ? 1.15 : 1),
+                  25 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
                 transform: [
                   {
                     translateX:
-                      7 * (small ? 0.85 : tablet ? 1.15 : 1),
+                      7 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
                   },
                   {
                     translateY:
-                      1 * (small ? 0.85 : tablet ? 1.15 : 1),
+                      1 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
                   },
                 ],
               },
@@ -208,7 +252,12 @@ export default function LogoutScreen({ navigation }) {
                 transform: [
                   {
                     translateY:
-                      4 * (small ? 0.85 : tablet ? 1.15 : 1),
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
                   },
                 ],
               },
@@ -218,7 +267,14 @@ export default function LogoutScreen({ navigation }) {
           >
             <MaterialCommunityIcons
               name="bell-circle-outline"
-              size={35 * (small ? 0.85 : tablet ? 1.15 : 1)}
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
               color="#FFFFFF"
             />
           </TouchableOpacity>
@@ -228,8 +284,10 @@ export default function LogoutScreen({ navigation }) {
           style={[
             styles.main,
             {
-              borderTopLeftRadius: tablet ? 55 : small ? 35 : 45,
-              borderTopRightRadius: tablet ? 55 : small ? 35 : 45,
+              borderTopLeftRadius:
+                tablet ? 55 : small ? 35 : 45,
+              borderTopRightRadius:
+                tablet ? 55 : small ? 35 : 45,
             },
           ]}
         >
@@ -240,10 +298,22 @@ export default function LogoutScreen({ navigation }) {
               {
                 width: tablet ? "85%" : "100%",
                 maxWidth: tablet ? 700 : undefined,
-                paddingHorizontal: tablet ? 0 : small ? 22 : 30,
-                paddingTop: tablet ? 35 : small ? 20 : 28,
+                paddingHorizontal: tablet
+                  ? 0
+                  : small
+                  ? 22
+                  : 30,
+                paddingTop: tablet
+                  ? 35
+                  : small
+                  ? 20
+                  : 28,
                 paddingBottom: 100,
-                gap: tablet ? 24 : small ? 15 : 20,
+                gap: tablet
+                  ? 24
+                  : small
+                  ? 15
+                  : 20,
               },
             ]}
           >
@@ -270,8 +340,18 @@ export default function LogoutScreen({ navigation }) {
                   style={[
                     styles.doorInside,
                     {
-                      width: tablet ? 68 : small ? 48 : 57,
-                      height: tablet ? 102 : small ? 73 : 86,
+                      width:
+                        tablet
+                          ? 68
+                          : small
+                          ? 48
+                          : 57,
+                      height:
+                        tablet
+                          ? 102
+                          : small
+                          ? 73
+                          : 86,
                     },
                   ]}
                 />
@@ -290,7 +370,12 @@ export default function LogoutScreen({ navigation }) {
                 styles.question,
                 {
                   fontSize: ui.question,
-                  lineHeight: tablet ? 34 : small ? 25 : 29,
+                  lineHeight:
+                    tablet
+                      ? 34
+                      : small
+                      ? 25
+                      : 29,
                 },
               ]}
             >
@@ -302,8 +387,18 @@ export default function LogoutScreen({ navigation }) {
                 styles.description,
                 {
                   fontSize: ui.description,
-                  lineHeight: tablet ? 24 : small ? 19 : 21,
-                  width: tablet ? "100%" : small ? "92%" : "90%",
+                  lineHeight:
+                    tablet
+                      ? 24
+                      : small
+                      ? 19
+                      : 21,
+                  width:
+                    tablet
+                      ? "100%"
+                      : small
+                      ? "92%"
+                      : "90%",
                 },
               ]}
             >
@@ -317,15 +412,26 @@ export default function LogoutScreen({ navigation }) {
               style={[
                 styles.everywhere,
                 {
-                  fontSize: small ? 14 : tablet ? 17 : 15,
-                  lineHeight: small ? 19 : tablet ? 24 : 21,
+                  fontSize: small
+                    ? 14
+                    : tablet
+                    ? 17
+                    : 15,
+                  lineHeight: small
+                    ? 19
+                    : tablet
+                    ? 24
+                    : 21,
                 },
               ]}
             >
               Or log out from all your{"\n"}devices
             </Text>
 
-            {button("Log Out Everywhere", logoutEverywhere)}
+            {button(
+              "Log Out Everywhere",
+              logoutEverywhere
+            )}
           </ScrollView>
         </View>
 
@@ -334,9 +440,19 @@ export default function LogoutScreen({ navigation }) {
             styles.bottomBar,
             {
               height:
-                65 * (small ? 0.85 : tablet ? 1.15 : 1),
+                65 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
               borderTopLeftRadius:
-                78 * (small ? 0.85 : tablet ? 1.15 : 1),
+                78 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
             },
           ]}
         >
@@ -351,8 +467,18 @@ export default function LogoutScreen({ navigation }) {
                 name={item.icon}
                 size={
                   item.icon === "swap-horizontal"
-                    ? 37 * (small ? 0.85 : tablet ? 1.15 : 1)
-                    : 35 * (small ? 0.85 : tablet ? 1.15 : 1)
+                    ? 37 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    : 35 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
                 }
                 color="#FFFFFF"
               />
