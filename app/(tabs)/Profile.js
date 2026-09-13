@@ -91,7 +91,7 @@ export default function Profile() {
                         : isTablet
                             ? 100
                             : 30,
-                    paddingHorizontal: isSmallScreen ? 15: isTablet ? 35: 20,
+                    paddingHorizontal: isSmallScreen ? 15: isTablet ? 35: 30,
                 },
             ]}>
 
@@ -110,6 +110,7 @@ export default function Profile() {
                     styles.title,
                     {
                         fontSize: 25 * scale,
+                        marginTop: isSmallScreen ? 20: isTablet ? 35: 0,
                     },
                 ]}>
                     Profile
