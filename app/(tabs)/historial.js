@@ -32,20 +32,20 @@ export default function HistorialScreen() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : isLargeScreen
-          ? 1.25
-          : 1;
+    ? 1
+    : isTablet
+    ? 1.15
+    : isLargeScreen
+    ? 1.25
+    : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (size) => Math.round(size * scale);
 
@@ -99,8 +99,8 @@ export default function HistorialScreen() {
                   "Savings",
                 type: getMovementType(
                   saving.category ||
-                  expense?.category ||
-                  ""
+                    expense?.category ||
+                    ""
                 ),
                 savings: Number(saving.amount || 0),
                 description:
@@ -109,13 +109,13 @@ export default function HistorialScreen() {
                   "",
                 amount: Number(
                   expense?.amount ??
-                  saving.originalAmount ??
-                  0
+                    saving.originalAmount ??
+                    0
                 ),
                 roundingAmount: Number(
                   expense?.roundingAmount ??
-                  saving.roundingAmount ??
-                  0
+                    saving.roundingAmount ??
+                    0
                 ),
                 date:
                   expense?.date ||

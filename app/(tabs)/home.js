@@ -35,15 +35,15 @@ const ACTIONS = [
   ["card-outline", "Register\nexpenses", "ion", "/registerexpenses"],
   ["book-outline", "Register\ngoals", "ion", "/registergoals"],
   ["trending-up-outline", "Investments", "ion", "/investments"],
-  ["hand-coin-outline", "Points\nExchange", "material", "/pointsExchange"],
+  ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
 ];
 
 const NAV = [
   ["home-outline", "ion", "/"],
   ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/expensesManagement"],
+  ["swap-horizontal", "material", "/ExpensesManagement"],
   ["layers-outline", "material", "/currentgoal"],
-  ["person-outline", "ion", "/profile"],
+  ["person-outline", "ion", "/Profile"],
 ];
 
 const getField = (item, fields) => {
@@ -396,28 +396,26 @@ export default function App() {
   const isSmallScreen = width < 360;
   const isMediumScreen =
     width >= 360 && width < 600;
-  const isTablet =
-    width >= 600 && width < 900;
-  const isLargeScreen =
-    width >= 900;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
 
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : isLargeScreen
-          ? 1.25
-          : 1;
+    ? 1
+    : isTablet
+    ? 1.15
+    : isLargeScreen
+    ? 1.25
+    : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (size) =>
     Math.round(size * scale);
@@ -470,12 +468,12 @@ export default function App() {
 
             setUsername(
               userData.username ||
-              "User"
+                "User"
             );
 
             setProfilePhoto(
               userData.identityDocumentUrl ||
-              null
+                null
             );
           } else {
             setUsername("User");
@@ -570,8 +568,8 @@ export default function App() {
                 documentData.createdAt?.toDate
                   ? documentData.createdAt.toDate()
                   : convertDate(
-                    documentData.date
-                  );
+                      documentData.date
+                    );
 
               expensesRecords.push({
                 category:
@@ -742,10 +740,10 @@ export default function App() {
   const savingsPercentage =
     totalMoney > 0
       ? Math.round(
-        (totalSavings /
-          totalMoney) *
-        100
-      )
+          (totalSavings /
+            totalMoney) *
+            100
+        )
       : 0;
 
   return (
@@ -845,7 +843,7 @@ export default function App() {
                     },
                     period ===
                       item &&
-                    styles.activeFilter,
+                      styles.activeFilter,
                   ]}
                 >
                   <Text
@@ -857,7 +855,7 @@ export default function App() {
                       },
                       period ===
                         item &&
-                      styles.activeFilterText,
+                        styles.activeFilterText,
                     ]}
                   >
                     {item}
@@ -868,7 +866,7 @@ export default function App() {
           </View>
 
           {filteredRecords.length >
-            0 ? (
+          0 ? (
             filteredRecords.map(
               (item, index) => (
                 <Transaction
@@ -956,7 +954,7 @@ function Header({
         ]}
         onPress={() =>
           router.push(
-            "/profile"
+            "/Profile"
           )
         }
       >
@@ -1300,7 +1298,7 @@ function Actions({
               ]}
             >
               {type ===
-                "ion" ? (
+              "ion" ? (
                 <Ionicons
                   name={icon}
                   size={
@@ -1354,15 +1352,15 @@ function Transaction({
   const amount =
     data.type === "Expense"
       ? `-${formatMoney(
-        Math.abs(
-          data.amount
-        )
-      )}`
+          Math.abs(
+            data.amount
+          )
+        )}`
       : `+${formatMoney(
-        Math.abs(
-          data.amount
-        )
-      )}`;
+          Math.abs(
+            data.amount
+          )
+        )}`;
 
   return (
     <View
@@ -1474,10 +1472,10 @@ function Transaction({
           styles.amount,
           data.type ===
             "Expense" &&
-          styles.negative,
+            styles.negative,
           data.type ===
             "Savings" &&
-          styles.positive,
+            styles.positive,
           {
             fontSize: s(14),
           },
@@ -1528,7 +1526,7 @@ function BottomNav({
             }
           >
             {type ===
-              "ion" ? (
+            "ion" ? (
               <Ionicons
                 name={icon}
                 size={s(31)}

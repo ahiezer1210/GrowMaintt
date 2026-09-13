@@ -5,7 +5,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { router } from "expo-router";
-import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
   deleteDoc,
@@ -14,6 +13,7 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -28,38 +28,37 @@ import {
 import { auth, db } from "../../firebaseConfig.js";
 
 export default function Devices() {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
 
   const [devices, setDevices] = useState([]);
   const [currentDeviceId, setCurrentDeviceId] = useState(null);
 
-  const small = width < 350;
-  const tablet = width >= 600;
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
 
-  const scale = small
+  const scale = isSmallScreen
     ? 0.85
-    : width < 600
-      ? 1
-      : tablet && width < 900
-        ? 1.15
-        : 1.25;
+    : isMediumScreen
+    ? 1
+    : isLargeScreen
+    ? 1.25
+    : isTablet
+    ? 1.15
+    : 1;
 
-  const s = (value) => Math.round(value * scale);
-
-  const horizontalPadding = small
+  const horizontalPadding = isSmallScreen
     ? 18
-    : width < 600
-      ? 25
-      : tablet && width < 900
-        ? 45
-        : 60;
+    : isMediumScreen
+    ? 25
+    : isLargeScreen
+    ? 60
+    : isTablet
+    ? 45
+    : 25;
 
-  const sizes = {
-    title: small ? 23 : tablet ? 30 : 27,
-    icon: small ? 24 : 28,
-    padding: small ? 12 : tablet ? 18 : 15,
-    cardRadius: small ? 18 : 20,
-  };
+  const s = (size) => Math.round(size * scale);
 
   const navItems = [
     {
@@ -416,8 +415,6 @@ export default function Devices() {
       <View
         style={[
           styles.header,
-          small && styles.headerSmall,
-          tablet && styles.headerTablet,
           {
             height: s(115),
             paddingHorizontal: horizontalPadding,
@@ -430,10 +427,10 @@ export default function Devices() {
             {
               transform: [
                 {
-                  translateY: 4 * scale,
+                  translateY: s(4),
                 },
                 {
-                  translateX: -4 * scale,
+                  translateX: -s(4),
                 },
               ],
             },
@@ -452,38 +449,14 @@ export default function Devices() {
           style={[
             styles.title,
             {
-              fontSize:
-                25 *
-                (small
-                  ? 0.85
-                  : tablet
-                    ? 1.15
-                    : 1),
-              lineHeight:
-                23 *
-                (small
-                  ? 0.85
-                  : tablet
-                    ? 1.15
-                    : 1),
+              fontSize: s(25),
+              lineHeight: s(23),
               transform: [
                 {
-                  translateX:
-                    4 *
-                    (small
-                      ? 0.85
-                      : tablet
-                        ? 1.15
-                        : 1),
+                  translateX: s(4),
                 },
                 {
-                  translateY:
-                    14 *
-                    (small
-                      ? 0.85
-                      : tablet
-                        ? 1.15
-                        : 1),
+                  translateY: s(14),
                 },
               ],
             },
@@ -498,7 +471,7 @@ export default function Devices() {
             {
               transform: [
                 {
-                  translateY: 3 * scale,
+                  translateY: s(3),
                 },
               ],
             },
@@ -508,7 +481,7 @@ export default function Devices() {
         >
           <MaterialCommunityIcons
             name="bell-circle-outline"
-            size={35 * scale}
+            size={s(35)}
             color="#FFFFFF"
           />
         </TouchableOpacity>
@@ -518,8 +491,8 @@ export default function Devices() {
         style={[
           styles.main,
           {
-            borderTopLeftRadius: 36 * scale,
-            borderTopRightRadius: 36 * scale,
+            borderTopLeftRadius: s(36),
+            borderTopRightRadius: s(36),
           },
         ]}
       >
@@ -527,15 +500,21 @@ export default function Devices() {
           style={styles.content}
           contentContainerStyle={[
             styles.contentContainer,
-            small && styles.contentSmall,
-            tablet && styles.contentTablet,
+            {
+              paddingHorizontal: horizontalPadding,
+              paddingTop: s(15),
+              paddingBottom: s(90),
+            },
           ]}
           showsVerticalScrollIndicator={false}
         >
           <Text
             style={[
               styles.sectionTitle,
-              small && styles.sectionSmall,
+              {
+                fontSize: s(18),
+                marginBottom: s(15),
+              },
             ]}
           >
             Devices
@@ -551,26 +530,27 @@ export default function Devices() {
                 style={[
                   styles.deviceCard,
                   {
-                    padding: sizes.padding,
-                    borderRadius:
-                      sizes.cardRadius,
+                    minHeight: s(110),
+                    padding: s(16),
+                    borderRadius: s(20),
+                    marginBottom: s(14),
                   },
-                  small &&
-                    styles.deviceCardSmall,
-                  tablet &&
-                    styles.deviceCardTablet,
                 ]}
               >
                 <View
                   style={[
                     styles.deviceIcon,
-                    small &&
-                      styles.deviceIconSmall,
+                    {
+                      width: s(55),
+                      height: s(55),
+                      borderRadius: s(16),
+                      marginRight: s(14),
+                    },
                   ]}
                 >
                   <Ionicons
                     name={getDeviceIcon(device)}
-                    size={sizes.icon}
+                    size={s(28)}
                     color="#3A7AFE"
                   />
                 </View>
@@ -579,8 +559,9 @@ export default function Devices() {
                   <Text
                     style={[
                       styles.deviceName,
-                      small &&
-                        styles.deviceNameSmall,
+                      {
+                        fontSize: s(16),
+                      },
                     ]}
                     numberOfLines={1}
                   >
@@ -590,21 +571,35 @@ export default function Devices() {
                   <Text
                     style={[
                       styles.deviceDetails,
-                      small &&
-                        styles.deviceDetailsSmall,
+                      {
+                        fontSize: s(13),
+                        lineHeight: s(18),
+                        marginTop: s(3),
+                      },
                     ]}
                   >
                     {getDeviceDetails(device)}
                   </Text>
 
-                  <View style={styles.status}>
+                  <View
+                    style={[
+                      styles.status,
+                      {
+                        marginTop: s(4),
+                      },
+                    ]}
+                  >
                     <View
                       style={[
                         status.active
                           ? styles.activeDot
                           : styles.dot,
-                        small &&
-                          styles.dotSmall,
+                        {
+                          width: s(7),
+                          height: s(7),
+                          borderRadius: s(4),
+                          marginRight: s(6),
+                        },
                       ]}
                     />
 
@@ -613,10 +608,9 @@ export default function Devices() {
                         status.active
                           ? styles.activeText
                           : styles.lastActive,
-                        small &&
-                          (status.active
-                            ? styles.activeTextSmall
-                            : styles.lastActiveSmall),
+                        {
+                          fontSize: s(12),
+                        },
                       ]}
                       numberOfLines={1}
                     >
@@ -628,8 +622,12 @@ export default function Devices() {
                 <TouchableOpacity
                   style={[
                     styles.unlinkButton,
-                    small &&
-                      styles.unlinkButtonSmall,
+                    {
+                      paddingVertical: s(9),
+                      paddingHorizontal: s(12),
+                      borderRadius: s(10),
+                      marginLeft: s(8),
+                    },
                     device.id ===
                       currentDeviceId && {
                       opacity: 0.35,
@@ -643,8 +641,9 @@ export default function Devices() {
                   <Text
                     style={[
                       styles.unlinkText,
-                      small &&
-                        styles.unlinkTextSmall,
+                      {
+                        fontSize: s(12),
+                      },
                     ]}
                   >
                     Unlink
@@ -657,23 +656,34 @@ export default function Devices() {
           <View
             style={[
               styles.infoCard,
-              small && styles.infoCardSmall,
+              {
+                borderRadius: s(18),
+                padding: s(16),
+                marginTop: s(8),
+              },
             ]}
           >
             <Ionicons
               name="shield-checkmark-outline"
-              size={small ? 22 : 25}
+              size={s(25)}
               color="#3A7AFE"
             />
 
             <View
-              style={styles.infoTextContainer}
+              style={[
+                styles.infoTextContainer,
+                {
+                  marginLeft: s(12),
+                },
+              ]}
             >
               <Text
                 style={[
                   styles.infoTitle,
-                  small &&
-                    styles.infoTitleSmall,
+                  {
+                    fontSize: s(14),
+                    marginBottom: s(5),
+                  },
                 ]}
               >
                 Keep your account secure
@@ -682,8 +692,10 @@ export default function Devices() {
               <Text
                 style={[
                   styles.infoText,
-                  small &&
-                    styles.infoTextSmall,
+                  {
+                    fontSize: s(12),
+                    lineHeight: s(18),
+                  },
                 ]}
               >
                 If you don't recognize a device,
@@ -697,9 +709,8 @@ export default function Devices() {
           style={[
             styles.bottomBar,
             {
-              height: 65 * scale,
-              borderTopLeftRadius:
-                78 * scale,
+              height: s(65),
+              borderTopLeftRadius: s(78),
             },
           ]}
         >
@@ -714,7 +725,7 @@ export default function Devices() {
             >
               <MaterialCommunityIcons
                 name={item.icon}
-                size={35 * scale}
+                size={s(35)}
                 color="#FFFFFF"
               />
             </TouchableOpacity>
@@ -733,18 +744,9 @@ const styles = StyleSheet.create({
 
   header: {
     width: "100%",
-    height: 115,
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-  },
-
-  headerSmall: {
-    height: 100,
-  },
-
-  headerTablet: {
-    height: 132,
   },
 
   backButton: {
@@ -775,41 +777,18 @@ const styles = StyleSheet.create({
   },
 
   contentContainer: {
-    padding: 20,
-    paddingTop: 15,
     paddingBottom: 90,
-  },
-
-  contentSmall: {
-    padding: 14,
-    paddingTop: 12,
-    paddingBottom: 90,
-  },
-
-  contentTablet: {
-    paddingHorizontal: 40,
-    paddingTop: 20,
-    paddingBottom: 100,
   },
 
   sectionTitle: {
-    fontSize: 18,
     fontWeight: "700",
     color: "#222",
-    marginBottom: 15,
-  },
-
-  sectionSmall: {
-    fontSize: 16,
-    marginBottom: 12,
   },
 
   deviceCard: {
-    minHeight: 110,
     backgroundColor: "#FFF",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 14,
     elevation: 3,
     shadowColor: "#000",
     shadowOpacity: 0.07,
@@ -820,29 +799,10 @@ const styles = StyleSheet.create({
     },
   },
 
-  deviceCardSmall: {
-    minHeight: 105,
-  },
-
-  deviceCardTablet: {
-    minHeight: 120,
-  },
-
   deviceIcon: {
-    width: 55,
-    height: 55,
-    borderRadius: 16,
     backgroundColor: "#EEF4FF",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
-  },
-
-  deviceIconSmall: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    marginRight: 10,
   },
 
   deviceInfo: {
@@ -851,139 +811,62 @@ const styles = StyleSheet.create({
   },
 
   deviceName: {
-    fontSize: 16,
     fontWeight: "700",
     color: "#222",
   },
 
-  deviceNameSmall: {
-    fontSize: 14,
-  },
-
   deviceDetails: {
-    fontSize: 13,
     color: "#777",
-    lineHeight: 18,
-    marginTop: 3,
-  },
-
-  deviceDetailsSmall: {
-    fontSize: 11,
-    lineHeight: 16,
   },
 
   status: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 4,
     minWidth: 0,
   },
 
   dot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
     backgroundColor: "#999",
-    marginRight: 6,
   },
 
   activeDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
     backgroundColor: "#25B7D3",
-    marginRight: 6,
-  },
-
-  dotSmall: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 5,
   },
 
   activeText: {
-    fontSize: 12,
     color: "#259E8C",
     fontWeight: "600",
   },
 
-  activeTextSmall: {
-    fontSize: 10,
-  },
-
   lastActive: {
-    fontSize: 12,
     color: "#030101",
-  },
-
-  lastActiveSmall: {
-    fontSize: 10,
   },
 
   unlinkButton: {
     backgroundColor: "#FFF1F1",
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    marginLeft: 8,
-  },
-
-  unlinkButtonSmall: {
-    paddingVertical: 7,
-    paddingHorizontal: 9,
-    borderRadius: 9,
-    marginLeft: 5,
   },
 
   unlinkText: {
     color: "#081023",
-    fontSize: 12,
     fontWeight: "700",
-  },
-
-  unlinkTextSmall: {
-    fontSize: 10,
   },
 
   infoCard: {
     backgroundColor: "#EEF4FF",
-    borderRadius: 18,
-    padding: 16,
     flexDirection: "row",
-    marginTop: 8,
-  },
-
-  infoCardSmall: {
-    padding: 13,
-    borderRadius: 16,
   },
 
   infoTextContainer: {
     flex: 1,
-    marginLeft: 12,
   },
 
   infoTitle: {
-    fontSize: 14,
     fontWeight: "700",
     color: "#222",
-    marginBottom: 5,
-  },
-
-  infoTitleSmall: {
-    fontSize: 12,
   },
 
   infoText: {
-    fontSize: 12,
-    lineHeight: 18,
     color: "#666",
-  },
-
-  infoTextSmall: {
-    fontSize: 11,
-    lineHeight: 16,
   },
 
   bottomBar: {

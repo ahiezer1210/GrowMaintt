@@ -24,7 +24,32 @@ import { auth, db } from "../../firebaseConfig.js";
 
 export default function SavingsGoal() {
   const { width, height } = useWindowDimensions();
-  const scale = Math.min(width / 390, height / 844);
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+    ? 1
+    : isLargeScreen
+    ? 1.25
+    : isTablet
+    ? 1.15
+    : 1;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+    ? 25
+    : isLargeScreen
+    ? 60
+    : isTablet
+    ? 45
+    : 25;
+
   const s = (value) => Math.round(value * scale);
 
   const [goalName, setGoalName] = useState("");
@@ -409,13 +434,16 @@ export default function SavingsGoal() {
           {
             paddingTop: s(55),
             paddingBottom: s(30),
+            paddingHorizontal: horizontalPadding,
           },
         ]}
       >
         <TouchableOpacity
           style={[
             styles.backButton,
-            { width: s(35) },
+            {
+              width: s(35),
+            },
           ]}
           onPress={() => router.back()}
         >
@@ -434,6 +462,9 @@ export default function SavingsGoal() {
               marginLeft: s(25),
             },
           ]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
         >
           Register savings goal
         </Text>
@@ -456,32 +487,74 @@ export default function SavingsGoal() {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          {
+            borderTopLeftRadius: s(35),
+            borderTopRightRadius: s(35),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(25),
+          },
+        ]}
+      >
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={
-            styles.scrollContent
-          }
+          contentContainerStyle={{
+            paddingBottom: s(30),
+          }}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             Goal name
           </Text>
 
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                height: s(48),
+                borderRadius: s(15),
+                paddingHorizontal: s(18),
+                marginBottom: s(22),
+              },
+            ]}
             placeholder="E.g. Buy a new phone"
             value={goalName}
             onChangeText={setGoalName}
             placeholderTextColor="#ACADAD"
           />
 
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             Target amount
           </Text>
 
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                height: s(48),
+                borderRadius: s(15),
+                paddingHorizontal: s(18),
+                marginBottom: s(22),
+              },
+            ]}
             placeholder="E.g. $300.00"
             keyboardType="numeric"
             value={targetAmount}
@@ -490,9 +563,21 @@ export default function SavingsGoal() {
           />
 
           <View
-            style={styles.mainGoalContainer}
+            style={[
+              styles.mainGoalContainer,
+              {
+                marginBottom: s(22),
+              },
+            ]}
           >
-            <Text style={styles.mainGoalText}>
+            <Text
+              style={[
+                styles.mainGoalText,
+                {
+                  fontSize: s(14),
+                },
+              ]}
+            >
               Main goal
             </Text>
 
@@ -508,14 +593,34 @@ export default function SavingsGoal() {
             />
           </View>
 
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             Saving frequency
           </Text>
 
-          <View style={styles.typeContainer}>
+          <View
+            style={[
+              styles.typeContainer,
+              {
+                marginBottom: s(17),
+              },
+            ]}
+          >
             <TouchableOpacity
               style={[
                 styles.typeButton,
+                {
+                  height: s(42),
+                  borderRadius: s(13),
+                  marginHorizontal: s(3),
+                },
                 frequency === "daily" &&
                   styles.typeButtonActive,
               ]}
@@ -526,6 +631,9 @@ export default function SavingsGoal() {
               <Text
                 style={[
                   styles.typeText,
+                  {
+                    fontSize: s(12),
+                  },
                   frequency === "daily" &&
                     styles.typeTextActive,
                 ]}
@@ -537,6 +645,11 @@ export default function SavingsGoal() {
             <TouchableOpacity
               style={[
                 styles.typeButton,
+                {
+                  height: s(42),
+                  borderRadius: s(13),
+                  marginHorizontal: s(3),
+                },
                 frequency === "monthly" &&
                   styles.typeButtonActive,
               ]}
@@ -547,6 +660,9 @@ export default function SavingsGoal() {
               <Text
                 style={[
                   styles.typeText,
+                  {
+                    fontSize: s(12),
+                  },
                   frequency === "monthly" &&
                     styles.typeTextActive,
                 ]}
@@ -556,12 +672,28 @@ export default function SavingsGoal() {
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             Amount to save
           </Text>
 
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              {
+                height: s(48),
+                borderRadius: s(15),
+                paddingHorizontal: s(18),
+                marginBottom: s(22),
+              },
+            ]}
             placeholder="Calculated automatically"
             value={savingAmount}
             editable={false}
@@ -569,7 +701,17 @@ export default function SavingsGoal() {
             placeholderTextColor="#ACADAD"
           />
 
-          <Text style={styles.roundingInfo}>
+          <Text
+            style={[
+              styles.roundingInfo,
+              {
+                fontSize: s(12),
+                lineHeight: s(17),
+                marginTop: -s(12),
+                marginBottom: s(15),
+              },
+            ]}
+          >
             The amount is calculated according to
             your target, frequency and saving dates.
           </Text>
@@ -580,6 +722,7 @@ export default function SavingsGoal() {
               {
                 height: s(40),
                 borderRadius: s(18),
+                marginBottom: s(17),
               },
             ]}
             onPress={handleCalculate}
@@ -596,24 +739,56 @@ export default function SavingsGoal() {
             </Text>
           </TouchableOpacity>
 
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             Start date
           </Text>
 
           <TextInput
-            style={styles.date}
+            style={[
+              styles.date,
+              {
+                height: s(48),
+                borderRadius: s(15),
+                paddingHorizontal: s(18),
+                marginBottom: s(22),
+              },
+            ]}
             placeholder="June 23, 2026"
             value={startDate}
             onChangeText={setStartDate}
             placeholderTextColor="#ACADAD"
           />
 
-          <Text style={styles.label}>
+          <Text
+            style={[
+              styles.label,
+              {
+                fontSize: s(14),
+                marginBottom: s(10),
+              },
+            ]}
+          >
             End date
           </Text>
 
           <TextInput
-            style={styles.date}
+            style={[
+              styles.date,
+              {
+                height: s(48),
+                borderRadius: s(15),
+                paddingHorizontal: s(18),
+                marginBottom: s(22),
+              },
+            ]}
             placeholder="December 23, 2026"
             value={endDate}
             onChangeText={setEndDate}
@@ -625,22 +800,34 @@ export default function SavingsGoal() {
               savingAmount.replace(",", ".")
             ) > 0 && (
               <View
-                style={
-                  styles.calculationContainer
-                }
+                style={[
+                  styles.calculationContainer,
+                  {
+                    borderRadius: s(15),
+                    padding: s(15),
+                    marginBottom: s(5),
+                  },
+                ]}
               >
                 <Text
-                  style={
-                    styles.calculationTitle
-                  }
+                  style={[
+                    styles.calculationTitle,
+                    {
+                      fontSize: s(13),
+                    },
+                  ]}
                 >
                   Recommended saving
                 </Text>
 
                 <Text
-                  style={
-                    styles.calculationAmount
-                  }
+                  style={[
+                    styles.calculationAmount,
+                    {
+                      fontSize: s(24),
+                      marginTop: s(3),
+                    },
+                  ]}
                 >
                   $
                   {Number(
@@ -652,9 +839,12 @@ export default function SavingsGoal() {
                 </Text>
 
                 <Text
-                  style={
-                    styles.calculationText
-                  }
+                  style={[
+                    styles.calculationText,
+                    {
+                      fontSize: s(12),
+                    },
+                  ]}
                 >
                   per{" "}
                   {frequency === "daily"
@@ -752,79 +942,52 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
-    paddingHorizontal: 30,
-    paddingTop: 25,
-  },
-
-  scrollContent: {
-    paddingBottom: 30,
   },
 
   label: {
     color: "#081023",
-    fontSize: 14,
     fontWeight: "600",
-    marginBottom: 10,
   },
 
   input: {
-    height: 48,
     backgroundColor: "#F3F4F5",
-    borderRadius: 15,
     borderWidth: 1,
     borderColor: "#000000",
-    paddingHorizontal: 18,
-    marginBottom: 22,
   },
 
   date: {
-    height: 48,
     backgroundColor: "#F3F4F5",
-    borderRadius: 15,
     borderWidth: 1,
     borderColor: "#000000",
-    paddingHorizontal: 18,
-    marginBottom: 22,
   },
 
   mainGoalContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 22,
   },
 
   mainGoalText: {
     color: "#081023",
-    fontSize: 14,
     fontWeight: "600",
   },
 
   roundingInfo: {
     color: "#ACADAD",
-    fontSize: 12,
-    marginTop: -12,
-    marginBottom: 15,
   },
 
   typeContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 17,
   },
 
   typeButton: {
     flex: 1,
-    height: 42,
     backgroundColor: "#F3F4F5",
-    borderRadius: 13,
     borderWidth: 1,
     borderColor: "#000000",
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 3,
   },
 
   typeButtonActive: {
@@ -834,7 +997,6 @@ const styles = StyleSheet.create({
 
   typeText: {
     color: "#081023",
-    fontSize: 12,
     fontWeight: "600",
   },
 
@@ -846,32 +1008,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#081023",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 17,
   },
 
   calculationContainer: {
     backgroundColor: "#F3F4F5",
-    borderRadius: 15,
-    padding: 15,
-    marginBottom: 5,
   },
 
   calculationTitle: {
     color: "#081023",
-    fontSize: 13,
     fontWeight: "600",
   },
 
   calculationAmount: {
     color: "#25B7D3",
-    fontSize: 24,
     fontWeight: "700",
-    marginTop: 3,
   },
 
   calculationText: {
     color: "#ACADAD",
-    fontSize: 12,
   },
 
   button: {

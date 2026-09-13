@@ -41,22 +41,22 @@ export default function Devices() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isLargeScreen
-        ? 1.25
-        : isTablet
-          ? 1.15
-          : 1;
+    ? 1
+    : isLargeScreen
+    ? 1.25
+    : isTablet
+    ? 1.15
+    : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isLargeScreen
-        ? 60
-        : isTablet
-          ? 45
-          : 25;
+    ? 25
+    : isLargeScreen
+    ? 60
+    : isTablet
+    ? 45
+    : 25;
 
   const s = (size) => Math.round(size * scale);
 
@@ -265,8 +265,9 @@ export default function Devices() {
     const location = "El Salvador";
 
     if (device.deviceType === "desktop") {
-      return `${location}\n${device.systemName || "Desktop"
-        }`;
+      return `${location}\n${
+        device.systemName || "Desktop"
+      }`;
     }
 
     const model =
@@ -628,7 +629,7 @@ export default function Devices() {
                       marginLeft: s(8),
                     },
                     device.id ===
-                    currentDeviceId && {
+                      currentDeviceId && {
                       opacity: 0.35,
                     },
                   ]}
