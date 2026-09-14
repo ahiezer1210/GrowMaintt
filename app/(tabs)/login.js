@@ -57,6 +57,15 @@ export default function LoginScreen() {
       );
 
       const user = credential.user;
+      const userRef = doc(db, "Users", user.uid);
+      const userSnapshot = await getDoc(userRef);
+
+      if (!userSnapshot.exists()) {
+        await setDoc(userRef, {
+          points: 0,
+          createdAt: serverTimestamp(),
+        });
+      }
       const deviceId = await getDeviceId();
       const { deviceName, location } = await getRealDeviceInfo();
       const devicesRef = collection(db, "Users", user.uid, "devices");

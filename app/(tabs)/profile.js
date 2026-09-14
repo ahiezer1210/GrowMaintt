@@ -21,7 +21,7 @@ export default function Profile() {
             title: "Edite Profile",
             icon: "person-outline",
             color: "#27b6d1",
-            route: "/Edit_profile"
+            route: "/edit_profile"
         },
         {
             title: "Security",
@@ -45,7 +45,7 @@ export default function Profile() {
             title: "Log\n Out",
             icon: "log-out-outline",
             color: "#27b6d1",
-            route: "/signout"
+            route: "/logout"
         }
     ];
 
@@ -115,7 +115,7 @@ export default function Profile() {
                             borderRadius: 20 * scale,
                         },
                     ]}
-                    onPress={abrirNotificaciones}
+                    onPress={() => router.push("/notifications")}
                 >
                     <Ionicons
                         name="notifications-outline"
@@ -129,24 +129,24 @@ export default function Profile() {
             <View style={[
                 styles.content,
                 {
-                    marginTop: isTablet ?  70 : 40,
+                    marginTop: isTablet ? 70 : 40,
                 }
-                ]}>
+            ]}>
 
                 <View style={[
-                        styles.imageContainer,
-                        {
-                            width: isTablet ? 120 : 90,
-                            height: isTablet ? 120 : 90,
-                            borderRadius: isTablet ? 60 : 45,
-                            top: -40,
-                        },
-                    ]}>
-                        <Image
-                            source={require("../../assets/images/Image.jpg")}
-                            style={styles.logo}
-                        />
-                    </View>
+                    styles.imageContainer,
+                    {
+                        width: isTablet ? 120 : 90,
+                        height: isTablet ? 120 : 90,
+                        borderRadius: isTablet ? 60 : 45,
+                        top: -40,
+                    },
+                ]}>
+                    <Image
+                        source={require("../../assets/images/Image.jpg")}
+                        style={styles.logo}
+                    />
+                </View>
 
                 <ScrollView
                     showsVerticalScrollIndicator={false}
@@ -163,8 +163,8 @@ export default function Profile() {
                         styles.name,
                         {
                             fontSize: isTablet ? 28 : 18,
-                            marginTop: isTablet ?  80 : 60,
-                            marginRight: isTablet ?  40 : 20,
+                            marginTop: isTablet ? 80 : 60,
+                            marginRight: isTablet ? 40 : 20,
                         },
                     ]}>
                         Diana Cardoza
@@ -187,7 +187,7 @@ export default function Profile() {
                                         minHeight: isTablet ? 98 * scale : 60 * scale,
                                         marginBottom: 18 * scale,
                                         marginRight: isTablet ? 380 * scale : 120 * scale,
-                                        
+
                                     },
                                 ]}
                                 onPress={() => {

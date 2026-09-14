@@ -714,7 +714,7 @@ export default function ExpenseManagement() {
                 <TouchableOpacity
                     onPress={() =>
                         router.push(
-                            "/ExpensesManagement"
+                            "/expensesManagement"
                         )
                     }
                     style={styles.navButton}
@@ -743,7 +743,7 @@ export default function ExpenseManagement() {
 
                 <TouchableOpacity
                     onPress={() =>
-                        router.push("/Profile")
+                        router.push("/profile")
                     }
                     style={styles.navButton}
                 >

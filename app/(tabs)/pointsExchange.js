@@ -1,5 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { auth, db } from "../../firebaseConfig";
 import {
     ScrollView,
     StyleSheet,
@@ -78,6 +81,35 @@ export default function PointExchange() {
             : isLargeTablet
                 ? 90
                 : 80;
+
+    const [availablePoints, setAvailablePoints] = useState(0);
+
+    useEffect(() => {
+        const user = auth.currentUser;
+
+        if (!user) {
+            return;
+        }
+
+        const userRef = doc(db, "Users", user.uid);
+
+        const unsubscribe = onSnapshot(
+            userRef,
+            (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    setAvailablePoints(data.points || 0);
+                } else {
+                    setAvailablePoints(0);
+                }
+            },
+            (error) => {
+                console.log("Error getting points:", error);
+            }
+        );
+
+        return unsubscribe;
+    }, []);
     return (
         <SafeAreaView style={styles.container}>
             <View style={[
@@ -145,7 +177,7 @@ export default function PointExchange() {
                             {
                                 fontSize: 28 * scale,
                             }
-                        ]}>400.0</Text>
+                        ]}>{availablePoints.toFixed(1)}</Text>
                     </View>
                     <View style={styles.pointsInfo}>
                         <View>
@@ -178,7 +210,7 @@ export default function PointExchange() {
                                 {
                                     fontSize: 15 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 Redeemed points
                             </Text>
                             <Text style={[
@@ -186,7 +218,7 @@ export default function PointExchange() {
                                 {
                                     fontSize: 20 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 -1000.0
                             </Text>
                         </View>
@@ -196,14 +228,14 @@ export default function PointExchange() {
                         {
                             marginTop: 15 * scale,
                         }
-                        ]}>
+                    ]}>
                         <View style={[
                             styles.progressBar,
                             {
                                 height: 15 * scale,
                                 borderRadius: 10 * scale,
                             }
-                            ]}>
+                        ]}>
                             <View style={styles.progress} />
                         </View>
                         <Text style={[
@@ -211,7 +243,7 @@ export default function PointExchange() {
                             {
                                 fontSize: 13 * scale,
                             }
-                            ]}>
+                        ]}>
                             30%
                         </Text>
                         <Text style={[
@@ -219,7 +251,7 @@ export default function PointExchange() {
                             {
                                 fontSize: 8 * scale,
                             }
-                            ]}>
+                        ]}>
                             10,000
                         </Text>
                     </View>
@@ -229,7 +261,7 @@ export default function PointExchange() {
                             fontSize: 14 * scale,
                             marginTop: 8 * scale,
                         }
-                        ]}>
+                    ]}>
                         30% of your goal, ¡You´re making progress!
                     </Text>
                 </View>
@@ -240,13 +272,13 @@ export default function PointExchange() {
                         paddingTop: 25 * scale,
                         marginTop: isTablet ? -40 : -70
                     }
-                    ]}>
+                ]}>
                     <Text style={[
                         styles.sectionTitle,
                         {
                             fontSize: 22 * scale,
                         }
-                        ]}>¡Rewards!</Text>
+                    ]}>¡Rewards!</Text>
                     {rewards.map((item, index) => (
                         <View style={[
                             styles.reward,
@@ -255,7 +287,7 @@ export default function PointExchange() {
                                 marginBottom: 10 * scale,
                                 paddingHorizontal: 8 * scale,
                             }
-                            ]} key={index}>
+                        ]} key={index}>
                             <View style={[
                                 styles.iconCircle,
                                 {
@@ -263,7 +295,7 @@ export default function PointExchange() {
                                     height: 38 * scale,
                                     borderRadius: 19 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 <Ionicons
                                     name={item.icon}
                                     size={23 * scale}
@@ -274,17 +306,17 @@ export default function PointExchange() {
                                 styles.rewardName,
                                 {
                                     width: isTablet
-                                    ? 120 * scale
-                                    : 85 * scale,
+                                        ? 120 * scale
+                                        : 85 * scale,
                                     paddingLeft: 8 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 <Text style={[
                                     styles.rewardTitle,
                                     {
                                         fontSize: 14 * scale,
                                     }
-                                    ]}>
+                                ]}>
                                     {item.title}
                                 </Text>
                                 <Text style={[
@@ -292,7 +324,7 @@ export default function PointExchange() {
                                     {
                                         fontSize: 13 * scale,
                                     }
-                                    ]}>{item.store}</Text>
+                                ]}>{item.store}</Text>
                             </View>
                             <View style={styles.rewardDescription}>
                                 <Text style={[
@@ -300,7 +332,7 @@ export default function PointExchange() {
                                     {
                                         fontSize: 13 * scale,
                                     }
-                                    ]}>
+                                ]}>
                                     {item.description}
                                 </Text>
                             </View>
@@ -308,11 +340,11 @@ export default function PointExchange() {
                                 styles.rewardPoints,
                                 {
                                     width: isTablet
-                                    ? 100 * scale
-                                    : 75 * scale,
-                                    fontSize: 11 *scale,
+                                        ? 100 * scale
+                                        : 75 * scale,
+                                    fontSize: 11 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 {item.points}
                             </Text>
                         </View>
@@ -323,7 +355,7 @@ export default function PointExchange() {
                             fontSize: 22 * scale,
                             marginTop: 10 * scale,
                         }
-                        ]}>
+                    ]}>
                         ¡Big reward!
                     </Text>
                     <View style={[
@@ -332,7 +364,7 @@ export default function PointExchange() {
                             minHeight: 65 * scale,
                             marginBottom: 10 * scale,
                         }
-                        ]}>
+                    ]}>
                         <View style={[
                             styles.iconCircle,
                             {
@@ -340,7 +372,7 @@ export default function PointExchange() {
                                 height: 38 * scale,
                                 borderRadius: 19 * scale,
                             }
-                            ]}>
+                        ]}>
                             <Ionicons
                                 name="restaurant-outline"
                                 size={23 * scale}
@@ -351,22 +383,22 @@ export default function PointExchange() {
                             styles.rewardName,
                             {
                                 width: isTablet
-                                ? 120 * scale
-                                : 85 * scale,
+                                    ? 120 * scale
+                                    : 85 * scale,
                             }
-                            ]}>
+                        ]}>
                             <Text style={[
                                 styles.rewardTitle,
                                 {
                                     fontSize: 14 * scale,
                                 }
-                                ]}>Food</Text>
+                            ]}>Food</Text>
                             <Text style={[
                                 styles.store,
                                 {
                                     fontSize: 13 * scale,
                                 }
-                                ]}>Don Li</Text>
+                            ]}>Don Li</Text>
                         </View>
                         <View style={styles.rewardDescription}>
                             <Text style={[
@@ -374,7 +406,7 @@ export default function PointExchange() {
                                 {
                                     fontSize: 13 * scale,
                                 }
-                                ]}>
+                            ]}>
                                 Free shushi order
                             </Text>
                         </View>
@@ -382,11 +414,11 @@ export default function PointExchange() {
                             styles.rewardPoints,
                             {
                                 width: isTablet
-                                ? 100 * scale
-                                : 75 * scale,
+                                    ? 100 * scale
+                                    : 75 * scale,
                                 fontSize: 11 * scale,
                             }
-                            ]}>
+                        ]}>
                             -500.0 points
                         </Text>
 
@@ -396,9 +428,9 @@ export default function PointExchange() {
             <View style={[
                 styles.bottomBar,
                 {
-                    height:isTablet ? 95 * scale : 70 * scale,
+                    height: isTablet ? 95 * scale : 70 * scale,
                 }
-                ]}>
+            ]}>
                 <TouchableOpacity onPress={() => router.push("/home")}>
                     <Ionicons
                         name="home-outline"
@@ -413,7 +445,7 @@ export default function PointExchange() {
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
+                <TouchableOpacity onPress={() => router.push("/expensesManagement")}>
                     <Ionicons
                         name="swap-horizontal-outline"
                         size={27 * scale}
@@ -427,7 +459,7 @@ export default function PointExchange() {
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => router.push("/Profile")}>
+                <TouchableOpacity onPress={() => router.push("/profile")}>
                     <Ionicons
                         name="person-outline"
                         size={27 * scale}

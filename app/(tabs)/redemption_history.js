@@ -268,7 +268,7 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/ExpensesManagement")}>
+                <TouchableOpacity onPress={() => router.push("/expensesManagement")}>
                     <Ionicons
                         name="swap-horizontal-outline"
                         size={27}
@@ -284,7 +284,7 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/Profile")}>
+                <TouchableOpacity onPress={() => router.push("/profile")}>
                     <Ionicons
                         name="person-outline"
                         size={27}
