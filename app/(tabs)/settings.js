@@ -16,7 +16,7 @@ const OPTIONS = [
   ["key-outline", "Change password", "newPassword"],
   ["cash-outline", "Expense control period", "Expensecontrolperiod"],
   ["phone-portrait-outline", "Linked devices", "linkeddevices"],
-  ["log-out-outline", "Log out", "signout"],
+  ["log-out-outline", "Log out", "logout"],
   ["close-outline", "Delete account", "deleteaccount"],
 ];
 

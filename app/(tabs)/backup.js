@@ -1,4 +1,4 @@
-import { Feather, Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -14,11 +14,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const NAV = [
-  ["home-outline", "ion", "Home", "home"],
-  ["bar-chart-outline", "ion", "Reports", "reports"],
-  ["swap-horizontal", "material", "Transactions", "swap"],
-  ["layers-outline", "material", "Savings", "layers"],
-  ["person-outline", "ion", "Profile", "account"],
+  ["home-outline", "/home"],
+  ["chart-box-outline", "/historial"],
+  ["swap-horizontal", "/expensesManagement"],
+  ["layers-outline", "/currentgoal"],
+  ["account-outline", "/profile"],
 ];
 
 const BackupScreen = ({ navigation }) => {
@@ -32,23 +32,6 @@ const BackupScreen = ({ navigation }) => {
   const [includeVideos, setIncludeVideos] = useState(false);
   const [useMobileData, setUseMobileData] = useState(false);
   const [endToEndEncryption, setEndToEndEncryption] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
-
-  const renderNavIcon = (name, type, size = 26, color = "#FFFFFF") => {
-    if (type === "ion") {
-      return <Ionicons color={color} name={name} size={size} />;
-    }
-
-    return <MaterialCommunityIcons color={color} name={name} size={size} />;
-  };
-
-  const handleNavPress = (screenName, tabKey) => {
-    setActiveTab(tabKey);
-
-    if (navigation && screenName) {
-      navigation.navigate(screenName);
-    }
-  };
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
@@ -56,16 +39,35 @@ const BackupScreen = ({ navigation }) => {
 
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => router.push("/Seetings")}
+          onPress={() => router.push("/settings")}
           activeOpacity={0.7}
           style={styles.backButton}
         >
-          <Ionicons color="#FFFFFF" name="arrow-back" size={24} />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35 * scale}
+            color="#FFFFFF"
+          />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Backup</Text>
 
-        <View style={styles.headerRightSpacer} />
+        <TouchableOpacity
+          style={styles.notification}
+          onPress={() =>
+            router.push({
+              pathname: "/notifications",
+              params: { from: "/backup" },
+            })
+          }
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={35 * scale}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
       </View>
 
       <View style={styles.topSection}>
@@ -262,26 +264,29 @@ const BackupScreen = ({ navigation }) => {
 
       <View style={styles.bottomBarContainer}>
         <SafeAreaView edges={["bottom"]} style={styles.bottomBarWrapper}>
-          <View style={styles.bottomTabBar}>
-            {NAV.map(([name, type, screenName, tabKey], index) => {
-              const isSelected = activeTab === tabKey;
-
-              return (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleNavPress(screenName, tabKey)}
-                  activeOpacity={0.7}
-                  style={styles.tabItem}
-                >
-                  {renderNavIcon(
-                    name,
-                    type,
-                    26,
-                    isSelected ? "#FFFFFF" : "rgba(255, 255, 255, 0.65)",
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+          <View
+            style={[
+              styles.bottomTabBar,
+              {
+                height: 65 * scale,
+                borderTopLeftRadius: 78 * scale,
+              },
+            ]}
+          >
+            {NAV.map(([icon, route], index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.tabItem}
+                onPress={() => router.push(route)}
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons
+                  name={icon}
+                  size={icon === "swap-horizontal" ? 37 * scale : 35 * scale}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </SafeAreaView>
       </View>
@@ -300,24 +305,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    height: 45,
+    height: 65,
   },
 
   backButton: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     justifyContent: "center",
   },
 
   headerTitle: {
     color: "#FFFFFF",
-    fontSize: 17,
+    fontSize: 22,
     fontWeight: "700",
     textAlign: "center",
   },
 
-  headerRightSpacer: {
-    width: 30,
+  notification: {
+    width: 40,
+    height: 40,
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   topSection: {
@@ -506,21 +514,21 @@ const styles = StyleSheet.create({
   },
 
   bottomBarWrapper: {
-    backgroundColor: "#23BDEE",
-    borderTopLeftRadius: 35,
+    backgroundColor: "#25B5D1",
+    borderTopLeftRadius: 78,
   },
 
   bottomTabBar: {
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
-    height: 55,
-    backgroundColor: "#23BDEE",
-    borderTopLeftRadius: 35,
+    backgroundColor: "#25B5D1",
+    overflow: "hidden",
   },
 
   tabItem: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },

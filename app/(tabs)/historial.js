@@ -1,17 +1,12 @@
-<<<<<<< HEAD
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
-=======
-import { Ionicons } from "@expo/vector-icons";
 import {
   collection,
   onSnapshot,
-  query,
   orderBy,
+  query,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
 import {
   FlatList,
   StatusBar,
@@ -26,21 +21,17 @@ import { auth, db } from "../../firebaseConfig.js";
 const NAV = [
   ["home-outline", "ion", "/home"],
   ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/ExpensesManagement"],
+  ["swap-horizontal", "material", "/expensesManagement"],
   ["layers-outline", "material", "/currentgoal"],
-  ["person-outline", "ion", "/(tabs)/profile"],
+  ["person-outline", "ion", "/profile"],
 ];
 
 export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
-<<<<<<< HEAD
-  const { width } = useWindowDimensions();
-=======
   const [movements, setMovements] = useState([]);
   const [selectedMovement, setSelectedMovement] = useState(null);
 
   const { width, height } = useWindowDimensions();
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -92,7 +83,10 @@ export default function HistorialScreen() {
           }))
           .filter((saving) => saving.uid === user.uid);
 
-        const expensesRef = collection(db, "Registro de gastos");
+        const expensesRef = collection(
+          db,
+          "Registro de gastos"
+        );
 
         const unsubscribeExpenses = onSnapshot(
           expensesRef,
@@ -102,51 +96,58 @@ export default function HistorialScreen() {
                 id: document.id,
                 ...document.data(),
               }))
-              .filter((expense) => expense.uid === user.uid);
-
-            const combinedMovements = savingsData.map((saving) => {
-              const expense = expensesData.find(
-                (item) => item.id === saving.expenseId
+              .filter(
+                (expense) => expense.uid === user.uid
               );
 
-              return {
-                id: saving.id,
-                name:
-                  saving.category ||
-                  expense?.category ||
-                  "Savings",
-                type: getMovementType(
-                  saving.category ||
+            const combinedMovements = savingsData.map(
+              (saving) => {
+                const expense = expensesData.find(
+                  (item) =>
+                    item.id === saving.expenseId
+                );
+
+                return {
+                  id: saving.id,
+                  name:
+                    saving.category ||
                     expense?.category ||
-                    ""
-                ),
-                savings: Number(saving.amount || 0),
-                description:
-                  expense?.description ||
-                  saving.description ||
-                  "",
-                amount: Number(
-                  expense?.amount ??
-                    saving.originalAmount ??
-                    0
-                ),
-                roundingAmount: Number(
-                  expense?.roundingAmount ??
-                    saving.roundingAmount ??
-                    0
-                ),
-                date:
-                  expense?.date ||
-                  saving.date ||
-                  "",
-                expenseType:
-                  expense?.expenseType ||
-                  "",
-                isRecurrent:
-                  expense?.isRecurrent ||
-                  false,
-              };
-            });
+                    "Savings",
+                  type: getMovementType(
+                    saving.category ||
+                      expense?.category ||
+                      ""
+                  ),
+                  savings: Number(
+                    saving.amount || 0
+                  ),
+                  description:
+                    expense?.description ||
+                    saving.description ||
+                    "",
+                  amount: Number(
+                    expense?.amount ??
+                      saving.originalAmount ??
+                      0
+                  ),
+                  roundingAmount: Number(
+                    expense?.roundingAmount ??
+                      saving.roundingAmount ??
+                      0
+                  ),
+                  date:
+                    expense?.date ||
+                    saving.date ||
+                    "",
+                  expenseType:
+                    expense?.expenseType ||
+                    "",
+                  isRecurrent:
+                    expense?.isRecurrent ||
+                    false,
+                };
+              }
+            );
 
             setMovements(combinedMovements);
           },
@@ -195,15 +196,20 @@ export default function HistorialScreen() {
     switch (type) {
       case "coffee":
         return "cafe-outline";
+
       case "supermarket":
         return "cart-outline";
+
       case "cinema":
       case "movie":
         return "videocam-outline";
+
       case "restaurant":
         return "restaurant-outline";
+
       case "shopping":
         return "bag-handle-outline";
+
       default:
         return "wallet-outline";
     }
@@ -222,7 +228,8 @@ export default function HistorialScreen() {
           styles.header,
           {
             height: s(145),
-            paddingHorizontal: horizontalPadding,
+            paddingHorizontal:
+              horizontalPadding,
           },
         ]}
       >
@@ -237,7 +244,11 @@ export default function HistorialScreen() {
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
-          <Ionicons name="arrow-back" size={26 * scale} color="#FFFFFF" />
+          <Ionicons
+            name="arrow-back"
+            size={26 * scale}
+            color="#FFFFFF"
+          />
         </TouchableOpacity>
 
         <Text
@@ -256,17 +267,11 @@ export default function HistorialScreen() {
         style={[
           styles.whitePanel,
           {
-<<<<<<< HEAD
-            borderTopLeftRadius: 45 * scale,
-            borderTopRightRadius: 45 * scale,
-            paddingHorizontal: horizontalPadding,
-            paddingTop: 28 * scale,
-=======
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
-            paddingHorizontal: horizontalPadding,
+            paddingHorizontal:
+              horizontalPadding,
             paddingTop: s(28),
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
           },
         ]}
       >
@@ -398,7 +403,9 @@ export default function HistorialScreen() {
                       minHeight: s(70),
                     },
                   ]}
-                  onPress={() => toggleMovement(item)}
+                  onPress={() =>
+                    toggleMovement(item)
+                  }
                   activeOpacity={0.7}
                 >
                   <View
@@ -480,7 +487,8 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        {item.description || "No description"}
+                        {item.description ||
+                          "No description"}
                       </Text>
                     </View>
 
@@ -542,7 +550,10 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        ${item.roundingAmount.toFixed(2)}
+                        $
+                        {item.roundingAmount.toFixed(
+                          2
+                        )}
                       </Text>
                     </View>
 
@@ -597,43 +608,15 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        + ${item.savings.toFixed(2)}
+                        + $
+                        {item.savings.toFixed(2)}
                       </Text>
                     </View>
                   </View>
                 )}
               </View>
-<<<<<<< HEAD
-
-              <Text
-                style={[
-                  styles.movementName,
-                  {
-                    fontSize: 15 * scale,
-                  },
-                ]}
-                numberOfLines={1}
-              >
-                {item.name}
-              </Text>
-
-              <Text
-                style={[
-                  styles.movementAmount,
-                  {
-                    fontSize: 15 * scale,
-                    marginLeft: 8 * scale,
-                  },
-                ]}
-              >
-                + ${item.savings.toFixed(2)}
-              </Text>
-            </View>
-          )}
-=======
             );
           }}
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
         />
 
         <TouchableOpacity
@@ -688,12 +671,16 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            Total saved: ${totalSaved.toFixed(2)}
+            Total saved: $
+            {totalSaved.toFixed(2)}
           </Text>
         </View>
       </View>
 
-      <BottomNav small={isSmallScreen} scale={scale} />
+      <BottomNav
+        small={isSmallScreen}
+        scale={scale}
+      />
     </View>
   );
 }
@@ -709,24 +696,30 @@ function BottomNav({ small, scale }) {
         },
       ]}
     >
-      {NAV.map(([icon, type, routePath], index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.navItem}
-          onPress={() => router.push(routePath)}
-          activeOpacity={0.7}
-        >
-          {type === "ion" ? (
-            <Ionicons name={icon} size={small ? 25 : 31} color="#FFFFFF" />
-          ) : (
-            <MaterialCommunityIcons
-              name={icon}
-              size={small ? 28 : 34}
-              color="#FFFFFF"
-            />
-          )}
-        </TouchableOpacity>
-      ))}
+      {NAV.map(
+        ([icon, type, routePath], index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => router.push(routePath)}
+            activeOpacity={0.7}
+          >
+            {type === "ion" ? (
+              <Ionicons
+                name={icon}
+                size={small ? 25 : 31}
+                color="#FFFFFF"
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name={icon}
+                size={small ? 28 : 34}
+                color="#FFFFFF"
+              />
+            )}
+          </TouchableOpacity>
+        )
+      )}
     </View>
   );
 }
@@ -933,7 +926,6 @@ const styles = StyleSheet.create({
     color: "#172B3A",
     fontWeight: "700",
   },
-<<<<<<< HEAD
 
   bottom: {
     position: "absolute",
@@ -953,6 +945,3 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
-=======
-});
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a

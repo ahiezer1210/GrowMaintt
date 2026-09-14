@@ -208,12 +208,16 @@ export default function NotificationsScreen() {
   };
 
   const volver = () => {
-    if (from === "/profile") {
+    if (from === "/historial") {
+      router.push("/historial");
+    } else if (from === "/profile") {
       router.push("/profile");
     } else if (from === "/Edit_profile") {
       router.push("/Edit_profile");
     } else if (from === "/settings") {
       router.push("/settings");
+    } else if (from === "/backup") {
+      router.push("/backup");
     } else if (from === "/linkeddevices") {
       router.push("/linkeddevices");
     } else if (from === "/logoutalldevices") {

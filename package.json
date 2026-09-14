@@ -20,7 +20,6 @@
     "expo-constants": "~57.0.17",
     "expo-device": "~57.0.2",
     "expo-font": "~57.0.3",
-<<<<<<< HEAD
     "expo-haptics": "~57.0.3",
     "expo-image": "~57.0.5",
     "expo-image-picker": "~57.0.17",
@@ -29,16 +28,6 @@
     "expo-router": "~57.0.21",
     "expo-secure-store": "~57.0.4",
     "expo-splash-screen": "~57.0.9",
-=======
-    "expo-haptics": "~57.0.2",
-    "expo-image": "~57.0.4",
-    "expo-image-picker": "~57.0.16",
-    "expo-linking": "~57.0.9",
-    "expo-location": "~57.0.16",
-    "expo-router": "~57.0.19",
-    "expo-secure-store": "~57.0.3",
-    "expo-splash-screen": "~57.0.8",
->>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
     "expo-status-bar": "~57.0.1",
     "expo-symbols": "~57.0.3",
     "expo-system-ui": "~57.0.4",
