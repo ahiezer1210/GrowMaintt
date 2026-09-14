@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { signOut } from "firebase/auth";
 import { useLayoutEffect } from "react";
 import {
@@ -39,6 +39,8 @@ const navItems = [
 
 export default function LogoutScreen({ navigation }) {
   const { width } = useWindowDimensions();
+
+  const { from } = useLocalSearchParams();
 
   const small = width < 350;
   const tablet = width >= 600;
@@ -81,9 +83,17 @@ export default function LogoutScreen({ navigation }) {
     router.push({
       pathname: "/notifications",
       params: {
-        from: "/signout",
+        from: "/logout",
       },
     });
+  };
+
+  const volver = () => {
+    if (from === "/profile") {
+      router.push("/profile");
+    } else {
+      router.push("/settings");
+    }
   };
 
   const logout = () => {
@@ -191,7 +201,7 @@ export default function LogoutScreen({ navigation }) {
                 ],
               },
             ]}
-            onPress={() => router.push("/settings")}
+            onPress={volver}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons

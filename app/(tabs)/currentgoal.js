@@ -204,38 +204,40 @@ export default function SavingsGoalsScreen() {
     }
   };
 
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/currentgoal",
+      },
+    });
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#0b1624"
+        backgroundColor="#081023"
       />
 
+      {/* HEADER */}
       <View
         style={[
           styles.header,
           {
-            height: s(90),
             paddingHorizontal: horizontalPadding,
           },
         ]}
       >
         <TouchableOpacity
+          style={styles.backButton}
           onPress={() => router.back()}
-          style={[
-            styles.backButton,
-            {
-              width: s(42),
-              height: s(42),
-              borderRadius: s(21),
-              marginRight: s(10),
-            },
-          ]}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={s(25)}
-            color="#fff"
+            size={35 * scale}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
 
@@ -243,570 +245,632 @@ export default function SavingsGoalsScreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(22),
+              fontSize: 25 * scale,
             },
           ]}
+          numberOfLines={1}
         >
           Savings Goals
         </Text>
+
+        <TouchableOpacity
+          style={styles.notificationButton}
+          onPress={abrirNotificaciones}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={35 * scale}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={[
-          styles.scrollContent,
+      {/* CARD BLANCA */}
+      <View
+        style={[
+          styles.content,
           {
-            paddingHorizontal: horizontalPadding,
-            paddingTop: s(20),
-            paddingBottom: s(40),
-            borderTopLeftRadius: s(35),
-            borderTopRightRadius: s(35),
+            borderTopLeftRadius: 35 * scale,
+            borderTopRightRadius: 35 * scale,
           },
         ]}
       >
-        {!hasGoals ? (
-          <View
-            style={[
-              styles.noGoalsContainer,
-              {
-                paddingVertical: s(30),
-              },
-            ]}
-          >
-            <Text
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: horizontalPadding,
+              paddingTop: s(20),
+              paddingBottom: s(110),
+            },
+          ]}
+        >
+          {!hasGoals ? (
+            <View
               style={[
-                styles.noGoalsText,
+                styles.noGoalsContainer,
                 {
-                  fontSize: s(16),
+                  paddingVertical: s(30),
                 },
               ]}
             >
-              No goals
-            </Text>
-          </View>
-        ) : (
-          <>
-            {mainGoal && (
-              <TouchableOpacity
-                activeOpacity={0.9}
-                onPress={() =>
-                  toggleGoal(mainGoal.id)
-                }
+              <Text
+                style={[
+                  styles.noGoalsText,
+                  {
+                    fontSize: s(16),
+                  },
+                ]}
               >
-                <View
-                  style={[
-                    styles.mainGoalCard,
-                    {
-                      borderRadius: s(25),
-                      padding: s(22),
-                      marginBottom: s(30),
-                    },
-                  ]}
+                No goals
+              </Text>
+            </View>
+          ) : (
+            <>
+              {mainGoal && (
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={() =>
+                    toggleGoal(mainGoal.id)
+                  }
                 >
-                  <View style={styles.mainGoalHeader}>
-                    <View
-                      style={{
-                        flex: 1,
-                        marginRight: s(10),
-                      }}
-                    >
-                      <Text
-                        style={[
-                          styles.mainGoalLabel,
-                          {
-                            fontSize: s(13),
-                            marginBottom: s(4),
-                          },
-                        ]}
-                      >
-                        MAIN GOAL
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.mainGoalTitle,
-                          {
-                            fontSize: s(27),
-                          },
-                        ]}
-                        numberOfLines={2}
-                      >
-                        {mainGoal.goalName}
-                      </Text>
-                    </View>
-
-                    <MaterialCommunityIcons
-                      name={
-                        expandedGoal === mainGoal.id
-                          ? "chevron-up"
-                          : "chevron-down"
-                      }
-                      size={s(25)}
-                      color="#fff"
-                    />
-                  </View>
-
                   <View
                     style={[
-                      styles.amountRow,
+                      styles.mainGoalCard,
                       {
-                        marginTop: s(25),
+                        borderRadius: s(25),
+                        padding: s(22),
+                        marginBottom: s(30),
                       },
                     ]}
                   >
-                    <View>
-                      <Text
-                        style={[
-                          styles.amountLabel,
-                          {
-                            fontSize: s(12),
-                          },
-                        ]}
-                      >
-                        SAVED
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.savedAmount,
-                          {
-                            fontSize: s(24),
-                            marginTop: s(3),
-                          },
-                        ]}
-                      >
-                        ${mainSaved.toFixed(2)}
-                      </Text>
-                    </View>
-
-                    <View
-                      style={styles.targetContainer}
-                    >
-                      <Text
-                        style={[
-                          styles.amountLabel,
-                          {
-                            fontSize: s(12),
-                          },
-                        ]}
-                      >
-                        TARGET
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.targetAmount,
-                          {
-                            fontSize: s(18),
-                            marginTop: s(3),
-                          },
-                        ]}
-                      >
-                        ${mainTarget.toFixed(2)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.progressBackground,
-                      {
-                        height: s(8),
-                        borderRadius: s(10),
-                        marginTop: s(20),
-                      },
-                    ]}
-                  >
-                    <View
-                      style={[
-                        styles.progressBar,
-                        {
-                          width: `${progress}%`,
-                          borderRadius: s(10),
-                        },
-                      ]}
-                    />
-                  </View>
-
-                  <View
-                    style={[
-                      styles.progressInfo,
-                      {
-                        marginTop: s(8),
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.progressText,
-                        {
-                          fontSize: s(12),
-                        },
-                      ]}
-                    >
-                      {progress}% completed
-                    </Text>
-
-                    <Text
-                      style={[
-                        styles.progressText,
-                        {
-                          fontSize: s(12),
-                        },
-                      ]}
-                    >
-                      ${remaining.toFixed(2)} left
-                    </Text>
-                  </View>
-
-                  <Text
-                    style={[
-                      styles.deadline,
-                      {
-                        fontSize: s(12),
-                        marginTop: s(15),
-                      },
-                    ]}
-                  >
-                    Deadline:{" "}
-                    {mainGoal.endDate || "No deadline"}
-                  </Text>
-
-                  {expandedGoal === mainGoal.id && (
-                    <View
-                      style={[
-                        styles.expandedContent,
-                        {
-                          marginTop: s(15),
-                          paddingTop: s(15),
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.descriptionTitle,
-                          {
-                            fontSize: s(14),
-                            marginBottom: s(5),
-                          },
-                        ]}
-                      >
-                        Description
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.descriptionText,
-                          {
-                            fontSize: s(13),
-                            marginBottom: s(15),
-                          },
-                        ]}
-                      >
-                        {mainGoal.description ||
-                          "No description"}
-                      </Text>
-
-                      <Text
-                        style={[
-                          styles.addMoneyTitle,
-                          {
-                            fontSize: s(14),
-                            marginBottom: s(8),
-                          },
-                        ]}
-                      >
-                        Add amount
-                      </Text>
-
-                      <TextInput
-                        style={[
-                          styles.addMoneyInput,
-                          {
-                            fontSize: s(14),
-                            borderRadius: s(12),
-                            padding: s(12),
-                            marginBottom: s(10),
-                          },
-                        ]}
-                        placeholder="Enter amount"
-                        placeholderTextColor="#999"
-                        keyboardType="decimal-pad"
-                        value={abono}
-                        onChangeText={setAbono}
-                      />
-
-                      <TouchableOpacity
-                        style={[
-                          styles.addMoneyButton,
-                          {
-                            borderRadius: s(20),
-                            height: s(42),
-                          },
-                        ]}
-                        onPress={() =>
-                          handleAddMoney(mainGoal)
-                        }
-                        disabled={addingMoney}
+                    <View style={styles.mainGoalHeader}>
+                      <View
+                        style={{
+                          flex: 1,
+                          marginRight: s(10),
+                        }}
                       >
                         <Text
                           style={[
-                            styles.addMoneyButtonText,
+                            styles.mainGoalLabel,
                             {
-                              fontSize: s(14),
+                              fontSize: s(13),
+                              marginBottom: s(4),
                             },
                           ]}
                         >
-                          {addingMoney
-                            ? "Adding..."
-                            : "Add amount"}
+                          MAIN GOAL
                         </Text>
-                      </TouchableOpacity>
+
+                        <Text
+                          style={[
+                            styles.mainGoalTitle,
+                            {
+                              fontSize: s(27),
+                            },
+                          ]}
+                          numberOfLines={2}
+                        >
+                          {mainGoal.goalName}
+                        </Text>
+                      </View>
+
+                      <MaterialCommunityIcons
+                        name={
+                          expandedGoal === mainGoal.id
+                            ? "chevron-up"
+                            : "chevron-down"
+                        }
+                        size={s(25)}
+                        color="#fff"
+                      />
                     </View>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
 
-            {savedgoal.length > 0 && (
-              <>
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      fontSize: s(19),
-                      marginBottom: s(15),
-                    },
-                  ]}
-                >
-                  My other goals
-                </Text>
+                    <View
+                      style={[
+                        styles.amountRow,
+                        {
+                          marginTop: s(25),
+                        },
+                      ]}
+                    >
+                      <View>
+                        <Text
+                          style={[
+                            styles.amountLabel,
+                            {
+                              fontSize: s(12),
+                            },
+                          ]}
+                        >
+                          SAVED
+                        </Text>
 
-                {savedgoal.map((goal) => {
-                  const target = Number(
-                    goal.targetAmount || 0
-                  );
+                        <Text
+                          style={[
+                            styles.savedAmount,
+                            {
+                              fontSize: s(24),
+                              marginTop: s(3),
+                            },
+                          ]}
+                        >
+                          ${mainSaved.toFixed(2)}
+                        </Text>
+                      </View>
 
-                  const saved = Number(
-                    goal.currentSavings || 0
-                  );
+                      <View
+                        style={styles.targetContainer}
+                      >
+                        <Text
+                          style={[
+                            styles.amountLabel,
+                            {
+                              fontSize: s(12),
+                            },
+                          ]}
+                        >
+                          TARGET
+                        </Text>
 
-                  const goalProgress =
-                    target > 0
-                      ? Math.min(
-                          100,
-                          Math.round(
-                            (saved / target) * 100
-                          )
-                        )
-                      : 0;
+                        <Text
+                          style={[
+                            styles.targetAmount,
+                            {
+                              fontSize: s(18),
+                              marginTop: s(3),
+                            },
+                          ]}
+                        >
+                          ${mainTarget.toFixed(2)}
+                        </Text>
+                      </View>
+                    </View>
 
-                  return (
-                    <TouchableOpacity
-                      key={goal.id}
-                      activeOpacity={0.9}
-                      onPress={() =>
-                        toggleGoal(goal.id)
-                      }
+                    <View
+                      style={[
+                        styles.progressBackground,
+                        {
+                          height: s(8),
+                          borderRadius: s(10),
+                          marginTop: s(20),
+                        },
+                      ]}
                     >
                       <View
                         style={[
-                          styles.otherGoalCard,
+                          styles.progressBar,
                           {
-                            borderRadius: s(18),
-                            padding: s(16),
-                            marginBottom: s(15),
+                            width: `${progress}%`,
+                            borderRadius: s(10),
                           },
-                          expandedGoal === goal.id &&
-                            styles.expandedOtherGoal,
+                        ]}
+                      />
+                    </View>
+
+                    <View
+                      style={[
+                        styles.progressInfo,
+                        {
+                          marginTop: s(8),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.progressText,
+                          {
+                            fontSize: s(12),
+                          },
                         ]}
                       >
-                        <View
-                          style={styles.otherGoalTop}
+                        {progress}% completed
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.progressText,
+                          {
+                            fontSize: s(12),
+                          },
+                        ]}
+                      >
+                        ${remaining.toFixed(2)} left
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        styles.deadline,
+                        {
+                          fontSize: s(12),
+                          marginTop: s(15),
+                        },
+                      ]}
+                    >
+                      Deadline:{" "}
+                      {mainGoal.endDate || "No deadline"}
+                    </Text>
+
+                    {expandedGoal === mainGoal.id && (
+                      <View
+                        style={[
+                          styles.expandedContent,
+                          {
+                            marginTop: s(15),
+                            paddingTop: s(15),
+                          },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.descriptionTitle,
+                            {
+                              fontSize: s(14),
+                              marginBottom: s(5),
+                            },
+                          ]}
                         >
-                          <View
+                          Description
+                        </Text>
+
+                        <Text
+                          style={[
+                            styles.descriptionText,
+                            {
+                              fontSize: s(13),
+                              marginBottom: s(15),
+                            },
+                          ]}
+                        >
+                          {mainGoal.description ||
+                            "No description"}
+                        </Text>
+
+                        <Text
+                          style={[
+                            styles.addMoneyTitle,
+                            {
+                              fontSize: s(14),
+                              marginBottom: s(8),
+                            },
+                          ]}
+                        >
+                          Add amount
+                        </Text>
+
+                        <TextInput
+                          style={[
+                            styles.addMoneyInput,
+                            {
+                              fontSize: s(14),
+                              borderRadius: s(12),
+                              padding: s(12),
+                              marginBottom: s(10),
+                            },
+                          ]}
+                          placeholder="Enter amount"
+                          placeholderTextColor="#999"
+                          keyboardType="decimal-pad"
+                          value={abono}
+                          onChangeText={setAbono}
+                        />
+
+                        <TouchableOpacity
+                          style={[
+                            styles.addMoneyButton,
+                            {
+                              borderRadius: s(20),
+                              height: s(42),
+                            },
+                          ]}
+                          onPress={() =>
+                            handleAddMoney(mainGoal)
+                          }
+                          disabled={addingMoney}
+                        >
+                          <Text
                             style={[
-                              styles.goalIconContainer,
+                              styles.addMoneyButtonText,
                               {
-                                width: s(48),
-                                height: s(48),
-                                borderRadius: s(15),
-                                marginRight: s(13),
+                                fontSize: s(14),
                               },
                             ]}
                           >
+                            {addingMoney
+                              ? "Adding..."
+                              : "Add amount"}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                </TouchableOpacity>
+              )}
+
+              {savedgoal.length > 0 && (
+                <>
+                  <Text
+                    style={[
+                      styles.sectionTitle,
+                      {
+                        fontSize: s(19),
+                        marginBottom: s(15),
+                      },
+                    ]}
+                  >
+                    My other goals
+                  </Text>
+
+                  {savedgoal.map((goal) => {
+                    const target = Number(
+                      goal.targetAmount || 0
+                    );
+
+                    const saved = Number(
+                      goal.currentSavings || 0
+                    );
+
+                    const goalProgress =
+                      target > 0
+                        ? Math.min(
+                            100,
+                            Math.round(
+                              (saved / target) * 100
+                            )
+                          )
+                        : 0;
+
+                    return (
+                      <TouchableOpacity
+                        key={goal.id}
+                        activeOpacity={0.9}
+                        onPress={() =>
+                          toggleGoal(goal.id)
+                        }
+                      >
+                        <View
+                          style={[
+                            styles.otherGoalCard,
+                            {
+                              borderRadius: s(18),
+                              padding: s(16),
+                              marginBottom: s(15),
+                            },
+                            expandedGoal === goal.id &&
+                              styles.expandedOtherGoal,
+                          ]}
+                        >
+                          <View
+                            style={styles.otherGoalTop}
+                          >
+                            <View
+                              style={[
+                                styles.goalIconContainer,
+                                {
+                                  width: s(48),
+                                  height: s(48),
+                                  borderRadius: s(15),
+                                  marginRight: s(13),
+                                },
+                              ]}
+                            >
+                              <MaterialCommunityIcons
+                                name={
+                                  goal.icon ||
+                                  "wallet-outline"
+                                }
+                                size={s(24)}
+                                color="#0b1624"
+                              />
+                            </View>
+
+                            <View
+                              style={styles.otherGoalInfo}
+                            >
+                              <Text
+                                style={[
+                                  styles.otherGoalTitle,
+                                  {
+                                    fontSize: s(16),
+                                    marginBottom: s(4),
+                                  },
+                                ]}
+                                numberOfLines={2}
+                              >
+                                {goal.goalName}
+                              </Text>
+
+                              <Text
+                                style={[
+                                  styles.otherGoalAmount,
+                                  {
+                                    fontSize: s(13),
+                                  },
+                                ]}
+                              >
+                                ${saved.toFixed(2)} / $
+                                {target.toFixed(2)}
+                              </Text>
+                            </View>
+
                             <MaterialCommunityIcons
                               name={
-                                goal.icon ||
-                                "wallet-outline"
+                                expandedGoal === goal.id
+                                  ? "chevron-up"
+                                  : "chevron-down"
                               }
-                              size={s(24)}
+                              size={s(23)}
                               color="#0b1624"
                             />
                           </View>
 
                           <View
-                            style={styles.otherGoalInfo}
+                            style={[
+                              styles.otherProgressBackground,
+                              {
+                                height: s(6),
+                                borderRadius: s(10),
+                                marginTop: s(13),
+                              },
+                            ]}
                           >
-                            <Text
+                            <View
                               style={[
-                                styles.otherGoalTitle,
+                                styles.otherProgressBar,
                                 {
-                                  fontSize: s(16),
-                                  marginBottom: s(4),
+                                  width: `${goalProgress}%`,
+                                  borderRadius: s(10),
                                 },
                               ]}
-                              numberOfLines={2}
-                            >
-                              {goal.goalName}
-                            </Text>
-
-                            <Text
-                              style={[
-                                styles.otherGoalAmount,
-                                {
-                                  fontSize: s(13),
-                                },
-                              ]}
-                            >
-                              ${saved.toFixed(2)} / $
-                              {target.toFixed(2)}
-                            </Text>
+                            />
                           </View>
 
-                          <MaterialCommunityIcons
-                            name={
-                              expandedGoal === goal.id
-                                ? "chevron-up"
-                                : "chevron-down"
-                            }
-                            size={s(23)}
-                            color="#0b1624"
-                          />
-                        </View>
-
-                        <View
-                          style={[
-                            styles.otherProgressBackground,
-                            {
-                              height: s(6),
-                              borderRadius: s(10),
-                              marginTop: s(13),
-                            },
-                          ]}
-                        >
-                          <View
-                            style={[
-                              styles.otherProgressBar,
-                              {
-                                width: `${goalProgress}%`,
-                                borderRadius: s(10),
-                              },
-                            ]}
-                          />
-                        </View>
-
-                        {expandedGoal === goal.id && (
-                          <View
-                            style={[
-                              styles.expandedContent,
-                              {
-                                marginTop: s(15),
-                                paddingTop: s(15),
-                              },
-                            ]}
-                          >
-                            <Text
+                          {expandedGoal === goal.id && (
+                            <View
                               style={[
-                                styles.descriptionTitle,
+                                styles.expandedContent,
                                 {
-                                  fontSize: s(14),
-                                  marginBottom: s(5),
+                                  marginTop: s(15),
+                                  paddingTop: s(15),
                                 },
                               ]}
-                            >
-                              Description
-                            </Text>
-
-                            <Text
-                              style={[
-                                styles.descriptionText,
-                                {
-                                  fontSize: s(13),
-                                  marginBottom: s(15),
-                                },
-                              ]}
-                            >
-                              {goal.description ||
-                                "No description"}
-                            </Text>
-
-                            <Text
-                              style={[
-                                styles.addMoneyTitle,
-                                {
-                                  fontSize: s(14),
-                                  marginBottom: s(8),
-                                },
-                              ]}
-                            >
-                              Add amount
-                            </Text>
-
-                            <TextInput
-                              style={[
-                                styles.addMoneyInput,
-                                {
-                                  fontSize: s(14),
-                                  borderRadius: s(12),
-                                  padding: s(12),
-                                  marginBottom: s(10),
-                                },
-                              ]}
-                              placeholder="Enter amount"
-                              placeholderTextColor="#999"
-                              keyboardType="decimal-pad"
-                              value={abono}
-                              onChangeText={setAbono}
-                            />
-
-                            <TouchableOpacity
-                              style={[
-                                styles.addMoneyButton,
-                                {
-                                  borderRadius: s(20),
-                                  height: s(42),
-                                },
-                              ]}
-                              onPress={() =>
-                                handleAddMoney(goal)
-                              }
-                              disabled={addingMoney}
                             >
                               <Text
                                 style={[
-                                  styles.addMoneyButtonText,
+                                  styles.descriptionTitle,
                                   {
                                     fontSize: s(14),
+                                    marginBottom: s(5),
                                   },
                                 ]}
                               >
-                                {addingMoney
-                                  ? "Adding..."
-                                  : "Add amount"}
+                                Description
                               </Text>
-                            </TouchableOpacity>
-                          </View>
-                        )}
-                      </View>
-                    </TouchableOpacity>
-                  );
-                })}
-              </>
-            )}
-          </>
-        )}
-      </ScrollView>
+
+                              <Text
+                                style={[
+                                  styles.descriptionText,
+                                  {
+                                    fontSize: s(13),
+                                    marginBottom: s(15),
+                                  },
+                                ]}
+                              >
+                                {goal.description ||
+                                  "No description"}
+                              </Text>
+
+                              <Text
+                                style={[
+                                  styles.addMoneyTitle,
+                                  {
+                                    fontSize: s(14),
+                                    marginBottom: s(8),
+                                  },
+                                ]}
+                              >
+                                Add amount
+                              </Text>
+
+                              <TextInput
+                                style={[
+                                  styles.addMoneyInput,
+                                  {
+                                    fontSize: s(14),
+                                    borderRadius: s(12),
+                                    padding: s(12),
+                                    marginBottom: s(10),
+                                  },
+                                ]}
+                                placeholder="Enter amount"
+                                placeholderTextColor="#999"
+                                keyboardType="decimal-pad"
+                                value={abono}
+                                onChangeText={setAbono}
+                              />
+
+                              <TouchableOpacity
+                                style={[
+                                  styles.addMoneyButton,
+                                  {
+                                    borderRadius: s(20),
+                                    height: s(42),
+                                  },
+                                ]}
+                                onPress={() =>
+                                  handleAddMoney(goal)
+                                }
+                                disabled={addingMoney}
+                              >
+                                <Text
+                                  style={[
+                                    styles.addMoneyButtonText,
+                                    {
+                                      fontSize: s(14),
+                                    },
+                                  ]}
+                                >
+                                  {addingMoney
+                                    ? "Adding..."
+                                    : "Add amount"}
+                                </Text>
+                              </TouchableOpacity>
+                            </View>
+                          )}
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </>
+              )}
+            </>
+          )}
+        </ScrollView>
+      </View>
+
+      {/* NAVBAR */}
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            height: isSmallScreen
+              ? 60
+              : isTablet
+              ? 65 * scale
+              : 65,
+            borderTopLeftRadius: 78 * scale,
+          },
+        ]}
+      >
+        {[
+          ["home-outline", "/home"],
+          ["chart-box-outline", "/historial"],
+          ["swap-horizontal", "/expensesManagement"],
+          ["layers-outline", "/currentgoal"],
+          ["account-outline", "/profile"],
+        ].map(([icon, route], index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => router.push(route)}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name={icon}
+              size={
+                icon === "swap-horizontal"
+                  ? 37 * scale
+                  : 35 * scale
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }
@@ -814,27 +878,47 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0b1624",
+    backgroundColor: "#081023",
   },
 
   header: {
+    height: 75,
+    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#0b1624",
+    backgroundColor: "#081023",
   },
 
   backButton: {
+    width: 45,
+    height: 45,
     alignItems: "center",
     justifyContent: "center",
   },
 
   headerTitle: {
-    color: "#fff",
-    fontWeight: "bold",
+    flex: 1,
+    textAlign: "center",
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 25,
+  },
+
+  notificationButton: {
+    width: 45,
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  content: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
   },
 
   scrollContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     minHeight: "100%",
   },
 
@@ -998,5 +1082,24 @@ const styles = StyleSheet.create({
   noGoalsText: {
     color: "#6b7280",
     fontWeight: "bold",
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

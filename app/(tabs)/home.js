@@ -35,15 +35,15 @@ const ACTIONS = [
   ["card-outline", "Register\nexpenses", "ion", "/registerexpenses"],
   ["book-outline", "Register\ngoals", "ion", "/registergoals"],
   ["trending-up-outline", "Investments", "ion", "/investments"],
-  ["hand-coin-outline", "Points\nExchange", "material", "/PointsExchange"],
+  ["hand-coin-outline", "Points\nExchange", "material", "/pointsExchange"],
 ];
 
 const NAV = [
-  ["home-outline", "ion", "/"],
-  ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/ExpensesManagement"],
-  ["layers-outline", "material", "/currentgoal"],
-  ["person-outline", "ion", "/Profile"],
+  ["home-outline", "/home"],
+  ["chart-box-outline", "/historial"],
+  ["swap-horizontal", "/expensesManagement"],
+  ["layers-outline", "/currentgoal"],
+  ["account-outline", "/profile"],
 ];
 
 const getField = (item, fields) => {
@@ -1005,10 +1005,12 @@ function Header({
         style={[
           styles.notification,
           {
-            width: s(52),
-            height: s(52),
-            borderRadius:
-              s(30),
+            transform: [
+              {
+                translateY:
+                  4 * scale,
+              },
+            ],
           },
         ]}
         onPress={() =>
@@ -1016,13 +1018,12 @@ function Header({
             "/notifications"
           )
         }
+        activeOpacity={0.7}
       >
-        <Ionicons
-          name="notifications-outline"
-          size={s(29)}
-          color={
-            COLORS.white
-          }
+        <MaterialCommunityIcons
+          name="bell-circle-outline"
+          size={37 * scale}
+          color={COLORS.white}
         />
 
         {hasNotification && (
@@ -1497,52 +1498,33 @@ function BottomNav({
   return (
     <View
       style={[
-        styles.bottom,
+        styles.bottomBar,
         {
-          height: s(65),
+          height: 65 * scale,
           borderTopLeftRadius:
-            s(78),
+            78 * scale,
         },
       ]}
     >
       {NAV.map(
-        (
-          [
-            icon,
-            type,
-            route,
-          ],
-          index
-        ) => (
+        ([icon, route], index) => (
           <TouchableOpacity
             key={index}
-            style={
-              styles.navItem
-            }
+            style={styles.navItem}
             onPress={() =>
-              router.push(
-                route
-              )
+              router.push(route)
             }
+            activeOpacity={0.7}
           >
-            {type ===
-            "ion" ? (
-              <Ionicons
-                name={icon}
-                size={s(31)}
-                color={
-                  COLORS.white
-                }
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name={icon}
-                size={s(34)}
-                color={
-                  COLORS.white
-                }
-              />
-            )}
+            <MaterialCommunityIcons
+              name={icon}
+              size={
+                icon === "swap-horizontal"
+                  ? 37 * scale
+                  : 35 * scale
+              }
+              color={COLORS.white}
+            />
           </TouchableOpacity>
         )
       )}
@@ -1598,8 +1580,6 @@ const styles = StyleSheet.create({
   },
 
   notification: {
-    backgroundColor:
-      COLORS.cyan,
     alignItems: "center",
     justifyContent:
       "center",
@@ -1808,24 +1788,22 @@ const styles = StyleSheet.create({
     color: COLORS.gray,
   },
 
-  bottom: {
+  bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor:
-      COLORS.cyan,
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent:
-      "space-around",
+    justifyContent: "space-around",
     overflow: "hidden",
   },
 
   navItem: {
     flex: 1,
+    height: "100%",
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 });

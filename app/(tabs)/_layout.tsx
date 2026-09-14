@@ -1,41 +1,23 @@
-﻿import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
+import { Stack } from "expo-router";
+import { NavigationHistoryProvider } from "../../context/NavigationHistoryContext";
+import { PeriodProvider } from "../../context/PeriodContext";
 
-export default function TabLayout() {
+export default function RootLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#007AFF",
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen
-        name="home"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="home"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
+    <PeriodProvider>
+      <NavigationHistoryProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="(tabs)"
+            options={{ headerShown: false }}
+          />
 
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons
-              name="person"
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-      />
-    </Tabs>
+          <Stack.Screen
+            name="modal"
+            options={{ presentation: "modal" }}
+          />
+        </Stack>
+      </NavigationHistoryProvider>
+    </PeriodProvider>
   );
 }

@@ -1,9 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   collection,
   onSnapshot,
-  query,
   orderBy,
+  query,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -16,6 +17,14 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
+
+const NAV = [
+  ["home-outline", "ion", "/home"],
+  ["bar-chart-outline", "ion", "/historial"],
+  ["swap-horizontal", "material", "/expensesManagement"],
+  ["layers-outline", "material", "/currentgoal"],
+  ["person-outline", "ion", "/profile"],
+];
 
 export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
@@ -74,7 +83,10 @@ export default function HistorialScreen() {
           }))
           .filter((saving) => saving.uid === user.uid);
 
-        const expensesRef = collection(db, "Registro de gastos");
+        const expensesRef = collection(
+          db,
+          "Registro de gastos"
+        );
 
         const unsubscribeExpenses = onSnapshot(
           expensesRef,
@@ -84,51 +96,58 @@ export default function HistorialScreen() {
                 id: document.id,
                 ...document.data(),
               }))
-              .filter((expense) => expense.uid === user.uid);
-
-            const combinedMovements = savingsData.map((saving) => {
-              const expense = expensesData.find(
-                (item) => item.id === saving.expenseId
+              .filter(
+                (expense) => expense.uid === user.uid
               );
 
-              return {
-                id: saving.id,
-                name:
-                  saving.category ||
-                  expense?.category ||
-                  "Savings",
-                type: getMovementType(
-                  saving.category ||
+            const combinedMovements = savingsData.map(
+              (saving) => {
+                const expense = expensesData.find(
+                  (item) =>
+                    item.id === saving.expenseId
+                );
+
+                return {
+                  id: saving.id,
+                  name:
+                    saving.category ||
                     expense?.category ||
-                    ""
-                ),
-                savings: Number(saving.amount || 0),
-                description:
-                  expense?.description ||
-                  saving.description ||
-                  "",
-                amount: Number(
-                  expense?.amount ??
-                    saving.originalAmount ??
-                    0
-                ),
-                roundingAmount: Number(
-                  expense?.roundingAmount ??
-                    saving.roundingAmount ??
-                    0
-                ),
-                date:
-                  expense?.date ||
-                  saving.date ||
-                  "",
-                expenseType:
-                  expense?.expenseType ||
-                  "",
-                isRecurrent:
-                  expense?.isRecurrent ||
-                  false,
-              };
-            });
+                    "Savings",
+                  type: getMovementType(
+                    saving.category ||
+                      expense?.category ||
+                      ""
+                  ),
+                  savings: Number(
+                    saving.amount || 0
+                  ),
+                  description:
+                    expense?.description ||
+                    saving.description ||
+                    "",
+                  amount: Number(
+                    expense?.amount ??
+                      saving.originalAmount ??
+                      0
+                  ),
+                  roundingAmount: Number(
+                    expense?.roundingAmount ??
+                      saving.roundingAmount ??
+                      0
+                  ),
+                  date:
+                    expense?.date ||
+                    saving.date ||
+                    "",
+                  expenseType:
+                    expense?.expenseType ||
+                    "",
+                  isRecurrent:
+                    expense?.isRecurrent ||
+                    false,
+                };
+              }
+            );
 
             setMovements(combinedMovements);
           },
@@ -177,15 +196,20 @@ export default function HistorialScreen() {
     switch (type) {
       case "coffee":
         return "cafe-outline";
+
       case "supermarket":
         return "cart-outline";
+
       case "cinema":
       case "movie":
         return "videocam-outline";
+
       case "restaurant":
         return "restaurant-outline";
+
       case "shopping":
         return "bag-handle-outline";
+
       default:
         return "wallet-outline";
     }
@@ -204,10 +228,29 @@ export default function HistorialScreen() {
           styles.header,
           {
             height: s(145),
-            paddingHorizontal: horizontalPadding,
+            paddingHorizontal:
+              horizontalPadding,
           },
         ]}
       >
+        <TouchableOpacity
+          style={[
+            styles.backButton,
+            {
+              left: 18 * scale,
+              top: 50 * scale,
+            },
+          ]}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="arrow-back"
+            size={26 * scale}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
+
         <Text
           style={[
             styles.headerTitle,
@@ -226,7 +269,8 @@ export default function HistorialScreen() {
           {
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
-            paddingHorizontal: horizontalPadding,
+            paddingHorizontal:
+              horizontalPadding,
             paddingTop: s(28),
           },
         ]}
@@ -359,7 +403,9 @@ export default function HistorialScreen() {
                       minHeight: s(70),
                     },
                   ]}
-                  onPress={() => toggleMovement(item)}
+                  onPress={() =>
+                    toggleMovement(item)
+                  }
                   activeOpacity={0.7}
                 >
                   <View
@@ -441,7 +487,8 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        {item.description || "No description"}
+                        {item.description ||
+                          "No description"}
                       </Text>
                     </View>
 
@@ -503,7 +550,10 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        ${item.roundingAmount.toFixed(2)}
+                        $
+                        {item.roundingAmount.toFixed(
+                          2
+                        )}
                       </Text>
                     </View>
 
@@ -558,7 +608,8 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        + ${item.savings.toFixed(2)}
+                        + $
+                        {item.savings.toFixed(2)}
                       </Text>
                     </View>
                   </View>
@@ -620,10 +671,55 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            Total saved: ${totalSaved.toFixed(2)}
+            Total saved: $
+            {totalSaved.toFixed(2)}
           </Text>
         </View>
       </View>
+
+      <BottomNav
+        small={isSmallScreen}
+        scale={scale}
+      />
+    </View>
+  );
+}
+
+function BottomNav({ small, scale }) {
+  return (
+    <View
+      style={[
+        styles.bottom,
+        {
+          height: 65 * scale,
+          borderTopLeftRadius: 78 * scale,
+        },
+      ]}
+    >
+      {NAV.map(
+        ([icon, type, routePath], index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => router.push(routePath)}
+            activeOpacity={0.7}
+          >
+            {type === "ion" ? (
+              <Ionicons
+                name={icon}
+                size={small ? 25 : 31}
+                color="#FFFFFF"
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name={icon}
+                size={small ? 28 : 34}
+                color="#FFFFFF"
+              />
+            )}
+          </TouchableOpacity>
+        )
+      )}
     </View>
   );
 }
@@ -689,6 +785,12 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
     textAlign: "center",
+  },
+
+  backButton: {
+    position: "absolute",
+    zIndex: 10,
+    padding: 8,
   },
 
   whitePanel: {
@@ -823,5 +925,23 @@ const styles = StyleSheet.create({
   bottomText: {
     color: "#172B3A",
     fontWeight: "700",
+  },
+
+  bottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#20A9D8",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
