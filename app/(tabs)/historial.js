@@ -1,4 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   FlatList,
@@ -27,9 +28,17 @@ const movements = [
   { id: "14", name: "Movie Theater", type: "cinema", savings: 1.7 },
 ];
 
+const NAV = [
+  ["home-outline", "ion", "/home"],
+  ["bar-chart-outline", "ion", "/historial"],
+  ["swap-horizontal", "material", "/ExpensesManagement"],
+  ["layers-outline", "material", "/currentgoal"],
+  ["person-outline", "ion", "/(tabs)/profile"],
+];
+
 export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -94,6 +103,20 @@ export default function HistorialScreen() {
           },
         ]}
       >
+        <TouchableOpacity
+          style={[
+            styles.backButton,
+            {
+              left: 18 * scale,
+              top: 50 * scale,
+            },
+          ]}
+          onPress={() => router.back()}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="arrow-back" size={26 * scale} color="#FFFFFF" />
+        </TouchableOpacity>
+
         <Text
           style={[
             styles.headerTitle,
@@ -112,7 +135,7 @@ export default function HistorialScreen() {
           {
             borderTopLeftRadius: 45 * scale,
             borderTopRightRadius: 45 * scale,
-            paddingHorizontal: 22 * scale,
+            paddingHorizontal: horizontalPadding,
             paddingTop: 28 * scale,
           },
         ]}
@@ -258,7 +281,7 @@ export default function HistorialScreen() {
                   styles.movementAmount,
                   {
                     fontSize: 15 * scale,
-                    marginLeft: 8  * scale,
+                    marginLeft: 8 * scale,
                   },
                 ]}
               >
@@ -320,6 +343,41 @@ export default function HistorialScreen() {
           </Text>
         </View>
       </View>
+
+      <BottomNav small={isSmallScreen} scale={scale} />
+    </View>
+  );
+}
+
+function BottomNav({ small, scale }) {
+  return (
+    <View
+      style={[
+        styles.bottom,
+        {
+          height: 65 * scale,
+          borderTopLeftRadius: 78 * scale,
+        },
+      ]}
+    >
+      {NAV.map(([icon, type, routePath], index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.navItem}
+          onPress={() => router.push(routePath)}
+          activeOpacity={0.7}
+        >
+          {type === "ion" ? (
+            <Ionicons name={icon} size={small ? 25 : 31} color="#FFFFFF" />
+          ) : (
+            <MaterialCommunityIcons
+              name={icon}
+              size={small ? 28 : 34}
+              color="#FFFFFF"
+            />
+          )}
+        </TouchableOpacity>
+      ))}
     </View>
   );
 }
@@ -341,6 +399,12 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "600",
     textAlign: "center",
+  },
+
+  backButton: {
+    position: "absolute",
+    zIndex: 10,
+    padding: 8,
   },
 
   whitePanel: {
@@ -445,5 +509,23 @@ const styles = StyleSheet.create({
   bottomText: {
     color: "#172B3A",
     fontWeight: "700",
+  },
+
+  bottom: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#20A9D8",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
