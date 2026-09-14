@@ -1,6 +1,17 @@
+<<<<<<< HEAD
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
+=======
+import { Ionicons } from "@expo/vector-icons";
+import {
+  collection,
+  onSnapshot,
+  query,
+  orderBy,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
+>>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
 import {
   FlatList,
   StatusBar,
@@ -10,23 +21,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-
-const movements = [
-  { id: "1", name: "Starbucks", type: "coffee", savings: 0.75 },
-  { id: "2", name: "Supermarket", type: "supermarket", savings: 1.0 },
-  { id: "3", name: "Cinema", type: "cinema", savings: 0.85 },
-  { id: "4", name: "McDonald's", type: "restaurant", savings: 1.25 },
-  { id: "5", name: "Walmart", type: "supermarket", savings: 1.5 },
-  { id: "6", name: "Coffee Shop", type: "coffee", savings: 2.0 },
-  { id: "7", name: "Netflix", type: "movie", savings: 0.65 },
-  { id: "8", name: "Target", type: "supermarket", savings: 1.1 },
-  { id: "9", name: "Restaurant", type: "restaurant", savings: 1.75 },
-  { id: "10", name: "Amazon", type: "shopping", savings: 1.35 },
-  { id: "11", name: "Shopping", type: "shopping", savings: 1.95 },
-  { id: "12", name: "Bakery", type: "coffee", savings: 0.95 },
-  { id: "13", name: "Grocery Store", type: "supermarket", savings: 1.4 },
-  { id: "14", name: "Movie Theater", type: "cinema", savings: 1.7 },
-];
+import { auth, db } from "../../firebaseConfig.js";
 
 const NAV = [
   ["home-outline", "ion", "/home"],
@@ -38,7 +33,14 @@ const NAV = [
 
 export default function HistorialScreen() {
   const [showAll, setShowAll] = useState(false);
+<<<<<<< HEAD
   const { width } = useWindowDimensions();
+=======
+  const [movements, setMovements] = useState([]);
+  const [selectedMovement, setSelectedMovement] = useState(null);
+
+  const { width, height } = useWindowDimensions();
+>>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -48,25 +50,146 @@ export default function HistorialScreen() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : isLargeScreen
+    ? 1.25
+    : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
+
+  const s = (size) => Math.round(size * scale);
+
+  useEffect(() => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      setMovements([]);
+      return;
+    }
+
+    const savingsRef = collection(db, "Ahorros");
+
+    const savingsQuery = query(
+      savingsRef,
+      orderBy("createdAt", "desc")
+    );
+
+    const unsubscribeSavings = onSnapshot(
+      savingsQuery,
+      (snapshot) => {
+        const savingsData = snapshot.docs
+          .map((document) => ({
+            id: document.id,
+            ...document.data(),
+          }))
+          .filter((saving) => saving.uid === user.uid);
+
+        const expensesRef = collection(db, "Registro de gastos");
+
+        const unsubscribeExpenses = onSnapshot(
+          expensesRef,
+          (expenseSnapshot) => {
+            const expensesData = expenseSnapshot.docs
+              .map((document) => ({
+                id: document.id,
+                ...document.data(),
+              }))
+              .filter((expense) => expense.uid === user.uid);
+
+            const combinedMovements = savingsData.map((saving) => {
+              const expense = expensesData.find(
+                (item) => item.id === saving.expenseId
+              );
+
+              return {
+                id: saving.id,
+                name:
+                  saving.category ||
+                  expense?.category ||
+                  "Savings",
+                type: getMovementType(
+                  saving.category ||
+                    expense?.category ||
+                    ""
+                ),
+                savings: Number(saving.amount || 0),
+                description:
+                  expense?.description ||
+                  saving.description ||
+                  "",
+                amount: Number(
+                  expense?.amount ??
+                    saving.originalAmount ??
+                    0
+                ),
+                roundingAmount: Number(
+                  expense?.roundingAmount ??
+                    saving.roundingAmount ??
+                    0
+                ),
+                date:
+                  expense?.date ||
+                  saving.date ||
+                  "",
+                expenseType:
+                  expense?.expenseType ||
+                  "",
+                isRecurrent:
+                  expense?.isRecurrent ||
+                  false,
+              };
+            });
+
+            setMovements(combinedMovements);
+          },
+          (error) => {
+            console.log(
+              "ERROR READING EXPENSES:",
+              error
+            );
+          }
+        );
+
+        return unsubscribeExpenses;
+      },
+      (error) => {
+        console.log(
+          "ERROR READING SAVINGS:",
+          error
+        );
+      }
+    );
+
+    return () => {
+      unsubscribeSavings();
+    };
+  }, []);
 
   const totalSaved = movements.reduce(
-    (total, movement) => total + movement.savings,
-    0,
+    (total, movement) =>
+      total + Number(movement.savings || 0),
+    0
   );
 
-  const visibleMovements = showAll ? movements : movements.slice(0, 6);
+  const visibleMovements = showAll
+    ? movements
+    : movements.slice(0, 6);
+
+  const toggleMovement = (movement) => {
+    if (selectedMovement?.id === movement.id) {
+      setSelectedMovement(null);
+    } else {
+      setSelectedMovement(movement);
+    }
+  };
 
   const getIcon = (type) => {
     switch (type) {
@@ -98,8 +221,8 @@ export default function HistorialScreen() {
         style={[
           styles.header,
           {
-            height: 145 * scale,
-            paddingHorizontal: 22 * scale,
+            height: s(145),
+            paddingHorizontal: horizontalPadding,
           },
         ]}
       >
@@ -121,7 +244,7 @@ export default function HistorialScreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: 24 * scale,
+              fontSize: s(24),
             },
           ]}
         >
@@ -133,10 +256,17 @@ export default function HistorialScreen() {
         style={[
           styles.whitePanel,
           {
+<<<<<<< HEAD
             borderTopLeftRadius: 45 * scale,
             borderTopRightRadius: 45 * scale,
             paddingHorizontal: horizontalPadding,
             paddingTop: 28 * scale,
+=======
+            borderTopLeftRadius: s(45),
+            borderTopRightRadius: s(45),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(28),
+>>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
           },
         ]}
       >
@@ -144,9 +274,9 @@ export default function HistorialScreen() {
           style={[
             styles.blueCard,
             {
-              height: 108 * scale,
-              borderRadius: 10 * scale,
-              paddingHorizontal: 18 * scale,
+              height: s(108),
+              borderRadius: s(10),
+              paddingHorizontal: s(18),
             },
           ]}
         >
@@ -154,13 +284,17 @@ export default function HistorialScreen() {
             style={[
               styles.walletBox,
               {
-                width: 82 * scale,
-                height: 82 * scale,
-                marginRight: 15 * scale,
+                width: s(82),
+                height: s(82),
+                marginRight: s(15),
               },
             ]}
           >
-            <Ionicons name="wallet-outline" size={48 * scale} color="#172B3A" />
+            <Ionicons
+              name="wallet-outline"
+              size={s(48)}
+              color="#172B3A"
+            />
           </View>
 
           <View style={styles.cardInfo}>
@@ -168,7 +302,7 @@ export default function HistorialScreen() {
               style={[
                 styles.cardTitle,
                 {
-                  fontSize: 15 * scale,
+                  fontSize: s(15),
                 },
               ]}
             >
@@ -179,7 +313,7 @@ export default function HistorialScreen() {
               style={[
                 styles.totalSaved,
                 {
-                  fontSize: 24 * scale,
+                  fontSize: s(24),
                 },
               ]}
             >
@@ -190,7 +324,7 @@ export default function HistorialScreen() {
               style={[
                 styles.keepSaving,
                 {
-                  fontSize: 13 * scale,
+                  fontSize: s(13),
                 },
               ]}
             >
@@ -203,18 +337,26 @@ export default function HistorialScreen() {
           style={[
             styles.divider,
             {
-              marginTop: 18 * scale,
-              marginBottom: 14 * scale,
+              marginTop: s(18),
+              marginBottom: s(14),
             },
           ]}
         />
 
-        <View style={styles.sectionHeader}>
+        <View
+          style={[
+            styles.sectionHeader,
+            {
+              paddingHorizontal: s(2),
+              marginBottom: s(3),
+            },
+          ]}
+        >
           <Text
             style={[
               styles.sectionTitle,
               {
-                fontSize: 17 * scale,
+                fontSize: s(17),
               },
             ]}
           >
@@ -225,7 +367,7 @@ export default function HistorialScreen() {
             style={[
               styles.sectionTitle,
               {
-                fontSize: 17 * scale,
+                fontSize: s(17),
               },
             ]}
           >
@@ -237,32 +379,231 @@ export default function HistorialScreen() {
           data={visibleMovements}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.movement,
-                {
-                  height: 70 * scale,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.movementIcon,
-                  {
-                    width: 58 * scale,
-                    height: 58 * scale,
-                    marginRight: 12 * scale,
-                  },
-                ]}
-              >
-                <Ionicons
-                  name={getIcon(item.type)}
-                  size={34 * scale}
-                  color="#172B3A"
-                />
+          contentContainerStyle={[
+            styles.list,
+            {
+              paddingBottom: s(2),
+            },
+          ]}
+          renderItem={({ item }) => {
+            const isSelected =
+              selectedMovement?.id === item.id;
+
+            return (
+              <View>
+                <TouchableOpacity
+                  style={[
+                    styles.movement,
+                    {
+                      minHeight: s(70),
+                    },
+                  ]}
+                  onPress={() => toggleMovement(item)}
+                  activeOpacity={0.7}
+                >
+                  <View
+                    style={[
+                      styles.movementIcon,
+                      {
+                        width: s(58),
+                        height: s(58),
+                        marginRight: s(12),
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={getIcon(item.type)}
+                      size={s(34)}
+                      color="#172B3A"
+                    />
+                  </View>
+
+                  <Text
+                    style={[
+                      styles.movementName,
+                      {
+                        fontSize: s(15),
+                      },
+                    ]}
+                    numberOfLines={1}
+                  >
+                    {item.name}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.movementAmount,
+                      {
+                        fontSize: s(15),
+                        marginLeft: s(8),
+                      },
+                    ]}
+                  >
+                    + ${item.savings.toFixed(2)}
+                  </Text>
+                </TouchableOpacity>
+
+                {isSelected && (
+                  <View
+                    style={[
+                      styles.details,
+                      {
+                        paddingHorizontal: s(12),
+                        paddingVertical: s(12),
+                      },
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Description
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        {item.description || "No description"}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Expense
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        ${item.amount.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Round-up to
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        ${item.roundingAmount.toFixed(2)}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.detailRow,
+                        {
+                          marginBottom: s(7),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Date
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailValue,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        {item.date || "No date"}
+                      </Text>
+                    </View>
+
+                    <View style={styles.detailRow}>
+                      <Text
+                        style={[
+                          styles.detailLabel,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        Savings
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.detailSavings,
+                          {
+                            fontSize: s(13),
+                          },
+                        ]}
+                      >
+                        + ${item.savings.toFixed(2)}
+                      </Text>
+                    </View>
+                  </View>
+                )}
               </View>
+<<<<<<< HEAD
 
               <Text
                 style={[
@@ -289,14 +630,18 @@ export default function HistorialScreen() {
               </Text>
             </View>
           )}
+=======
+            );
+          }}
+>>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a
         />
 
         <TouchableOpacity
           style={[
             styles.seeAll,
             {
-              paddingVertical: 10 * scale,
-              paddingRight: 4 * scale,
+              paddingVertical: s(10),
+              paddingRight: s(4),
             },
           ]}
           onPress={() => setShowAll(!showAll)}
@@ -306,8 +651,8 @@ export default function HistorialScreen() {
             style={[
               styles.seeAllText,
               {
-                fontSize: 15 * scale,
-                marginRight: 4 * scale,
+                fontSize: s(15),
+                marginRight: s(4),
               },
             ]}
           >
@@ -315,8 +660,12 @@ export default function HistorialScreen() {
           </Text>
 
           <Ionicons
-            name={showAll ? "chevron-up" : "arrow-forward"}
-            size={22 * scale}
+            name={
+              showAll
+                ? "chevron-up"
+                : "arrow-forward"
+            }
+            size={s(22)}
             color="#172B3A"
           />
         </TouchableOpacity>
@@ -325,9 +674,9 @@ export default function HistorialScreen() {
           style={[
             styles.bottomTotal,
             {
-              height: 42 * scale,
-              borderRadius: 8 * scale,
-              marginBottom: 8 * scale,
+              height: s(42),
+              borderRadius: s(8),
+              marginBottom: s(8),
             },
           ]}
         >
@@ -335,7 +684,7 @@ export default function HistorialScreen() {
             style={[
               styles.bottomText,
               {
-                fontSize: 15 * scale,
+                fontSize: s(15),
               },
             ]}
           >
@@ -380,6 +729,50 @@ function BottomNav({ small, scale }) {
       ))}
     </View>
   );
+}
+
+function getMovementType(category) {
+  const value = category.toLowerCase();
+
+  if (
+    value.includes("coffee") ||
+    value.includes("cafe")
+  ) {
+    return "coffee";
+  }
+
+  if (
+    value.includes("supermarket") ||
+    value.includes("grocery") ||
+    value.includes("market")
+  ) {
+    return "supermarket";
+  }
+
+  if (
+    value.includes("cinema") ||
+    value.includes("movie")
+  ) {
+    return "cinema";
+  }
+
+  if (
+    value.includes("restaurant") ||
+    value.includes("food") ||
+    value.includes("mcdonald")
+  ) {
+    return "restaurant";
+  }
+
+  if (
+    value.includes("shopping") ||
+    value.includes("amazon") ||
+    value.includes("store")
+  ) {
+    return "shopping";
+  }
+
+  return "wallet";
 }
 
 const styles = StyleSheet.create({
@@ -453,8 +846,6 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingHorizontal: 2,
-    marginBottom: 3,
   },
 
   sectionTitle: {
@@ -489,6 +880,38 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  details: {
+    backgroundColor: "#F3F4F5",
+    borderBottomWidth: 1,
+    borderBottomColor: "#EEEEEE",
+  },
+
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+
+  detailLabel: {
+    color: "#777777",
+    fontWeight: "600",
+    flex: 1,
+  },
+
+  detailValue: {
+    color: "#172B3A",
+    fontWeight: "600",
+    flex: 1.5,
+    textAlign: "right",
+  },
+
+  detailSavings: {
+    color: "#168AFF",
+    fontWeight: "700",
+    flex: 1.5,
+    textAlign: "right",
+  },
+
   seeAll: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -510,6 +933,7 @@ const styles = StyleSheet.create({
     color: "#172B3A",
     fontWeight: "700",
   },
+<<<<<<< HEAD
 
   bottom: {
     position: "absolute",
@@ -529,3 +953,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+=======
+});
+>>>>>>> 349b3c5810c493ba5e5ac84cb0ac139294ec6e3a

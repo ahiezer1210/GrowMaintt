@@ -14,14 +14,18 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
-import { auth, db } from "../../firebaseConfig.js";
+import { auth, db } from "../../firebaseConfig";
 import { getDeviceId } from "../../utils/device";
 import { getRealDeviceInfo } from "../../utils/deviceInfo";
 
@@ -30,6 +34,12 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { width } = useWindowDimensions();
+
+  const small = width < 360;
+  const tablet = width >= 600;
+  const horizontalPadding = tablet ? 50 : small ? 18 : 25;
 
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
@@ -47,15 +57,10 @@ export default function LoginScreen() {
       );
 
       const user = credential.user;
-
       const deviceId = await getDeviceId();
-
       const { deviceName, location } = await getRealDeviceInfo();
-
       const devicesRef = collection(db, "Users", user.uid, "devices");
-
       const deviceRef = doc(db, "Users", user.uid, "devices", deviceId);
-
       const deviceSnapshot = await getDoc(deviceRef);
 
       if (deviceSnapshot.exists()) {
@@ -74,7 +79,6 @@ export default function LoginScreen() {
       }
 
       const devicesSnapshot = await getDocs(devicesRef);
-
       const isFirstDevice = devicesSnapshot.empty;
 
       await setDoc(deviceRef, {
@@ -89,7 +93,6 @@ export default function LoginScreen() {
 
       if (isFirstDevice) {
         const userRef = doc(db, "Users", user.uid);
-
         await setDoc(
           userRef,
           {
@@ -99,7 +102,6 @@ export default function LoginScreen() {
         );
       } else {
         const alertsRef = collection(db, "Users", user.uid, "securityAlerts");
-
         await addDoc(alertsRef, {
           uid: user.uid,
           deviceId,
@@ -120,17 +122,14 @@ export default function LoginScreen() {
         case "auth/invalid-email":
           message = "The email address is not valid.";
           break;
-
         case "auth/user-not-found":
         case "auth/wrong-password":
         case "auth/invalid-credential":
           message = "Incorrect email or password.";
           break;
-
         case "auth/too-many-requests":
           message = "Too many attempts. Please try again later.";
           break;
-
         case "permission-denied":
           message = "You do not have permission to access this data.";
           break;
@@ -143,76 +142,87 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+
       <View style={styles.header}>
         <Image
           source={require("../../assets/images/logo.png")}
           style={styles.logo}
         />
-
         <Text style={styles.title}>Sign In</Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.label}>Email or Username</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your email"
-          placeholderTextColor="#ACADAD"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
-        <Text style={styles.label}>Password</Text>
-
-        <View style={styles.passwordBox}>
-          <TextInput
-            style={styles.password}
-            placeholder="Enter your password"
-            placeholderTextColor="#ACADAD"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity onPress={() => router.push("/forgotpassword")}>
-          <Text style={styles.forgot}>Forgot Password?</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.button, loading && { opacity: 0.7 }]}
-          onPress={handleSignIn}
-          disabled={loading}
+      <View style={styles.whiteContainer}>
+        <ScrollView
+          style={styles.whiteScroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: horizontalPadding,
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
-          {loading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text style={styles.buttonText}>Sign In</Text>
-          )}
-        </TouchableOpacity>
+          <View style={styles.card}>
+            <Text style={styles.label}>Email or Username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your email"
+              placeholderTextColor="#ACADAD"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
 
-        <View style={styles.register}>
-          <Text style={styles.account}>Don't have an account?</Text>
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordBox}>
+              <TextInput
+                style={styles.password}
+                placeholder="Enter your password"
+                placeholderTextColor="#ACADAD"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+              </TouchableOpacity>
+            </View>
 
-          <TouchableOpacity onPress={() => router.push("/register")}>
-            <Text style={styles.signup}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity onPress={() => router.push("/forgotpassword")}>
+              <Text style={styles.forgot}>Forgot Password?</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.7 }]}
+              onPress={handleSignIn}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" />
+              ) : (
+                <Text style={styles.buttonText}>Sign In</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.register}>
+              <Text style={styles.account}>Don't have an account?</Text>
+              <TouchableOpacity onPress={() => router.push("/register")}>
+                <Text style={styles.signup}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     backgroundColor: "#081023",
   },
@@ -221,6 +231,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 55,
     paddingBottom: 30,
+    backgroundColor: "#081023",
   },
 
   logo: {
@@ -236,13 +247,28 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  card: {
+  whiteContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
-    paddingHorizontal: 30,
+    overflow: "hidden",
+  },
+
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
     paddingTop: 40,
+    paddingBottom: 180,
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 40,
   },
 
   label: {
@@ -271,6 +297,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
+    marginBottom: 12,
   },
 
   password: {
@@ -285,7 +312,6 @@ const styles = StyleSheet.create({
   forgot: {
     textAlign: "right",
     color: "#25B7D3",
-    marginTop: 15,
     marginBottom: 25,
   },
 
@@ -295,6 +321,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 25,
   },
 
   buttonText: {
@@ -306,7 +333,6 @@ const styles = StyleSheet.create({
   register: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 25,
   },
 
   account: {

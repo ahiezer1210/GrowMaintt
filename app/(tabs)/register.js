@@ -5,6 +5,8 @@ import { doc, setDoc } from "firebase/firestore";
 import { useState } from "react";
 import {
   Alert,
+  SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -20,8 +22,17 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
+
+  const small = width < 360;
   const tablet = width >= 600;
+  const horizontalPadding = tablet ? 50 : small ? 18 : 25;
+  const titleFontSize = tablet ? 34 : 28;
+  const labelFontSize = tablet ? 16 : 14;
+  const inputHeight = tablet ? 58 : 50;
+  const passwordBoxHeight = tablet ? 56 : 48;
+  const buttonHeight = tablet ? 54 : 48;
+  const buttonFontSize = tablet ? 19 : 17;
 
   const registerusers = async () => {
     if (!username.trim() || !email.trim() || !password || !confirmpassword) {
@@ -64,7 +75,7 @@ export default function SignupScreen() {
       Alert.alert("Registration successfully", "", [
         {
           text: "Ok",
-          onPress: () => router.push("/home"),
+          onPress: () => router.push("/verificationage"),
         },
       ]);
     } catch (error) {
@@ -84,118 +95,166 @@ export default function SignupScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Register</Text>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.topContent}>
+        <View style={styles.header}>
+          <Text style={[styles.title, { fontSize: titleFontSize }]}>
+            Register
+          </Text>
+        </View>
       </View>
 
-      <View style={[styles.card, tablet && { paddingTop: 55 }]}>
-        <Text style={styles.label}>Username</Text>
+      <View style={styles.whiteContainer}>
+        <ScrollView
+          style={styles.whiteScroll}
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: horizontalPadding,
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.card}>
+            <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              Username
+            </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username"
-          value={username}
-          onChangeText={setUsername}
-          placeholderTextColor="#ACADAD"
-          autoCapitalize="none"
-        />
+            <TextInput
+              style={[styles.input, { height: inputHeight }]}
+              placeholder="Enter your username"
+              value={username}
+              onChangeText={setUsername}
+              placeholderTextColor="#ACADAD"
+              autoCapitalize="none"
+            />
 
-        <Text style={styles.label}>E-mail</Text>
+            <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              E-mail
+            </Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your E-mail"
-          value={email}
-          onChangeText={setEmail}
-          placeholderTextColor="#ACADAD"
-          autoCapitalize="none"
-          keybooardType="email-address"
-          autoCorrect={false}
-        />
+            <TextInput
+              style={[styles.input, { height: inputHeight }]}
+              placeholder="Enter your E-mail"
+              value={email}
+              onChangeText={setEmail}
+              placeholderTextColor="#ACADAD"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              autoCorrect={false}
+            />
 
-        <Text style={styles.label}>Password</Text>
+            <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              Password
+            </Text>
 
-        <View style={styles.passwordBox}>
-          <TextInput
-            style={styles.password}
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            placeholderTextColor="#ACADAD"
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+            <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+              <TextInput
+                style={styles.password}
+                placeholder="Enter your password"
+                value={password}
+                onChangeText={setPassword}
+                placeholderTextColor="#ACADAD"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+              </TouchableOpacity>
+            </View>
 
-        <Text style={styles.label}>Confirm Password</Text>
+            <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              Confirm Password
+            </Text>
 
-        <View style={styles.passwordBox}>
-          <TextInput
-            style={styles.password}
-            placeholder="Enter your password"
-            value={confirmpassword}
-            onChangeText={setConfirmPassword}
-            placeholderTextColor="#ACADAD"
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-            autoCorrect={false}
-          />
+            <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+              <TextInput
+                style={styles.password}
+                placeholder="Enter your password"
+                value={confirmpassword}
+                onChangeText={setConfirmPassword}
+                placeholderTextColor="#ACADAD"
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
 
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
-          </TouchableOpacity>
-        </View>
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity style={styles.button} onPress={registerusers}>
-          <Text style={styles.buttonText}>Next</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { height: buttonHeight }]}
+              onPress={registerusers}
+            >
+              <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>
+                Next
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safe: {
     flex: 1,
     backgroundColor: "#081023",
   },
 
+  topContent: {
+    backgroundColor: "#081023",
+    paddingHorizontal: 25,
+  },
+
   header: {
     alignItems: "center",
-    paddingTop: 55,
-    paddingBottom: 30,
+    paddingTop: 40,
+    paddingBottom: 20,
   },
 
   title: {
     color: "#FFFFFF",
-    fontSize: 28,
     fontWeight: "700",
   },
 
-  card: {
+  whiteContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
-    paddingHorizontal: 30,
-    paddingTop: 25,
+    overflow: "hidden",
+  },
+
+  whiteScroll: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
+  },
+
+  scrollContent: {
+    flexGrow: 1,
+    paddingTop: 40,
+    paddingBottom: 140,
+  },
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    paddingBottom: 40,
   },
 
   label: {
     color: "#081023",
-    fontSize: 14,
     fontWeight: "600",
     marginBottom: 10,
   },
 
   input: {
-    height: 50,
     backgroundColor: "#F3F4F5",
     borderRadius: 15,
     borderWidth: 1,
@@ -205,7 +264,6 @@ const styles = StyleSheet.create({
   },
 
   passwordBox: {
-    height: 48,
     backgroundColor: "#F3F4F5",
     borderRadius: 15,
     borderWidth: 1,
@@ -226,7 +284,6 @@ const styles = StyleSheet.create({
   },
 
   button: {
-    height: 48,
     backgroundColor: "#25B7D3",
     borderRadius: 18,
     justifyContent: "center",
@@ -237,6 +294,5 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 17,
   },
 });

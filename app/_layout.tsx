@@ -1,5 +1,4 @@
 import { Stack } from 'expo-router';
-
 import { PeriodProvider } from '../context/PeriodContext';
 
 export default function RootLayout() {
