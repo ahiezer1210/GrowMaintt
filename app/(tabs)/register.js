@@ -75,7 +75,7 @@ export default function SignupScreen() {
       Alert.alert("Registration successfully", "", [
         {
           text: "Ok",
-          onPress: () => router.push("/verificationage"),
+          onPress: () => router.push("/identityverification"),
         },
       ]);
     } catch (error) {
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingTop: 40,
-    paddingBottom: 140,
+    paddingBottom: 10,
   },
 
   card: {

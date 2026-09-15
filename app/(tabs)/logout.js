@@ -89,8 +89,12 @@ export default function LogoutScreen({ navigation }) {
   };
 
   const volver = () => {
-    if (from === "/profile") {
+    const origen = Array.isArray(from) ? from[0] : from;
+
+    if (origen === "/profile") {
       router.push("/profile");
+    } else if (origen === "/settings") {
+      router.push("/settings");
     } else {
       router.push("/settings");
     }

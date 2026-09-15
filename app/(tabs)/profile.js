@@ -109,7 +109,6 @@ export default function Profile() {
                 </Text>
 
                 <TouchableOpacity
-
                     style={[
                         styles.notificationButton,
                         {
@@ -118,7 +117,7 @@ export default function Profile() {
                             borderRadius: 20 * scale,
                         },
                     ]}
-                    onPress={() => router.push("/notifications")}
+                    onPress={abrirNotificaciones}
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
@@ -168,8 +167,6 @@ export default function Profile() {
                     ]}
                 >
 
-
-
                     <Text
                         style={[
                             styles.name,
@@ -202,17 +199,34 @@ export default function Profile() {
                                         minHeight: isTablet
                                             ? 98 * scale
                                             : 60 * scale,
+
                                         marginBottom: 18 * scale,
 
-                                        marginRight: isTablet ? 380 * scale : 120 * scale,
-
-                            
+                                        marginRight: isTablet
+                                            ? 380 * scale
+                                            : 120 * scale,
                                     },
                                 ]}
                                 onPress={() => {
-                                    if (option.route) {
+
+                                    // Si entra a Logout desde Profile,
+                                    // enviamos el origen para que la flecha
+                                    // pueda regresar correctamente.
+                                    if (option.route === "/logout") {
+
+                                        router.push({
+                                            pathname: "/logout",
+                                            params: {
+                                                from: "/profile",
+                                            },
+                                        });
+
+                                    } else if (option.route) {
+
                                         router.push(option.route);
+
                                     }
+
                                 }}
                                 activeOpacity={0.7}
                             >
@@ -222,22 +236,27 @@ export default function Profile() {
                                         styles.iconContainer,
                                         {
                                             backgroundColor: option.color,
+
                                             width: isTablet
                                                 ? 70 * scale
                                                 : 45 * scale,
+
                                             height: isTablet
                                                 ? 70 * scale
                                                 : 45 * scale,
+
                                             borderRadius: 12 * scale,
                                             marginRight: 16 * scale,
                                         },
                                     ]}
                                 >
+
                                     <Ionicons
                                         name={option.icon}
                                         size={25 * scale}
                                         color="#FFFFFF"
                                     />
+
                                 </View>
 
                                 <Text
@@ -247,6 +266,7 @@ export default function Profile() {
                                             fontSize: isTablet
                                                 ? 20 * scale
                                                 : 16 * scale,
+
                                             lineHeight: 28 * scale,
                                         },
                                     ]}
@@ -273,6 +293,7 @@ export default function Profile() {
                             : isTablet
                                 ? 65 * scale
                                 : 65,
+
                         borderTopLeftRadius: 78 * scale,
                     },
                 ]}
