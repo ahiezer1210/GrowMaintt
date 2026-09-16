@@ -228,8 +228,12 @@ export default function NotificationsScreen() {
       router.push("/currentgoal");
     } else if (from === "/investments") {
       router.push("/investments");
+    } else if (from === "/pointsExchange") {
+      router.push("/pointsExchange");
     } else if (from === "/ExpensesManagement") {
       router.push("/expensesManagement");
+    } else if (from === "/registergoals") {
+      router.push("/registergoals");
     } else {
       router.push("/home");
     }
@@ -245,7 +249,6 @@ export default function NotificationsScreen() {
         backgroundColor="#071426"
       />
 
-      {/* HEADER */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.back}
@@ -268,7 +271,6 @@ export default function NotificationsScreen() {
         )}
       </View>
 
-      {/* CONTENT */}
       <View style={styles.content}>
         <View style={styles.categories}>
           {categories.map((category) => (
@@ -454,8 +456,12 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "700",
     transform: [
-      { translateX: 10 },
-      { translateY: 1 },
+      {
+        translateX: 10,
+      },
+      {
+        translateY: 1,
+      },
     ],
   },
 

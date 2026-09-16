@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   addDoc,
@@ -20,10 +20,11 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../../firebaseConfig.js";
 
 export default function SavingsGoal() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -52,6 +53,9 @@ export default function SavingsGoal() {
 
   const s = (value) => Math.round(value * scale);
 
+  const headerHeight = 118 * scale;
+  const bottomHeight = 65 * scale;
+
   const [goalName, setGoalName] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [frequency, setFrequency] = useState("");
@@ -74,6 +78,15 @@ export default function SavingsGoal() {
   const cancelGoal = () => {
     resetForm();
     router.replace("/home");
+  };
+
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/registergoals",
+      },
+    });
   };
 
   const parseDate = (value) => {
@@ -381,6 +394,7 @@ export default function SavingsGoal() {
             "Maximum reached",
             "You can have a maximum of 3 main goals."
           );
+
           setSaving(false);
           return;
         }
@@ -426,63 +440,89 @@ export default function SavingsGoal() {
     }
   };
 
+  const navItems = [
+    {
+      icon: "home-outline",
+      route: "/home",
+    },
+    {
+      icon: "chart-box-outline",
+      route: "/historial",
+    },
+    {
+      icon: "swap-horizontal",
+      route: "/expensesManagement",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/profile",
+    },
+  ];
+
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
+
       <View
         style={[
           styles.header,
           {
-            paddingTop: s(55),
-            paddingBottom: s(30),
+            height: headerHeight,
             paddingHorizontal: horizontalPadding,
           },
         ]}
       >
+       
         <TouchableOpacity
           style={[
             styles.backButton,
             {
-              width: s(35),
+              transform: [
+                { translateY: 4 * scale },
+              ],
             },
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")}
+          activeOpacity={0.7}
         >
-          <Ionicons
-            name="arrow-back"
-            size={s(25)}
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35 * scale}
             color="#FFFFFF"
           />
         </TouchableOpacity>
 
         <Text
           style={[
-            styles.title,
+            styles.headerTitle,
             {
-              fontSize: s(28),
-              marginLeft: s(25),
+              fontSize: 25 * scale,
+              lineHeight: 28 * scale,
             },
           ]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.7}
         >
-          Register savings goal
+          Create savings{"\n"}goals
         </Text>
 
         <TouchableOpacity
           style={[
-            styles.notificationButton,
+            styles.headerBell,
             {
-              width: s(34),
-              height: s(34),
-              borderRadius: s(18),
+              transform: [
+                { translateY: 4 * scale },
+              ],
             },
           ]}
+          onPress={abrirNotificaciones}
+          activeOpacity={0.7}
         >
-          <Ionicons
-            name="notifications-outline"
-            size={s(25)}
-            color="#081023"
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={35 * scale}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
       </View>
@@ -491,17 +531,17 @@ export default function SavingsGoal() {
         style={[
           styles.card,
           {
-            borderTopLeftRadius: s(35),
-            borderTopRightRadius: s(35),
+            borderTopLeftRadius: 45 * scale,
+            borderTopRightRadius: 45 * scale,
             paddingHorizontal: horizontalPadding,
-            paddingTop: s(25),
+            paddingTop: 25 * scale,
           },
         ]}
       >
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{
-            paddingBottom: s(30),
+            paddingBottom: 100 * scale,
           }}
           keyboardShouldPersistTaps="handled"
         >
@@ -906,7 +946,37 @@ export default function SavingsGoal() {
           </TouchableOpacity>
         </ScrollView>
       </View>
-    </View>
+
+      {/* NAVBAR */}
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            height: bottomHeight,
+            borderTopLeftRadius: 78 * scale,
+          },
+        ]}
+      >
+        {navItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => router.push(item.route)}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name={item.icon}
+              size={
+                item.icon === "swap-horizontal"
+                  ? 37 * scale
+                  : 35 * scale
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -917,28 +987,40 @@ const styles = StyleSheet.create({
   },
 
   header: {
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "space-between",
+    position: "relative",
   },
 
   backButton: {
+    width: 45,
+    height: "100%",
     alignItems: "flex-start",
-    marginLeft: 10,
-  },
-
-  title: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    flex: 1,
-  },
-
-  notificationButton: {
-    backgroundColor: "#E0F5E7",
     justifyContent: "center",
-    alignItems: "center",
+    zIndex: 2,
   },
 
+  headerTitle: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    color: "#FFFFFF",
+    fontWeight: "700",
+    textAlign: "center",
+    zIndex: 1,
+  },
+
+  headerBell: {
+    width: 45,
+    height: "100%",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+
+  /* CONTENT */
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -1037,5 +1119,24 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "700",
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

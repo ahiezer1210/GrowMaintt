@@ -33,7 +33,7 @@ const COLORS = {
 
 const ACTIONS = [
   ["card-outline", "Register\nexpenses", "ion", "/registerexpenses"],
-  ["book-outline", "Register\ngoals", "ion", "/registergoals"],
+  ["book-outline", "Create\ngoals", "ion", "/registergoals"],
   ["trending-up-outline", "Investments", "ion", "/investments"],
   ["hand-coin-outline", "Points\nExchange", "material", "/pointsExchange"],
 ];
