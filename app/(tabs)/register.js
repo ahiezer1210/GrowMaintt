@@ -1,10 +1,12 @@
 import { router } from "expo-router";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -22,6 +24,8 @@ export default function SignupScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmpassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const { width } = useWindowDimensions();
 
   const small = width < 360;
@@ -36,7 +40,7 @@ export default function SignupScreen() {
 
   const registerusers = async () => {
     if (!username.trim() || !email.trim() || !password || !confirmpassword) {
-      Alert.alert("Incomplete fields");
+      Alert.alert("Incomplete fields", "Please fill in all the required fields.");
       return;
     }
     if (password !== confirmpassword) {
@@ -55,10 +59,13 @@ export default function SignupScreen() {
     if (!/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
       Alert.alert(
         "Invalid password",
-        "The password must have at least one capital letter or special caracter",
+        "The password must have at least one capital letter or special character",
       );
       return;
     }
+
+    setLoading(true);
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -79,125 +86,143 @@ export default function SignupScreen() {
         },
       ]);
     } catch (error) {
-      if (error.code == "auth/email-already-in-use") {
-        Alert.alert("Email already exits");
+      if (error.code === "auth/email-already-in-use") {
+        Alert.alert("Email already exists");
       } else if (error.code === "auth/username-already-in-use") {
-        Alert.alert("Username already exits");
+        Alert.alert("Username already exists");
       } else if (error.code === "auth/invalid-email") {
         Alert.alert("Invalid Email");
       } else if (error.code === "auth/weak-password") {
-        Alert.alert("The password must have at least 6 chracters");
+        Alert.alert("The password must have at least 6 characters");
       } else {
         console.log(error.code, error.message);
         Alert.alert("Error", error.message);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.safe}>
-      <View style={styles.topContent}>
-        <View style={styles.header}>
-          <Text style={[styles.title, { fontSize: titleFontSize }]}>
-            Register
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.whiteContainer}>
-        <ScrollView
-          style={styles.whiteScroll}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingHorizontal: horizontalPadding,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.card}>
-            <Text style={[styles.label, { fontSize: labelFontSize }]}>
-              Username
+      {/* ✅ Manejo responsivo del teclado */}
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View style={styles.topContent}>
+          <View style={styles.header}>
+            <Text style={[styles.title, { fontSize: titleFontSize }]}>
+              Register
             </Text>
-
-            <TextInput
-              style={[styles.input, { height: inputHeight }]}
-              placeholder="Enter your username"
-              value={username}
-              onChangeText={setUsername}
-              placeholderTextColor="#ACADAD"
-              autoCapitalize="none"
-            />
-
-            <Text style={[styles.label, { fontSize: labelFontSize }]}>
-              E-mail
-            </Text>
-
-            <TextInput
-              style={[styles.input, { height: inputHeight }]}
-              placeholder="Enter your E-mail"
-              value={email}
-              onChangeText={setEmail}
-              placeholderTextColor="#ACADAD"
-              autoCapitalize="none"
-              keyboardType="email-address"
-              autoCorrect={false}
-            />
-
-            <Text style={[styles.label, { fontSize: labelFontSize }]}>
-              Password
-            </Text>
-
-            <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
-              <TextInput
-                style={styles.password}
-                placeholder="Enter your password"
-                value={password}
-                onChangeText={setPassword}
-                placeholderTextColor="#ACADAD"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
-              </TouchableOpacity>
-            </View>
-
-            <Text style={[styles.label, { fontSize: labelFontSize }]}>
-              Confirm Password
-            </Text>
-
-            <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
-              <TextInput
-                style={styles.password}
-                placeholder="Enter your password"
-                value={confirmpassword}
-                onChangeText={setConfirmPassword}
-                placeholderTextColor="#ACADAD"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
-
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={[styles.button, { height: buttonHeight }]}
-              onPress={registerusers}
-            >
-              <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>
-                Next
-              </Text>
-            </TouchableOpacity>
           </View>
-        </ScrollView>
-      </View>
+        </View>
+
+        <View style={styles.whiteContainer}>
+          <ScrollView
+            style={styles.whiteScroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              {
+                paddingHorizontal: horizontalPadding,
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.card}>
+              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+                Username
+              </Text>
+              <TextInput
+                style={[styles.input, { height: inputHeight }]}
+                placeholder="Enter your username"
+                value={username}
+                onChangeText={setUsername}
+                placeholderTextColor="#ACADAD"
+                autoCapitalize="none"
+              />
+
+              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+                E-mail
+              </Text>
+              <TextInput
+                style={[styles.input, { height: inputHeight }]}
+                placeholder="Enter your E-mail"
+                value={email}
+                onChangeText={setEmail}
+                placeholderTextColor="#ACADAD"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                autoCorrect={false}
+              />
+
+              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+                Password
+              </Text>
+              <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+                <TextInput
+                  style={styles.password}
+                  placeholder="Enter your password"
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholderTextColor="#ACADAD"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+                Confirm Password
+              </Text>
+              <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+                <TextInput
+                  style={styles.password}
+                  placeholder="Confirm your password"
+                  value={confirmpassword}
+                  onChangeText={setConfirmPassword}
+                  placeholderTextColor="#ACADAD"
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  { height: buttonHeight },
+                  loading && { opacity: 0.7 },
+                ]}
+                onPress={registerusers}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>
+                    Next
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              <View style={styles.loginRow}>
+                <Text style={styles.accountText}>Already have an account?</Text>
+                <TouchableOpacity onPress={() => router.push("/login")}>
+                  <Text style={styles.loginText}>Sign In</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -206,6 +231,10 @@ const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: "#081023",
+  },
+
+  keyboardContainer: {
+    flex: 1,
   },
 
   topContent: {
@@ -239,19 +268,19 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 40,
-    paddingBottom: 10,
+    paddingTop: 35,
+    paddingBottom: 30,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
 
   label: {
     color: "#081023",
     fontWeight: "600",
-    marginBottom: 10,
+    marginBottom: 8,
   },
 
   input: {
@@ -260,7 +289,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#000000",
     paddingHorizontal: 18,
-    marginBottom: 34,
+    marginBottom: 20,
+    color: "#081023",
   },
 
   passwordBox: {
@@ -271,11 +301,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    marginBottom: 56,
+    marginBottom: 20,
   },
 
   password: {
     flex: 1,
+    color: "#081023",
   },
 
   show: {
@@ -289,10 +320,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginTop: 15,
+    marginBottom: 20,
   },
 
   buttonText: {
     color: "#FFFFFF",
     fontWeight: "700",
+  },
+
+  loginRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  accountText: {
+    color: "#ACADAD",
+  },
+
+  loginText: {
+    color: "#25B7D3",
+    fontWeight: "700",
+    marginLeft: 5,
   },
 });

@@ -14,6 +14,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -154,78 +156,87 @@ export default function LoginScreen() {
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor="#081023" />
 
-      <View style={styles.header}>
-        <Image
-          source={require("../../assets/images/logo.png")}
-          style={styles.logo}
-        />
-        <Text style={styles.title}>Sign In</Text>
-      </View>
+      <KeyboardAvoidingView
+        style={styles.keyboardContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <View style={styles.header}>
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={styles.logo}
+          />
+          <Text style={styles.title}>Sign In</Text>
+        </View>
 
-      <View style={styles.whiteContainer}>
-        <ScrollView
-          style={styles.whiteScroll}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingHorizontal: horizontalPadding,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          <View style={styles.card}>
-            <Text style={styles.label}>Email or Username</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Enter your email"
-              placeholderTextColor="#ACADAD"
-              value={email}
-              onChangeText={setEmail}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordBox}>
+        <View style={styles.whiteContainer}>
+          <ScrollView
+            style={styles.whiteScroll}
+            contentContainerStyle={[
+              styles.scrollContent,
+              {
+                paddingHorizontal: horizontalPadding,
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.card}>
+              <Text style={styles.label}>Email or Username</Text>
               <TextInput
-                style={styles.password}
-                placeholder="Enter your password"
+                style={styles.input}
+                placeholder="Enter your email"
                 placeholderTextColor="#ACADAD"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+
+              <Text style={styles.label}>Password</Text>
+              <View style={styles.passwordBox}>
+                <TextInput
+                  style={styles.password}
+                  placeholder="Enter your password"
+                  placeholderTextColor="#ACADAD"
+                  secureTextEntry={!showPassword}
+                  value={password}
+                  onChangeText={setPassword}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                >
+                  <Text style={styles.show}>
+                    {showPassword ? "Hide" : "Show"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity onPress={() => router.push("/forgotpassword")}>
+                <Text style={styles.forgot}>Forgot Password?</Text>
               </TouchableOpacity>
-            </View>
 
-            <TouchableOpacity onPress={() => router.push("/forgotpassword")}>
-              <Text style={styles.forgot}>Forgot Password?</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.button, loading && { opacity: 0.7 }]}
-              onPress={handleSignIn}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#FFFFFF" />
-              ) : (
-                <Text style={styles.buttonText}>Sign In</Text>
-              )}
-            </TouchableOpacity>
-
-            <View style={styles.register}>
-              <Text style={styles.account}>Don't have an account?</Text>
-              <TouchableOpacity onPress={() => router.push("/register")}>
-                <Text style={styles.signup}>Sign Up</Text>
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.7 }]}
+                onPress={handleSignIn}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <Text style={styles.buttonText}>Sign In</Text>
+                )}
               </TouchableOpacity>
+
+              <View style={styles.register}>
+                <Text style={styles.account}>Don't have an account?</Text>
+                <TouchableOpacity onPress={() => router.push("/register")}>
+                  <Text style={styles.signup}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </View>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -236,18 +247,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#081023",
   },
 
+  keyboardContainer: {
+    flex: 1,
+  },
+
   header: {
     alignItems: "center",
-    paddingTop: 55,
-    paddingBottom: 30,
+    paddingTop: 40,
+    paddingBottom: 25,
     backgroundColor: "#081023",
   },
 
   logo: {
-    width: 120,
-    height: 120,
+    width: 110,
+    height: 110,
     resizeMode: "contain",
-    marginBottom: 15,
+    marginBottom: 10,
   },
 
   title: {
@@ -271,13 +286,13 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 40,
-    paddingBottom: 180,
+    paddingTop: 35,
+    paddingBottom: 40, 
   },
 
   card: {
     backgroundColor: "#FFFFFF",
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
 
   label: {
@@ -295,6 +310,7 @@ const styles = StyleSheet.create({
     borderColor: "#000000",
     paddingHorizontal: 18,
     marginBottom: 22,
+    color: "#081023",
   },
 
   passwordBox: {
@@ -311,6 +327,7 @@ const styles = StyleSheet.create({
 
   password: {
     flex: 1,
+    color: "#081023",
   },
 
   show: {
