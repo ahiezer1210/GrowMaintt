@@ -3,12 +3,12 @@ import { router } from "expo-router";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../../firebaseConfig";
@@ -19,28 +19,28 @@ const rewards = [
     title: "5% discount",
     store: "Hilasal",
     description: "Discount in Hilasal product",
-    points: "-200.0 points",
+    points: 200,
   },
   {
     icon: "gift-outline",
     title: "Gift card",
     store: "Dollarcity",
     description: "Gift card of $10.00",
-    points: "-200.0 points",
+    points: 200,
   },
   {
     icon: "pricetag-outline",
     title: "5% discount",
     store: "Group Q",
     description: "Cars spare parts discount",
-    points: "-400.0 points",
+    points: 100,
   },
   {
     icon: "restaurant-outline",
     title: "Free Topping",
     store: "Neveria",
     description: "Free fruits topping",
-    points: "-100.0 points",
+    points: 500,
   },
 ];
 
@@ -72,6 +72,17 @@ export default function PointExchange() {
   const bottomHeight = 65 * scale;
 
   const [availablePoints, setAvailablePoints] = useState(0);
+  const [redeemedPoints, setRedeemedPoints] = useState(0);
+  const availableRewards = rewards.filter(
+    (reward) => availablePoints >= reward.points
+  );
+
+  const pointsGoal = 500;
+
+  const progressPercentage = Math.min(
+    (availablePoints / pointsGoal) * 100,
+    100
+  );
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -119,7 +130,7 @@ export default function PointExchange() {
 
   return (
     <SafeAreaView style={styles.container}>
-        <View
+      <View
         style={[
           styles.header,
           {
@@ -285,7 +296,7 @@ export default function PointExchange() {
                   },
                 ]}
               >
-                -1000.0
+                {redeemedPoints.toFixed(1)}
               </Text>
             </View>
           </View>
@@ -307,7 +318,14 @@ export default function PointExchange() {
                 },
               ]}
             >
-              <View style={styles.progress} />
+              <View
+                style={[
+                  styles.progress,
+                  {
+                    width: `${progressPercentage}%`,
+                  },
+                ]}
+              />
             </View>
 
             <Text
@@ -318,7 +336,7 @@ export default function PointExchange() {
                 },
               ]}
             >
-              30%
+              {Math.round(progressPercentage)}%
             </Text>
 
             <Text
@@ -342,7 +360,7 @@ export default function PointExchange() {
               },
             ]}
           >
-            30% of your goal, ¡You´re making progress!
+            {Math.round(progressPercentage)}% of your goal, ¡You´re making progress!
           </Text>
         </View>
 
@@ -366,188 +384,200 @@ export default function PointExchange() {
             ¡Rewards!
           </Text>
 
-          {rewards.map((item, index) => (
-            <View
-              style={[
-                styles.reward,
-                {
-                  minHeight: 65 * scale,
-                  marginBottom: 10 * scale,
-                  paddingHorizontal: 8 * scale,
-                },
-              ]}
-              key={index}
-            >
-              <View
-                style={[
-                  styles.iconCircle,
-                  {
-                    width: 38 * scale,
-                    height: 38 * scale,
-                    borderRadius: 19 * scale,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name={item.icon}
-                  size={23 * scale}
-                  color="white"
-                />
-              </View>
-
-              <View
-                style={[
-                  styles.rewardName,
-                  {
-                    width: isTablet ? 120 * scale : 85 * scale,
-                    paddingLeft: 8 * scale,
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.rewardTitle,
-                    {
-                      fontSize: 14 * scale,
-                    },
-                  ]}
-                >
-                  {item.title}
-                </Text>
-
-                <Text
-                  style={[
-                    styles.store,
-                    {
-                      fontSize: 13 * scale,
-                    },
-                  ]}
-                >
-                  {item.store}
-                </Text>
-              </View>
-
-              <View style={styles.rewardDescription}>
-                <Text
-                  style={[
-                    styles.description,
-                    {
-                      fontSize: 13 * scale,
-                    },
-                  ]}
-                >
-                  {item.description}
-                </Text>
-              </View>
-
-              <Text
-                style={[
-                  styles.rewardPoints,
-                  {
-                    width: isTablet ? 100 * scale : 75 * scale,
-                    fontSize: 11 * scale,
-                  },
-                ]}
-              >
-                {item.points}
-              </Text>
-            </View>
-          ))}
-
-          <Text
-            style={[
-              styles.sectionTitle,
-              {
-                fontSize: 22 * scale,
-                marginTop: 10 * scale,
-              },
-            ]}
-          >
-            ¡Big reward!
-          </Text>
-
-          <View
-            style={[
-              styles.reward,
-              {
-                minHeight: 65 * scale,
-                marginBottom: 10 * scale,
-              },
-            ]}
-          >
-            <View
-              style={[
-                styles.iconCircle,
-                {
-                  width: 38 * scale,
-                  height: 38 * scale,
-                  borderRadius: 19 * scale,
-                },
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="restaurant-outline"
-                size={23 * scale}
-                color="white"
-              />
-            </View>
-
-            <View
-              style={[
-                styles.rewardName,
-                {
-                  width: isTablet ? 120 * scale : 85 * scale,
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.rewardTitle,
-                  {
-                    fontSize: 14 * scale,
-                  },
-                ]}
-              >
-                Food
-              </Text>
-
-              <Text
-                style={[
-                  styles.store,
-                  {
-                    fontSize: 13 * scale,
-                  },
-                ]}
-              >
-                Don Li
-              </Text>
-            </View>
-
-            <View style={styles.rewardDescription}>
-              <Text
-                style={[
-                  styles.description,
-                  {
-                    fontSize: 13 * scale,
-                  },
-                ]}
-              >
-                Free shushi order
-              </Text>
-            </View>
-
-            <Text
-              style={[
-                styles.rewardPoints,
-                {
-                  width: isTablet ? 100 * scale : 75 * scale,
-                  fontSize: 11 * scale,
-                },
-              ]}
-            >
-              -500.0 points
+          {availablePoints === 0 ? (
+            <Text style={styles.noRewards}>
+              You don't have enough points yet.
+              Register an investment to earn points!
             </Text>
-          </View>
+          ) : (
+
+            availableRewards.map((item, index) => (
+              <View
+                style={[
+                  styles.reward,
+                  {
+                    minHeight: 65 * scale,
+                    marginBottom: 10 * scale,
+                    paddingHorizontal: 8 * scale,
+                  },
+                ]}
+                key={index}
+              >
+                <View
+                  style={[
+                    styles.iconCircle,
+                    {
+                      width: 38 * scale,
+                      height: 38 * scale,
+                      borderRadius: 19 * scale,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={item.icon}
+                    size={23 * scale}
+                    color="white"
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.rewardName,
+                    {
+                      width: isTablet ? 120 * scale : 85 * scale,
+                      paddingLeft: 8 * scale,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.rewardTitle,
+                      {
+                        fontSize: 14 * scale,
+                      },
+                    ]}
+                  >
+                    {item.title}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.store,
+                      {
+                        fontSize: 13 * scale,
+                      },
+                    ]}
+                  >
+                    {item.store}
+                  </Text>
+                </View>
+
+                <View style={styles.rewardDescription}>
+                  <Text
+                    style={[
+                      styles.description,
+                      {
+                        fontSize: 13 * scale,
+                      },
+                    ]}
+                  >
+                    {item.description}
+                  </Text>
+                </View>
+
+                <Text
+                  style={[
+                    styles.rewardPoints,
+                    {
+                      width: isTablet ? 100 * scale : 75 * scale,
+                      fontSize: 11 * scale,
+                    },
+                  ]}
+                >
+                  -{item.points}.0 points
+                </Text>
+              </View>
+            ))
+          )}
+
+          {availablePoints >= 500 && (
+            <>
+              <Text
+                style={[
+                  styles.sectionTitle,
+                  {
+                    fontSize: 22 * scale,
+                    marginTop: 10 * scale,
+                  },
+                ]}
+              >
+                ¡Big reward!
+              </Text>
+
+              <View
+                style={[
+                  styles.reward,
+                  {
+                    minHeight: 65 * scale,
+                    marginBottom: 10 * scale,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconCircle,
+                    {
+                      width: 38 * scale,
+                      height: 38 * scale,
+                      borderRadius: 19 * scale,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="restaurant-outline"
+                    size={23 * scale}
+                    color="white"
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.rewardName,
+                    {
+                      width: isTablet ? 120 * scale : 85 * scale,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.rewardTitle,
+                      {
+                        fontSize: 14 * scale,
+                      },
+                    ]}
+                  >
+                    Food
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.store,
+                      {
+                        fontSize: 13 * scale,
+                      },
+                    ]}
+                  >
+                    Don Li
+                  </Text>
+                </View>
+
+                <View style={styles.rewardDescription}>
+                  <Text
+                    style={[
+                      styles.description,
+                      {
+                        fontSize: 13 * scale,
+                      },
+                    ]}
+                  >
+                    Free shushi order
+                  </Text>
+                </View>
+
+                <Text
+                  style={[
+                    styles.rewardPoints,
+                    {
+                      width: isTablet ? 100 * scale : 75 * scale,
+                      fontSize: 11 * scale,
+                    },
+                  ]}
+                >
+                  -500.0 points
+                </Text>
+              </View>
+            </>
+          )}
         </View>
       </ScrollView>
 
@@ -579,7 +609,7 @@ export default function PointExchange() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 }
 
@@ -593,8 +623,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "transparent",
   },
-
-  /* HEADER */
 
   header: {
     backgroundColor: "#071426",
@@ -617,6 +645,13 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
+  },
+
+  noRewards: {
+    textAlign: "center",
+    color: "#777",
+    fontSize: 14,
+    marginVertical: 20,
   },
 
   pointsheader: {
@@ -688,8 +723,7 @@ const styles = StyleSheet.create({
   },
 
   progress: {
-    width: "30%",
-    height: "100%",
+    width: "100%",
     backgroundColor: "#29b6b1",
   },
 

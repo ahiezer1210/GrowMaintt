@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -20,20 +21,20 @@ export default function PrivacyScreen({ navigation }) {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-    ? 1
-    : isTablet
-    ? 1.15
-    : 1.25;
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
 
   const verticalScale = (size) => Math.round(size * (height / 800));
 
   const horizontalPadding = isSmallScreen
     ? 16
     : isMediumScreen
-    ? 22
-    : isTablet
-    ? 40
-    : 50;
+      ? 22
+      : isTablet
+        ? 40
+        : 50;
 
   const sectionVerticalPadding = isTablet ? verticalScale(14) : verticalScale(8);
 
@@ -46,8 +47,9 @@ export default function PrivacyScreen({ navigation }) {
         <View style={[styles.header, { height: verticalScale(95) }]}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation?.goBack()}
+            onPress={() => router.back()}
             activeOpacity={0.7}
+
           >
             <MaterialCommunityIcons
               name="arrow-left"
@@ -75,6 +77,7 @@ export default function PrivacyScreen({ navigation }) {
               },
             ]}
             activeOpacity={0.7}
+            onPress={() => router.push("/notifications")}
           >
             <MaterialCommunityIcons
               name="bell-outline"

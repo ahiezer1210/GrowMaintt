@@ -1,5 +1,6 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
+import { onAuthStateChanged } from "firebase/auth";
 import { StyleSheet, Text, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -8,6 +9,9 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+
+import { auth } from "../../firebaseConfig";
+
 
 export default function Inicio() {
   const scale = useSharedValue(0.7);
@@ -26,11 +30,21 @@ export default function Inicio() {
       })
     );
 
-    const timer = setTimeout(() => {
-      router.replace("/welcome");
-    }, 1500);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const timer = setTimeout(() => {
+        if (user) {
+          // Ya inició sesión anteriormente
+          router.replace("/home");
+        } else {
+          // No hay una sesión iniciada
+          router.replace("/welcome");
+        }
+      }, 1500);
 
-    return () => clearTimeout(timer);
+      return () => clearTimeout(timer);
+    });
+
+    return unsubscribe;
   }, []);
 
   const logoAnimatedStyle = useAnimatedStyle(() => {
