@@ -21,20 +21,20 @@ export default function PrivacyScreen() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-    ? 1
-    : isTablet
-    ? 1.15
-    : 1.25;
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
 
   const verticalScale = (size) => Math.round(size * (height / 800));
 
   const horizontalPadding = isSmallScreen
     ? 16
     : isMediumScreen
-    ? 22
-    : isTablet
-    ? 40
-    : 50;
+      ? 22
+      : isTablet
+        ? 40
+        : 50;
 
   const sectionVerticalPadding = isTablet ? verticalScale(14) : verticalScale(8);
 
@@ -54,12 +54,9 @@ export default function PrivacyScreen() {
         <View style={[styles.header, { height: verticalScale(95) }]}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => {
-              if (router.canGoBack()) {
-                router.back();
-              }
-            }}
+            onPress={() => router.back()}
             activeOpacity={0.7}
+
           >
             <MaterialCommunityIcons
               name="arrow-left"
@@ -87,12 +84,7 @@ export default function PrivacyScreen() {
               },
             ]}
             activeOpacity={0.7}
-            onPress={() =>
-              router.push({
-                pathname: "/notifications",
-                params: { from: "/privacypolicy" },
-              })
-            }
+            onPress={() => router.push("/notifications")}
           >
             <MaterialCommunityIcons
               name="bell-outline"

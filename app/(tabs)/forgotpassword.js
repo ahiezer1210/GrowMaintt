@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
 import {
@@ -23,23 +24,40 @@ export default function RecuperarContrasena({ navigation }) {
   const [enviado, setEnviado] = useState(false);
 
   const recuperarContrasena = async () => {
-    const email = correo.trim();
+    const email = correo.trim().toLowerCase();
 
     if (!email) {
-      Alert.alert("Empty field", "Please send your email again.");
+      Alert.alert(
+        "Empty field",
+        "Please send your email again."
+      );
       return;
     }
 
-    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const formatoCorreo =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoCorreo.test(email)) {
-      Alert.alert("Incorrect email", "Send a valid email.");
+      Alert.alert(
+        "Incorrect email",
+        "Send a valid email."
+      );
       return;
     }
 
     try {
       setCargando(true);
+
       await sendPasswordResetEmail(auth, email);
+
+      await AsyncStorage.setItem(
+        "pendingPasswordReset",
+        JSON.stringify({
+          email,
+          requestedAt: Date.now(),
+        })
+      );
+
       setEnviado(true);
     } catch (error) {
       if (error.code === "auth/user-not-found") {
@@ -47,20 +65,32 @@ export default function RecuperarContrasena({ navigation }) {
           "Email not found",
           "We don't find a count with that email."
         );
-      } else if (error.code === "auth/invalid-email") {
-        Alert.alert("Too many attempts", "The email entered is incorrect");
-      } else if (error.code === "auth/too-many-requests") {
+      } else if (
+        error.code === "auth/invalid-email"
+      ) {
+        Alert.alert(
+          "Incorrect email",
+          "The email entered is incorrect."
+        );
+      } else if (
+        error.code === "auth/too-many-requests"
+      ) {
         Alert.alert(
           "Too many attempts",
           "Wait a few minutes before try again."
         );
-      } else if (error.code === "auth/network-request-failed") {
+      } else if (
+        error.code === "auth/network-request-failed"
+      ) {
         Alert.alert(
           "Without connection",
           "Could not connect to Firebase. Check your Internet connection."
         );
       } else {
-        Alert.alert("Error", "The recovery email couldn't be sent. Try again.");
+        Alert.alert(
+          "Error",
+          "The recovery email couldn't be sent. Try again."
+        );
       }
     } finally {
       setCargando(false);
@@ -74,21 +104,31 @@ export default function RecuperarContrasena({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#081023"
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
+        {/* Header Azul */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.botonRegresar}
             onPress={() => navigation.goBack()}
           >
-            <MaterialCommunityIcons name="arrow-left" size={26} color="#FFFFFF" />
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={26}
+              color="#FFFFFF"
+            />
           </TouchableOpacity>
 
-          <Text style={styles.titulo}>Password{"\n"}Recovery</Text>
+          <Text style={styles.titulo}>
+            Password{"\n"}Recovery
+          </Text>
         </View>
 
         <View style={styles.whiteContainer}>
@@ -97,6 +137,8 @@ export default function RecuperarContrasena({ navigation }) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            alwaysBounceVertical={true} 
+            overScrollMode="always" 
           >
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons
@@ -106,13 +148,19 @@ export default function RecuperarContrasena({ navigation }) {
               />
 
               <View style={styles.checkCircle}>
-                <MaterialCommunityIcons name="check" size={21} color="#FFFFFF" />
+                <MaterialCommunityIcons
+                  name="check"
+                  size={21}
+                  color="#FFFFFF"
+                />
               </View>
             </View>
 
             {!enviado ? (
               <>
-                <Text style={styles.label}>User or email</Text>
+                <Text style={styles.label}>
+                  User or email
+                </Text>
 
                 <TextInput
                   style={styles.input}
@@ -133,7 +181,8 @@ export default function RecuperarContrasena({ navigation }) {
                 <TouchableOpacity
                   style={[
                     styles.botonSiguiente,
-                    cargando && styles.botonDeshabilitado,
+                    cargando &&
+                      styles.botonDeshabilitado,
                   ]}
                   onPress={recuperarContrasena}
                   disabled={cargando}
@@ -141,7 +190,11 @@ export default function RecuperarContrasena({ navigation }) {
                   {cargando ? (
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
-                    <Text style={styles.textoSiguiente}>Next</Text>
+                    <Text
+                      style={styles.textoSiguiente}
+                    >
+                      Next
+                    </Text>
                   )}
                 </TouchableOpacity>
 
@@ -150,7 +203,9 @@ export default function RecuperarContrasena({ navigation }) {
                   onPress={() => navigation.goBack()}
                   disabled={cargando}
                 >
-                  <Text style={styles.textoIntentar}>Cancel</Text>
+                  <Text style={styles.textoIntentar}>
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
               </>
             ) : (
@@ -163,30 +218,52 @@ export default function RecuperarContrasena({ navigation }) {
                   />
                 </View>
 
-                <Text style={styles.tituloConfirmacion}>¡Sent email!</Text>
-
-                <Text style={styles.mensajeConfirmacion}>
-                  We've sent a link to recover your password to:
+                <Text
+                  style={styles.tituloConfirmacion}
+                >
+                  ¡Sent email!
                 </Text>
 
-                <Text style={styles.correoConfirmacion}>{correo}</Text>
+                <Text
+                  style={styles.mensajeConfirmacion}
+                >
+                  We've sent a link to recover your
+                  password to:
+                </Text>
 
-                <Text style={styles.mensajePequeno}>
-                  Check your inbox and also the spam folder.
+                <Text
+                  style={styles.correoConfirmacion}
+                >
+                  {correo}
+                </Text>
+
+                <Text
+                  style={styles.mensajePequeno}
+                >
+                  Check your inbox and also the spam
+                  folder.
                 </Text>
 
                 <TouchableOpacity
                   style={styles.botonSiguiente}
                   onPress={() => navigation.goBack()}
                 >
-                  <Text style={styles.textoSiguiente}>Back to the login</Text>
+                  <Text
+                    style={styles.textoSiguiente}
+                  >
+                    Back to the login
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.botonIntentar}
                   onPress={volverAIntentar}
                 >
-                  <Text style={styles.textoIntentar}>Use another email.</Text>
+                  <Text
+                    style={styles.textoIntentar}
+                  >
+                    Use another email.
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -219,7 +296,7 @@ const styles = StyleSheet.create({
     borderRadius: 23,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 10, 
+    zIndex: 10,
   },
 
   titulo: {
@@ -235,7 +312,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
     borderTopRightRadius: 35,
-    overflow: "hidden", 
+    overflow: "hidden",
   },
 
   whiteScroll: {
@@ -247,7 +324,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 30,
     paddingTop: 40,
-    paddingBottom: 40, 
+    paddingBottom: 250, 
   },
 
   iconContainer: {

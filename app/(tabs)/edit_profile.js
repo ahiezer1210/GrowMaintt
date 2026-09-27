@@ -23,20 +23,21 @@ import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 
 import {
+  addDoc,
+  collection,
   doc,
   getDoc,
+  serverTimestamp,
   setDoc,
 } from "firebase/firestore";
 
 import {
-  getDownloadURL,
-  ref,
-  uploadBytes,
-} from "firebase/storage";
+  onAuthStateChanged,
+  sendEmailVerification,
+  updateEmail,
+} from "firebase/auth";
 
-import { onAuthStateChanged } from "firebase/auth";
-
-import { auth, db, storage } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
   cyan: "#25B5D1",
@@ -65,6 +66,11 @@ export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const [originalUsername, setOriginalUsername] = useState("");
+  const [originalPhone, setOriginalPhone] = useState("");
+  const [originalEmail, setOriginalEmail] = useState("");
+  const [originalPhotoURL, setOriginalPhotoURL] = useState(null);
 
   const { width } = useWindowDimensions();
 
@@ -106,17 +112,36 @@ export default function App() {
           if (userSnap.exists()) {
             const data = userSnap.data();
 
-            setUsername(data.username || "");
-            setPhone(data.phone || "");
+            const savedUsername =
+              data.username || "";
 
-            setEmail(
+            const savedPhone =
+              data.phone || "";
+
+            const savedEmail =
               data.email ||
-                currentUser.email ||
-                ""
-            );
+              currentUser.email ||
+              "";
 
-            setPhotoURL(
-              data.photoURL || null
+            const savedPhotoURL =
+              data.photoURL || null;
+
+            setUsername(savedUsername);
+            setPhone(savedPhone);
+            setEmail(savedEmail);
+            setPhotoURL(savedPhotoURL);
+
+            setOriginalUsername(
+              savedUsername
+            );
+            setOriginalPhone(
+              savedPhone
+            );
+            setOriginalEmail(
+              savedEmail
+            );
+            setOriginalPhotoURL(
+              savedPhotoURL
             );
 
             setNotifications(
@@ -131,9 +156,11 @@ export default function App() {
                 : false
             );
           } else {
-            setEmail(
-              currentUser.email || ""
-            );
+            const currentEmail =
+              currentUser.email || "";
+
+            setEmail(currentEmail);
+            setOriginalEmail(currentEmail);
           }
         } catch (error) {
           console.log(
@@ -173,16 +200,28 @@ export default function App() {
           mediaTypes: ["images"],
           allowsEditing: true,
           aspect: [1, 1],
-          quality: 0.8,
+          quality: 0.5,
+          base64: true,
         });
 
       if (result.canceled) {
         return;
       }
 
-      setPhotoURL(
-        result.assets[0].uri
-      );
+      const asset = result.assets[0];
+
+      if (!asset.base64) {
+        Alert.alert(
+          "Error",
+          "Unable to process the selected image."
+        );
+        return;
+      }
+
+      const imageBase64 =
+        `data:image/jpeg;base64,${asset.base64}`;
+
+      setPhotoURL(imageBase64);
     } catch (error) {
       console.log(
         "Error selecting image:",
@@ -215,18 +254,35 @@ export default function App() {
         await ImagePicker.launchCameraAsync({
           allowsEditing: true,
           aspect: [1, 1],
-          quality: 0.8,
+          quality: 0.5,
+          base64: true,
         });
 
       if (result.canceled) return;
 
-      setPhotoURL(
-        result.assets[0].uri
-      );
+      const asset = result.assets[0];
+
+      if (!asset.base64) {
+        Alert.alert(
+          "Error",
+          "Unable to process the photo."
+        );
+        return;
+      }
+
+      const imageBase64 =
+        `data:image/jpeg;base64,${asset.base64}`;
+
+      setPhotoURL(imageBase64);
     } catch (error) {
       console.log(
         "Camera error:",
         error
+      );
+
+      Alert.alert(
+        "Error",
+        "Unable to take the photo."
       );
     }
   };
@@ -286,32 +342,38 @@ export default function App() {
     );
   };
 
-  const uploadPhoto = async (uri) => {
-    if (!user) {
-      throw new Error(
-        "No authenticated user."
+  const createSecurityAlert = async ({
+    type,
+    title,
+    message,
+    extraData = {},
+  }) => {
+    try {
+      if (!user) return;
+
+      await addDoc(
+        collection(
+          db,
+          "Users",
+          user.uid,
+          "securityAlerts"
+        ),
+        {
+          uid: user.uid,
+          type,
+          title,
+          message,
+          read: false,
+          createdAt: serverTimestamp(),
+          ...extraData,
+        }
+      );
+    } catch (error) {
+      console.log(
+        "Error creating security alert:",
+        error
       );
     }
-
-    const response = await fetch(uri);
-    const blob = await response.blob();
-
-    const imageRef = ref(
-      storage,
-      `profileImages/${user.uid}.jpg`
-    );
-
-    await uploadBytes(
-      imageRef,
-      blob
-    );
-
-    const downloadURL =
-      await getDownloadURL(
-        imageRef
-      );
-
-    return downloadURL;
   };
 
   const updateProfile = async () => {
@@ -351,8 +413,97 @@ export default function App() {
       return;
     }
 
+    const newUsername =
+      username.trim();
+
+    const newPhone =
+      phone.trim();
+
+    const newEmail =
+      email.trim();
+
+    const oldEmail =
+      (
+        originalEmail ||
+        user.email ||
+        ""
+      ).trim();
+
+    const usernameChanged =
+      newUsername !==
+      originalUsername.trim();
+
+    const phoneChanged =
+      newPhone !==
+      originalPhone.trim();
+
+    const emailChanged =
+      newEmail.toLowerCase() !==
+      oldEmail.toLowerCase();
+
+    const photoChanged =
+      photoURL !== originalPhotoURL;
+
+    const anyProfileChange =
+      usernameChanged ||
+      phoneChanged ||
+      emailChanged ||
+      photoChanged;
+
     try {
       setSaving(true);
+
+      if (emailChanged) {
+        try {
+          await updateEmail(
+            user,
+            newEmail
+          );
+
+          await sendEmailVerification(
+            user
+          );
+        } catch (error) {
+          console.log(
+            "Error updating authentication email:",
+            error
+          );
+
+          if (
+            error?.code ===
+            "auth/requires-recent-login"
+          ) {
+            Alert.alert(
+              "Recent Login Required",
+              "For security reasons, please log in again before changing your email address."
+            );
+          } else if (
+            error?.code ===
+            "auth/email-already-in-use"
+          ) {
+            Alert.alert(
+              "Email Already in Use",
+              "That email address is already being used by another account."
+            );
+          } else if (
+            error?.code ===
+            "auth/invalid-email"
+          ) {
+            Alert.alert(
+              "Invalid Email",
+              "Please enter a valid email address."
+            );
+          } else {
+            Alert.alert(
+              "Email Update Error",
+              error?.message ||
+                "Unable to update your email address."
+            );
+          }
+
+          return;
+        }
+      }
 
       const userRef = doc(
         db,
@@ -363,20 +514,84 @@ export default function App() {
       await setDoc(
         userRef,
         {
-          username: username.trim(),
-          phone: phone.trim(),
-          email: email.trim(),
-          updatedAt: new Date(),
+          username: newUsername,
+          phone: newPhone,
+          email: newEmail,
+          photoURL: photoURL || null,
+          notifications,
+          darkMode,
+          updatedAt: serverTimestamp(),
         },
         {
           merge: true,
         }
       );
 
-      Alert.alert(
-        "Profile Updated",
-        "Your profile has been updated successfully."
+      if (usernameChanged || photoChanged) {
+        await createSecurityAlert({
+          type: "profile_change",
+          title: "Profile information updated",
+          message:
+            "Your profile information was updated successfully.",
+        });
+      }
+
+      if (emailChanged) {
+        await createSecurityAlert({
+          type: "email_change",
+          title: "Email address changed",
+          message:
+            "Your account email address was changed successfully. A verification email has been sent to your new address.",
+          extraData: {
+            newEmail,
+          },
+        });
+      }
+
+      if (phoneChanged) {
+        await createSecurityAlert({
+          type: "phone_change",
+          title: "Phone number changed",
+          message:
+            "Your account phone number was updated successfully.",
+          extraData: {
+            phone: newPhone,
+          },
+        });
+      }
+
+      setOriginalUsername(
+        newUsername
       );
+
+      setOriginalPhone(
+        newPhone
+      );
+
+      setOriginalEmail(
+        newEmail
+      );
+
+      setOriginalPhotoURL(
+        photoURL
+      );
+
+      if (emailChanged) {
+        Alert.alert(
+          "Profile Updated",
+          "Your profile was updated successfully. A verification email was sent to your new email address."
+        );
+      } else if (anyProfileChange) {
+        Alert.alert(
+          "Profile Updated",
+          "Your profile has been updated successfully."
+        );
+      } else {
+        Alert.alert(
+          "Settings Saved",
+          "Your settings have been saved successfully."
+        );
+      }
     } catch (error) {
       console.log(
         "Error:",

@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { router } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -64,9 +65,12 @@ export default function TermsScreen() {
                 top: isSmallScreen ? 45 : 55,
                 width: 42 * scale,
                 height: 42 * scale,
+                
               },
+              
             ]}
             activeOpacity={0.7}
+            onPress={() => router.back()}
           >
             <Ionicons
               name="arrow-back"

@@ -1,6 +1,11 @@
 import { router } from "expo-router";
 import { FirebaseError } from "firebase/app";
 import { updatePassword } from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  serverTimestamp,
+} from "firebase/firestore";
 import { useRef, useState } from "react";
 import {
   Alert,
@@ -16,7 +21,7 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { auth } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 export default function ChangePassword() {
   const newPasswordRef = useRef("");
@@ -32,6 +37,29 @@ export default function ChangePassword() {
   const tablet = width >= 600;
   const horizontalPadding = tablet ? 50 : small ? 18 : 25;
 
+  const createSecurityAlert = async (user) => {
+    try {
+      const alertsRef = collection(
+        db,
+        "Users",
+        user.uid,
+        "securityAlerts"
+      );
+
+      await addDoc(alertsRef, {
+        uid: user.uid,
+        type: "password_change",
+        title: "Password changed",
+        message:
+          "Your account password was changed successfully. If you did not make this change, secure your account immediately.",
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.log("Error creating password security alert:", error);
+    }
+  };
+
   const changePassword = async () => {
     const newPassword = newPasswordRef.current;
     const confirmPassword = confirmPasswordRef.current;
@@ -42,7 +70,10 @@ export default function ChangePassword() {
     }
 
     if (newPassword.length < 6) {
-      Alert.alert("Error", "The password must be at least 6 characters long.");
+      Alert.alert(
+        "Error",
+        "The password must be at least 6 characters long."
+      );
       return;
     }
 
@@ -60,32 +91,56 @@ export default function ChangePassword() {
 
     try {
       setLoading(true);
+
       await updatePassword(user, newPassword);
+
+      await createSecurityAlert(user);
 
       newPasswordRef.current = "";
       confirmPasswordRef.current = "";
 
-      Alert.alert("Success", "Your password was changed successfully.", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/login"),
-        },
-      ]);
+      Alert.alert(
+        "Success",
+        "Your password was changed successfully.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/login"),
+          },
+        ]
+      );
     } catch (error) {
-      console.log(error);
+      console.log("Password change error:", error);
 
       if (
         error instanceof FirebaseError &&
         error.code === "auth/requires-recent-login"
       ) {
-        Alert.alert("Session expired", "You need to sign in again.");
+        Alert.alert(
+          "Session expired",
+          "You need to sign in again before changing your password."
+        );
       } else if (
         error instanceof FirebaseError &&
         error.code === "auth/weak-password"
       ) {
-        Alert.alert("Weak password", "The password must be stronger.");
+        Alert.alert(
+          "Weak password",
+          "The password must be stronger."
+        );
+      } else if (
+        error instanceof FirebaseError &&
+        error.code === "auth/network-request-failed"
+      ) {
+        Alert.alert(
+          "Without connection",
+          "Could not connect to Firebase. Check your Internet connection."
+        );
       } else {
-        Alert.alert("Error", "The password could not be changed.");
+        Alert.alert(
+          "Error",
+          "The password could not be changed."
+        );
       }
     } finally {
       setLoading(false);
@@ -94,7 +149,10 @@ export default function ChangePassword() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#081023"
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -113,6 +171,8 @@ export default function ChangePassword() {
             ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
+            alwaysBounceVertical={true}
+            overScrollMode="always"
           >
             <View style={styles.card}>
               <Text style={styles.label}>New Password</Text>
@@ -133,10 +193,16 @@ export default function ChangePassword() {
                   autoComplete="off"
                   textContentType="oneTimeCode"
                   importantForAutofill="no"
+                  editable={!loading}
                 />
 
-                <TouchableOpacity onPress={() => setShowNew(!showNew)}>
-                  <Text style={styles.show}>{showNew ? "Hide" : "Show"}</Text>
+                <TouchableOpacity
+                  onPress={() => setShowNew(!showNew)}
+                  disabled={loading}
+                >
+                  <Text style={styles.show}>
+                    {showNew ? "Hide" : "Show"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -158,9 +224,15 @@ export default function ChangePassword() {
                   autoComplete="off"
                   textContentType="oneTimeCode"
                   importantForAutofill="no"
+                  editable={!loading}
                 />
 
-                <TouchableOpacity onPress={() => setShowConfirm(!showConfirm)}>
+                <TouchableOpacity
+                  onPress={() =>
+                    setShowConfirm(!showConfirm)
+                  }
+                  disabled={loading}
+                >
                   <Text style={styles.show}>
                     {showConfirm ? "Hide" : "Show"}
                   </Text>
@@ -168,13 +240,18 @@ export default function ChangePassword() {
               </View>
 
               <TouchableOpacity
-                style={[styles.button, loading && { opacity: 0.7 }]}
+                style={[
+                  styles.button,
+                  loading && { opacity: 0.7 },
+                ]}
                 onPress={changePassword}
                 disabled={loading}
                 activeOpacity={0.8}
               >
                 <Text style={styles.buttonText}>
-                  {loading ? "Changing..." : "Change Password"}
+                  {loading
+                    ? "Changing..."
+                    : "Change Password"}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -220,7 +297,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingTop: 40,
-    paddingBottom: 30,
+    paddingBottom: 350,
   },
 
   card: {

@@ -5,7 +5,9 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Device from "expo-device";
 import { router } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
 import {
+  addDoc,
   collection,
   deleteDoc,
   doc,
@@ -13,7 +15,6 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -132,9 +133,9 @@ export default function Devices() {
 
         const deviceRef = doc(
           db,
-          "Dispositivos Vinculados",
+          "Users",
           user.uid,
-          "linkedDevices",
+          "devices",
           deviceId
         );
 
@@ -147,6 +148,7 @@ export default function Devices() {
             systemName,
             modelName: Device.modelName || "",
             osVersion: Device.osVersion || "",
+            location: "El Salvador",
             lastActive: serverTimestamp(),
           },
           { merge: true }
@@ -154,9 +156,9 @@ export default function Devices() {
 
         const devicesRef = collection(
           db,
-          "Dispositivos Vinculados",
+          "Users",
           user.uid,
-          "linkedDevices"
+          "devices"
         );
 
         unsubscribeDevices = onSnapshot(
@@ -176,11 +178,15 @@ export default function Devices() {
               const dateA =
                 a.lastActive?.toDate
                   ? a.lastActive.toDate()
+                  : a.lastLoginAt?.toDate
+                  ? a.lastLoginAt.toDate()
                   : new Date(0);
 
               const dateB =
                 b.lastActive?.toDate
                   ? b.lastActive.toDate()
+                  : b.lastLoginAt?.toDate
+                  ? b.lastLoginAt.toDate()
                   : new Date(0);
 
               return dateB - dateA;
@@ -262,7 +268,8 @@ export default function Devices() {
   };
 
   const getDeviceDetails = (device) => {
-    const location = "El Salvador";
+    const location =
+      device.location || "El Salvador";
 
     if (device.deviceType === "desktop") {
       return `${location}\n${
@@ -286,17 +293,24 @@ export default function Devices() {
       };
     }
 
-    if (!device.lastActive?.toDate) {
+    const lastActiveDate =
+      device.lastActive?.toDate
+        ? device.lastActive.toDate()
+        : device.lastLoginAt?.toDate
+        ? device.lastLoginAt.toDate()
+        : null;
+
+    if (!lastActiveDate) {
       return {
         active: false,
         text: "Last active: unknown",
       };
     }
 
-    const lastActive = device.lastActive.toDate();
     const now = new Date();
 
-    const difference = now - lastActive;
+    const difference =
+      now - lastActiveDate;
 
     const minutes = Math.floor(
       difference / 60000
@@ -375,14 +389,37 @@ export default function Devices() {
                 return;
               }
 
+              const deviceName =
+                getDeviceName(device);
+
               await deleteDoc(
                 doc(
                   db,
-                  "Dispositivos Vinculados",
+                  "Users",
                   user.uid,
-                  "linkedDevices",
+                  "devices",
                   device.id
                 )
+              );
+
+              await addDoc(
+                collection(
+                  db,
+                  "Users",
+                  user.uid,
+                  "securityAlerts"
+                ),
+                {
+                  uid: user.uid,
+                  type: "device_unlinked",
+                  title: "Device unlinked",
+                  message: `The device ${deviceName} was removed from your linked devices.`,
+                  deviceId: device.id,
+                  deviceName:
+                    device.deviceName || deviceName,
+                  read: false,
+                  createdAt: serverTimestamp(),
+                }
               );
             } catch (error) {
               console.log(

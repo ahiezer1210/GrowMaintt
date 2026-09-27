@@ -1,6 +1,5 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -10,14 +9,15 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppSettings } from "../../context/Appsettings";
 
 const OPTIONS = [
-  ["shield-checkmark-outline", "Backup and synchronization", "backup"],
-  ["key-outline", "Change password", "newPassword"],
-  ["cash-outline", "Expense control period", "Expensecontrolperiod"],
-  ["phone-portrait-outline", "Linked devices", "linkeddevices"],
-  ["log-out-outline", "Log out", "logout"],
-  ["close-outline", "Delete account", "deleteaccount"],
+  ["shield-checkmark-outline", "backup", "backup"],
+  ["key-outline", "changePassword", "newPassword"],
+  ["cash-outline", "expenseControl", "Expensecontrolperiod"],
+  ["phone-portrait-outline", "linkedDevices", "linkeddevices"],
+  ["log-out-outline", "logout", "logout"],
+  ["close-outline", "deleteAccount", "deleteaccount"],
 ];
 
 const NAV_ITEMS = [
@@ -49,7 +49,15 @@ const NAV_ITEMS = [
 ];
 
 export default function SettingsScreen() {
-  const [selectedTheme, setSelectedTheme] = useState("light");
+  const {
+    theme,
+    language,
+    isDark,
+    colors,
+    t,
+    setTheme,
+    setLanguage,
+  } = useAppSettings();
 
   const { width } = useWindowDimensions();
 
@@ -70,8 +78,23 @@ export default function SettingsScreen() {
   };
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView
+      edges={["top"]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.header,
+          },
+        ]}
+      >
         <View style={styles.topRow}>
           <TouchableOpacity
             onPress={() => router.push("/profile")}
@@ -101,7 +124,7 @@ export default function SettingsScreen() {
               },
             ]}
           >
-            Settings
+            {t.settings}
           </Text>
 
           <TouchableOpacity
@@ -119,8 +142,11 @@ export default function SettingsScreen() {
 
         <View style={styles.themesContainer}>
           <TouchableOpacity
-            style={styles.themeOption}
-            onPress={() => setSelectedTheme("light")}
+            style={[
+              styles.themeOption,
+              theme === "light" && styles.themeOptionActive,
+            ]}
+            onPress={() => setTheme("light")}
             activeOpacity={0.8}
           >
             <Ionicons name="sunny-outline" size={38} color="#FFFFFF" />
@@ -128,16 +154,26 @@ export default function SettingsScreen() {
             <View
               style={[
                 styles.radioButton,
-                selectedTheme === "light" && styles.radioActive,
+                {
+                  backgroundColor:
+                    theme === "light"
+                      ? "#23BDEE"
+                      : isDark
+                      ? "#5D6673"
+                      : "#C4C4C4",
+                },
               ]}
             />
 
-            <Text style={styles.themeLabel}>Light theme</Text>
+            <Text style={styles.themeLabel}>{t.lightTheme}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.themeOption}
-            onPress={() => setSelectedTheme("dark")}
+            style={[
+              styles.themeOption,
+              theme === "dark" && styles.themeOptionActive,
+            ]}
+            onPress={() => setTheme("dark")}
             activeOpacity={0.8}
           >
             <Ionicons name="moon-outline" size={38} color="#FFFFFF" />
@@ -145,46 +181,115 @@ export default function SettingsScreen() {
             <View
               style={[
                 styles.radioButton,
-                selectedTheme === "dark" && styles.radioActive,
+                {
+                  backgroundColor:
+                    theme === "dark"
+                      ? "#23BDEE"
+                      : isDark
+                      ? "#5D6673"
+                      : "#C4C4C4",
+                },
               ]}
             />
 
-            <Text style={styles.themeLabel}>Dark theme</Text>
+            <Text style={styles.themeLabel}>{t.darkTheme}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.languageContainer}>
+          <TouchableOpacity
+            style={[
+              styles.languageButton,
+              language === "en" && styles.languageButtonActive,
+            ]}
+            onPress={() => setLanguage("en")}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="language-outline"
+              size={19}
+              color="#FFFFFF"
+            />
+
+            <Text style={styles.languageText}>{t.english}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.languageButton,
+              language === "es" && styles.languageButtonActive,
+            ]}
+            onPress={() => setLanguage("es")}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="language-outline"
+              size={19}
+              color="#FFFFFF"
+            />
+
+            <Text style={styles.languageText}>{t.spanish}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.contentCard}>
+      <View
+        style={[
+          styles.contentCard,
+          {
+            backgroundColor: colors.card,
+          },
+        ]}
+      >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           bounces={true}
         >
-          {OPTIONS.map(([icon, text, route]) => (
+          {OPTIONS.map(([icon, textKey, route]) => (
             <TouchableOpacity
               style={styles.optionRow}
-              key={text}
+              key={textKey}
               activeOpacity={0.7}
               onPress={() => handleOptionPress(route)}
             >
-              <View style={styles.iconCircle}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  {
+                    backgroundColor: colors.icon,
+                  },
+                ]}
+              >
                 <Ionicons name={icon} size={22} color="#FFFFFF" />
               </View>
 
-              <Text style={styles.optionText}>{text}</Text>
+              <Text
+                style={[
+                  styles.optionText,
+                  {
+                    color: colors.text,
+                  },
+                ]}
+              >
+                {t[textKey]}
+              </Text>
 
               <Ionicons
                 name="chevron-forward"
                 size={22}
-                color="#0D1B2A"
+                color={colors.chevron}
               />
             </TouchableOpacity>
           ))}
         </ScrollView>
 
         <View style={styles.bottomNavContainer}>
-          <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
+          <SafeAreaView
+            edges={["bottom"]}
+            style={styles.bottomNavSafeArea}
+          >
             <View style={styles.bottomTabBar}>
               {NAV_ITEMS.map((item) => (
                 <TouchableOpacity
@@ -211,14 +316,12 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0D1B2A",
   },
 
   header: {
     paddingHorizontal: 25,
     paddingTop: 6,
     paddingBottom: 14,
-    backgroundColor: "#071426",
   },
 
   topRow: {
@@ -252,27 +355,30 @@ const styles = StyleSheet.create({
     transform: [{ translateY: 4 }],
   },
 
- themesContainer: {
-  flexDirection: "row",
-  justifyContent: "space-evenly",
-  alignItems: "center",
-  paddingHorizontal: 10,
-  columnGap: 55,
-},
+  themesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    columnGap: 55,
+  },
+
   themeOption: {
     alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 15,
+  },
+
+  themeOptionActive: {
+    backgroundColor: "rgba(35, 189, 238, 0.12)",
   },
 
   radioButton: {
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#C4C4C4",
     marginVertical: 5,
-  },
-
-  radioActive: {
-    backgroundColor: "#23BDEE",
   },
 
   themeLabel: {
@@ -281,13 +387,43 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
+  languageContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 14,
+    gap: 10,
+  },
+
+  languageButton: {
+    width: 105,
+    height: 38,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+    gap: 6,
+  },
+
+  languageButtonActive: {
+    backgroundColor: "#23BDEE",
+    borderColor: "#23BDEE",
+  },
+
+  languageText: {
+    color: "#FFFFFF",
+    fontSize: 12,
+    fontWeight: "700",
+  },
+
   contentCard: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
     overflow: "hidden",
-    justify: "space-between",
+    justifyContent: "space-between",
   },
 
   scrollView: {
@@ -300,7 +436,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     justifyContent: "space-between",
-    minHeight: 320, 
+    minHeight: 320,
   },
 
   optionRow: {
@@ -313,7 +449,6 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "#23BDEE",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 16,
@@ -323,11 +458,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14.5,
     fontWeight: "600",
-    color: "#263238",
   },
 
   bottomNavContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "transparent",
   },
 
   bottomNavSafeArea: {
@@ -338,7 +472,7 @@ const styles = StyleSheet.create({
   bottomTabBar: {
     height: 65,
     flexDirection: "row",
-    justify: "space-around",
+    justifyContent: "space-around",
     alignItems: "center",
     backgroundColor: "#25B5D1",
     borderTopLeftRadius: 78,

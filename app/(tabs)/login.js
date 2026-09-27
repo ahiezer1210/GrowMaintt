@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import {
@@ -43,24 +44,117 @@ export default function LoginScreen() {
   const tablet = width >= 600;
   const horizontalPadding = tablet ? 50 : small ? 18 : 25;
 
+  const createPasswordResetAlert = async (user) => {
+    try {
+      const pendingReset =
+        await AsyncStorage.getItem(
+          "pendingPasswordReset"
+        );
+
+      if (!pendingReset) {
+        return;
+      }
+
+      let resetData;
+
+      try {
+        resetData = JSON.parse(pendingReset);
+      } catch {
+        await AsyncStorage.removeItem(
+          "pendingPasswordReset"
+        );
+        return;
+      }
+
+      const savedEmail =
+        resetData?.email?.trim?.().toLowerCase?.();
+
+      const currentEmail =
+        user?.email?.trim?.().toLowerCase?.();
+
+      if (!savedEmail || !currentEmail) {
+        return;
+      }
+
+      if (savedEmail !== currentEmail) {
+        return;
+      }
+
+      const requestedAt = Number(
+        resetData?.requestedAt || 0
+      );
+
+      const now = Date.now();
+
+      const maxAge = 24 * 60 * 60 * 1000;
+
+      if (
+        requestedAt &&
+        now - requestedAt > maxAge
+      ) {
+        await AsyncStorage.removeItem(
+          "pendingPasswordReset"
+        );
+        return;
+      }
+
+      const alertsRef = collection(
+        db,
+        "Users",
+        user.uid,
+        "securityAlerts"
+      );
+
+      await addDoc(alertsRef, {
+        uid: user.uid,
+        type: "password_reset",
+        title: "Password reset",
+        message:
+          "Your account password was reset successfully. If you did not make this change, secure your account immediately.",
+        read: false,
+        createdAt: serverTimestamp(),
+      });
+
+      await AsyncStorage.removeItem(
+        "pendingPasswordReset"
+      );
+    } catch (error) {
+      console.log(
+        "Error creating password reset alert:",
+        error
+      );
+    }
+  };
+
   const handleSignIn = async () => {
     if (!email.trim() || !password) {
-      Alert.alert("Incomplete fields", "Please enter your email and password.");
+      Alert.alert(
+        "Incomplete fields",
+        "Please enter your email and password."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
-      const credential = await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
+      const credential =
+        await signInWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        );
 
       const user = credential.user;
-      const userRef = doc(db, "Users", user.uid);
-      const userSnapshot = await getDoc(userRef);
+
+      const userRef = doc(
+        db,
+        "Users",
+        user.uid
+      );
+
+      const userSnapshot =
+        await getDoc(userRef);
 
       if (!userSnapshot.exists()) {
         await setDoc(userRef, {
@@ -68,11 +162,29 @@ export default function LoginScreen() {
           createdAt: serverTimestamp(),
         });
       }
+
       const deviceId = await getDeviceId();
-      const { deviceName, location } = await getRealDeviceInfo();
-      const devicesRef = collection(db, "Users", user.uid, "devices");
-      const deviceRef = doc(db, "Users", user.uid, "devices", deviceId);
-      const deviceSnapshot = await getDoc(deviceRef);
+
+      const { deviceName, location } =
+        await getRealDeviceInfo();
+
+      const devicesRef = collection(
+        db,
+        "Users",
+        user.uid,
+        "devices"
+      );
+
+      const deviceRef = doc(
+        db,
+        "Users",
+        user.uid,
+        "devices",
+        deviceId
+      );
+
+      const deviceSnapshot =
+        await getDoc(deviceRef);
 
       if (deviceSnapshot.exists()) {
         await setDoc(
@@ -81,68 +193,115 @@ export default function LoginScreen() {
             deviceName,
             location,
             lastLoginAt: serverTimestamp(),
+            lastActive: serverTimestamp(),
           },
-          { merge: true },
-        );
-
-        router.replace("/home");
-        return;
-      }
-
-      const devicesSnapshot = await getDocs(devicesRef);
-      const isFirstDevice = devicesSnapshot.empty;
-
-      await setDoc(deviceRef, {
-        deviceId,
-        deviceName,
-        location,
-        firstLoginAt: serverTimestamp(),
-        lastLoginAt: serverTimestamp(),
-        trusted: isFirstDevice,
-        primary: isFirstDevice,
-      });
-
-      if (isFirstDevice) {
-        const userRef = doc(db, "Users", user.uid);
-        await setDoc(
-          userRef,
           {
-            primaryDeviceId: deviceId,
-          },
-          { merge: true },
+            merge: true,
+          }
         );
-      } else {
-        const alertsRef = collection(db, "Users", user.uid, "securityAlerts");
+
+        const alertsRef = collection(
+          db,
+          "Users",
+          user.uid,
+          "securityAlerts"
+        );
+
         await addDoc(alertsRef, {
           uid: user.uid,
           deviceId,
           deviceName,
           location,
           type: "login_attempt",
-          status: "pending",
+          title: "Login detected",
+          message: `Your account was accessed from ${
+            deviceName || "a linked device"
+          }.`,
+          status: "completed",
           read: false,
           createdAt: serverTimestamp(),
         });
+      } else {
+        const devicesSnapshot =
+          await getDocs(devicesRef);
+
+        const isFirstDevice =
+          devicesSnapshot.empty;
+
+        await setDoc(deviceRef, {
+          deviceId,
+          deviceName,
+          location,
+          firstLoginAt: serverTimestamp(),
+          lastLoginAt: serverTimestamp(),
+          lastActive: serverTimestamp(),
+          trusted: isFirstDevice,
+          primary: isFirstDevice,
+        });
+
+        if (isFirstDevice) {
+          await setDoc(
+            userRef,
+            {
+              primaryDeviceId: deviceId,
+            },
+            {
+              merge: true,
+            }
+          );
+        } else {
+          const alertsRef = collection(
+            db,
+            "Users",
+            user.uid,
+            "securityAlerts"
+          );
+
+          await addDoc(alertsRef, {
+            uid: user.uid,
+            deviceId,
+            deviceName,
+            location,
+            type: "new_device_login",
+            title: "New login detected",
+            message: `A new login was detected from ${
+              deviceName || "another device"
+            }.`,
+            status: "pending",
+            read: false,
+            createdAt: serverTimestamp(),
+          });
+        }
       }
+
+      await createPasswordResetAlert(user);
 
       router.replace("/home");
     } catch (error) {
-      let message = "Unable to sign in. Please try again.";
+      let message =
+        "Unable to sign in. Please try again.";
 
       switch (error.code) {
         case "auth/invalid-email":
-          message = "The email address is not valid.";
+          message =
+            "The email address is not valid.";
           break;
+
         case "auth/user-not-found":
         case "auth/wrong-password":
         case "auth/invalid-credential":
-          message = "Incorrect email or password.";
+          message =
+            "Incorrect email or password.";
           break;
+
         case "auth/too-many-requests":
-          message = "Too many attempts. Please try again later.";
+          message =
+            "Too many attempts. Please try again later.";
           break;
+
         case "permission-denied":
-          message = "You do not have permission to access this data.";
+          message =
+            "You do not have permission to access this data.";
           break;
       }
 
@@ -154,18 +313,28 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#081023"
+      />
 
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
       >
         <View style={styles.header}>
           <Image
             source={require("../../assets/images/logo.png")}
             style={styles.logo}
           />
-          <Text style={styles.title}>Sign In</Text>
+
+          <Text style={styles.title}>
+            Sign In
+          </Text>
         </View>
 
         <View style={styles.whiteContainer}>
@@ -174,14 +343,18 @@ export default function LoginScreen() {
             contentContainerStyle={[
               styles.scrollContent,
               {
-                paddingHorizontal: horizontalPadding,
+                paddingHorizontal:
+                  horizontalPadding,
               },
             ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
-              <Text style={styles.label}>Email or Username</Text>
+              <Text style={styles.label}>
+                Email or Username
+              </Text>
+
               <TextInput
                 style={styles.input}
                 placeholder="Enter your email"
@@ -192,7 +365,10 @@ export default function LoginScreen() {
                 keyboardType="email-address"
               />
 
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>
+                Password
+              </Text>
+
               <View style={styles.passwordBox}>
                 <TextInput
                   style={styles.password}
@@ -202,35 +378,64 @@ export default function LoginScreen() {
                   value={password}
                   onChangeText={setPassword}
                 />
+
                 <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
+                  onPress={() =>
+                    setShowPassword(
+                      !showPassword
+                    )
+                  }
                 >
                   <Text style={styles.show}>
-                    {showPassword ? "Hide" : "Show"}
+                    {showPassword
+                      ? "Hide"
+                      : "Show"}
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity onPress={() => router.push("/forgotpassword")}>
-                <Text style={styles.forgot}>Forgot Password?</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  router.push("/forgotpassword")
+                }
+              >
+                <Text style={styles.forgot}>
+                  Forgot Password?
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.button, loading && { opacity: 0.7 }]}
+                style={[
+                  styles.button,
+                  loading && { opacity: 0.7 },
+                ]}
                 onPress={handleSignIn}
                 disabled={loading}
               >
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.buttonText}>Sign In</Text>
+                  <Text
+                    style={styles.buttonText}
+                  >
+                    Sign In
+                  </Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.register}>
-                <Text style={styles.account}>Don't have an account?</Text>
-                <TouchableOpacity onPress={() => router.push("/register")}>
-                  <Text style={styles.signup}>Sign Up</Text>
+                <Text style={styles.account}>
+                  Don't have an account?
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push("/register")
+                  }
+                >
+                  <Text style={styles.signup}>
+                    Sign Up
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -287,7 +492,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingTop: 35,
-    paddingBottom: 40, 
+    paddingBottom: 40,
   },
 
   card: {
