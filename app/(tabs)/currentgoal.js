@@ -220,7 +220,6 @@ export default function SavingsGoalsScreen() {
         backgroundColor="#081023"
       />
 
-      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -266,7 +265,6 @@ export default function SavingsGoalsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* CARD BLANCA */}
       <View
         style={[
           styles.content,

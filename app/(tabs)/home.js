@@ -3,8 +3,7 @@ import { router } from "expo-router";
 import {
   collection,
   doc,
-  getDoc,
-  onSnapshot,
+  onSnapshot
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -448,18 +447,16 @@ export default function App() {
       return;
     }
 
-    const loadUserData =
-      async () => {
-        try {
-          const userRef = doc(
-            db,
-            "Users",
-            user.uid
-          );
+    const userRef = doc(
+      db,
+      "Users",
+      user.uid
+    );
 
-          const userSnap =
-            await getDoc(userRef);
-
+    const unsubscribe =
+      onSnapshot(
+        userRef,
+        (userSnap) => {
           if (
             userSnap.exists()
           ) {
@@ -472,22 +469,23 @@ export default function App() {
             );
 
             setProfilePhoto(
-              userData.identityDocumentUrl ||
+              userData.photoURL ||
                 null
             );
           } else {
             setUsername("User");
             setProfilePhoto(null);
           }
-        } catch (error) {
+        },
+        (error) => {
           console.log(
             "Error loading user data:",
             error
           );
         }
-      };
+      );
 
-    loadUserData();
+    return unsubscribe;
   }, []);
 
   useEffect(() => {

@@ -1,20 +1,32 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  arrayUnion,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  runTransaction,
+  serverTimestamp,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../../firebaseConfig";
 
 const rewards = [
   {
+    id: "hilasal",
     icon: "card-outline",
     title: "5% discount",
     store: "Hilasal",
@@ -22,6 +34,7 @@ const rewards = [
     points: 200,
   },
   {
+    id: "dollarcity",
     icon: "gift-outline",
     title: "Gift card",
     store: "Dollarcity",
@@ -29,6 +42,7 @@ const rewards = [
     points: 200,
   },
   {
+    id: "groupq",
     icon: "pricetag-outline",
     title: "5% discount",
     store: "Group Q",
@@ -36,10 +50,27 @@ const rewards = [
     points: 100,
   },
   {
-    icon: "restaurant-outline",
+    id: "microsoft",
+    icon: "microsoft",
+    title: "5% discount",
+    store: "Microsoft",
+    description: "Discount on Microsoft products",
+    points: 300,
+  },
+  {
+    id: "neveria",
+    icon: "ice-cream",
     title: "Free Topping",
     store: "Neveria",
     description: "Free fruits topping",
+    points: 500,
+  },
+  {
+    id: "donli",
+    icon: "restaurant-outline",
+    title: "Food",
+    store: "Don Li",
+    description: "Free sushi order",
     points: 500,
   },
 ];
@@ -73,9 +104,7 @@ export default function PointExchange() {
 
   const [availablePoints, setAvailablePoints] = useState(0);
   const [redeemedPoints, setRedeemedPoints] = useState(0);
-  const availableRewards = rewards.filter(
-    (reward) => availablePoints >= reward.points
-  );
+  const [redeemingReward, setRedeemingReward] = useState(null);
 
   const pointsGoal = 500;
 
@@ -88,28 +117,300 @@ export default function PointExchange() {
     const user = auth.currentUser;
 
     if (!user) {
+      setAvailablePoints(0);
+      setRedeemedPoints(0);
       return;
     }
 
-    const userRef = doc(db, "Users", user.uid);
+    const pointsQuery = query(
+      collection(db, "Points"),
+      where("userId", "==", user.uid)
+    );
 
-    const unsubscribe = onSnapshot(
-      userRef,
+    const redeemedQuery = query(
+      collection(db, "Redeemed"),
+      where("userId", "==", user.uid)
+    );
+
+    let totalPoints = 0;
+    let totalRedeemed = 0;
+
+    const updateAvailablePoints = () => {
+      const available = Math.max(totalPoints - totalRedeemed, 0);
+      setAvailablePoints(available);
+    };
+
+    const unsubscribePoints = onSnapshot(
+      pointsQuery,
       (snapshot) => {
-        if (snapshot.exists()) {
-          const data = snapshot.data();
-          setAvailablePoints(data.points || 0);
-        } else {
-          setAvailablePoints(0);
-        }
+        totalPoints = 0;
+
+        snapshot.forEach((item) => {
+          const data = item.data();
+
+          if (typeof data.points === "number") {
+            totalPoints += data.points;
+          }
+        });
+
+        updateAvailablePoints();
       },
       (error) => {
-        console.log("Error getting points:", error);
+        console.log("Error getting Points:", error);
+        setAvailablePoints(0);
       }
     );
 
-    return unsubscribe;
+    const unsubscribeRedeemed = onSnapshot(
+      redeemedQuery,
+      (snapshot) => {
+        totalRedeemed = 0;
+
+        snapshot.forEach((item) => {
+          const data = item.data();
+
+          if (typeof data.points === "number") {
+            totalRedeemed += data.points;
+          }
+        });
+
+        setRedeemedPoints(totalRedeemed);
+        updateAvailablePoints();
+      },
+      (error) => {
+        console.log("Error getting Redeemed:", error);
+        setRedeemedPoints(0);
+      }
+    );
+
+    return () => {
+      unsubscribePoints();
+      unsubscribeRedeemed();
+    };
   }, []);
+
+  const generarCodigo = (store) => {
+    const prefix = store
+      .replace(/[^a-zA-Z]/g, "")
+      .substring(0, 3)
+      .toUpperCase();
+
+    const characters = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+    let randomPart = "";
+
+    for (let i = 0; i < 6; i++) {
+      randomPart += characters.charAt(
+        Math.floor(Math.random() * characters.length)
+      );
+    }
+
+    return `GM-${prefix}-${randomPart}`;
+  };
+
+  const redeemReward = async (reward) => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert(
+        "Session required",
+        "Please log in again to redeem your reward."
+      );
+      return;
+    }
+
+    if (availablePoints < reward.points) {
+      Alert.alert(
+        "Not enough points",
+        `You need ${reward.points} points to redeem this reward.`
+      );
+      return;
+    }
+
+    setRedeemingReward(reward.id);
+
+    try {
+      const pointsQuery = query(
+        collection(db, "Points"),
+        where("userId", "==", user.uid)
+      );
+
+      const redeemedQuery = query(
+        collection(db, "Redeemed"),
+        where("userId", "==", user.uid)
+      );
+
+      const [pointsSnapshot, redeemedSnapshot] = await Promise.all([
+        new Promise((resolve, reject) => {
+          const unsubscribe = onSnapshot(
+            pointsQuery,
+            (snapshot) => {
+              unsubscribe();
+              resolve(snapshot);
+            },
+            (error) => {
+              unsubscribe();
+              reject(error);
+            }
+          );
+        }),
+        new Promise((resolve, reject) => {
+          const unsubscribe = onSnapshot(
+            redeemedQuery,
+            (snapshot) => {
+              unsubscribe();
+              resolve(snapshot);
+            },
+            (error) => {
+              unsubscribe();
+              reject(error);
+            }
+          );
+        }),
+      ]);
+
+      let totalPoints = 0;
+      let totalRedeemed = 0;
+
+      pointsSnapshot.forEach((item) => {
+        const data = item.data();
+
+        if (typeof data.points === "number") {
+          totalPoints += data.points;
+        }
+      });
+
+      redeemedSnapshot.forEach((item) => {
+        const data = item.data();
+
+        if (typeof data.points === "number") {
+          totalRedeemed += data.points;
+        }
+      });
+
+      const currentAvailablePoints = Math.max(
+        totalPoints - totalRedeemed,
+        0
+      );
+
+      if (currentAvailablePoints < reward.points) {
+        Alert.alert(
+          "Not enough points",
+          "You no longer have enough points for this reward."
+        );
+        return;
+      }
+
+      const code = generarCodigo(reward.store);
+
+      const redeemedRef = doc(collection(db, "Redeemed"));
+      const rewardRef = doc(collection(db, "Recompensas"));
+
+      const notificationRef = doc(
+        db,
+        "Notificaciones",
+        `${user.uid}_Rewards`
+      );
+
+      const rewardNotification = {
+        id: `${redeemedRef.id}_reward`,
+        uid: user.uid,
+        type: "reward_redeemed",
+        category: "Rewards",
+        title: "Reward unlocked",
+        message: `Your ${reward.title.toLowerCase()} at ${reward.store} is ready. You used ${reward.points} points.`,
+        rewardId: reward.id,
+        rewardTitle: reward.title,
+        store: reward.store,
+        points: reward.points,
+        code: code,
+        redeemedId: redeemedRef.id,
+        read: false,
+        createdAt: Timestamp.now(),
+      };
+
+      await runTransaction(db, async (transaction) => {
+        transaction.set(redeemedRef, {
+          userId: user.uid,
+          rewardId: reward.id,
+          store: reward.store,
+          title: reward.title,
+          points: reward.points,
+          code: code,
+          redeemedAt: serverTimestamp(),
+        });
+
+        transaction.set(rewardRef, {
+          userId: user.uid,
+          rewardId: reward.id,
+          store: reward.store,
+          title: reward.title,
+          description: reward.description,
+          points: reward.points,
+          code: code,
+          status: "active",
+          redeemedAt: serverTimestamp(),
+        });
+
+        transaction.set(
+          notificationRef,
+          {
+            uid: user.uid,
+            category: "Rewards",
+            notifications: arrayUnion(rewardNotification),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      });
+
+      Alert.alert(
+        "Reward unlocked!",
+        `Your ${reward.title.toLowerCase()} at ${reward.store} is ready.\n\nCode: ${code}\n\nPoints used: ${reward.points}`,
+        [
+          {
+            text: "OK",
+          },
+        ]
+      );
+    } catch (error) {
+      console.log("Error redeeming reward:", error);
+
+      Alert.alert(
+        "Something went wrong",
+        "We couldn't redeem this reward. Please try again."
+      );
+    } finally {
+      setRedeemingReward(null);
+    }
+  };
+
+  const confirmarCanje = (reward) => {
+    if (availablePoints < reward.points) {
+      Alert.alert(
+        "Reward locked",
+        `You need ${reward.points} points to unlock this reward.\n\nYou currently have ${availablePoints.toFixed(
+          1
+        )} points.`
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Redeem reward",
+      `Redeem ${reward.points} points for ${reward.title.toLowerCase()} at ${reward.store}?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Redeem",
+          onPress: () => redeemReward(reward),
+        },
+      ]
+    );
+  };
 
   const abrirNotificaciones = () => {
     router.push({
@@ -360,7 +661,8 @@ export default function PointExchange() {
               },
             ]}
           >
-            {Math.round(progressPercentage)}% of your goal, ¡You´re making progress!
+            {Math.round(progressPercentage)}% of your goal, ¡You´re making
+            progress!
           </Text>
         </View>
 
@@ -384,14 +686,11 @@ export default function PointExchange() {
             ¡Rewards!
           </Text>
 
-          {availablePoints === 0 ? (
-            <Text style={styles.noRewards}>
-              You don't have enough points yet.
-              Register an investment to earn points!
-            </Text>
-          ) : (
+          {rewards.map((item) => {
+            const isUnlocked = availablePoints >= item.points;
+            const isRedeeming = redeemingReward === item.id;
 
-            availableRewards.map((item, index) => (
+            return (
               <View
                 style={[
                   styles.reward,
@@ -399,9 +698,10 @@ export default function PointExchange() {
                     minHeight: 65 * scale,
                     marginBottom: 10 * scale,
                     paddingHorizontal: 8 * scale,
+                    opacity: isUnlocked ? 1 : 0.55,
                   },
                 ]}
-                key={index}
+                key={item.id}
               >
                 <View
                   style={[
@@ -465,119 +765,58 @@ export default function PointExchange() {
                   </Text>
                 </View>
 
-                <Text
-                  style={[
-                    styles.rewardPoints,
-                    {
-                      width: isTablet ? 100 * scale : 75 * scale,
-                      fontSize: 11 * scale,
-                    },
-                  ]}
-                >
-                  -{item.points}.0 points
-                </Text>
-              </View>
-            ))
-          )}
-
-          {availablePoints >= 500 && (
-            <>
-              <Text
-                style={[
-                  styles.sectionTitle,
-                  {
-                    fontSize: 22 * scale,
-                    marginTop: 10 * scale,
-                  },
-                ]}
-              >
-                ¡Big reward!
-              </Text>
-
-              <View
-                style={[
-                  styles.reward,
-                  {
-                    minHeight: 65 * scale,
-                    marginBottom: 10 * scale,
-                  },
-                ]}
-              >
                 <View
                   style={[
-                    styles.iconCircle,
+                    styles.rewardAction,
                     {
-                      width: 38 * scale,
-                      height: 38 * scale,
-                      borderRadius: 19 * scale,
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="restaurant-outline"
-                    size={23 * scale}
-                    color="white"
-                  />
-                </View>
-
-                <View
-                  style={[
-                    styles.rewardName,
-                    {
-                      width: isTablet ? 120 * scale : 85 * scale,
+                      width: isTablet ? 100 * scale : 82 * scale,
                     },
                   ]}
                 >
                   <Text
                     style={[
-                      styles.rewardTitle,
+                      styles.rewardPoints,
                       {
-                        fontSize: 14 * scale,
+                        fontSize: 10 * scale,
                       },
                     ]}
                   >
-                    Food
+                    {item.points}.0 pts
                   </Text>
 
-                  <Text
+                  <TouchableOpacity
                     style={[
-                      styles.store,
+                      styles.redeemButton,
                       {
-                        fontSize: 13 * scale,
+                        paddingVertical: 5 * scale,
+                        paddingHorizontal: 7 * scale,
+                        borderRadius: 7 * scale,
                       },
+                      !isUnlocked && styles.lockedButton,
                     ]}
+                    onPress={() => confirmarCanje(item)}
+                    disabled={isRedeeming}
+                    activeOpacity={0.75}
                   >
-                    Don Li
-                  </Text>
+                    <Text
+                      style={[
+                        styles.redeemButtonText,
+                        {
+                          fontSize: 9 * scale,
+                        },
+                      ]}
+                    >
+                      {isRedeeming
+                        ? "..."
+                        : isUnlocked
+                          ? "Redeem"
+                          : "Locked"}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-
-                <View style={styles.rewardDescription}>
-                  <Text
-                    style={[
-                      styles.description,
-                      {
-                        fontSize: 13 * scale,
-                      },
-                    ]}
-                  >
-                    Free shushi order
-                  </Text>
-                </View>
-
-                <Text
-                  style={[
-                    styles.rewardPoints,
-                    {
-                      width: isTablet ? 100 * scale : 75 * scale,
-                      fontSize: 11 * scale,
-                    },
-                  ]}
-                >
-                  -500.0 points
-                </Text>
               </View>
-            </>
-          )}
+            );
+          })}
         </View>
       </ScrollView>
 
@@ -609,7 +848,7 @@ export default function PointExchange() {
           </TouchableOpacity>
         ))}
       </View>
-    </SafeAreaView >
+    </SafeAreaView>
   );
 }
 
@@ -645,13 +884,6 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
-  },
-
-  noRewards: {
-    textAlign: "center",
-    color: "#777",
-    fontSize: 14,
-    marginVertical: 20,
   },
 
   pointsheader: {
@@ -802,11 +1034,32 @@ const styles = StyleSheet.create({
     color: "#555",
   },
 
+  rewardAction: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+
   rewardPoints: {
     color: "#24b3ce",
     textAlign: "right",
+    marginBottom: 4,
   },
 
+  redeemButton: {
+    backgroundColor: "#25B5D1",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  lockedButton: {
+    backgroundColor: "#B3B3B3",
+  },
+
+  redeemButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 
   bottomBar: {
     position: "absolute",

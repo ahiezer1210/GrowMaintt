@@ -1,7 +1,13 @@
-
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
 import { router } from "expo-router";
+import { getAuth } from "firebase/auth";
+import {
+    collection,
+    onSnapshot,
+    query,
+    where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
     Alert,
     ScrollView,
@@ -10,61 +16,115 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
+import { db } from "../../firebaseConfig";
 
 export default function Redemptionhistory() {
-    const [filter, setfilter] = useState("Todos");
-    const canjes = [
-        {
-            id: "1",
-            tipo: "Hilasal discount",
-            date: "May 10, 2026",
-            discount: "-$20.00",
-            state: "Complete",
-            icon: "pricetag-outline",
-        },
+    const [filter, setfilter] = useState("All");
+    const [canjes, setCanjes] = useState([]);
 
-        {
-            id: "2",
-            tipo: "Partner stores",
-            date: "April 28, 2026",
-            discount: "-$10.00",
-            state: "Complete",
-            icon: "pricetag-outline",
-        },
+    const auth = getAuth();
 
-        {
-            id: "3",
-            tipo: "Hilasal discount",
-            date: "July 5, 2026",
-            discount: "-$5.00",
-            state: "In process",
-            icon: "pricetag-outline",
-        },
+    useEffect(() => {
+        const user = auth.currentUser;
 
-        {
-            id: "4",
-            tipo: "Partner stores",
-            date: "March 20, 2026",
-            discount: "-$1.99",
-            state: "Canceled",
-            icon: "pricetag-outline",
-        },
-    ]
+        if (!user) {
+            setCanjes([]);
+            return;
+        }
+
+        const redeemedRef = collection(db, "Redeemed");
+
+        const redeemedQuery = query(
+            redeemedRef,
+            where("userId", "==", user.uid)
+        );
+
+        const unsubscribe = onSnapshot(
+            redeemedQuery,
+            (snapshot) => {
+                const data = snapshot.docs.map((doc) => {
+                    const item = doc.data();
+
+                    let date = "Date unavailable";
+
+                    if (item.redeemedAt?.toDate) {
+                        date = item.redeemedAt.toDate().toLocaleDateString(
+                            "en-US",
+                            {
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                            }
+                        );
+                    } else if (item.redeemedAt) {
+                        const parsedDate = new Date(item.redeemedAt);
+
+                        if (!isNaN(parsedDate.getTime())) {
+                            date = parsedDate.toLocaleDateString(
+                                "en-US",
+                                {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                }
+                            );
+                        }
+                    }
+
+                    return {
+                        id: doc.id,
+                        tipo: item.title || "Reward",
+                        store: item.store || "Partner stores",
+                        date,
+                        points: Number(item.points || 0),
+                        discount: `-${Number(item.points || 0)} pts`,
+                        state: item.state || "Complete",
+                        code: item.code || "",
+                        icon: "pricetag-outline",
+                    };
+                });
+
+                data.sort((a, b) => {
+                    const dateA = new Date(a.date).getTime();
+                    const dateB = new Date(b.date).getTime();
+
+                    return dateB - dateA;
+                });
+
+                setCanjes(data);
+            },
+            (error) => {
+                console.log("Error getting redemption history:", error);
+                setCanjes([]);
+            }
+        );
+
+        return unsubscribe;
+    }, []);
 
     const canjesFiltrados =
-        filter === "Todos"
+        filter === "All"
             ? canjes
             : canjes.filter((canje) => canje.state === filter);
+
+    const totalPoints = canjes.reduce(
+        (total, canje) => total + canje.points,
+        0
+    );
+
+    const totalExchanges = canjes.length;
 
     const showDetail = (canje) => {
         Alert.alert(
             canje.tipo,
+            `Store: ${canje.store}\n\n` +
             `Date: ${canje.date}\n\n` +
-            `Discount: ${canje.discount}\n\n` +
-            `State: ${canje.state}\n\n`,
+            `Points used: ${canje.points}\n\n` +
+            `Status: ${canje.state}\n\n` +
+            (canje.code ? `Code: ${canje.code}\n\n` : ""),
             [
                 {
-                    text: "Cerrar",
+                    text: "Close",
                 },
             ]
         );
@@ -82,7 +142,6 @@ export default function Redemptionhistory() {
                     contentContainerStyle={styles.scrollContent}
                 >
 
-
                     <View style={styles.resumen}>
 
                         <Text style={styles.resumenTitleGeneral}>
@@ -90,13 +149,13 @@ export default function Redemptionhistory() {
                         </Text>
 
                         <View style={styles.resumenContent}>
+
                             <View style={styles.giftContainer}>
                                 <Ionicons
                                     name="gift-outline"
                                     size={80}
                                     color="#081023"
                                 />
-
                             </View>
 
                             <View style={styles.resumenItem}>
@@ -112,12 +171,13 @@ export default function Redemptionhistory() {
                                 </Text>
 
                                 <Text style={styles.resumenValor}>
-                                    12
+                                    {totalExchanges}
                                 </Text>
 
                             </View>
 
                             <View style={styles.resumenItem}>
+
                                 <Ionicons
                                     name="wallet-outline"
                                     size={25}
@@ -129,11 +189,13 @@ export default function Redemptionhistory() {
                                 </Text>
 
                                 <Text style={styles.resumenValor}>
-                                    $10.00
+                                    {totalPoints} pts
                                 </Text>
+
                             </View>
 
                             <View style={styles.resumenItem}>
+
                                 <Ionicons
                                     name="pricetag-outline"
                                     size={25}
@@ -145,30 +207,33 @@ export default function Redemptionhistory() {
                                 </Text>
 
                                 <Text style={styles.resumenValor}>
-                                    5
+                                    {totalExchanges}
                                 </Text>
+
                             </View>
+
                         </View>
                     </View>
 
                     <View style={styles.filters}>
+
                         <Filter
-                            text="Todos"
+                            text="All"
                             icon="list-outline"
-                            active={filter === "Todos"}
-                            onPress={() => setfilter("Todos")}
+                            active={filter === "All"}
+                            onPress={() => setfilter("All")}
                         />
 
                         <Filter
                             text="Complete"
-                            icon="time-outline"
+                            icon="checkmark-circle-outline"
                             active={filter === "Complete"}
                             onPress={() => setfilter("Complete")}
                         />
 
                         <Filter
                             text="In process"
-                            icon="checkmark-circle-outline"
+                            icon="time-outline"
                             active={filter === "In process"}
                             onPress={() => setfilter("In process")}
                         />
@@ -179,9 +244,11 @@ export default function Redemptionhistory() {
                             active={filter === "Canceled"}
                             onPress={() => setfilter("Canceled")}
                         />
+
                     </View>
 
                     <View style={styles.list}>
+
                         {canjesFiltrados.length === 0 ? (
                             <View style={styles.sinCanjes}>
 
@@ -192,7 +259,7 @@ export default function Redemptionhistory() {
                                 />
 
                                 <Text style={styles.sinCanjesText}>
-                                    No hay canjes en esta categoria
+                                    No redemptions in this category
                                 </Text>
 
                             </View>
@@ -206,28 +273,33 @@ export default function Redemptionhistory() {
                                 >
 
                                     <View style={styles.canjeIcon}>
+
                                         <Ionicons
                                             name={canje.icon}
                                             size={27}
                                             color="#081823"
                                         />
+
                                     </View>
 
                                     <View style={styles.canjeInfo}>
 
                                         <View style={styles.tipoContainer}>
+
                                             <Text style={styles.tipo}>
                                                 {canje.tipo}
                                             </Text>
+
                                         </View>
 
                                         <Text style={styles.date}>
-                                            redeemed on {canje.date}.
+                                            Redeemed on {canje.date}.
                                         </Text>
 
                                     </View>
 
                                     <View style={styles.canjeRight}>
+
                                         <Text style={styles.discount}>
                                             {canje.discount}
                                         </Text>
@@ -241,17 +313,16 @@ export default function Redemptionhistory() {
                                     </View>
 
                                 </TouchableOpacity>
-
-
                             ))
                         )}
 
                     </View>
 
                 </ScrollView>
-
             </View>
+
             <View style={styles.bottomBar}>
+
                 <TouchableOpacity onPress={() => router.push("/home")}>
                     <Ionicons
                         name="home-outline"
@@ -268,7 +339,9 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/expensesManagement")}>
+                <TouchableOpacity
+                    onPress={() => router.push("/expensesManagement")}
+                >
                     <Ionicons
                         name="swap-horizontal-outline"
                         size={27}
@@ -276,7 +349,9 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
+                <TouchableOpacity
+                    onPress={() => router.push("/currentgoal")}
+                >
                     <Ionicons
                         name="layers-outline"
                         size={27}
@@ -284,7 +359,9 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => router.push("/profile")}>
+                <TouchableOpacity
+                    onPress={() => router.push("/profile")}
+                >
                     <Ionicons
                         name="person-outline"
                         size={27}
@@ -293,13 +370,9 @@ export default function Redemptionhistory() {
                 </TouchableOpacity>
 
             </View>
-
         </View>
-
-
     );
 }
-
 
 function Filter({
     text,
@@ -307,9 +380,7 @@ function Filter({
     active,
     onPress,
 }) {
-
     return (
-
         <TouchableOpacity
             style={[
                 styles.filter,
@@ -332,8 +403,6 @@ function Filter({
         </TouchableOpacity>
     );
 }
-
-
 
 const styles = StyleSheet.create({
     container: {
@@ -397,7 +466,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-        
     },
 
     giftContainer: {
@@ -405,7 +473,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "flex-start",
         marginTop: -10,
-        
     },
 
     resumenTitle: {
@@ -448,7 +515,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#BCE8EF",
         borderWidth: 1,
         borderColor: "#081023",
-
     },
 
     filterText: {
@@ -504,6 +570,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#081023",
     },
+
     canjeRight: {
         alignItems: "center",
         justifyContent: "center",
@@ -517,6 +584,12 @@ const styles = StyleSheet.create({
     },
 
     without: {
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 50,
+    },
+
+    sinCanjes: {
         alignItems: "center",
         justifyContent: "center",
         paddingVertical: 50,
