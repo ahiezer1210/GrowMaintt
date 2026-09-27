@@ -1,6 +1,15 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
+    collection,
+    doc,
+    increment,
+    writeBatch,
+} from "firebase/firestore";
+import { useState } from "react";
+import {
+    KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -10,15 +19,8 @@ import {
     useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState } from "react";
-import {
-    collection,
-    doc,
-    increment,
-    writeBatch,
-} from "firebase/firestore";
 
-import {auth, db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 export default function RegisterInvestment() {
     const { width } = useWindowDimensions();
@@ -114,134 +116,147 @@ export default function RegisterInvestment() {
 
     return (
         <SafeAreaView style={styles.container}>
-
-            <View style={[
-                styles.header,
-                {
-                    paddingHorizontal: horizontalPadding,
-                    height: 150 * scale,
-                },
-            ]}>
-
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons
-                        name="arrow-back"
-                        size={25 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-                <Text style={[
-                    styles.headerTitle,
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+            >
+                <View style={[
+                    styles.header,
                     {
-                        fontSize: 21 * scale,
-
-                    }
+                        paddingHorizontal: horizontalPadding,
+                        height: 150 * scale,
+                    },
                 ]}>
-                    Register Investment
-                </Text>
 
-                <TouchableOpacity onPress={() => router.push("/notifications")}>
-                    <Ionicons
-                        name="notifications-outline"
-                        size={25 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-            </View>
-
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingHorizontal: horizontalPadding,
-                    paddingBottom: 30,
-                }}>
-                <View style={styles.titleContainer}>
-                    <Text style={[
-                        styles.title,
-                        {
-                            fontSize: 23 * scale
-                        },
-                    ]}> Register your investment</Text>
-
-                    <Text style={[
-                        styles.subtitle,
-                        {
-                            fontSize: 14 * scale
-                        },
-                    ]}> Enter the information about your investment</Text>
-                </View>
-
-                <View style={styles.form}>
-                    <Text style={
-                        styles.label
-                    }> Investment name</Text>
-
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Example:savign investment"
-                        placeholderTextColor={"#999"}
-                        value={investmentName}
-                        onChangeText={setInvestmentName}
-                    />
-
-                    <Text style={styles.label}> Amount</Text>
-
-                    <View style={styles.amountContainer}>
-                        <Text style={styles.dollar}>$</Text>
-
-                        <TextInput
-                            style={styles.amountInput}
-                            placeholder="0.00"
-                            placeholderTextColor="#999"
-                            keyboardType="decimal-pad"
-                            value={amount}
-                            onChangeText={setAmount}
-                        />
-                    </View>
-
-                    <Text style={styles.label}>
-                        Investment type
-                    </Text>
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Example: Business, savings..."
-                        placeholderTextColor="#999"
-                        value={type}
-                        onChangeText={setType}
-                    />
-
-                    <Text style={styles.label}>
-                        Date
-                    </Text>
-
-                    <TextInput
-                        style={styles.input}
-                        placeholder="DD/MM/YYYY"
-                        placeholderTextColor="#999"
-                        value={date}
-                        onChangeText={setDate}
-                    />
-
-                    <TouchableOpacity
-                        style={styles.button}
-                        onPress={registrarInversion}
-                    >
+                    <TouchableOpacity onPress={() => router.back()}>
                         <Ionicons
-                            name="checkmark-circle-outline"
-                            size={23}
+                            name="arrow-back"
+                            size={25 * scale}
                             color="white"
                         />
-
-                        <Text style={styles.buttonText}>
-                            Register investment
-                        </Text>
                     </TouchableOpacity>
 
+                    <Text style={[
+                        styles.headerTitle,
+                        {
+                            fontSize: 21 * scale,
+
+                        }
+                    ]}>
+                        Register Investment
+                    </Text>
+
+                    <TouchableOpacity
+                     onPress={() =>
+                        router.push({
+                            pathname: "/notifications",
+                            params: { from: "/registerinvestments" }
+                        })
+                        }
+                    >
+                        <Ionicons
+                            name="notifications-outline"
+                            size={25 * scale}
+                            color="white"
+                        />
+                    </TouchableOpacity>
                 </View>
-            </ScrollView>
+
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingHorizontal: horizontalPadding,
+                        paddingBottom: 30,
+                    }}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.titleContainer}>
+                        <Text style={[
+                            styles.title,
+                            {
+                                fontSize: 23 * scale
+                            },
+                        ]}> Register your investment</Text>
+
+                        <Text style={[
+                            styles.subtitle,
+                            {
+                                fontSize: 14 * scale
+                            },
+                        ]}> Enter the information about your investment</Text>
+                    </View>
+
+                    <View style={styles.form}>
+                        <Text style={
+                            styles.label
+                        }> Investment name</Text>
+
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Example:savign investment"
+                            placeholderTextColor={"#999"}
+                            value={investmentName}
+                            onChangeText={setInvestmentName}
+                        />
+
+                        <Text style={styles.label}> Amount</Text>
+
+                        <View style={styles.amountContainer}>
+                            <Text style={styles.dollar}>$</Text>
+
+                            <TextInput
+                                style={styles.amountInput}
+                                placeholder="0.00"
+                                placeholderTextColor="#999"
+                                keyboardType="decimal-pad"
+                                value={amount}
+                                onChangeText={setAmount}
+                            />
+                        </View>
+
+                        <Text style={styles.label}>
+                            Investment type
+                        </Text>
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Example: Business, savings..."
+                            placeholderTextColor="#999"
+                            value={type}
+                            onChangeText={setType}
+                        />
+
+                        <Text style={styles.label}>
+                            Date
+                        </Text>
+
+                        <TextInput
+                            style={styles.input}
+                            placeholder="DD/MM/YYYY"
+                            placeholderTextColor="#999"
+                            value={date}
+                            onChangeText={setDate}
+                        />
+
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={registrarInversion}
+                        >
+                            <Ionicons
+                                name="checkmark-circle-outline"
+                                size={23}
+                                color="white"
+                            />
+
+                            <Text style={styles.buttonText}>
+                                Register investment
+                            </Text>
+                        </TouchableOpacity>
+
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
 
             <View
                 style={[

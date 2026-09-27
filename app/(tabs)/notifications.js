@@ -212,8 +212,8 @@ export default function NotificationsScreen() {
       router.push("/historial");
     } else if (from === "/profile") {
       router.push("/profile");
-    } else if (from === "/Edit_profile") {
-      router.push("/Edit_profile");
+    } else if (from === "/edit_profile") {
+      router.push("/edit_profile");
     } else if (from === "/settings") {
       router.push("/settings");
     } else if (from === "/backup") {
@@ -230,10 +230,24 @@ export default function NotificationsScreen() {
       router.push("/investments");
     } else if (from === "/pointsExchange") {
       router.push("/pointsExchange");
-    } else if (from === "/ExpensesManagement") {
-      router.push("/expensesManagement");
+    } else if (from === "/expensesmanagement") {
+      router.push("/expensesmanagement");
     } else if (from === "/registergoals") {
       router.push("/registergoals");
+    } else if (from === "/registerinvestments") {
+      router.push("/registerinvestments");
+    } else if (from === "/logout"){
+      router.push("/logout")
+    } else if (from === "/investmentreminder"){
+      router.push("/investmentreminder")
+    } else if (from === "/savingsreminder"){
+      router.push("/savingsreminder")
+    } else if (from === "/privacypolicy"){
+      router.push("/privacypolicy")
+    } else if (from === "/deleteaccount"){
+      router.push("/deleteaccount")
+    } else if (from === "/usermanual"){
+      router.push("/usermanual")
     } else {
       router.push("/home");
     }
@@ -360,7 +374,6 @@ export default function NotificationsScreen() {
               ))}
         </ScrollView>
 
-        {/* BOTTOM NAVIGATION */}
         <SafeAreaView
           edges={["bottom"]}
           style={styles.bottomContainer}

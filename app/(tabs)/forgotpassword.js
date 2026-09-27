@@ -80,7 +80,6 @@ export default function RecuperarContrasena({ navigation }) {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Header Azul */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.botonRegresar}
@@ -98,8 +97,6 @@ export default function RecuperarContrasena({ navigation }) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            alwaysBounceVertical={true} 
-            overScrollMode="always" 
           >
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons
@@ -250,7 +247,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 30,
     paddingTop: 40,
-    paddingBottom: 250, 
+    paddingBottom: 40, 
   },
 
   iconContainer: {

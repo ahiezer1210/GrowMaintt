@@ -71,7 +71,6 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView edges={["top"]} style={styles.container}>
-      {/* Header original */}
       <View style={styles.header}>
         <View style={styles.topRow}>
           <TouchableOpacity
@@ -155,7 +154,6 @@ export default function SettingsScreen() {
         </View>
       </View>
 
-      {/* Contenedor con ScrollView adaptable */}
       <View style={styles.contentCard}>
         <ScrollView
           style={styles.scrollView}
@@ -185,7 +183,6 @@ export default function SettingsScreen() {
           ))}
         </ScrollView>
 
-        {/* Menú inferior */}
         <View style={styles.bottomNavContainer}>
           <SafeAreaView edges={["bottom"]} style={styles.bottomNavSafeArea}>
             <View style={styles.bottomTabBar}>
@@ -303,7 +300,7 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 20,
     justifyContent: "space-between",
-    minHeight: 320, // Garantiza buena separación si hay poco espacio
+    minHeight: 320, 
   },
 
   optionRow: {

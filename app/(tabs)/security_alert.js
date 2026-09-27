@@ -95,7 +95,6 @@ export default function SecurityAlertScreen() {
 
       <View style={styles.container}>
 
-        {/* HEADER */}
         <View
           style={[
             styles.header,
@@ -141,7 +140,6 @@ export default function SecurityAlertScreen() {
           </Text>
         </View>
 
-        {/* CONTENIDO */}
         <View
           style={[
             styles.contentCard,
@@ -225,7 +223,6 @@ export default function SecurityAlertScreen() {
           )}
         </View>
 
-        {/* NAVBAR */}
         <View
           style={[
             styles.bottomBar,

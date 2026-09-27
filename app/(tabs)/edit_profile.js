@@ -4,6 +4,8 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -412,482 +414,486 @@ export default function App() {
       />
 
       <View style={styles.app}>
-
-        <View
-          style={[
-            styles.header,
-            {
-              height:
-                118 *
-                (isSmall
-                  ? 0.85
-                  : isTablet
-                  ? 1.15
-                  : 1),
-              paddingHorizontal: isSmall
-                ? 18
-                : isTablet
-                ? 45
-                : 25,
-            },
-          ]}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <TouchableOpacity
+          <View
             style={[
-              styles.headerButton,
+              styles.header,
               {
-                transform: [
-                  {
-                    translateY:
-                      4 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
-              },
-            ]}
-            onPress={() =>
-              router.push("/profile")
-            }
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons
-              name="arrow-left"
-              size={
-                35 *
-                (isSmall
-                  ? 0.85
-                  : isTablet
-                  ? 1.15
-                  : 1)
-              }
-              color={COLORS.white}
-            />
-          </TouchableOpacity>
-
-          <Text
-            style={[
-              styles.headerTitle,
-              {
-                fontSize:
-                  25 *
+                height:
+                  118 *
                   (isSmall
                     ? 0.85
                     : isTablet
                     ? 1.15
                     : 1),
-                transform: [
-                  {
-                    translateX:
-                      7 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1),
-                  },
-                  {
-                    translateY:
-                      1 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
-              },
-            ]}
-          >
-            Edit My Profile
-          </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.notificationButton,
-              {
-                transform: [
-                  {
-                    translateY:
-                      4 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
-              },
-            ]}
-            onPress={() =>
-              router.push({
-                pathname: "/notifications",
-                params: {
-                  from: "/Edit_profile",
-                },
-              })
-            }
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons
-              name="bell-circle-outline"
-              size={
-                35 *
-                (isSmall
-                  ? 0.85
+                paddingHorizontal: isSmall
+                  ? 18
                   : isTablet
-                  ? 1.15
-                  : 1)
-              }
-              color={COLORS.white}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={[
-            styles.whiteContainer,
-            {
-              borderTopLeftRadius:
-                isTablet
-                  ? 55
-                  : isSmall
-                  ? 35
-                  : 45,
-
-              borderTopRightRadius:
-                isTablet
-                  ? 55
-                  : isSmall
-                  ? 35
-                  : 45,
-            },
-          ]}
-        >
-          <ScrollView
-            style={styles.whiteScroll}
-            contentContainerStyle={[
-              styles.profileScroll,
-              {
-                paddingHorizontal:
-                  horizontalPadding,
-                paddingBottom:
-                  45 * scale,
+                  ? 45
+                  : 25,
               },
             ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
           >
-            <View style={styles.profileCard}>
-
-              <View style={styles.photoContainer}>
-                {photoURL ? (
-                  <Image
-                    source={{
-                      uri: photoURL,
-                    }}
-                    style={[
-                      styles.profileImage,
-                      {
-                        width:
-                          82 * scale,
-                        height:
-                          82 * scale,
-                        borderRadius:
-                          41 * scale,
-                      },
-                    ]}
-                  />
-                ) : (
-                  <View
-                    style={[
-                      styles.profilePlaceholder,
-                      {
-                        width:
-                          82 * scale,
-                        height:
-                          82 * scale,
-                        borderRadius:
-                          41 * scale,
-                      },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name="account"
-                      size={
-                        40 * scale
-                      }
-                      color={COLORS.gray}
-                    />
-                  </View>
-                )}
-
-                <TouchableOpacity
-                  style={[
-                    styles.cameraButton,
+            <TouchableOpacity
+              style={[
+                styles.headerButton,
+                {
+                  transform: [
                     {
-                      width:
-                        27 * scale,
-                      height:
-                        27 * scale,
-                      borderRadius:
-                        14 * scale,
+                      translateY:
+                        4 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
                     },
-                  ]}
-                  onPress={changePhoto}
-                >
-                  <MaterialCommunityIcons
-                    name="camera-outline"
-                    size={
-                      16 * scale
-                    }
-                    color={COLORS.white}
-                  />
-                </TouchableOpacity>
-              </View>
+                  ],
+                },
+              ]}
+              onPress={() =>
+                router.push("/profile")
+              }
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={
+                  35 *
+                  (isSmall
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
 
-              <Text
-                style={[
-                  styles.name,
-                  {
-                    fontSize:
-                      20 * scale,
+            <Text
+              style={[
+                styles.headerTitle,
+                {
+                  fontSize:
+                    25 *
+                    (isSmall
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                  transform: [
+                    {
+                      translateX:
+                        7 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                    {
+                      translateY:
+                        1 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
+                },
+              ]}
+            >
+              Edit My Profile
+            </Text>
+
+            <TouchableOpacity
+              style={[
+                styles.notificationButton,
+                {
+                  transform: [
+                    {
+                      translateY:
+                        4 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
+                },
+              ]}
+              onPress={() =>
+                router.push({
+                  pathname: "/notifications",
+                  params: {
+                    from: "/edit_profile",
                   },
-                ]}
-                numberOfLines={1}
-              >
-                {username || "User"}
-              </Text>
+                })
+              }
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="bell-circle-outline"
+                size={
+                  35 *
+                  (isSmall
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
+          </View>
 
-              <Text
-                style={[
-                  styles.id,
-                  {
-                    fontSize:
-                      11 * scale,
-                  },
-                ]}
-              >
-                ID:{" "}
-                {user?.uid?.slice(
-                  0,
-                  8
-                ) || "00000000"}
-              </Text>
+          <View
+            style={[
+              styles.whiteContainer,
+              {
+                borderTopLeftRadius:
+                  isTablet
+                    ? 55
+                    : isSmall
+                    ? 35
+                    : 45,
 
-              <View style={styles.section}>
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      fontSize:
-                        21 * scale,
-                    },
-                  ]}
-                >
-                  Account Settings
-                </Text>
+                borderTopRightRadius:
+                  isTablet
+                    ? 55
+                    : isSmall
+                    ? 35
+                    : 45,
+              },
+            ]}
+          >
+            <ScrollView
+              style={styles.whiteScroll}
+              contentContainerStyle={[
+                styles.profileScroll,
+                {
+                  paddingHorizontal:
+                    horizontalPadding,
+                  paddingBottom:
+                    45 * scale,
+                },
+              ]}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+            >
+              <View style={styles.profileCard}>
 
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      fontSize:
-                        14 * scale,
-                    },
-                  ]}
-                >
-                  Username
-                </Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      height:
-                        48 * scale,
-                      fontSize:
-                        14 * scale,
-                      borderRadius:
-                        9 * scale,
-                    },
-                  ]}
-                  value={username}
-                  onChangeText={
-                    setUsername
-                  }
-                  placeholder="Username"
-                  placeholderTextColor="#777"
-                />
-
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      fontSize:
-                        14 * scale,
-                    },
-                  ]}
-                >
-                  Phone Number
-                </Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      height:
-                        48 * scale,
-                      fontSize:
-                        14 * scale,
-                      borderRadius:
-                        9 * scale,
-                    },
-                  ]}
-                  value={phone}
-                  onChangeText={setPhone}
-                  placeholder="+503 0000 0000"
-                  placeholderTextColor="#777"
-                  keyboardType="phone-pad"
-                />
-
-                <Text
-                  style={[
-                    styles.label,
-                    {
-                      fontSize:
-                        14 * scale,
-                    },
-                  ]}
-                >
-                  Email Address
-                </Text>
-
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      height:
-                        48 * scale,
-                      fontSize:
-                        14 * scale,
-                      borderRadius:
-                        9 * scale,
-                    },
-                  ]}
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholder="email@gmail.com"
-                  placeholderTextColor="#777"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                />
-
-                <View
-                  style={styles.optionRow}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      {
-                        fontSize:
-                          14 * scale,
-                      },
-                    ]}
-                  >
-                    Push Notifications
-                  </Text>
-
-                  <Switch
-                    value={notifications}
-                    onValueChange={
-                      setNotifications
-                    }
-                    trackColor={{
-                      false: "#D7D7D7",
-                      true: COLORS.dark,
-                    }}
-                    thumbColor={
-                      COLORS.white
-                    }
-                  />
-                </View>
-
-                <View
-                  style={styles.optionRow}
-                >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      {
-                        fontSize:
-                          14 * scale,
-                      },
-                    ]}
-                  >
-                    Dark Mode
-                  </Text>
-
-                  <Switch
-                    value={darkMode}
-                    onValueChange={
-                      setDarkMode
-                    }
-                    trackColor={{
-                      false: "#D7D7D7",
-                      true: COLORS.cyan,
-                    }}
-                    thumbColor={
-                      COLORS.white
-                    }
-                  />
-                </View>
-
-                <TouchableOpacity
-                  style={[
-                    styles.updateButton,
-                    {
-                      height:
-                        48 * scale,
-                      borderRadius:
-                        24 * scale,
-                    },
-                    saving &&
-                      styles.updateButtonDisabled,
-                  ]}
-                  onPress={
-                    updateProfile
-                  }
-                  disabled={saving}
-                >
-                  {saving ? (
-                    <ActivityIndicator
-                      size="small"
-                      color={
-                        COLORS.white
-                      }
+                <View style={styles.photoContainer}>
+                  {photoURL ? (
+                    <Image
+                      source={{
+                        uri: photoURL,
+                      }}
+                      style={[
+                        styles.profileImage,
+                        {
+                          width:
+                            82 * scale,
+                          height:
+                            82 * scale,
+                          borderRadius:
+                            41 * scale,
+                        },
+                      ]}
                     />
                   ) : (
+                    <View
+                      style={[
+                        styles.profilePlaceholder,
+                        {
+                          width:
+                            82 * scale,
+                          height:
+                            82 * scale,
+                          borderRadius:
+                            41 * scale,
+                        },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name="account"
+                        size={
+                          40 * scale
+                        }
+                        color={COLORS.gray}
+                      />
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    style={[
+                      styles.cameraButton,
+                      {
+                        width:
+                          27 * scale,
+                        height:
+                          27 * scale,
+                        borderRadius:
+                          14 * scale,
+                      },
+                    ]}
+                    onPress={changePhoto}
+                  >
+                    <MaterialCommunityIcons
+                      name="camera-outline"
+                      size={
+                        16 * scale
+                      }
+                      color={COLORS.white}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <Text
+                  style={[
+                    styles.name,
+                    {
+                      fontSize:
+                        20 * scale,
+                    },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {username || "User"}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.id,
+                    {
+                      fontSize:
+                        11 * scale,
+                    },
+                  ]}
+                >
+                  ID:{" "}
+                  {user?.uid?.slice(
+                    0,
+                    8
+                  ) || "00000000"}
+                </Text>
+
+                <View style={styles.section}>
+                  <Text
+                    style={[
+                      styles.sectionTitle,
+                      {
+                        fontSize:
+                          21 * scale,
+                      },
+                    ]}
+                  >
+                    Account Settings
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize:
+                          14 * scale,
+                      },
+                    ]}
+                  >
+                    Username
+                  </Text>
+
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        height:
+                          48 * scale,
+                        fontSize:
+                          14 * scale,
+                        borderRadius:
+                          9 * scale,
+                      },
+                    ]}
+                    value={username}
+                    onChangeText={
+                      setUsername
+                    }
+                    placeholder="Username"
+                    placeholderTextColor="#777"
+                  />
+
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize:
+                          14 * scale,
+                      },
+                    ]}
+                  >
+                    Phone Number
+                  </Text>
+
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        height:
+                          48 * scale,
+                        fontSize:
+                          14 * scale,
+                        borderRadius:
+                          9 * scale,
+                      },
+                    ]}
+                    value={phone}
+                    onChangeText={setPhone}
+                    placeholder="+503 0000 0000"
+                    placeholderTextColor="#777"
+                    keyboardType="phone-pad"
+                  />
+
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize:
+                          14 * scale,
+                      },
+                    ]}
+                  >
+                    Email Address
+                  </Text>
+
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        height:
+                          48 * scale,
+                        fontSize:
+                          14 * scale,
+                        borderRadius:
+                          9 * scale,
+                      },
+                    ]}
+                    value={email}
+                    onChangeText={setEmail}
+                    placeholder="email@gmail.com"
+                    placeholderTextColor="#777"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+
+                  <View
+                    style={styles.optionRow}
+                  >
                     <Text
                       style={[
-                        styles.updateText,
+                        styles.optionText,
                         {
                           fontSize:
                             14 * scale,
                         },
                       ]}
                     >
-                      Update Profile
+                      Push Notifications
                     </Text>
-                  )}
-                </TouchableOpacity>
+
+                    <Switch
+                      value={notifications}
+                      onValueChange={
+                        setNotifications
+                      }
+                      trackColor={{
+                        false: "#D7D7D7",
+                        true: COLORS.dark,
+                      }}
+                      thumbColor={
+                        COLORS.white
+                      }
+                    />
+                  </View>
+
+                  <View
+                    style={styles.optionRow}
+                  >
+                    <Text
+                      style={[
+                        styles.optionText,
+                        {
+                          fontSize:
+                            14 * scale,
+                        },
+                      ]}
+                    >
+                      Dark Mode
+                    </Text>
+
+                    <Switch
+                      value={darkMode}
+                      onValueChange={
+                        setDarkMode
+                      }
+                      trackColor={{
+                        false: "#D7D7D7",
+                        true: COLORS.cyan,
+                      }}
+                      thumbColor={
+                        COLORS.white
+                      }
+                    />
+                  </View>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.updateButton,
+                      {
+                        height:
+                          48 * scale,
+                        borderRadius:
+                          24 * scale,
+                      },
+                      saving &&
+                        styles.updateButtonDisabled,
+                    ]}
+                    onPress={
+                      updateProfile
+                    }
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <ActivityIndicator
+                        size="small"
+                        color={
+                          COLORS.white
+                        }
+                      />
+                    ) : (
+                      <Text
+                        style={[
+                          styles.updateText,
+                          {
+                            fontSize:
+                              14 * scale,
+                          },
+                        ]}
+                      >
+                        Update Profile
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
 
         <View
           style={[

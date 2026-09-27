@@ -1,6 +1,8 @@
 import { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -148,159 +150,171 @@ export default function DeleteAccount({ navigation }) {
     router.push("/settings");
   };
 
+  const handleNotifications = () => {
+    router.push({
+      pathname: "/notifications",
+      params: { from: "/deleteaccount" },
+    });
+  };
+
   return (
     <SafeAreaView style={styles.safe}>
       <StatusBar barStyle="light-content" backgroundColor={COLORS.dark} />
 
       <View style={styles.app}>
-
-        <View style={[styles.topContent, { paddingHorizontal: horizontalPadding }]}>
-          <View style={[styles.header, { minHeight: s(55), marginTop: s(8), marginBottom: s(12) }]}>
-            <TouchableOpacity
-              style={[styles.iconButton, { width: s(40), height: s(40) }]}
-              activeOpacity={0.7}
-              onPress={handleCancel}
-            >
-              <Ionicons name="arrow-back" size={s(24)} color={COLORS.white} />
-            </TouchableOpacity>
-
-            <Text
-              style={[styles.headerTitle, { fontSize: s(22) }]}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              Delete Account
-            </Text>
-
-            <TouchableOpacity
-              style={[styles.headerNotification, { width: s(38), height: s(38), borderRadius: s(19) }]}
-              activeOpacity={0.7}
-            >
-              <Ionicons name="notifications-outline" size={s(20)} color={COLORS.dark} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View
-          style={[
-            styles.whiteContainer,
-            {
-              borderTopLeftRadius: s(40),
-              borderTopRightRadius: s(40),
-            },
-          ]}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <ScrollView
-            style={styles.whiteScroll}
-            contentContainerStyle={[
-              styles.scrollContent,
-              {
-                paddingHorizontal: horizontalPadding,
-                paddingTop: s(24),
-                paddingBottom: s(90),
-              },
-            ]}
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            keyboardDismissMode="on-drag"
-          >
-            <View style={styles.content}>
-              <View style={[styles.iconContainer, { marginBottom: s(20) }]}>
-                <View
-                  style={[
-                    styles.warningCircle,
-                    {
-                      width: s(135),
-                      height: s(135),
-                      borderRadius: s(67.5),
-                    },
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name="alert"
-                    size={s(75)}
-                    color="#1769E0"
-                  />
-                </View>
-              </View>
+          <View style={[styles.topContent, { paddingHorizontal: horizontalPadding }]}>
+            <View style={[styles.header, { minHeight: s(55), marginTop: s(8), marginBottom: s(12) }]}>
+              <TouchableOpacity
+                style={[styles.iconButton, { width: s(40), height: s(40) }]}
+                activeOpacity={0.7}
+                onPress={handleCancel}
+              >
+                <Ionicons name="arrow-back" size={s(24)} color={COLORS.white} />
+              </TouchableOpacity>
 
               <Text
-                style={[
-                  styles.description,
-                  {
-                    fontSize: s(15),
-                    lineHeight: s(21),
-                    marginBottom: s(24),
-                  },
-                ]}
+                style={[styles.headerTitle, { fontSize: s(22) }]}
+                numberOfLines={1}
+                adjustsFontSizeToFit
               >
-                This action will delete all of your data and this action cannot be undone.
+                Delete Account
               </Text>
 
-              <View style={styles.formGroup}>
-                <Text style={[styles.label, { fontSize: s(16), marginBottom: s(8) }]}>
-                  Enter your password
-                </Text>
+              <TouchableOpacity
+                style={[styles.headerNotification, { width: s(38), height: s(38), borderRadius: s(19) }]}
+                activeOpacity={0.7}
+                onPress={handleNotifications}
+              >
+                <Ionicons name="notifications-outline" size={s(20)} color={COLORS.dark} />
+              </TouchableOpacity>
+            </View>
+          </View>
 
-                <TextInput
+          <View
+            style={[
+              styles.whiteContainer,
+              {
+                borderTopLeftRadius: s(40),
+                borderTopRightRadius: s(40),
+              },
+            ]}
+          >
+            <ScrollView
+              style={styles.whiteScroll}
+              contentContainerStyle={[
+                styles.scrollContent,
+                {
+                  paddingHorizontal: horizontalPadding,
+                  paddingTop: s(24),
+                  paddingBottom: s(90),
+                },
+              ]}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="on-drag"
+            >
+              <View style={styles.content}>
+                <View style={[styles.iconContainer, { marginBottom: s(20) }]}>
+                  <View
+                    style={[
+                      styles.warningCircle,
+                      {
+                        width: s(135),
+                        height: s(135),
+                        borderRadius: s(67.5),
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name="alert"
+                      size={s(75)}
+                      color="#1769E0"
+                    />
+                  </View>
+                </View>
+
+                <Text
                   style={[
-                    styles.input,
+                    styles.description,
                     {
-                      height: s(48),
-                      borderRadius: s(16),
-                      paddingHorizontal: s(16),
                       fontSize: s(15),
+                      lineHeight: s(21),
                       marginBottom: s(24),
                     },
                   ]}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder=""
-                  placeholderTextColor="#A8ADB5"
-                  secureTextEntry
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  textContentType="password"
-                  returnKeyType="done"
-                  onSubmitEditing={handleDelete}
-                />
-
-                <TouchableOpacity
-                  style={[
-                    styles.darkButton,
-                    {
-                      height: s(46),
-                      borderRadius: s(23),
-                      marginBottom: s(12),
-                    },
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={handleDelete}
                 >
-                  <Text style={[styles.buttonText, { fontSize: s(15) }]}>
-                    Delete
-                  </Text>
-                </TouchableOpacity>
+                  This action will delete all of your data and this action cannot be undone.
+                </Text>
 
-                <TouchableOpacity
-                  style={[
-                    styles.darkButton,
-                    {
-                      height: s(46),
-                      borderRadius: s(23),
-                    },
-                  ]}
-                  activeOpacity={0.8}
-                  onPress={handleCancel}
-                >
-                  <Text style={[styles.buttonText, { fontSize: s(15) }]}>
-                    Cancel
+                <View style={styles.formGroup}>
+                  <Text style={[styles.label, { fontSize: s(16), marginBottom: s(8) }]}>
+                    Enter your password
                   </Text>
-                </TouchableOpacity>
+
+                  <TextInput
+                    style={[
+                      styles.input,
+                      {
+                        height: s(48),
+                        borderRadius: s(16),
+                        paddingHorizontal: s(16),
+                        fontSize: s(15),
+                        marginBottom: s(24),
+                      },
+                    ]}
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder=""
+                    placeholderTextColor="#A8ADB5"
+                    secureTextEntry
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    textContentType="password"
+                    returnKeyType="done"
+                    onSubmitEditing={handleDelete}
+                  />
+
+                  <TouchableOpacity
+                    style={[
+                      styles.darkButton,
+                      {
+                        height: s(46),
+                        borderRadius: s(23),
+                        marginBottom: s(12),
+                      },
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={handleDelete}
+                  >
+                    <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                      Delete
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.darkButton,
+                      {
+                        height: s(46),
+                        borderRadius: s(23),
+                      },
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={handleCancel}
+                  >
+                    <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-            </View>
-          </ScrollView>
-        </View>
+            </ScrollView>
+          </View>
+        </KeyboardAvoidingView>
 
         <BottomNav small={small} scale={responsiveScale} />
       </View>
@@ -312,11 +326,11 @@ function BottomNav({ small, scale }) {
   const s = (value) => Math.round(value * scale);
 
   const routes = [
-    "../../home",
-    "/",
-    "/",
-    "/",
-    "../../Edit_profile",
+    "/home",
+    "/historial",
+    "/expensesManagement",
+    "/currentgoal",
+    "/profile",
   ];
 
   return (

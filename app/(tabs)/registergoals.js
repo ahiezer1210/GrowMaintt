@@ -11,6 +11,8 @@ import {
 import { useEffect, useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -465,489 +467,492 @@ export default function SavingsGoal() {
 
   return (
     <SafeAreaView style={styles.container}>
-
-      <View
-        style={[
-          styles.header,
-          {
-            height: headerHeight,
-            paddingHorizontal: horizontalPadding,
-          },
-        ]}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-       
-        <TouchableOpacity
+        <View
           style={[
-            styles.backButton,
+            styles.header,
             {
-              transform: [
-                { translateY: 4 * scale },
-              ],
-            },
-          ]}
-          onPress={() => router.replace("/home")}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={35 * scale}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-
-        <Text
-          style={[
-            styles.headerTitle,
-            {
-              fontSize: 25 * scale,
-              lineHeight: 28 * scale,
+              height: headerHeight,
+              paddingHorizontal: horizontalPadding,
             },
           ]}
         >
-          Create savings{"\n"}goals
-        </Text>
-
-        <TouchableOpacity
-          style={[
-            styles.headerBell,
-            {
-              transform: [
-                { translateY: 4 * scale },
-              ],
-            },
-          ]}
-          onPress={abrirNotificaciones}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name="bell-circle-outline"
-            size={35 * scale}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
-      </View>
-
-      <View
-        style={[
-          styles.card,
-          {
-            borderTopLeftRadius: 45 * scale,
-            borderTopRightRadius: 45 * scale,
-            paddingHorizontal: horizontalPadding,
-            paddingTop: 25 * scale,
-          },
-        ]}
-      >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: 100 * scale,
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize: s(14),
-                marginBottom: s(10),
-              },
-            ]}
-          >
-            Goal name
-          </Text>
-
-          <TextInput
-            style={[
-              styles.input,
-              {
-                height: s(48),
-                borderRadius: s(15),
-                paddingHorizontal: s(18),
-                marginBottom: s(22),
-              },
-            ]}
-            placeholder="E.g. Buy a new phone"
-            value={goalName}
-            onChangeText={setGoalName}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize: s(14),
-                marginBottom: s(10),
-              },
-            ]}
-          >
-            Target amount
-          </Text>
-
-          <TextInput
-            style={[
-              styles.input,
-              {
-                height: s(48),
-                borderRadius: s(15),
-                paddingHorizontal: s(18),
-                marginBottom: s(22),
-              },
-            ]}
-            placeholder="E.g. $300.00"
-            keyboardType="numeric"
-            value={targetAmount}
-            onChangeText={setTargetAmount}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <View
-            style={[
-              styles.mainGoalContainer,
-              {
-                marginBottom: s(22),
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.mainGoalText,
-                {
-                  fontSize: s(14),
-                },
-              ]}
-            >
-              Main goal
-            </Text>
-
-            <Switch
-              value={isMainGoal}
-              onValueChange={setIsMainGoal}
-              trackColor={{
-                false: "#D9D9D9",
-                true: "#25B7D3",
-              }}
-              thumbColor="#FFFFFF"
-              ios_backgroundColor="#D9D9D9"
-            />
-          </View>
-
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize: s(14),
-                marginBottom: s(10),
-              },
-            ]}
-          >
-            Saving frequency
-          </Text>
-
-          <View
-            style={[
-              styles.typeContainer,
-              {
-                marginBottom: s(17),
-              },
-            ]}
-          >
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                {
-                  height: s(42),
-                  borderRadius: s(13),
-                  marginHorizontal: s(3),
-                },
-                frequency === "daily" &&
-                  styles.typeButtonActive,
-              ]}
-              onPress={() =>
-                setFrequency("daily")
-              }
-            >
-              <Text
-                style={[
-                  styles.typeText,
-                  {
-                    fontSize: s(12),
-                  },
-                  frequency === "daily" &&
-                    styles.typeTextActive,
-                ]}
-              >
-                Daily
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.typeButton,
-                {
-                  height: s(42),
-                  borderRadius: s(13),
-                  marginHorizontal: s(3),
-                },
-                frequency === "monthly" &&
-                  styles.typeButtonActive,
-              ]}
-              onPress={() =>
-                setFrequency("monthly")
-              }
-            >
-              <Text
-                style={[
-                  styles.typeText,
-                  {
-                    fontSize: s(12),
-                  },
-                  frequency === "monthly" &&
-                    styles.typeTextActive,
-                ]}
-              >
-                Monthly
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize: s(14),
-                marginBottom: s(10),
-              },
-            ]}
-          >
-            Amount to save
-          </Text>
-
-          <TextInput
-            style={[
-              styles.input,
-              {
-                height: s(48),
-                borderRadius: s(15),
-                paddingHorizontal: s(18),
-                marginBottom: s(22),
-              },
-            ]}
-            placeholder="Calculated automatically"
-            value={savingAmount}
-            editable={false}
-            selectTextOnFocus={false}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text
-            style={[
-              styles.roundingInfo,
-              {
-                fontSize: s(12),
-                lineHeight: s(17),
-                marginTop: -s(12),
-                marginBottom: s(15),
-              },
-            ]}
-          >
-            The amount is calculated according to
-            your target, frequency and saving dates.
-          </Text>
 
           <TouchableOpacity
             style={[
-              styles.calculateButton,
+              styles.backButton,
               {
-                height: s(40),
-                borderRadius: s(18),
-                marginBottom: s(17),
+                transform: [
+                  { translateY: 4 * scale },
+                ],
               },
             ]}
-            onPress={handleCalculate}
+            onPress={() => router.replace("/home")}
+            activeOpacity={0.7}
           >
-            <Text
-              style={[
-                styles.buttonText,
-                {
-                  fontSize: s(15),
-                },
-              ]}
-            >
-              Calculate saving
-            </Text>
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={35 * scale}
+              color="#FFFFFF"
+            />
           </TouchableOpacity>
 
           <Text
             style={[
-              styles.label,
+              styles.headerTitle,
               {
-                fontSize: s(14),
-                marginBottom: s(10),
+                fontSize: 25 * scale,
+                lineHeight: 28 * scale,
               },
             ]}
           >
-            Start date
+            Create savings{"\n"}goals
           </Text>
 
-          <TextInput
+          <TouchableOpacity
             style={[
-              styles.date,
+              styles.headerBell,
               {
-                height: s(48),
-                borderRadius: s(15),
-                paddingHorizontal: s(18),
-                marginBottom: s(22),
+                transform: [
+                  { translateY: 4 * scale },
+                ],
               },
             ]}
-            placeholder="June 23, 2026"
-            value={startDate}
-            onChangeText={setStartDate}
-            placeholderTextColor="#ACADAD"
-          />
-
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize: s(14),
-                marginBottom: s(10),
-              },
-            ]}
+            onPress={abrirNotificaciones}
+            activeOpacity={0.7}
           >
-            End date
-          </Text>
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={35 * scale}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        </View>
 
-          <TextInput
-            style={[
-              styles.date,
-              {
-                height: s(48),
-                borderRadius: s(15),
-                paddingHorizontal: s(18),
-                marginBottom: s(22),
-              },
-            ]}
-            placeholder="December 23, 2026"
-            value={endDate}
-            onChangeText={setEndDate}
-            placeholderTextColor="#ACADAD"
-          />
+        <View
+          style={[
+            styles.card,
+            {
+              borderTopLeftRadius: 45 * scale,
+              borderTopRightRadius: 45 * scale,
+              paddingHorizontal: horizontalPadding,
+              paddingTop: 25 * scale,
+            },
+          ]}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: 100 * scale,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: s(14),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
+              Goal name
+            </Text>
 
-          {savingAmount &&
-            Number(
-              savingAmount.replace(",", ".")
-            ) > 0 && (
-              <View
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: s(48),
+                  borderRadius: s(15),
+                  paddingHorizontal: s(18),
+                  marginBottom: s(22),
+                },
+              ]}
+              placeholder="E.g. Buy a new phone"
+              value={goalName}
+              onChangeText={setGoalName}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: s(14),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
+              Target amount
+            </Text>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: s(48),
+                  borderRadius: s(15),
+                  paddingHorizontal: s(18),
+                  marginBottom: s(22),
+                },
+              ]}
+              placeholder="E.g. $300.00"
+              keyboardType="numeric"
+              value={targetAmount}
+              onChangeText={setTargetAmount}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <View
+              style={[
+                styles.mainGoalContainer,
+                {
+                  marginBottom: s(22),
+                },
+              ]}
+            >
+              <Text
                 style={[
-                  styles.calculationContainer,
+                  styles.mainGoalText,
                   {
-                    borderRadius: s(15),
-                    padding: s(15),
-                    marginBottom: s(5),
+                    fontSize: s(14),
                   },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.calculationTitle,
-                    {
-                      fontSize: s(13),
-                    },
-                  ]}
-                >
-                  Recommended saving
-                </Text>
+                Main goal
+              </Text>
 
-                <Text
-                  style={[
-                    styles.calculationAmount,
-                    {
-                      fontSize: s(24),
-                      marginTop: s(3),
-                    },
-                  ]}
-                >
-                  $
-                  {Number(
-                    savingAmount.replace(
-                      ",",
-                      "."
-                    )
-                  ).toFixed(2)}
-                </Text>
+              <Switch
+                value={isMainGoal}
+                onValueChange={setIsMainGoal}
+                trackColor={{
+                  false: "#D9D9D9",
+                  true: "#25B7D3",
+                }}
+                thumbColor="#FFFFFF"
+                ios_backgroundColor="#D9D9D9"
+              />
+            </View>
 
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: s(14),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
+              Saving frequency
+            </Text>
+
+            <View
+              style={[
+                styles.typeContainer,
+                {
+                  marginBottom: s(17),
+                },
+              ]}
+            >
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  {
+                    height: s(42),
+                    borderRadius: s(13),
+                    marginHorizontal: s(3),
+                  },
+                  frequency === "daily" &&
+                    styles.typeButtonActive,
+                ]}
+                onPress={() =>
+                  setFrequency("daily")
+                }
+              >
                 <Text
                   style={[
-                    styles.calculationText,
+                    styles.typeText,
                     {
                       fontSize: s(12),
                     },
+                    frequency === "daily" &&
+                      styles.typeTextActive,
                   ]}
                 >
-                  per{" "}
-                  {frequency === "daily"
-                    ? "day"
-                    : "month"}
+                  Daily
                 </Text>
-              </View>
-            )}
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                height: s(48),
-                marginTop: s(15),
-                borderRadius: s(18),
-                opacity: saving ? 0.6 : 1,
-              },
-            ]}
-            onPress={saveGoal}
-            disabled={saving}
-          >
+              <TouchableOpacity
+                style={[
+                  styles.typeButton,
+                  {
+                    height: s(42),
+                    borderRadius: s(13),
+                    marginHorizontal: s(3),
+                  },
+                  frequency === "monthly" &&
+                    styles.typeButtonActive,
+                ]}
+                onPress={() =>
+                  setFrequency("monthly")
+                }
+              >
+                <Text
+                  style={[
+                    styles.typeText,
+                    {
+                      fontSize: s(12),
+                    },
+                    frequency === "monthly" &&
+                      styles.typeTextActive,
+                  ]}
+                >
+                  Monthly
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <Text
               style={[
-                styles.buttonText,
+                styles.label,
                 {
-                  fontSize: s(17),
+                  fontSize: s(14),
+                  marginBottom: s(10),
                 },
               ]}
             >
-              {saving
-                ? "Saving..."
-                : "Save goal"}
+              Amount to save
             </Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                height: s(34),
-                marginTop: s(15),
-                borderRadius: s(18),
-              },
-            ]}
-            onPress={cancelGoal}
-            disabled={saving}
-          >
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: s(48),
+                  borderRadius: s(15),
+                  paddingHorizontal: s(18),
+                  marginBottom: s(22),
+                },
+              ]}
+              placeholder="Calculated automatically"
+              value={savingAmount}
+              editable={false}
+              selectTextOnFocus={false}
+              placeholderTextColor="#ACADAD"
+            />
+
             <Text
               style={[
-                styles.buttonText,
+                styles.roundingInfo,
                 {
-                  fontSize: s(17),
+                  fontSize: s(12),
+                  lineHeight: s(17),
+                  marginTop: -s(12),
+                  marginBottom: s(15),
                 },
               ]}
             >
-              Cancel
+              The amount is calculated according to
+              your target, frequency and saving dates.
             </Text>
-          </TouchableOpacity>
-        </ScrollView>
-      </View>
 
-      {/* NAVBAR */}
+            <TouchableOpacity
+              style={[
+                styles.calculateButton,
+                {
+                  height: s(40),
+                  borderRadius: s(18),
+                  marginBottom: s(17),
+                },
+              ]}
+              onPress={handleCalculate}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    fontSize: s(15),
+                  },
+                ]}
+              >
+                Calculate saving
+              </Text>
+            </TouchableOpacity>
+
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: s(14),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
+              Start date
+            </Text>
+
+            <TextInput
+              style={[
+                styles.date,
+                {
+                  height: s(48),
+                  borderRadius: s(15),
+                  paddingHorizontal: s(18),
+                  marginBottom: s(22),
+                },
+              ]}
+              placeholder="June 23, 2026"
+              value={startDate}
+              onChangeText={setStartDate}
+              placeholderTextColor="#ACADAD"
+            />
+
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: s(14),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
+              End date
+            </Text>
+
+            <TextInput
+              style={[
+                styles.date,
+                {
+                  height: s(48),
+                  borderRadius: s(15),
+                  paddingHorizontal: s(18),
+                  marginBottom: s(22),
+                },
+              ]}
+              placeholder="December 23, 2026"
+              value={endDate}
+              onChangeText={setEndDate}
+              placeholderTextColor="#ACADAD"
+            />
+
+            {savingAmount &&
+              Number(
+                savingAmount.replace(",", ".")
+              ) > 0 && (
+                <View
+                  style={[
+                    styles.calculationContainer,
+                    {
+                      borderRadius: s(15),
+                      padding: s(15),
+                      marginBottom: s(5),
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.calculationTitle,
+                      {
+                        fontSize: s(13),
+                      },
+                    ]}
+                  >
+                    Recommended saving
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.calculationAmount,
+                      {
+                        fontSize: s(24),
+                        marginTop: s(3),
+                      },
+                    ]}
+                  >
+                    $
+                    {Number(
+                      savingAmount.replace(
+                        ",",
+                        "."
+                      )
+                    ).toFixed(2)}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.calculationText,
+                      {
+                        fontSize: s(12),
+                      },
+                    ]}
+                  >
+                    per{" "}
+                    {frequency === "daily"
+                      ? "day"
+                      : "month"}
+                  </Text>
+                </View>
+              )}
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  height: s(48),
+                  marginTop: s(15),
+                  borderRadius: s(18),
+                  opacity: saving ? 0.6 : 1,
+                },
+              ]}
+              onPress={saveGoal}
+              disabled={saving}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    fontSize: s(17),
+                  },
+                ]}
+              >
+                {saving
+                  ? "Saving..."
+                  : "Save goal"}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  height: s(34),
+                  marginTop: s(15),
+                  borderRadius: s(18),
+                },
+              ]}
+              onPress={cancelGoal}
+              disabled={saving}
+            >
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    fontSize: s(17),
+                  },
+                ]}
+              >
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </KeyboardAvoidingView>
+
       <View
         style={[
           styles.bottomBar,
@@ -1020,7 +1025,6 @@ const styles = StyleSheet.create({
     zIndex: 2,
   },
 
-  /* CONTENT */
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",

@@ -1,23 +1,21 @@
-import React, { useState } from 'react';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar,
-  useWindowDimensions,
-  Alert,
   ScrollView,
-  Platform,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function ManualScreen({ navigation }) {
+export default function ManualScreen() {
   const { width, height } = useWindowDimensions();
 
   const [activeTab, setActiveTab] = useState('home');
-  const [hasNotification, setHasNotification] = useState(true);
 
   
   const isTablet = width >= 700;
@@ -27,20 +25,23 @@ export default function ManualScreen({ navigation }) {
   const scale = Math.min(Math.max(width / 375, 0.9), 1.35);
 
   const handleNotificationPress = () => {
-    setHasNotification(false);
-
-    Alert.alert(
-      'Notifications',
-      'You do not have any new notifications.'
-    );
+    router.push({
+      pathname: '/notifications',
+      params: { from: '/usermanual' },
+    });
   };
 
-  const handleNavPress = (screenName, tabKey) => {
-    setActiveTab(tabKey);
+  const NAV_ROUTES = {
+    home: '/home',
+    reports: '/historial',
+    transactions: '/expensesManagement',
+    savings: '/currentgoal',
+    profile: '/profile',
+  };
 
-    if (navigation && screenName) {
-      navigation.navigate(screenName);
-    }
+  const handleNavPress = (tabKey) => {
+    setActiveTab(tabKey);
+    router.push(NAV_ROUTES[tabKey]);
   };
 
   const sections = [
@@ -110,9 +111,11 @@ export default function ManualScreen({ navigation }) {
       >
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() =>
-            navigation?.goBack ? navigation.goBack() : null
-          }
+          onPress={() => {
+            if (router.canGoBack()) {
+              router.back();
+            }
+          }}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
@@ -159,11 +162,7 @@ export default function ManualScreen({ navigation }) {
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
-            name={
-              hasNotification
-                ? 'bell-badge-outline'
-                : 'bell-outline'
-            }
+            name="bell-outline"
             size={23 * scale}
             color="#081023"
           />
@@ -336,7 +335,6 @@ export default function ManualScreen({ navigation }) {
               ))}
             </View>
 
-            {/* ================= TIPS HEADER ================= */}
             <View style={styles.tipsHeader}>
               <View style={styles.tipsIcon}>
                 <MaterialCommunityIcons
@@ -501,9 +499,7 @@ export default function ManualScreen({ navigation }) {
            
             <TouchableOpacity
               style={styles.navButton}
-              onPress={() =>
-                handleNavPress('Home', 'home')
-              }
+              onPress={() => handleNavPress('home')}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
@@ -520,9 +516,7 @@ export default function ManualScreen({ navigation }) {
             
             <TouchableOpacity
               style={styles.navButton}
-              onPress={() =>
-                handleNavPress('Reports', 'reports')
-              }
+              onPress={() => handleNavPress('reports')}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
@@ -539,12 +533,7 @@ export default function ManualScreen({ navigation }) {
            
             <TouchableOpacity
               style={styles.navButton}
-              onPress={() =>
-                handleNavPress(
-                  'Transactions',
-                  'transactions'
-                )
-              }
+              onPress={() => handleNavPress('transactions')}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
@@ -561,9 +550,7 @@ export default function ManualScreen({ navigation }) {
             
             <TouchableOpacity
               style={styles.navButton}
-              onPress={() =>
-                handleNavPress('Savings', 'savings')
-              }
+              onPress={() => handleNavPress('savings')}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
@@ -580,9 +567,7 @@ export default function ManualScreen({ navigation }) {
            
             <TouchableOpacity
               style={styles.navButton}
-              onPress={() =>
-                handleNavPress('Profile', 'profile')
-              }
+              onPress={() => handleNavPress('profile')}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons

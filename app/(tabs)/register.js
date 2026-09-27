@@ -105,7 +105,6 @@ export default function SignupScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* ✅ Manejo responsivo del teclado */}
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
         behavior={Platform.OS === "ios" ? "padding" : "height"}

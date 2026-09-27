@@ -302,9 +302,12 @@ export default function ExpenseManagement() {
                         },
                     ]}
                     onPress={() =>
-                        router.push(
-                            "/notifications"
-                        )
+                        router.push({
+                            pathname: "/notifications",
+                            params : { 
+                                from: "/expensesmanagement"
+                            },
+                        })
                     }
                 >
                     <Ionicons

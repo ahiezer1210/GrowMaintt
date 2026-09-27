@@ -100,12 +100,10 @@ export default function ChangePassword() {
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>Change Password</Text>
         </View>
 
-        {/* Contenedor blanco */}
         <View style={styles.whiteContainer}>
           <ScrollView
             style={styles.whiteScroll}
@@ -115,8 +113,6 @@ export default function ChangePassword() {
             ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            alwaysBounceVertical={true} // 
-            overScrollMode="always" // 
           >
             <View style={styles.card}>
               <Text style={styles.label}>New Password</Text>
@@ -224,7 +220,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingTop: 40,
-    paddingBottom: 350, 
+    paddingBottom: 30,
   },
 
   card: {

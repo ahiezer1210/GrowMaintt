@@ -1,4 +1,5 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import {
   SafeAreaView,
   ScrollView,
@@ -10,7 +11,7 @@ import {
   View,
 } from "react-native";
 
-export default function PrivacyScreen({ navigation }) {
+export default function PrivacyScreen() {
   const { width, height } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
@@ -37,16 +38,27 @@ export default function PrivacyScreen({ navigation }) {
 
   const sectionVerticalPadding = isTablet ? verticalScale(14) : verticalScale(8);
 
+  const navIcons = [
+    { icon: "home-outline", route: "/home", size: 28 },
+    { icon: "chart-box-outline", route: "/historial", size: 28 },
+    { icon: "swap-horizontal", route: "/expensesManagement", size: 30 },
+    { icon: "layers-outline", route: "/currentgoal", size: 28 },
+    { icon: "account-outline", route: "/profile", size: 28 },
+  ];
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar backgroundColor="#071426" barStyle="light-content" />
 
       <View style={styles.screen}>
-        {/* Header */}
         <View style={[styles.header, { height: verticalScale(95) }]}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation?.goBack()}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              }
+            }}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
@@ -75,6 +87,12 @@ export default function PrivacyScreen({ navigation }) {
               },
             ]}
             activeOpacity={0.7}
+            onPress={() =>
+              router.push({
+                pathname: "/notifications",
+                params: { from: "/privacypolicy" },
+              })
+            }
           >
             <MaterialCommunityIcons
               name="bell-outline"
@@ -319,45 +337,20 @@ export default function PrivacyScreen({ navigation }) {
           </ScrollView>
 
           <View style={[styles.bottomBar, { height: verticalScale(72) }]}>
-            <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-              <MaterialCommunityIcons
-                name="home-outline"
-                size={Math.round(28 * scale)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-              <MaterialCommunityIcons
-                name="chart-box-outline"
-                size={Math.round(28 * scale)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-              <MaterialCommunityIcons
-                name="swap-horizontal"
-                size={Math.round(30 * scale)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={Math.round(28 * scale)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.navButton} activeOpacity={0.7}>
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={Math.round(28 * scale)}
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+            {navIcons.map(({ icon, route, size }) => (
+              <TouchableOpacity
+                key={icon}
+                style={styles.navButton}
+                activeOpacity={0.7}
+                onPress={() => router.push(route)}
+              >
+                <MaterialCommunityIcons
+                  name={icon}
+                  size={Math.round(size * scale)}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
       </View>

@@ -3,12 +3,12 @@ import { router } from "expo-router";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../../firebaseConfig";
@@ -594,7 +594,6 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
 
-  /* HEADER */
 
   header: {
     backgroundColor: "#071426",

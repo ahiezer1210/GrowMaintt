@@ -270,7 +270,7 @@ export default function HistorialScreen() {
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
             paddingHorizontal:
-              horizontalPadding,
+            horizontalPadding,
             paddingTop: s(28),
           },
         ]}
