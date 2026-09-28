@@ -1,22 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    arrayUnion,
     collection,
     doc,
-    serverTimestamp,
-    Timestamp,
+    increment,
     writeBatch,
 } from "firebase/firestore";
 import { useState } from "react";
 import {
+    KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    useWindowDimensions,
     View,
+    useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -74,28 +74,9 @@ export default function RegisterInvestment() {
                 return;
             }
 
+            const userRef = doc(db, "Users", user.uid);
+
             const investmentRef = doc(collection(db, "investments"));
-            const pointsRef = doc(collection(db, "Points"));
-
-            const notificationRef = doc(
-                db,
-                "Notificaciones",
-                `${user.uid}_Investment`
-            );
-
-            const investmentNotification = {
-                id: `${investmentRef.id}_investment`,
-                uid: user.uid,
-                type: "investment_completed",
-                category: "Investment",
-                title: "Investment registered",
-                message: `Your investment of $${investmentAmount.toFixed(2)} was successfully registered. You earned ${points} points.`,
-                amount: investmentAmount,
-                points: points,
-                investmentId: investmentRef.id,
-                read: false,
-                createdAt: Timestamp.now(),
-            };
 
             const batch = writeBatch(db);
 
@@ -106,23 +87,12 @@ export default function RegisterInvestment() {
                 type: type,
                 date: date,
                 points: points,
-                createdAt: serverTimestamp(),
-            });
-
-            batch.set(pointsRef, {
-                userId: user.uid,
-                points: points,
-                type: "points",
-                createdAt: serverTimestamp(),
             });
 
             batch.set(
-                notificationRef,
+                userRef,
                 {
-                    uid: user.uid,
-                    category: "Investment",
-                    notifications: arrayUnion(investmentNotification),
-                    updatedAt: serverTimestamp(),
+                    points: increment(points),
                 },
                 { merge: true }
             );
@@ -166,14 +136,15 @@ export default function RegisterInvestment() {
                         />
                     </TouchableOpacity>
 
-                <Text style={[
-                    styles.headerTitle,
-                    {
-                        fontSize: 21 * scale,
-                    }
-                ]}>
-                    Register Investment
-                </Text>
+                    <Text style={[
+                        styles.headerTitle,
+                        {
+                            fontSize: 21 * scale,
+
+                        }
+                    ]}>
+                        Register Investment
+                    </Text>
 
                     <TouchableOpacity
                      onPress={() =>
@@ -191,36 +162,35 @@ export default function RegisterInvestment() {
                     </TouchableOpacity>
                 </View>
 
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingHorizontal: horizontalPadding,
-                    paddingBottom: 30,
-                }}>
-                <View style={styles.titleContainer}>
-                    <Text style={[
-                        styles.title,
-                        {
-                            fontSize: 23 * scale
-                        },
-                    ]}>
-                        Register your investment
-                    </Text>
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{
+                        paddingHorizontal: horizontalPadding,
+                        paddingBottom: 30,
+                    }}
+                    keyboardShouldPersistTaps="handled"
+                >
+                    <View style={styles.titleContainer}>
+                        <Text style={[
+                            styles.title,
+                            {
+                                fontSize: 23 * scale
+                            },
+                        ]}> Register your investment</Text>
 
-                    <Text style={[
-                        styles.subtitle,
-                        {
-                            fontSize: 14 * scale
-                        },
-                    ]}>
-                        Enter the information about your investment
-                    </Text>
-                </View>
+                        <Text style={[
+                            styles.subtitle,
+                            {
+                                fontSize: 14 * scale
+                            },
+                        ]}> Enter the information about your investment</Text>
+                    </View>
 
-                <View style={styles.form}>
-                    <Text style={styles.label}>
-                        Investment name
-                    </Text>
+                    <View style={styles.form}>
+                        <Text style={
+                            styles.label
+                        }> Investment name</Text>
+
 
                         <TextInput
                             style={styles.input}
@@ -230,14 +200,10 @@ export default function RegisterInvestment() {
                             onChangeText={setInvestmentName}
                         />
 
-                    <Text style={styles.label}>
-                        Amount
-                    </Text>
+                        <Text style={styles.label}> Amount</Text>
 
-                    <View style={styles.amountContainer}>
-                        <Text style={styles.dollar}>
-                            $
-                        </Text>
+                        <View style={styles.amountContainer}>
+                            <Text style={styles.dollar}>$</Text>
 
                             <TextInput
                                 style={styles.amountInput}
@@ -342,11 +308,11 @@ export default function RegisterInvestment() {
                     />
                 </TouchableOpacity>
 
-            </View>
-        </SafeAreaView>
-    );
-}
 
+            </View>
+        </SafeAreaView >
+    )
+}
 const styles = StyleSheet.create({
     container: {
         flex: 1,
