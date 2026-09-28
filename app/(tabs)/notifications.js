@@ -39,7 +39,6 @@ const getSecurityTitle = (type) => {
     device_unlinked: "Device unlinked",
     suspicious_activity: "Suspicious activity detected",
   };
-
   return titles[type] || "Security alert";
 };
 
@@ -55,7 +54,6 @@ const getSecurityIcon = (type) => {
     device_unlinked: "cellphone-remove",
     suspicious_activity: "alert-circle-outline",
   };
-
   return icons[type] || "shield-check-outline";
 };
 
@@ -65,22 +63,15 @@ const getGeneralIcon = (category) => {
     Investment: "finance",
     Rewards: "medal-outline",
   };
-
   return icons[category] || "bell-outline";
 };
 
 const formatDate = (timestamp) => {
   if (!timestamp) {
-    return {
-      date: "",
-      time: "",
-      fullDate: "",
-      createdAt: 0,
-    };
+    return { date: "", time: "", fullDate: "", createdAt: 0 };
   }
 
   let dateObject;
-
   if (timestamp?.toDate) {
     dateObject = timestamp.toDate();
   } else if (timestamp instanceof Date) {
@@ -92,12 +83,7 @@ const formatDate = (timestamp) => {
   }
 
   if (Number.isNaN(dateObject.getTime())) {
-    return {
-      date: "",
-      time: "",
-      fullDate: "",
-      createdAt: 0,
-    };
+    return { date: "", time: "", fullDate: "", createdAt: 0 };
   }
 
   const date = dateObject.toLocaleDateString("en-US", {
@@ -105,18 +91,15 @@ const formatDate = (timestamp) => {
     day: "numeric",
     year: "numeric",
   });
-
   const time = dateObject.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
   });
 
-  const fullDate = `${date} at ${time}`;
-
   return {
     date,
     time,
-    fullDate,
+    fullDate: `${date} at ${time}`,
     createdAt: dateObject.getTime(),
   };
 };
@@ -124,7 +107,6 @@ const formatDate = (timestamp) => {
 export default function NotificationsScreen() {
   const user = auth.currentUser;
   const params = useLocalSearchParams();
-
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,22 +119,14 @@ export default function NotificationsScreen() {
     }
 
     setLoading(true);
-
     const unsubscribers = [];
 
-    const securityRef = collection(
-      db,
-      "Users",
-      user.uid,
-      "securityAlerts"
-    );
-
+    const securityRef = collection(db, "Users", user.uid, "securityAlerts");
     const unsubscribeSecurity = onSnapshot(
       securityRef,
       (snapshot) => {
         const securityNotifications = snapshot.docs.map((item) => {
           const alert = item.data();
-
           const formatted = formatDate(alert.createdAt);
 
           return {
@@ -166,7 +140,7 @@ export default function NotificationsScreen() {
             description:
               alert.message ||
               alert.description ||
-              "A security event was detected on your account.",
+              `Your account was accessed from ${alert.deviceName || "another device"}`,
             deviceName: alert.deviceName || null,
             amount: null,
             points: null,
@@ -186,31 +160,18 @@ export default function NotificationsScreen() {
         });
 
         setNotifications((previous) => {
-          const generalNotifications = previous.filter(
-            (item) => item.category !== "Security"
-          );
-
-          return [...generalNotifications, ...securityNotifications].sort(
+          const general = previous.filter((item) => item.category !== "Security");
+          return [...general, ...securityNotifications].sort(
             (a, b) => b.createdAt - a.createdAt
           );
         });
-
         setLoading(false);
       },
-      () => {
-        setLoading(false);
-      }
+      () => setLoading(false)
     );
-
     unsubscribers.push(unsubscribeSecurity);
 
-    const generalCategories = [
-      "Savings",
-      "Investment",
-      "Rewards",
-    ];
-
-    generalCategories.forEach((category) => {
+    ["Savings", "Investment", "Rewards"].forEach((category) => {
       const notificationRef = doc(
         db,
         "Notificaciones",
@@ -225,98 +186,112 @@ export default function NotificationsScreen() {
             ? data.notifications
             : [];
 
-          const mappedNotifications = notificationArray.map(
-            (notification, index) => {
-              const formatted = formatDate(notification.createdAt);
+          const mapped = notificationArray.map((notification, index) => {
+            const formatted = formatDate(notification.createdAt);
+            const notificationId =
+              notification.id ||
+              `${category.toLowerCase()}-${index}-${formatted.createdAt}`;
 
-              const notificationId =
-                notification.id ||
-                `${category.toLowerCase()}-${index}-${formatted.createdAt}`;
-
-              return {
-                id: `notification-${snapshot.id}-${notificationId}`,
-                alertId: snapshot.id,
-                notificationId,
-                category: notification.category || category,
-                collectionName: "Notificaciones",
-                type: notification.type || "notification",
-                title: notification.title || "New notification",
-                description:
-                  notification.message ||
-                  notification.description ||
-                  "You have a new notification.",
-                deviceName: notification.deviceName || null,
-                amount: notification.amount ?? null,
-                points: notification.points ?? null,
-                store: notification.store || null,
-                code: notification.code || null,
-                rewardId: notification.rewardId || null,
-                rewardTitle: notification.rewardTitle || null,
-                redeemedId: notification.redeemedId || null,
-                status:
-                  notification.read === true ? "Read" : "Unread",
-                unread: notification.read !== true,
-                time: formatted.time,
-                date: formatted.date,
-                fullDate: formatted.fullDate,
-                icon:
-                  notification.icon ||
-                  getGeneralIcon(notification.category || category),
-                createdAt: formatted.createdAt,
-              };
-            }
-          );
+            return {
+              id: `notification-${snapshot.id}-${notificationId}`,
+              alertId: snapshot.id,
+              notificationId,
+              category: notification.category || category,
+              collectionName: "Notificaciones",
+              type: notification.type || "notification",
+              title: notification.title || "New notification",
+              description:
+                notification.message ||
+                notification.description ||
+                "You have a new notification.",
+              deviceName: notification.deviceName || null,
+              amount: notification.amount ?? null,
+              points: notification.points ?? null,
+              store: notification.store || null,
+              code: notification.code || null,
+              rewardId: notification.rewardId || null,
+              rewardTitle: notification.rewardTitle || null,
+              redeemedId: notification.redeemedId || null,
+              status: notification.read === true ? "Read" : "Unread",
+              unread: notification.read !== true,
+              time: formatted.time,
+              date: formatted.date,
+              fullDate: formatted.fullDate,
+              icon:
+                notification.icon ||
+                getGeneralIcon(notification.category || category),
+              createdAt: formatted.createdAt,
+            };
+          });
 
           setNotifications((previous) => {
-            const otherNotifications = previous.filter(
+            const others = previous.filter(
               (item) =>
                 !(
                   item.collectionName === "Notificaciones" &&
                   item.category === category
                 )
             );
-
-            return [
-              ...otherNotifications,
-              ...mappedNotifications,
-            ].sort((a, b) => b.createdAt - a.createdAt);
+            return [...others, ...mapped].sort(
+              (a, b) => b.createdAt - a.createdAt
+            );
           });
-
           setLoading(false);
         },
-        () => {
-          setLoading(false);
-        }
+        () => setLoading(false)
       );
 
       unsubscribers.push(unsubscribeGeneral);
     });
 
-    return () => {
-      unsubscribers.forEach((unsubscribe) => unsubscribe());
-    };
+    return () => unsubscribers.forEach((unsub) => unsub());
   }, [user?.uid]);
 
   const filteredNotifications =
     selectedCategory === "All"
       ? notifications
-      : notifications.filter(
-          (item) => item.category === selectedCategory
-        );
+      : notifications.filter((item) => item.category === selectedCategory);
 
-  const getBackRoute = () => {
+  const unreadCount = notifications.filter((item) => item.unread).length;
+
+  const volver = () => {
     const from = params?.from;
 
     const routes = {
+      "/historial": "/historial",
+      historial: "/historial",
+      "/profile": "/profile",
+      profile: "/Profile",
+      "/Profile": "/Profile",
+      "/Edit_profile": "/Edit_profile",
+      "/edit_profile": "/edit_profile",
+      "/settings": "/settings",
+      "/backup": "/backup",
+      "/linkeddevices": "/linkeddevices",
+      "/logoutalldevices": "/logoutalldevices",
+      "/signout": "/signout",
+      "/currentgoal": "/currentgoal",
+      "/investments": "/investments",
+      "/pointsExchange": "/pointsExchange",
+      "/ExpensesManagement": "/expensesManagement",
+      "/expensesManagement": "/expensesManagement",
+      "/expensesmanagement": "/expensesmanagement",
+      "/registergoals": "/registergoals",
+      "/registerinvestments": "/registerinvestments",
+      "/logout": "/logout",
+      "/investmentreminder": "/investmentreminder",
+      "/savingsreminder": "/savingsreminder",
+      "/privacypolicy": "/privacypolicy",
+      "/deleteaccount": "/deleteaccount",
+      "/usermanual": "/usermanual",
       home: "/",
       savings: "/savings",
       investment: "/investment",
       rewards: "/pointsExchange",
-      profile: "/Profile",
       expenses: "/expensesManagement",
     };
 
-    return routes[from] || "/";
+    router.push(routes[from] || "/");
   };
 
   const openNotification = async (notification) => {
@@ -335,14 +310,9 @@ export default function NotificationsScreen() {
         if (notification.unread) {
           await runTransaction(db, async (transaction) => {
             const snapshot = await transaction.get(ref);
-
-            if (!snapshot.exists()) {
-              return;
+            if (snapshot.exists()) {
+              transaction.update(ref, { read: true });
             }
-
-            transaction.update(ref, {
-              read: true,
-            });
           });
         }
 
@@ -354,12 +324,10 @@ export default function NotificationsScreen() {
             collectionName: "securityAlerts",
           },
         });
-
         return;
       }
 
       const category = notification.category;
-
       const notificationRef = doc(
         db,
         "Notificaciones",
@@ -369,36 +337,24 @@ export default function NotificationsScreen() {
       if (notification.unread) {
         await runTransaction(db, async (transaction) => {
           const snapshot = await transaction.get(notificationRef);
-
-          if (!snapshot.exists()) {
-            return;
-          }
+          if (!snapshot.exists()) return;
 
           const data = snapshot.data();
-          const notificationArray = Array.isArray(data.notifications)
+          const arr = Array.isArray(data.notifications)
             ? data.notifications
             : [];
 
-          const updatedNotifications = notificationArray.map((item) => {
+          const updated = arr.map((item) => {
             const itemId =
               item.id ||
-              `${category.toLowerCase()}-${notificationArray.indexOf(item)}`;
-
-            if (
-              String(itemId) === String(notification.notificationId)
-            ) {
-              return {
-                ...item,
-                read: true,
-              };
+              `${category.toLowerCase()}-${arr.indexOf(item)}`;
+            if (String(itemId) === String(notification.notificationId)) {
+              return { ...item, read: true };
             }
-
             return item;
           });
 
-          transaction.update(notificationRef, {
-            notifications: updatedNotifications,
-          });
+          transaction.update(notificationRef, { notifications: updated });
         });
       }
 
@@ -420,12 +376,10 @@ export default function NotificationsScreen() {
     if (!user?.uid) return;
 
     try {
+      // Security
       const batch = writeBatch(db);
-
       const unreadSecurity = notifications.filter(
-        (item) =>
-          item.category === "Security" &&
-          item.unread === true
+        (item) => item.category === "Security" && item.unread
       );
 
       unreadSecurity.forEach((item) => {
@@ -436,23 +390,14 @@ export default function NotificationsScreen() {
           "securityAlerts",
           item.alertId
         );
-
-        batch.update(ref, {
-          read: true,
-        });
+        batch.update(ref, { read: true });
       });
 
       if (unreadSecurity.length > 0) {
         await batch.commit();
       }
 
-      const generalCategories = [
-        "Savings",
-        "Investment",
-        "Rewards",
-      ];
-
-      for (const category of generalCategories) {
+      for (const category of ["Savings", "Investment", "Rewards"]) {
         const notificationRef = doc(
           db,
           "Notificaciones",
@@ -461,26 +406,15 @@ export default function NotificationsScreen() {
 
         await runTransaction(db, async (transaction) => {
           const snapshot = await transaction.get(notificationRef);
-
-          if (!snapshot.exists()) {
-            return;
-          }
+          if (!snapshot.exists()) return;
 
           const data = snapshot.data();
-          const notificationArray = Array.isArray(data.notifications)
+          const arr = Array.isArray(data.notifications)
             ? data.notifications
             : [];
 
-          const updatedNotifications = notificationArray.map(
-            (item) => ({
-              ...item,
-              read: true,
-            })
-          );
-
-          transaction.update(notificationRef, {
-            notifications: updatedNotifications,
-          });
+          const updated = arr.map((item) => ({ ...item, read: true }));
+          transaction.update(notificationRef, { notifications: updated });
         });
       }
     } catch (error) {
@@ -488,40 +422,82 @@ export default function NotificationsScreen() {
     }
   };
 
+  const emptyState = () => {
+    const info = {
+      All: [
+        "bell-off-outline",
+        "No notifications",
+        "You don't have any notifications here yet.",
+      ],
+      Savings: [
+        "cash-multiple",
+        "No savings reminders",
+        "You don't have any savings reminders yet.",
+      ],
+      Investment: [
+        "finance",
+        "No investment notices",
+        "You don't have any investment notifications yet.",
+      ],
+      Rewards: [
+        "medal-outline",
+        "No rewards updates",
+        "You don't have any rewards notifications yet.",
+      ],
+      Security: [
+        "shield-check-outline",
+        "No security alerts",
+        "You don't have any security alerts yet.",
+      ],
+    };
+
+    const [icon, title, description] = info[selectedCategory] || info.All;
+
+    return (
+      <View style={styles.emptyContainer}>
+        <View style={styles.emptyIcon}>
+          <MaterialCommunityIcons name={icon} size={42} color="#ACADAD" />
+        </View>
+        <Text style={styles.emptyTitle}>{title}</Text>
+        <Text style={styles.emptyText}>{description}</Text>
+      </View>
+    );
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#071426"
-      />
+    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
+      <StatusBar barStyle="light-content" backgroundColor="#071426" />
 
       <View style={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => router.replace(getBackRoute())}
+            onPress={volver}
+            activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={26}
+              size={28}
               color="#FFFFFF"
             />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>
-            Notifications
-          </Text>
+          <Text style={styles.headerTitle}>Notifications</Text>
 
-          <TouchableOpacity
-            style={styles.markButton}
-            onPress={markAllAsRead}
-          >
-            <MaterialCommunityIcons
-              name="check-all"
-              size={23}
-              color="#25B5D1"
-            />
-          </TouchableOpacity>
+          <View style={styles.headerRight}>
+            {unreadCount > 0 && <View style={styles.headerDot} />}
+            <TouchableOpacity
+              style={styles.markButton}
+              onPress={markAllAsRead}
+              activeOpacity={0.7}
+            >
+              <MaterialCommunityIcons
+                name="check-all"
+                size={24}
+                color="#25B5D1"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
 
         <View style={styles.content}>
@@ -533,7 +509,6 @@ export default function NotificationsScreen() {
             >
               {categories.map((category) => {
                 const active = selectedCategory === category;
-
                 return (
                   <TouchableOpacity
                     key={category}
@@ -542,6 +517,7 @@ export default function NotificationsScreen() {
                       active && styles.categoryButtonActive,
                     ]}
                     onPress={() => setSelectedCategory(category)}
+                    activeOpacity={0.8}
                   >
                     <Text
                       style={[
@@ -569,37 +545,21 @@ export default function NotificationsScreen() {
                   size={48}
                   color="#ACADAD"
                 />
-                <Text style={styles.emptyText}>
-                  Loading notifications...
-                </Text>
+                <Text style={styles.emptyText}>Loading notifications...</Text>
               </View>
             ) : filteredNotifications.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
-                  name="bell-outline"
-                  size={48}
-                  color="#ACADAD"
-                />
-                <Text style={styles.emptyText}>
-                  No notifications
-                </Text>
-              </View>
+              emptyState()
             ) : (
               filteredNotifications.map((notification) => (
                 <TouchableOpacity
                   key={notification.id}
                   style={styles.notificationCard}
                   activeOpacity={0.8}
-                  onPress={() =>
-                    openNotification(notification)
-                  }
+                  onPress={() => openNotification(notification)}
                 >
                   <View style={styles.iconContainer}>
                     <MaterialCommunityIcons
-                      name={
-                        notification.icon ||
-                        "bell-outline"
-                      }
+                      name={notification.icon || "bell-outline"}
                       size={25}
                       color="#25B5D1"
                     />
@@ -613,7 +573,6 @@ export default function NotificationsScreen() {
                       >
                         {notification.title}
                       </Text>
-
                       {notification.unread && (
                         <View style={styles.unreadDot} />
                       )}
@@ -630,7 +589,6 @@ export default function NotificationsScreen() {
                       <Text style={styles.dateText}>
                         {notification.date}
                       </Text>
-
                       <Text style={styles.timeText}>
                         {notification.time}
                       </Text>
@@ -657,9 +615,7 @@ export default function NotificationsScreen() {
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() =>
-              router.replace("/expensesManagement")
-            }
+            onPress={() => router.replace("/expensesManagement")}
           >
             <MaterialCommunityIcons
               name="wallet-outline"
@@ -703,41 +659,46 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#071426",
   },
-
   container: {
     flex: 1,
     backgroundColor: "#071426",
   },
-
   header: {
-    height: 118,
+    height: 110,
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
-
   backButton: {
     width: 44,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
-
   headerTitle: {
     color: "#FFFFFF",
     fontSize: 24,
     fontWeight: "700",
   },
-
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  headerDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: "#27B4D0",
+  },
   markButton: {
     width: 44,
     height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
-
   content: {
     flex: 1,
     backgroundColor: "#FFFFFF",
@@ -745,17 +706,14 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 45,
     overflow: "hidden",
   },
-
   categoryContainer: {
     paddingTop: 22,
     paddingBottom: 12,
   },
-
   categoryScroll: {
     paddingHorizontal: 20,
     gap: 10,
   },
-
   categoryButton: {
     paddingHorizontal: 18,
     height: 40,
@@ -764,33 +722,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
   categoryButtonActive: {
     backgroundColor: "#25B5D1",
   },
-
   categoryText: {
     fontSize: 14,
     fontWeight: "600",
     color: "#6F7378",
   },
-
   categoryTextActive: {
     color: "#FFFFFF",
   },
-
   notificationScroll: {
     flex: 1,
   },
-
   notificationContent: {
     paddingHorizontal: 20,
     paddingBottom: 120,
     paddingTop: 8,
   },
-
   notificationCard: {
-    minHeight: 126,
+    minHeight: 120,
     backgroundColor: "#F7F8F9",
     borderRadius: 17,
     marginBottom: 12,
@@ -799,7 +751,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-
   iconContainer: {
     width: 50,
     height: 50,
@@ -809,23 +760,19 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginRight: 14,
   },
-
   notificationInfo: {
     flex: 1,
   },
-
   titleRow: {
     flexDirection: "row",
     alignItems: "center",
   },
-
   notificationTitle: {
     flex: 1,
     fontSize: 16,
     fontWeight: "700",
     color: "#0A3438",
   },
-
   unreadDot: {
     width: 9,
     height: 9,
@@ -833,44 +780,55 @@ const styles = StyleSheet.create({
     backgroundColor: "#25B5D1",
     marginLeft: 8,
   },
-
   notificationDescription: {
     marginTop: 7,
     fontSize: 13,
     lineHeight: 19,
     color: "#70767A",
   },
-
   dateRow: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 9,
   },
-
   dateText: {
     fontSize: 11,
     color: "#9A9FA3",
   },
-
   timeText: {
     fontSize: 11,
     color: "#9A9FA3",
     marginLeft: 10,
   },
-
   emptyContainer: {
     flex: 1,
     minHeight: 400,
     alignItems: "center",
     justifyContent: "center",
+    paddingHorizontal: 35,
   },
-
+  emptyIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#F1F3F5",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyTitle: {
+    color: "#172D3D",
+    fontSize: 17,
+    fontWeight: "800",
+    textAlign: "center",
+    marginBottom: 8,
+  },
   emptyText: {
-    marginTop: 12,
-    fontSize: 15,
-    color: "#ACADAD",
+    color: "#6D7580",
+    fontSize: 13,
+    textAlign: "center",
+    lineHeight: 18,
   },
-
   bottomBar: {
     position: "absolute",
     bottom: 0,
@@ -884,13 +842,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     paddingHorizontal: 12,
   },
-
   bottomItem: {
     alignItems: "center",
     justifyContent: "center",
     minWidth: 72,
   },
-
   bottomText: {
     color: "#FFFFFF",
     fontSize: 11,
