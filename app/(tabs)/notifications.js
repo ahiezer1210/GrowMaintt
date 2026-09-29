@@ -29,7 +29,6 @@ const categories = [
 ];
 
 export default function NotificationsScreen() {
-
   const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
@@ -40,18 +39,18 @@ export default function NotificationsScreen() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (value) => Math.round(value * scale);
 
@@ -92,8 +91,9 @@ export default function NotificationsScreen() {
               alertId: item.id,
               category: "Security",
               title: "Security alert",
-              description: `Your account was accessed from ${alert.deviceName || "another device"
-                }`,
+              description: `Your account was accessed from ${
+                alert.deviceName || "another device"
+              }`,
               time: date.toLocaleTimeString([], {
                 hour: "2-digit",
                 minute: "2-digit",
@@ -122,9 +122,9 @@ export default function NotificationsScreen() {
     selectedCategory === "All"
       ? notifications
       : notifications.filter(
-        (item) =>
-          item.category === selectedCategory
-      );
+          (item) =>
+            item.category === selectedCategory
+        );
 
   const unreadCount = notifications.filter(
     (item) => item.unread
@@ -234,7 +234,15 @@ export default function NotificationsScreen() {
   };
 
   const volver = () => {
-    if (from === "/historial") {
+    if (from === "/privacypolicy") {
+      router.push("/privacypolicy");
+    } else if (from === "/registerinvestments") {
+      router.push("/registerinvestments");
+    } else if (from === "/registerexpenses") {
+      router.push("/registerexpenses");
+    } else if (from === "/usermanual") {
+      router.push("/usermanual");
+    } else if (from === "/historial") {
       router.push("/historial");
     } else if (from === "/profile") {
       router.push("/profile");
@@ -275,6 +283,7 @@ export default function NotificationsScreen() {
         backgroundColor="#071426"
       />
 
+      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -330,6 +339,7 @@ export default function NotificationsScreen() {
         )}
       </View>
 
+      {/* CONTENT */}
       <View
         style={[
           styles.content,
@@ -340,6 +350,7 @@ export default function NotificationsScreen() {
           },
         ]}
       >
+        {/* CATEGORIES */}
         <View
           style={[
             styles.categories,
@@ -360,9 +371,11 @@ export default function NotificationsScreen() {
                   borderRadius: s(9),
                 },
                 selectedCategory === category &&
-                styles.categoryActive,
+                  styles.categoryActive,
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() =>
+                setSelectedCategory(category)
+              }
               activeOpacity={0.8}
             >
               <Text
@@ -372,7 +385,7 @@ export default function NotificationsScreen() {
                     fontSize: s(10),
                   },
                   selectedCategory === category &&
-                  styles.categoryTextActive,
+                    styles.categoryTextActive,
                 ]}
               >
                 {category}
@@ -381,6 +394,7 @@ export default function NotificationsScreen() {
           ))}
         </View>
 
+        {/* NOTIFICATIONS LIST */}
         <ScrollView
           style={[
             styles.list,
@@ -399,119 +413,119 @@ export default function NotificationsScreen() {
           {filtered.length === 0
             ? emptyState()
             : filtered.map((item) => (
-              <TouchableOpacity
-                key={item.id}
-                style={[
-                  styles.notification,
-                  {
-                    minHeight: s(76),
-                    borderRadius: s(13),
-                    padding: s(11),
-                    marginBottom: s(12),
-                  },
-                ]}
-                onPress={() =>
-                  openNotification(item)
-                }
-                activeOpacity={0.8}
-              >
-                <View
+                <TouchableOpacity
+                  key={item.id}
                   style={[
-                    styles.icon,
+                    styles.notification,
                     {
-                      width: s(35),
-                      marginRight: s(7),
+                      minHeight: s(76),
+                      borderRadius: s(13),
+                      padding: s(11),
+                      marginBottom: s(12),
                     },
                   ]}
+                  onPress={() =>
+                    openNotification(item)
+                  }
+                  activeOpacity={0.8}
                 >
-                  <MaterialCommunityIcons
-                    name={item.icon}
-                    size={s(26)}
-                    color="#172D3D"
-                  />
-                </View>
-
-                <View
-                  style={[
-                    styles.notificationContent,
-                    {
-                      paddingRight: s(15),
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.title,
-                      {
-                        fontSize: s(11),
-                        marginBottom: s(3),
-                      },
-                    ]}
-                  >
-                    {item.title}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.description,
-                      {
-                        fontSize: s(9),
-                        lineHeight: s(12),
-                      },
-                    ]}
-                  >
-                    {item.description}
-                  </Text>
-
                   <View
                     style={[
-                      styles.dateRow,
+                      styles.icon,
                       {
-                        marginTop: s(4),
+                        width: s(35),
+                        marginRight: s(7),
                       },
                     ]}
                   >
-                    <Text
-                      style={[
-                        styles.time,
-                        {
-                          fontSize: s(8),
-                          marginRight: s(3),
-                        },
-                      ]}
-                    >
-                      {item.time}
-                    </Text>
-
-                    <Text
-                      style={[
-                        styles.date,
-                        {
-                          fontSize: s(8),
-                        },
-                      ]}
-                    >
-                      {item.date}
-                    </Text>
+                    <MaterialCommunityIcons
+                      name={item.icon}
+                      size={s(26)}
+                      color="#172D3D"
+                    />
                   </View>
-                </View>
 
-                {item.unread && (
                   <View
                     style={[
-                      styles.notificationDot,
+                      styles.notificationContent,
                       {
-                        left: s(11),
-                        top: s(12),
-                        width: s(7),
-                        height: s(7),
-                        borderRadius: s(7),
+                        paddingRight: s(15),
                       },
                     ]}
-                  />
-                )}
-              </TouchableOpacity>
-            ))}
+                  >
+                    <Text
+                      style={[
+                        styles.title,
+                        {
+                          fontSize: s(11),
+                          marginBottom: s(3),
+                        },
+                      ]}
+                    >
+                      {item.title}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.description,
+                        {
+                          fontSize: s(9),
+                          lineHeight: s(12),
+                        },
+                      ]}
+                    >
+                      {item.description}
+                    </Text>
+
+                    <View
+                      style={[
+                        styles.dateRow,
+                        {
+                          marginTop: s(4),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.time,
+                          {
+                            fontSize: s(8),
+                            marginRight: s(3),
+                          },
+                        ]}
+                      >
+                        {item.time}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.date,
+                          {
+                            fontSize: s(8),
+                          },
+                        ]}
+                      >
+                        {item.date}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {item.unread && (
+                    <View
+                      style={[
+                        styles.notificationDot,
+                        {
+                          left: s(11),
+                          top: s(12),
+                          width: s(7),
+                          height: s(7),
+                          borderRadius: s(7),
+                        },
+                      ]}
+                    />
+                  )}
+                </TouchableOpacity>
+              ))}
         </ScrollView>
 
         {/* BOTTOM NAVIGATION */}

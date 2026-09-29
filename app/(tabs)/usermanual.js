@@ -1,6 +1,6 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   ScrollView,
   StatusBar,
@@ -8,640 +8,763 @@ import {
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+  View,
+} from "react-native";
+
+const navItems = [
+  {
+    icon: "home-outline",
+    route: "/home",
+  },
+  {
+    icon: "chart-box-outline",
+    route: "/historial",
+  },
+  {
+    icon: "swap-horizontal",
+    route: "/expensesManagement",
+  },
+  {
+    icon: "layers-outline",
+    route: "/currentgoal",
+  },
+  {
+    icon: "account-outline",
+    route: "/profile",
+  },
+];
 
 export default function ManualScreen() {
   const { width, height } = useWindowDimensions();
 
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState("home");
 
-  
-  const isTablet = width >= 700;
+  const small = width < 350;
+  const tablet = width >= 600;
   const isLandscape = width > height;
 
-  
-  const scale = Math.min(Math.max(width / 375, 0.9), 1.35);
+  const scale = (value, tabletValue) =>
+    tablet
+      ? (tabletValue ?? value * 1.15)
+      : small
+      ? value * 0.85
+      : value;
 
-  const handleNotificationPress = () => {
+  const abrirNotificaciones = () => {
     router.push({
-      pathname: '/notifications',
-      params: { from: '/usermanual' },
+      pathname: "/notifications",
+      params: {
+        from: "/usermanual",
+      },
     });
   };
 
-  const NAV_ROUTES = {
-    home: '/home',
-    reports: '/historial',
-    transactions: '/expensesManagement',
-    savings: '/currentgoal',
-    profile: '/profile',
-  };
-
-  const handleNavPress = (tabKey) => {
-    setActiveTab(tabKey);
-    router.push(NAV_ROUTES[tabKey]);
-  };
-
-  const sections = [
-    {
-      number: '01',
-      title: 'Home',
-      icon: 'home-outline',
-      description:
-        'Know your balance, recent activity and get a quick summary of your finances.',
-    },
-    {
-      number: '02',
-      title: 'Add Expense',
-      icon: 'plus-circle-outline',
-      description:
-        'Register your daily expenses and classify them by category.',
-    },
-    {
-      number: '03',
-      title: 'Reports',
-      icon: 'chart-box-outline',
-      description:
-        'Visualize your income, expenses and savings with charts and statistics.',
-    },
-    {
-      number: '04',
-      title: 'Savings',
-      icon: 'piggy-bank-outline',
-      description:
-        'Create savings goals, contribute regularly and reach your objectives.',
-    },
-    {
-      number: '05',
-      title: 'Transactions',
-      icon: 'swap-horizontal',
-      description:
-        'Review the history of all your financial movements in detail.',
-    },
-    {
-      number: '06',
-      title: 'Settings',
-      icon: 'cog-outline',
-      description:
-        'Manage your account preferences and configuration.',
-    },
-  ];
-
   return (
-    <SafeAreaView style={styles.screen} edges={['top', 'left', 'right']}>
+    <View style={styles.screen}>
       <StatusBar
-        backgroundColor="#081023"
+        translucent
+        backgroundColor="#071426"
         barStyle="light-content"
       />
 
-      
-      <View
-        style={[
-          styles.header,
-          {
-            height: isLandscape
-              ? 70
-              : isTablet
-              ? 86
-              : 76,
-          },
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => {
-            if (router.canGoBack()) {
-              router.back();
-            }
-          }}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={28 * scale}
-            color="#FFFFFF"
-          />
-        </TouchableOpacity>
+      <View style={styles.app}>
 
-        <View style={styles.headerCenter}>
+        {/* HEADER */}
+        <View
+          style={[
+            styles.header,
+            {
+              height:
+                118 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                ? 45
+                : 25,
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              styles.back,
+              {
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
+            onPress={() => {
+              if (router.canGoBack()) {
+                router.back();
+              }
+            }}
+            activeOpacity={0.7}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
           <Text
             style={[
               styles.headerTitle,
               {
-                fontSize: 21 * scale,
+                fontSize:
+                  25 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
+                transform: [
+                  {
+                    translateX:
+                      7 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                  {
+                    translateY:
+                      1 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
               },
             ]}
           >
             User Manual
           </Text>
 
-          <Text
+          <TouchableOpacity
             style={[
-              styles.headerSubtitle,
+              styles.headerBell,
               {
-                fontSize: 12 * scale,
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
               },
             ]}
+            onPress={abrirNotificaciones}
+            activeOpacity={0.7}
           >
-            Everything you need to know
-          </Text>
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
         </View>
 
-        <TouchableOpacity
+        {/* MAIN */}
+        <View
           style={[
-            styles.bellButton,
+            styles.main,
             {
-              width: 42 * scale,
-              height: 42 * scale,
-              borderRadius: 21 * scale,
+              borderTopLeftRadius:
+                tablet ? 55 : small ? 35 : 45,
+              borderTopRightRadius:
+                tablet ? 55 : small ? 35 : 45,
             },
           ]}
-          onPress={handleNotificationPress}
-          activeOpacity={0.7}
         >
-          <MaterialCommunityIcons
-            name="bell-outline"
-            size={23 * scale}
-            color="#081023"
-          />
-        </TouchableOpacity>
-      </View>
-
-      
-      <View style={styles.main}>
-        <ScrollView
-          style={styles.scroll}
-          contentContainerStyle={[
-            styles.content,
-            {
-              paddingHorizontal: isTablet ? 42 : 20,
-              paddingTop: isLandscape ? 18 : 24,
-              paddingBottom: 30,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View
-            style={[
-              styles.innerContent,
+          <ScrollView
+            style={styles.scroll}
+            contentContainerStyle={[
+              styles.content,
               {
-                maxWidth: isTablet ? 1050 : 700,
+                paddingHorizontal: tablet
+                  ? 42
+                  : small
+                  ? 20
+                  : 20,
+
+                paddingTop: isLandscape
+                  ? 18
+                  : tablet
+                  ? 35
+                  : small
+                  ? 20
+                  : 24,
+
+                paddingBottom: 100,
               },
             ]}
+            showsVerticalScrollIndicator={false}
           >
-            
-            <View style={styles.titleContainer}>
-              <Text
-                style={[
-                  styles.mainTitle,
-                  {
-                    fontSize: isTablet
-                      ? 28
-                      : 23 * scale,
-                  },
-                ]}
-              >
-                What is GrowMait?
-              </Text>
-
-              <View style={styles.titleLine} />
-            </View>
-
-            
-            <View style={styles.introBox}>
-              <View style={styles.introIcon}>
-                <MaterialCommunityIcons
-                  name="wallet-outline"
-                  size={25 * scale}
-                  color="#FFFFFF"
-                />
-              </View>
-
-              <View style={styles.introContent}>
-                <Text
-                  style={[
-                    styles.introText,
-                    {
-                      fontSize: isTablet
-                        ? 16
-                        : 13.5 * scale,
-                      lineHeight: isTablet
-                        ? 23
-                        : 19 * scale,
-                    },
-                  ]}
-                >
-                  GrowMait is your ally to keep control of your
-                  finances, expenses and savings. Everything in
-                  one simple, easy and secure place.
-                </Text>
-              </View>
-            </View>
-
-            
-            <View style={styles.sectionHeader}>
-              <View>
-                <Text
-                  style={[
-                    styles.sectionHeading,
-                    {
-                      fontSize: isTablet ? 22 : 18 * scale,
-                    },
-                  ]}
-                >
-                  Explore GrowMait
-                </Text>
-
-                <Text
-                  style={[
-                    styles.sectionSubheading,
-                    {
-                      fontSize: isTablet
-                        ? 14
-                        : 11.5 * scale,
-                    },
-                  ]}
-                >
-                  Everything you can do in the app
-                </Text>
-              </View>
-            </View>
-
-            
             <View
               style={[
-                styles.sectionsContainer,
-                isTablet && styles.sectionsGrid,
+                styles.innerContent,
+                {
+                  maxWidth: tablet ? 1050 : 700,
+                },
               ]}
             >
-              {sections.map((item) => (
-                <View
-                  key={item.number}
+
+              {/* TITLE */}
+              <View style={styles.titleContainer}>
+                <Text
                   style={[
-                    styles.sectionCard,
-                    isTablet && styles.sectionCardTablet,
+                    styles.mainTitle,
+                    {
+                      fontSize: tablet
+                        ? 28
+                        : 23 *
+                          (small
+                            ? 0.85
+                            : 1),
+                    },
                   ]}
                 >
-                  
-                  <View style={styles.numberContainer}>
-                    <Text style={styles.numberText}>
-                      {item.number}
-                    </Text>
-                  </View>
+                  What is GrowMait?
+                </Text>
 
-                  
-                  <View style={styles.sectionIcon}>
+                <View style={styles.titleLine} />
+              </View>
+
+              {/* INTRO */}
+              <View style={styles.introBox}>
+                <View style={styles.introIcon}>
+                  <MaterialCommunityIcons
+                    name="wallet-outline"
+                    size={
+                      25 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    }
+                    color="#FFFFFF"
+                  />
+                </View>
+
+                <View style={styles.introContent}>
+                  <Text
+                    style={[
+                      styles.introText,
+                      {
+                        fontSize: tablet
+                          ? 16
+                          : 13.5 *
+                            (small
+                              ? 0.85
+                              : 1),
+
+                        lineHeight: tablet
+                          ? 23
+                          : 19 *
+                            (small
+                              ? 0.85
+                              : 1),
+                      },
+                    ]}
+                  >
+                    GrowMait is your ally to keep control of your
+                    finances, expenses and savings. Everything in
+                    one simple, easy and secure place.
+                  </Text>
+                </View>
+              </View>
+
+              {/* EXPLORE */}
+              <View style={styles.sectionHeader}>
+                <View>
+                  <Text
+                    style={[
+                      styles.sectionHeading,
+                      {
+                        fontSize: tablet
+                          ? 22
+                          : 18 *
+                            (small
+                              ? 0.85
+                              : 1),
+                      },
+                    ]}
+                  >
+                    Explore GrowMait
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.sectionSubheading,
+                      {
+                        fontSize: tablet
+                          ? 14
+                          : 11.5 *
+                            (small
+                              ? 0.85
+                              : 1),
+                      },
+                    ]}
+                  >
+                    Everything you can do in the app
+                  </Text>
+                </View>
+              </View>
+
+              {/* SECTIONS */}
+              <View
+                style={[
+                  styles.sectionsContainer,
+                  tablet && styles.sectionsGrid,
+                ]}
+              >
+                {[
+                  {
+                    number: "01",
+                    title: "Home",
+                    icon: "home-outline",
+                    description:
+                      "Know your balance, recent activity and get a quick summary of your finances.",
+                  },
+                  {
+                    number: "02",
+                    title: "Add Expense",
+                    icon: "plus-circle-outline",
+                    description:
+                      "Register your daily expenses and classify them by category.",
+                  },
+                  {
+                    number: "03",
+                    title: "Reports",
+                    icon: "chart-box-outline",
+                    description:
+                      "Visualize your income, expenses and savings with charts and statistics.",
+                  },
+                  {
+                    number: "04",
+                    title: "Savings",
+                    icon: "piggy-bank-outline",
+                    description:
+                      "Create savings goals, contribute regularly and reach your objectives.",
+                  },
+                  {
+                    number: "05",
+                    title: "Transactions",
+                    icon: "swap-horizontal",
+                    description:
+                      "Review the history of all your financial movements in detail.",
+                  },
+                  {
+                    number: "06",
+                    title: "Settings",
+                    icon: "cog-outline",
+                    description:
+                      "Manage your account preferences and configuration.",
+                  },
+                ].map((item) => (
+                  <View
+                    key={item.number}
+                    style={[
+                      styles.sectionCard,
+                      tablet && styles.sectionCardTablet,
+                    ]}
+                  >
+                    <View style={styles.numberContainer}>
+                      <Text style={styles.numberText}>
+                        {item.number}
+                      </Text>
+                    </View>
+
+                    <View style={styles.sectionIcon}>
+                      <MaterialCommunityIcons
+                        name={item.icon}
+                        size={
+                          25 *
+                          (small
+                            ? 0.85
+                            : tablet
+                            ? 1.15
+                            : 1)
+                        }
+                        color="#25B7D3"
+                      />
+                    </View>
+
+                    <View style={styles.sectionInfo}>
+                      <Text
+                        style={[
+                          styles.sectionTitle,
+                          {
+                            fontSize: tablet
+                              ? 17
+                              : 14.5 *
+                                (small
+                                  ? 0.85
+                                  : 1),
+                          },
+                        ]}
+                      >
+                        {item.title}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.sectionText,
+                          {
+                            fontSize: tablet
+                              ? 14
+                              : 11.5 *
+                                (small
+                                  ? 0.85
+                                  : 1),
+
+                            lineHeight: tablet
+                              ? 20
+                              : 16 *
+                                (small
+                                  ? 0.85
+                                  : 1),
+                          },
+                        ]}
+                      >
+                        {item.description}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+
+              {/* TIPS */}
+              <View style={styles.tipsHeader}>
+                <View style={styles.tipsIcon}>
+                  <MaterialCommunityIcons
+                    name="lightbulb-on-outline"
+                    size={
+                      23 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    }
+                    color="#FFFFFF"
+                  />
+                </View>
+
+                <View>
+                  <Text
+                    style={[
+                      styles.tipsTitle,
+                      {
+                        fontSize: tablet
+                          ? 22
+                          : 18 *
+                            (small
+                              ? 0.85
+                              : 1),
+                      },
+                    ]}
+                  >
+                    Useful Tips
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.tipsSubtitle,
+                      {
+                        fontSize: tablet
+                          ? 14
+                          : 11 *
+                            (small
+                              ? 0.85
+                              : 1),
+                      },
+                    ]}
+                  >
+                    Small actions for better financial habits
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                style={[
+                  styles.tipsContainer,
+                  tablet && styles.tipsGrid,
+                ]}
+              >
+                {/* TIP 1 */}
+                <View
+                  style={[
+                    styles.tipCard,
+                    tablet && styles.tipCardTablet,
+                  ]}
+                >
+                  <View style={styles.tipIconContainer}>
                     <MaterialCommunityIcons
-                      name={item.icon}
-                      size={25 * scale}
-                      color="#25B7D3"
+                      name="shield-check-outline"
+                      size={
+                        28 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1)
+                      }
+                      color="#081023"
                     />
                   </View>
 
-                  
-                  <View style={styles.sectionInfo}>
+                  <View style={styles.tipContent}>
                     <Text
                       style={[
-                        styles.sectionTitle,
+                        styles.tipTitle,
                         {
-                          fontSize: isTablet
-                            ? 17
-                            : 14.5 * scale,
+                          fontSize: tablet
+                            ? 16
+                            : 13.5 *
+                              (small
+                                ? 0.85
+                                : 1),
                         },
                       ]}
                     >
-                      {item.title}
+                      Keep your data safe
                     </Text>
 
                     <Text
                       style={[
-                        styles.sectionText,
+                        styles.tipDescription,
                         {
-                          fontSize: isTablet
-                            ? 14
-                            : 11.5 * scale,
-                          lineHeight: isTablet
-                            ? 20
-                            : 16 * scale,
+                          fontSize: tablet
+                            ? 13.5
+                            : 11 *
+                              (small
+                                ? 0.85
+                                : 1),
+
+                          lineHeight: tablet
+                            ? 19
+                            : 15 *
+                              (small
+                                ? 0.85
+                                : 1),
                         },
                       ]}
                     >
-                      {item.description}
+                      Do not share your password or sign in on
+                      shared devices.
                     </Text>
                   </View>
                 </View>
-              ))}
-            </View>
 
-            <View style={styles.tipsHeader}>
-              <View style={styles.tipsIcon}>
-                <MaterialCommunityIcons
-                  name="lightbulb-on-outline"
-                  size={23 * scale}
-                  color="#FFFFFF"
-                />
-              </View>
-
-              <View>
-                <Text
+                {/* TIP 2 */}
+                <View
                   style={[
-                    styles.tipsTitle,
-                    {
-                      fontSize: isTablet
-                        ? 22
-                        : 18 * scale,
-                    },
+                    styles.tipCard,
+                    tablet && styles.tipCardTablet,
                   ]}
                 >
-                  Useful Tips
-                </Text>
+                  <View style={styles.tipIconContainer}>
+                    <MaterialCommunityIcons
+                      name="bullseye-arrow"
+                      size={
+                        28 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1)
+                      }
+                      color="#081023"
+                    />
+                  </View>
 
-                <Text
-                  style={[
-                    styles.tipsSubtitle,
-                    {
-                      fontSize: isTablet
-                        ? 14
-                        : 11 * scale,
-                    },
-                  ]}
-                >
-                  Small actions for better financial habits
-                </Text>
+                  <View style={styles.tipContent}>
+                    <Text
+                      style={[
+                        styles.tipTitle,
+                        {
+                          fontSize: tablet
+                            ? 16
+                            : 13.5 *
+                              (small
+                                ? 0.85
+                                : 1),
+                        },
+                      ]}
+                    >
+                      Set realistic goals
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.tipDescription,
+                        {
+                          fontSize: tablet
+                            ? 13.5
+                            : 11 *
+                              (small
+                                ? 0.85
+                                : 1),
+
+                          lineHeight: tablet
+                            ? 19
+                            : 15 *
+                              (small
+                                ? 0.85
+                                : 1),
+                        },
+                      ]}
+                    >
+                      Start with small goals and increase them
+                      little by little.
+                    </Text>
+                  </View>
+                </View>
               </View>
+
             </View>
+          </ScrollView>
+        </View>
 
-           
-            <View
-              style={[
-                styles.tipsContainer,
-                isTablet && styles.tipsGrid,
-              ]}
-            >
-              
-              <View
-                style={[
-                  styles.tipCard,
-                  isTablet && styles.tipCardTablet,
-                ]}
-              >
-                <View style={styles.tipIconContainer}>
-                  <MaterialCommunityIcons
-                    name="shield-check-outline"
-                    size={28 * scale}
-                    color="#081023"
-                  />
-                </View>
+        {/* NAVBAR - IGUAL AL LOGOUT */}
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height:
+                65 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
 
-                <View style={styles.tipContent}>
-                  <Text
-                    style={[
-                      styles.tipTitle,
-                      {
-                        fontSize: isTablet
-                          ? 16
-                          : 13.5 * scale,
-                      },
-                    ]}
-                  >
-                    Keep your data safe
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.tipDescription,
-                      {
-                        fontSize: isTablet
-                          ? 13.5
-                          : 11 * scale,
-                        lineHeight: isTablet
-                          ? 19
-                          : 15 * scale,
-                      },
-                    ]}
-                  >
-                    Do not share your password or sign in on
-                    shared devices.
-                  </Text>
-                </View>
-              </View>
-
-              
-              <View
-                style={[
-                  styles.tipCard,
-                  isTablet && styles.tipCardTablet,
-                ]}
-              >
-                <View style={styles.tipIconContainer}>
-                  <MaterialCommunityIcons
-                    name="bullseye-arrow"
-                    size={28 * scale}
-                    color="#081023"
-                  />
-                </View>
-
-                <View style={styles.tipContent}>
-                  <Text
-                    style={[
-                      styles.tipTitle,
-                      {
-                        fontSize: isTablet
-                          ? 16
-                          : 13.5 * scale,
-                      },
-                    ]}
-                  >
-                    Set realistic goals
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.tipDescription,
-                      {
-                        fontSize: isTablet
-                          ? 13.5
-                          : 11 * scale,
-                        lineHeight: isTablet
-                          ? 19
-                          : 15 * scale,
-                      },
-                    ]}
-                  >
-                    Start with small goals and increase them
-                    little by little.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-
-        
-        <SafeAreaView
-          edges={['bottom']}
-          style={styles.bottomBarContainer}
+              borderTopLeftRadius:
+                78 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+            },
+          ]}
         >
-          <View
-            style={[
-              styles.bottomBar,
-              {
-                height: isLandscape
-                  ? 58
-                  : isTablet
-                  ? 72
-                  : 66,
-              },
-            ]}
-          >
-           
+          {navItems.map((item) => (
             <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => handleNavPress('home')}
-              activeOpacity={0.7}
+              key={item.route}
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => {
+                setActiveTab(item.route);
+                router.push(item.route);
+              }}
             >
               <MaterialCommunityIcons
-                name="home-outline"
-                size={26 * scale}
-                color={
-                  activeTab === 'home'
-                    ? '#FFFFFF'
-                    : 'rgba(255,255,255,0.55)'
+                name={item.icon}
+                size={
+                  item.icon === "swap-horizontal"
+                    ? 37 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    : 35 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
                 }
+                color="#FFFFFF"
               />
             </TouchableOpacity>
+          ))}
+        </View>
 
-            
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => handleNavPress('reports')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons
-                name="chart-box-outline"
-                size={26 * scale}
-                color={
-                  activeTab === 'reports'
-                    ? '#FFFFFF'
-                    : 'rgba(255,255,255,0.55)'
-                }
-              />
-            </TouchableOpacity>
-
-           
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => handleNavPress('transactions')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons
-                name="swap-horizontal"
-                size={28 * scale}
-                color={
-                  activeTab === 'transactions'
-                    ? '#FFFFFF'
-                    : 'rgba(255,255,255,0.55)'
-                }
-              />
-            </TouchableOpacity>
-
-            
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => handleNavPress('savings')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={26 * scale}
-                color={
-                  activeTab === 'savings'
-                    ? '#FFFFFF'
-                    : 'rgba(255,255,255,0.55)'
-                }
-              />
-            </TouchableOpacity>
-
-           
-            <TouchableOpacity
-              style={styles.navButton}
-              onPress={() => handleNavPress('profile')}
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={26 * scale}
-                color={
-                  activeTab === 'profile'
-                    ? '#FFFFFF'
-                    : 'rgba(255,255,255,0.55)'
-                }
-              />
-            </TouchableOpacity>
-          </View>
-        </SafeAreaView>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
-
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#081023',
+    backgroundColor: "#FFF",
   },
 
-  
-
-  header: {
-    width: '100%',
-    backgroundColor: '#081023',
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 18,
-  },
-
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-
-  headerCenter: {
+  app: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#071426",
+  },
+
+  /* HEADER */
+  header: {
+    width: "100%",
+    backgroundColor: "#071426",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  back: {
+    width: 30,
+    alignItems: "flex-start",
+    justifyContent: "center",
   },
 
   headerTitle: {
-    color: '#FFFFFF',
-    fontWeight: '800',
-    letterSpacing: 0.2,
+    color: "#FFF",
+    fontWeight: "700",
   },
 
-  headerSubtitle: {
-    color: '#ACADAD',
-    marginTop: 3,
-    fontWeight: '500',
+  headerBell: {
+    justifyContent: "center",
   },
 
-  bellButton: {
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  
+  /* MAIN */
   main: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 38,
-    borderTopRightRadius: 38,
-    overflow: 'hidden',
+    width: "100%",
+    backgroundColor: "#FFF",
+    overflow: "hidden",
   },
 
   scroll: {
@@ -650,43 +773,41 @@ const styles = StyleSheet.create({
 
   content: {
     flexGrow: 1,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   innerContent: {
-    width: '100%',
+    width: "100%",
   },
 
- 
-
+  /* TITLE */
   titleContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 18,
   },
 
   mainTitle: {
-    color: '#081023',
-    fontWeight: '900',
-    textAlign: 'center',
+    color: "#081023",
+    fontWeight: "900",
+    textAlign: "center",
   },
 
   titleLine: {
     width: 42,
     height: 4,
     borderRadius: 5,
-    backgroundColor: '#25B7D3',
+    backgroundColor: "#25B7D3",
     marginTop: 8,
   },
 
- 
-
+  /* INTRO */
   introBox: {
-    width: '100%',
-    backgroundColor: '#25B7D3',
+    width: "100%",
+    backgroundColor: "#25B7D3",
     borderRadius: 20,
     padding: 17,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 26,
   },
 
@@ -694,9 +815,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 16,
-    backgroundColor: 'rgba(8,16,35,0.16)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "rgba(8,16,35,0.16)",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 13,
   },
 
@@ -705,57 +826,50 @@ const styles = StyleSheet.create({
   },
 
   introText: {
-    color: '#081023',
-    fontWeight: '700',
+    color: "#081023",
+    fontWeight: "700",
   },
 
- 
-
+  /* SECTIONS */
   sectionHeader: {
-    width: '100%',
+    width: "100%",
     marginBottom: 13,
   },
 
   sectionHeading: {
-    color: '#081023',
-    fontWeight: '900',
+    color: "#081023",
+    fontWeight: "900",
   },
 
   sectionSubheading: {
-    color: '#ACADAD',
+    color: "#ACADAD",
     marginTop: 3,
-    fontWeight: '500',
+    fontWeight: "500",
   },
 
-  
-
   sectionsContainer: {
-    width: '100%',
+    width: "100%",
   },
 
   sectionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
 
   sectionCard: {
-    width: '100%',
+    width: "100%",
     minHeight: 96,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: '#E7EAEA',
+    borderColor: "#E7EAEA",
     borderRadius: 18,
     marginBottom: 12,
     padding: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-
-    
+    flexDirection: "row",
+    alignItems: "center",
     elevation: 2,
-
-   
-    shadowColor: '#081023',
+    shadowColor: "#081023",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -765,29 +879,29 @@ const styles = StyleSheet.create({
   },
 
   sectionCardTablet: {
-    width: '48.8%',
+    width: "48.8%",
     minHeight: 125,
   },
 
   numberContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 9,
     right: 11,
   },
 
   numberText: {
-    color: '#ACADAD',
+    color: "#ACADAD",
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   sectionIcon: {
     width: 49,
     height: 49,
     borderRadius: 15,
-    backgroundColor: '#EAF9FC',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#EAF9FC",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 13,
   },
 
@@ -797,22 +911,21 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: '#081023',
-    fontWeight: '800',
+    color: "#081023",
+    fontWeight: "800",
     marginBottom: 4,
   },
 
   sectionText: {
-    color: '#4E5658',
-    fontWeight: '400',
+    color: "#4E5658",
+    fontWeight: "400",
   },
 
-
-
+  /* TIPS */
   tipsHeader: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: 15,
     marginBottom: 13,
   },
@@ -821,54 +934,54 @@ const styles = StyleSheet.create({
     width: 43,
     height: 43,
     borderRadius: 14,
-    backgroundColor: '#081023',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#081023",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 11,
   },
 
   tipsTitle: {
-    color: '#081023',
-    fontWeight: '900',
+    color: "#081023",
+    fontWeight: "900",
   },
 
   tipsSubtitle: {
-    color: '#ACADAD',
+    color: "#ACADAD",
     marginTop: 2,
   },
 
   tipsContainer: {
-    width: '100%',
+    width: "100%",
   },
 
   tipsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   tipCard: {
-    width: '100%',
-    backgroundColor: '#F7F9F9',
+    width: "100%",
+    backgroundColor: "#F7F9F9",
     borderRadius: 18,
     padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E8EBEB',
+    borderColor: "#E8EBEB",
   },
 
   tipCardTablet: {
-    width: '48.8%',
+    width: "48.8%",
   },
 
   tipIconContainer: {
     width: 49,
     height: 49,
     borderRadius: 15,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
 
@@ -877,33 +990,33 @@ const styles = StyleSheet.create({
   },
 
   tipTitle: {
-    color: '#081023',
-    fontWeight: '800',
+    color: "#081023",
+    fontWeight: "800",
     marginBottom: 3,
   },
 
   tipDescription: {
-    color: '#25B7D3',
-    fontWeight: '600',
+    color: "#25B7D3",
+    fontWeight: "600",
   },
 
-
-  bottomBarContainer: {
-    backgroundColor: '#25B7D3',
-  },
-
+  /* NAVBAR - IGUAL AL LOGOUT */
   bottomBar: {
-    width: '100%',
-    backgroundColor: '#25B7D3',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
   },
 
-  navButton: {
+  navItem: {
     flex: 1,
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

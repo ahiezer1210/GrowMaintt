@@ -1,7 +1,6 @@
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -14,100 +13,238 @@ import {
 export default function PrivacyScreen() {
   const { width, height } = useWindowDimensions();
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600;
+  const small = width < 350;
+  const tablet = width >= 600;
 
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+  const scale = (value, tabletValue) =>
+    tablet
+      ? (tabletValue ?? value * 1.35)
+      : small
+      ? value * 0.9
+      : value;
 
   const verticalScale = (size) => Math.round(size * (height / 800));
 
-  const horizontalPadding = isSmallScreen
-    ? 16
-    : isMediumScreen
-      ? 22
-      : isTablet
-        ? 40
-        : 50;
+  const sectionVerticalPadding = tablet
+    ? verticalScale(14)
+    : verticalScale(8);
 
-  const sectionVerticalPadding = isTablet ? verticalScale(14) : verticalScale(8);
-
-  const navIcons = [
-    { icon: "home-outline", route: "/home", size: 28 },
-    { icon: "chart-box-outline", route: "/historial", size: 28 },
-    { icon: "swap-horizontal", route: "/expensesManagement", size: 30 },
-    { icon: "layers-outline", route: "/currentgoal", size: 28 },
-    { icon: "account-outline", route: "/profile", size: 28 },
+  const navItems = [
+    {
+      icon: "home-outline",
+      route: "/home",
+    },
+    {
+      icon: "chart-box-outline",
+      route: "/historial",
+    },
+    {
+      icon: "swap-horizontal",
+      route: "/expensesManagement",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/profile",
+    },
   ];
 
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar backgroundColor="#071426" barStyle="light-content" />
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/privacypolicy",
+      },
+    });
+  };
 
-      <View style={styles.screen}>
-        <View style={[styles.header, { height: verticalScale(95) }]}>
+  return (
+    <View style={styles.screen}>
+      <StatusBar
+        translucent
+        backgroundColor="#071426"
+        barStyle="light-content"
+      />
+
+      <View style={styles.app}>
+        {/* HEADER IGUAL A LOGOUT */}
+        <View
+          style={[
+            styles.header,
+            {
+              height:
+                118 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                ? 45
+                : 25,
+            },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.backButton}
+            style={[
+              styles.back,
+              {
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
             onPress={() => router.back()}
             activeOpacity={0.7}
-
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={Math.round(32 * scale)}
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
               color="#FFFFFF"
             />
           </TouchableOpacity>
 
-          <View style={styles.headerCenter}>
-            <Text style={[styles.headerTitle, { fontSize: Math.round(22 * scale) }]}>
-              Privacy Policy
-            </Text>
-            <Text style={[styles.headerSubtitle, { fontSize: Math.round(12 * scale) }]}>
-              Everything you need to know
-            </Text>
-          </View>
+          <Text
+            style={[
+              styles.headerTitle,
+              {
+                fontSize:
+                  25 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
+                transform: [
+                  {
+                    translateX:
+                      7 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                  {
+                    translateY:
+                      1 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
+              },
+            ]}
+          >
+            Privacy Policy
+          </Text>
 
           <TouchableOpacity
             style={[
-              styles.bellButton,
+              styles.headerBell,
               {
-                width: 42 * scale,
-                height: 42 * scale,
-                borderRadius: (42 * scale) / 2,
+                transform: [
+                  {
+                    translateY:
+                      4 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1),
+                  },
+                ],
               },
             ]}
+            onPress={abrirNotificaciones}
             activeOpacity={0.7}
-            onPress={() => router.push("/notifications")}
           >
             <MaterialCommunityIcons
-              name="bell-outline"
-              size={Math.round(24 * scale)}
-              color="#397468"
+              name="bell-circle-outline"
+              size={
+                35 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1)
+              }
+              color="#FFFFFF"
             />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.main}>
+        <View
+          style={[
+            styles.main,
+            {
+              borderTopLeftRadius: tablet
+                ? 55
+                : small
+                ? 35
+                : 45,
+              borderTopRightRadius: tablet
+                ? 55
+                : small
+                ? 35
+                : 45,
+            },
+          ]}
+        >
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[
               styles.content,
               {
-                paddingHorizontal: horizontalPadding,
-                paddingTop: verticalScale(20),
-                paddingBottom: verticalScale(20),
+                width: tablet ? "85%" : "100%",
+                maxWidth: tablet ? 700 : undefined,
+                paddingHorizontal: tablet
+                  ? 0
+                  : small
+                  ? 22
+                  : 30,
+                paddingTop: tablet
+                  ? 35
+                  : small
+                  ? 20
+                  : 28,
+                paddingBottom: 100,
               },
             ]}
           >
             <View style={styles.innerContainer}>
-              <Text style={[styles.mainTitle, { fontSize: Math.round(22 * scale) }]}>
+              <Text
+                style={[
+                  styles.mainTitle,
+                  {
+                    fontSize: Math.round(
+                      scale(22, 28)
+                    ),
+                  },
+                ]}
+              >
                 Your Privacy Matters
               </Text>
 
@@ -116,22 +253,35 @@ export default function PrivacyScreen() {
                   styles.banner,
                   {
                     paddingVertical: verticalScale(14),
-                    paddingHorizontal: horizontalPadding / 1.5,
+                    paddingHorizontal:
+                      (tablet ? 40 : small ? 22 : 30) / 1.5,
                     marginBottom: verticalScale(12),
                   },
                 ]}
               >
                 <Text
-                  style={[styles.bannerTitle, { fontSize: Math.round(15 * scale) }]}
+                  style={[
+                    styles.bannerTitle,
+                    {
+                      fontSize: Math.round(
+                        scale(15, 17)
+                      ),
+                    },
+                  ]}
                 >
                   Your Privacy is Important
                 </Text>
+
                 <Text
                   style={[
                     styles.bannerSubtitle,
                     {
-                      fontSize: Math.round(12 * scale),
-                      lineHeight: Math.round(17 * scale),
+                      fontSize: Math.round(
+                        scale(12, 14)
+                      ),
+                      lineHeight: Math.round(
+                        scale(17, 21)
+                      ),
                     },
                   ]}
                 >
@@ -140,205 +290,492 @@ export default function PrivacyScreen() {
                 </Text>
               </View>
 
-              <View style={[styles.section, { paddingVertical: sectionVerticalPadding }]}>
-                <View style={[styles.iconWrapper, { width: 36 * scale }]}>
+              {/* USER ICON */}
+              <View
+                style={[
+                  styles.section,
+                  {
+                    paddingVertical:
+                      sectionVerticalPadding,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      width:
+                        36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ]}
+                >
                   <Feather
                     name="user"
-                    size={Math.round(24 * scale)}
+                    size={Math.round(
+                      24 *
+                      (small
+                        ? 0.9
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    )}
                     color="#071426"
                   />
                 </View>
+
                 <View style={styles.textWrapper}>
                   <Text
                     style={[
                       styles.sectionTitle,
                       {
-                        fontSize: Math.round(14 * scale),
-                        lineHeight: Math.round(19 * scale),
+                        fontSize: Math.round(
+                          scale(14, 16)
+                        ),
+                        lineHeight: Math.round(
+                          scale(19, 22)
+                        ),
                       },
                     ]}
                   >
                     What information do we collect?
                   </Text>
+
                   <Text
                     style={[
                       styles.sectionText,
                       {
-                        fontSize: Math.round(12 * scale),
-                        lineHeight: Math.round(17 * scale),
+                        fontSize: Math.round(
+                          scale(12, 14)
+                        ),
+                        lineHeight: Math.round(
+                          scale(17, 20)
+                        ),
                       },
                     ]}
                   >
-                    We collect information that you provide directly, such as your
-                    contact details and account information.
+                    We collect information that you provide directly, such as
+                    your contact details and account information.
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.divider, { marginLeft: 36 * scale + 10 }]} />
+              <View
+                style={[
+                  styles.divider,
+                  {
+                    marginLeft:
+                      36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1) +
+                      10,
+                  },
+                ]}
+              />
 
-              <View style={[styles.section, { paddingVertical: sectionVerticalPadding }]}>
-                <View style={[styles.iconWrapper, { width: 36 * scale }]}>
+              {/* SEARCH ICON */}
+              <View
+                style={[
+                  styles.section,
+                  {
+                    paddingVertical:
+                      sectionVerticalPadding,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      width:
+                        36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ]}
+                >
                   <Feather
                     name="search"
-                    size={Math.round(24 * scale)}
+                    size={Math.round(
+                      24 *
+                      (small
+                        ? 0.9
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    )}
                     color="#071426"
                   />
                 </View>
+
                 <View style={styles.textWrapper}>
                   <Text
                     style={[
                       styles.sectionTitle,
                       {
-                        fontSize: Math.round(14 * scale),
-                        lineHeight: Math.round(19 * scale),
+                        fontSize: Math.round(
+                          scale(14, 16)
+                        ),
+                        lineHeight: Math.round(
+                          scale(19, 22)
+                        ),
                       },
                     ]}
                   >
                     How do we use your information?
                   </Text>
+
                   <Text
                     style={[
                       styles.sectionText,
                       {
-                        fontSize: Math.round(12 * scale),
-                        lineHeight: Math.round(17 * scale),
+                        fontSize: Math.round(
+                          scale(12, 14)
+                        ),
+                        lineHeight: Math.round(
+                          scale(17, 20)
+                        ),
                       },
                     ]}
                   >
-                    We use your information to provide and improve our services,
-                    personalize your experience, and comply with our legal
-                    obligations.
+                    We use your information to provide and improve our
+                    services, personalize your experience, and comply with our
+                    legal obligations.
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.divider, { marginLeft: 36 * scale + 10 }]} />
+              <View
+                style={[
+                  styles.divider,
+                  {
+                    marginLeft:
+                      36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1) +
+                      10,
+                  },
+                ]}
+              />
 
-              <View style={[styles.section, { paddingVertical: sectionVerticalPadding }]}>
-                <View style={[styles.iconWrapper, { width: 36 * scale }]}>
+              {/* LOCK ICON */}
+              <View
+                style={[
+                  styles.section,
+                  {
+                    paddingVertical:
+                      sectionVerticalPadding,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      width:
+                        36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ]}
+                >
                   <Feather
                     name="lock"
-                    size={Math.round(24 * scale)}
+                    size={Math.round(
+                      24 *
+                      (small
+                        ? 0.9
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    )}
                     color="#071426"
                   />
                 </View>
+
                 <View style={styles.textWrapper}>
                   <Text
                     style={[
                       styles.sectionTitle,
                       {
-                        fontSize: Math.round(14 * scale),
-                        lineHeight: Math.round(19 * scale),
+                        fontSize: Math.round(
+                          scale(14, 16)
+                        ),
+                        lineHeight: Math.round(
+                          scale(19, 22)
+                        ),
                       },
                     ]}
                   >
                     How do we protect your data?
                   </Text>
+
                   <Text
                     style={[
                       styles.sectionText,
                       {
-                        fontSize: Math.round(12 * scale),
-                        lineHeight: Math.round(17 * scale),
+                        fontSize: Math.round(
+                          scale(12, 14)
+                        ),
+                        lineHeight: Math.round(
+                          scale(17, 20)
+                        ),
                       },
                     ]}
                   >
-                    We implement technical and organizational measures to protect
-                    your data against unauthorized access, loss, or misuse.
+                    We implement technical and organizational measures to
+                    protect your data against unauthorized access, loss, or
+                    misuse.
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.divider, { marginLeft: 36 * scale + 10 }]} />
+              <View
+                style={[
+                  styles.divider,
+                  {
+                    marginLeft:
+                      36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1) +
+                      10,
+                  },
+                ]}
+              />
 
-              <View style={[styles.section, { paddingVertical: sectionVerticalPadding }]}>
-                <View style={[styles.iconWrapper, { width: 36 * scale }]}>
+              {/* USERS ICON */}
+              <View
+                style={[
+                  styles.section,
+                  {
+                    paddingVertical:
+                      sectionVerticalPadding,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      width:
+                        36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ]}
+                >
                   <Feather
                     name="users"
-                    size={Math.round(24 * scale)}
+                    size={Math.round(
+                      24 *
+                      (small
+                        ? 0.9
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    )}
                     color="#071426"
                   />
                 </View>
+
                 <View style={styles.textWrapper}>
                   <Text
                     style={[
                       styles.sectionTitle,
                       {
-                        fontSize: Math.round(14 * scale),
-                        lineHeight: Math.round(19 * scale),
+                        fontSize: Math.round(
+                          scale(14, 16)
+                        ),
+                        lineHeight: Math.round(
+                          scale(19, 22)
+                        ),
                       },
                     ]}
                   >
                     Who do we share your information with?
                   </Text>
+
                   <Text
                     style={[
                       styles.sectionText,
                       {
-                        fontSize: Math.round(12 * scale),
-                        lineHeight: Math.round(17 * scale),
+                        fontSize: Math.round(
+                          scale(12, 14)
+                        ),
+                        lineHeight: Math.round(
+                          scale(17, 20)
+                        ),
                       },
                     ]}
                   >
-                    We do not share your personal information with third parties,
-                    except when necessary to provide the service or when legally
-                    required.
+                    We do not share your personal information with third
+                    parties, except when necessary to provide the service or
+                    when legally required.
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.divider, { marginLeft: 36 * scale + 10 }]} />
+              <View
+                style={[
+                  styles.divider,
+                  {
+                    marginLeft:
+                      36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1) +
+                      10,
+                  },
+                ]}
+              />
 
-              <View style={[styles.section, { paddingVertical: sectionVerticalPadding }]}>
-                <View style={[styles.iconWrapper, { width: 36 * scale }]}>
+              {/* SCALE BALANCE ICON */}
+              <View
+                style={[
+                  styles.section,
+                  {
+                    paddingVertical:
+                      sectionVerticalPadding,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.iconWrapper,
+                    {
+                      width:
+                        36 *
+                        (small
+                          ? 0.9
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name="scale-balance"
-                    size={Math.round(25 * scale)}
+                    size={Math.round(
+                      25 *
+                      (small
+                        ? 0.9
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    )}
                     color="#071426"
                   />
                 </View>
+
                 <View style={styles.textWrapper}>
                   <Text
                     style={[
                       styles.sectionTitle,
                       {
-                        fontSize: Math.round(14 * scale),
-                        lineHeight: Math.round(19 * scale),
+                        fontSize: Math.round(
+                          scale(14, 16)
+                        ),
+                        lineHeight: Math.round(
+                          scale(19, 22)
+                        ),
                       },
                     ]}
                   >
                     Your rights
                   </Text>
+
                   <Text
                     style={[
                       styles.sectionText,
                       {
-                        fontSize: Math.round(12 * scale),
-                        lineHeight: Math.round(17 * scale),
+                        fontSize: Math.round(
+                          scale(12, 14)
+                        ),
+                        lineHeight: Math.round(
+                          scale(17, 20)
+                        ),
                       },
                     ]}
                   >
-                    You have the right to access, correct, delete, or limit the use
-                    of your personal information. You can exercise your rights at
-                    any time.
+                    You have the right to access, correct, delete, or limit
+                    the use of your personal information. You can exercise
+                    your rights at any time.
                   </Text>
                 </View>
               </View>
             </View>
           </ScrollView>
 
-          <View style={[styles.bottomBar, { height: verticalScale(72) }]}>
-            {navIcons.map(({ icon, route, size }) => (
+          {/* NAVBAR IGUAL A LOGOUT */}
+          <View
+            style={[
+              styles.bottomBar,
+              {
+                height:
+                  65 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
+                borderTopLeftRadius:
+                  78 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
+              },
+            ]}
+          >
+            {navItems.map((item) => (
               <TouchableOpacity
-                key={icon}
-                style={styles.navButton}
-                activeOpacity={0.7}
-                onPress={() => router.push(route)}
+                key={item.route}
+                style={styles.navItem}
+                activeOpacity={0.8}
+                onPress={() => router.push(item.route)}
               >
                 <MaterialCommunityIcons
-                  name={icon}
-                  size={Math.round(size * scale)}
+                  name={item.icon}
+                  size={
+                    item.icon === "swap-horizontal"
+                      ? 37 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1)
+                      : 35 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1)
+                  }
                   color="#FFFFFF"
                 />
               </TouchableOpacity>
@@ -346,17 +783,17 @@ export default function PrivacyScreen() {
           </View>
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  screen: {
     flex: 1,
-    backgroundColor: "#071426",
+    backgroundColor: "#FFF",
   },
 
-  screen: {
+  app: {
     flex: 1,
     backgroundColor: "#071426",
   },
@@ -366,53 +803,38 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 18,
+    justifyContent: "space-between",
   },
 
-  backButton: {
-    width: 44,
-    height: 44,
-    justifyContent: "center",
-  },
-
-  headerCenter: {
-    flex: 1,
-    alignItems: "center",
+  back: {
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
-    color: "#FFFFFF",
-    fontWeight: "800",
+    color: "#FFF",
+    fontWeight: "700",
   },
 
-  headerSubtitle: {
-    color: "#FFFFFF",
-    marginTop: 2,
-  },
-
-  bellButton: {
-    backgroundColor: "#E2F5E9",
-    alignItems: "center",
+  headerBell: {
     justifyContent: "center",
   },
 
   main: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
+    width: "100%",
+    backgroundColor: "#FFF",
     overflow: "hidden",
   },
 
   content: {
-    flexGrow: 1,
-    justifyContent: "space-between",
+    alignItems: "center",
+    alignSelf: "center",
   },
 
   innerContainer: {
-    flex: 1,
-    justifyContent: "space-between",
+    width: "100%",
   },
 
   mainTitle: {
@@ -472,15 +894,18 @@ const styles = StyleSheet.create({
   },
 
   bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
     width: "100%",
-    backgroundColor: "#2BB3CA",
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    borderTopLeftRadius: 50,
+    overflow: "hidden",
   },
 
-  navButton: {
+  navItem: {
     flex: 1,
     height: "100%",
     alignItems: "center",

@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
     collection,
@@ -33,7 +33,6 @@ export default function RegisterInvestment() {
     const isSmallScreen = width < 360;
     const isMediumScreen = width >= 360 && width < 600;
     const isTablet = width >= 600;
-    const isLargeScreen = width >= 900;
 
     const scale = isSmallScreen
         ? 0.85
@@ -50,6 +49,8 @@ export default function RegisterInvestment() {
             : isTablet
                 ? 45
                 : 60;
+
+    const s = (value) => Math.round(value * scale);
 
     const registrarInversion = async () => {
         if (!investmentName || !amount || !type || !date) {
@@ -107,7 +108,6 @@ export default function RegisterInvestment() {
             setAmount("");
             setType("");
             setDate("");
-
         } catch (error) {
             console.log(error);
             alert("There was an error registering the investment.");
@@ -120,217 +120,349 @@ export default function RegisterInvestment() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
-                <View style={[
-                    styles.header,
-                    {
-                        paddingHorizontal: horizontalPadding,
-                        height: 150 * scale,
-                    },
-                ]}>
-
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Ionicons
-                            name="arrow-back"
-                            size={25 * scale}
-                            color="white"
+                <View
+                    style={[
+                        styles.header,
+                        {
+                            height: s(118),
+                            paddingHorizontal: horizontalPadding,
+                        },
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={[
+                            styles.back,
+                            {
+                                left: s(15),
+                                top: s(34),
+                                width: s(55),
+                                height: s(55),
+                            },
+                        ]}
+                        onPress={() => router.push("/settings")}
+                        activeOpacity={0.7}
+                    >
+                        <MaterialCommunityIcons
+                            name="arrow-left"
+                            size={s(35)}
+                            color="#FFFFFF"
                         />
                     </TouchableOpacity>
 
-                    <Text style={[
-                        styles.headerTitle,
-                        {
-                            fontSize: 21 * scale,
-
-                        }
-                    ]}>
+                    <Text
+                        style={[
+                            styles.headerTitle,
+                            {
+                                fontSize: s(25),
+                            },
+                        ]}
+                    >
                         Register Investment
                     </Text>
 
                     <TouchableOpacity
-                     onPress={() =>
-                        router.push({
-                            pathname: "/notifications",
-                            params: { from: "/registerinvestments" }
-                        })
+                        style={[
+                            styles.headerBell,
+                            {
+                                right: s(15),
+                                top: s(34),
+                                width: s(55),
+                                height: s(55),
+                            },
+                        ]}
+                        onPress={() =>
+                            router.push({
+                                pathname: "/notifications",
+                                params: {
+                                    from: "/registerinvestments",
+                                },
+                            })
                         }
+                        activeOpacity={0.7}
                     >
-                        <Ionicons
-                            name="notifications-outline"
-                            size={25 * scale}
-                            color="white"
+                        <MaterialCommunityIcons
+                            name="bell-circle-outline"
+                            size={s(35)}
+                            color="#FFFFFF"
                         />
                     </TouchableOpacity>
                 </View>
 
-                <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    contentContainerStyle={{
-                        paddingHorizontal: horizontalPadding,
-                        paddingBottom: 30,
-                    }}
-                    keyboardShouldPersistTaps="handled"
+                <View
+                    style={[
+                        styles.main,
+                        {
+                            borderTopLeftRadius: s(
+                                isTablet
+                                    ? 55
+                                    : isSmallScreen
+                                        ? 35
+                                        : 45
+                            ),
+                            borderTopRightRadius: s(
+                                isTablet
+                                    ? 55
+                                    : isSmallScreen
+                                        ? 35
+                                        : 45
+                            ),
+                        },
+                    ]}
                 >
-                    <View style={styles.titleContainer}>
-                        <Text style={[
-                            styles.title,
+                    <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        contentContainerStyle={[
+                            styles.scrollContent,
                             {
-                                fontSize: 23 * scale
+                                paddingHorizontal: horizontalPadding,
+                                paddingBottom: s(100),
                             },
-                        ]}> Register your investment</Text>
+                        ]}
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <View style={styles.titleContainer}>
+                            <Text
+                                style={[
+                                    styles.title,
+                                    {
+                                        fontSize: s(23),
+                                    },
+                                ]}
+                            >
+                                Register your investment
+                            </Text>
 
-                        <Text style={[
-                            styles.subtitle,
-                            {
-                                fontSize: 14 * scale
-                            },
-                        ]}> Enter the information about your investment</Text>
-                    </View>
-
-                    <View style={styles.form}>
-                        <Text style={
-                            styles.label
-                        }> Investment name</Text>
-
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Example:savign investment"
-                            placeholderTextColor={"#999"}
-                            value={investmentName}
-                            onChangeText={setInvestmentName}
-                        />
-
-                        <Text style={styles.label}> Amount</Text>
-
-                        <View style={styles.amountContainer}>
-                            <Text style={styles.dollar}>$</Text>
-
-                            <TextInput
-                                style={styles.amountInput}
-                                placeholder="0.00"
-                                placeholderTextColor="#999"
-                                keyboardType="decimal-pad"
-                                value={amount}
-                                onChangeText={setAmount}
-                            />
+                            <Text
+                                style={[
+                                    styles.subtitle,
+                                    {
+                                        fontSize: s(14),
+                                    },
+                                ]}
+                            >
+                                Enter the information about your investment
+                            </Text>
                         </View>
 
-                        <Text style={styles.label}>
-                            Investment type
-                        </Text>
+                        <View style={styles.form}>
+                            <Text style={styles.label}>
+                                Investment name
+                            </Text>
 
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Example: Business, savings..."
-                            placeholderTextColor="#999"
-                            value={type}
-                            onChangeText={setType}
-                        />
-
-                        <Text style={styles.label}>
-                            Date
-                        </Text>
-
-                        <TextInput
-                            style={styles.input}
-                            placeholder="DD/MM/YYYY"
-                            placeholderTextColor="#999"
-                            value={date}
-                            onChangeText={setDate}
-                        />
-
-                        <TouchableOpacity
-                            style={styles.button}
-                            onPress={registrarInversion}
-                        >
-                            <Ionicons
-                                name="checkmark-circle-outline"
-                                size={23}
-                                color="white"
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Example:savign investment"
+                                placeholderTextColor="#999"
+                                value={investmentName}
+                                onChangeText={setInvestmentName}
                             />
 
-                            <Text style={styles.buttonText}>
-                                Register investment
+                            <Text style={styles.label}>
+                                Amount
                             </Text>
-                        </TouchableOpacity>
 
-                    </View>
-                </ScrollView>
+                            <View style={styles.amountContainer}>
+                                <Text style={styles.dollar}>$</Text>
+
+                                <TextInput
+                                    style={styles.amountInput}
+                                    placeholder="0.00"
+                                    placeholderTextColor="#999"
+                                    keyboardType="decimal-pad"
+                                    value={amount}
+                                    onChangeText={setAmount}
+                                />
+                            </View>
+
+                            <Text style={styles.label}>
+                                Investment type
+                            </Text>
+
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Example: Business, savings..."
+                                placeholderTextColor="#999"
+                                value={type}
+                                onChangeText={setType}
+                            />
+
+                            <Text style={styles.label}>
+                                Date
+                            </Text>
+
+                            <TextInput
+                                style={styles.input}
+                                placeholder="DD/MM/YYYY"
+                                placeholderTextColor="#999"
+                                value={date}
+                                onChangeText={setDate}
+                            />
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.button,
+                                    {
+                                        height: s(52),
+                                        borderRadius: s(15),
+                                        marginTop: s(25),
+                                    },
+                                ]}
+                                onPress={registrarInversion}
+                            >
+                                <MaterialCommunityIcons
+                                    name="check-circle-outline"
+                                    size={s(23)}
+                                    color="white"
+                                />
+
+                                <Text
+                                    style={[
+                                        styles.buttonText,
+                                        {
+                                            fontSize: s(16),
+                                        },
+                                    ]}
+                                >
+                                    Register investment
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </View>
+
+                {/* NAVBAR */}
+                <View
+                    style={[
+                        styles.bottomBar,
+                        {
+                            height: s(65),
+                            borderTopLeftRadius: s(78),
+                        },
+                    ]}
+                >
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() => router.push("/home")}
+                    >
+                        <MaterialCommunityIcons
+                            name="home-outline"
+                            size={s(35)}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() => router.push("/historial")}
+                    >
+                        <MaterialCommunityIcons
+                            name="chart-box-outline"
+                            size={s(35)}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() =>
+                            router.push("/expensesManagement")
+                        }
+                    >
+                        <MaterialCommunityIcons
+                            name="swap-horizontal"
+                            size={s(37)}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() => router.push("/currentgoal")}
+                    >
+                        <MaterialCommunityIcons
+                            name="layers-outline"
+                            size={s(35)}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() => router.push("/profile")}
+                    >
+                        <MaterialCommunityIcons
+                            name="account-outline"
+                            size={s(35)}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+                </View>
             </KeyboardAvoidingView>
-
-            <View
-                style={[
-                    styles.bottomBar,
-                    { height: 70 * scale },
-                ]}
-            >
-                <TouchableOpacity onPress={() => router.push("/home")}>
-                    <Ionicons
-                        name="home-outline"
-                        size={27 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/historial")}>
-                    <Ionicons
-                        name="bar-chart-outline"
-                        size={27 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => router.push("/expensesManagement")}
-                >
-                    <Ionicons
-                        name="swap-horizontal-outline"
-                        size={27 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => router.push("/currentgoal")}
-                >
-                    <Ionicons
-                        name="layers-outline"
-                        size={27 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/profile")}>
-                    <Ionicons
-                        name="person-outline"
-                        size={27 * scale}
-                        color="white"
-                    />
-                </TouchableOpacity>
-
-
-            </View>
-        </SafeAreaView >
-    )
+        </SafeAreaView>
+    );
 }
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#ffffff",
+        backgroundColor: "#071426",
     },
 
+    
     header: {
-        backgroundColor: "#081023",
+        width: "100%",
+        backgroundColor: "#071426",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        marginTop: -40,
+    },
+
+    back: {
+        position: "absolute",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 999,
+        elevation: 10,
     },
 
     headerTitle: {
-        color: "white",
-        fontWeight: "bold",
-        marginTop: 20,
+        flex: 1,
+        color: "#FFFFFF",
+        fontWeight: "700",
+        textAlign: "center",
+        transform: [
+            {
+                translateX: 7,
+            },
+            {
+                translateY: 1,
+            },
+        ],
+    },
+
+    headerBell: {
+        position: "absolute",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 999,
+        elevation: 10,
+    },
+
+    
+    main: {
+        flex: 1,
+        backgroundColor: "#FFFFFF",
+        overflow: "hidden",
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: 0,
     },
 
     titleContainer: {
@@ -341,7 +473,6 @@ const styles = StyleSheet.create({
     title: {
         color: "#081023",
         fontWeight: "bold",
-        marginTop: -20,
     },
 
     subtitle: {
@@ -350,7 +481,7 @@ const styles = StyleSheet.create({
     },
 
     form: {
-        backgroundColor: "white",
+        backgroundColor: "#FFFFFF",
         borderRadius: 25,
         padding: 20,
         marginBottom: 20,
@@ -412,16 +543,28 @@ const styles = StyleSheet.create({
     },
 
     buttonText: {
-        color: "white",
+        color: "#FFFFFF",
         fontSize: 16,
         fontWeight: "bold",
     },
 
+    
     bottomBar: {
-        backgroundColor: "#24B6D1",
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        backgroundColor: "#25B5D1",
         flexDirection: "row",
-        justifyContent: "space-around",
         alignItems: "center",
-        marginBottom: -30,
+        justifyContent: "space-around",
+        overflow: "hidden",
+    },
+
+    navItem: {
+        flex: 1,
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
     },
 });

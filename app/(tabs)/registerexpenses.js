@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   addDoc,
@@ -230,31 +230,57 @@ export default function Registerexpenses() {
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
+          {/* HEADER */}
           <View
             style={[
               styles.header,
               {
-                height: 160 * scale,
+                height:
+                  118 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                paddingHorizontal: isSmallScreen
+                  ? 18
+                  : isTablet
+                  ? 45
+                  : 25,
               },
             ]}
           >
             <TouchableOpacity
               style={[
-                styles.backButton,
+                styles.back,
                 {
-                  left: horizontalPadding,
-                  top: isSmallScreen ? 45 : 55,
-                  width: 42 * scale,
-                  height: 42 * scale,
+                  transform: [
+                    {
+                      translateY:
+                        4 *
+                        (isSmallScreen
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
                 },
               ]}
-              onPress={() => router.back()}
+              onPress={() => router.push("/home")}
               activeOpacity={0.7}
             >
-              <Ionicons
-                name="arrow-back"
-                size={Math.round(28 * scale)}
-                color={COLORS.white}
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
               />
             </TouchableOpacity>
 
@@ -262,7 +288,33 @@ export default function Registerexpenses() {
               style={[
                 styles.headerTitle,
                 {
-                  fontSize: Math.round(23 * scale),
+                  fontSize:
+                    25 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                  transform: [
+                    {
+                      translateX:
+                        7 *
+                        (isSmallScreen
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                    {
+                      translateY:
+                        1 *
+                        (isSmallScreen
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
                 },
               ]}
             >
@@ -271,26 +323,47 @@ export default function Registerexpenses() {
 
             <TouchableOpacity
               style={[
-                styles.profileButton,
+                styles.headerBell,
                 {
-                  right: horizontalPadding,
-                  top: isSmallScreen ? 42 : 50,
-                  width: 48 * scale,
-                  height: 48 * scale,
-                  borderRadius: (48 * scale) / 2,
+                  transform: [
+                    {
+                      translateY:
+                        4 *
+                        (isSmallScreen
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
                 },
               ]}
-              onPress={() => router.push("../../notifications")}
+              onPress={() =>
+                router.push({
+                  pathname: "/notifications",
+                  params: {
+                    from: "/registerexpenses",
+                  },
+                })
+              }
               activeOpacity={0.7}
             >
-              <Ionicons
-                name="notifications-outline"
-                size={Math.round(22 * scale)}
-                color={COLORS.blue}
+              <MaterialCommunityIcons
+                name="bell-circle-outline"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
               />
             </TouchableOpacity>
           </View>
 
+          {/* CONTENIDO */}
           <View style={styles.cardContainer}>
             <ScrollView
               style={styles.scroll}
@@ -298,7 +371,7 @@ export default function Registerexpenses() {
                 styles.scrollContent,
                 {
                   paddingHorizontal: horizontalPadding,
-                  paddingBottom: isSmallScreen ? 35 : 50,
+                  paddingBottom: isSmallScreen ? 100 : 110,
                 },
               ]}
               showsVerticalScrollIndicator={true}
@@ -633,10 +706,128 @@ export default function Registerexpenses() {
 
               <View
                 style={{
-                  height: Math.round(30 * scale),
+                  height: Math.round(80 * scale),
                 }}
               />
             </ScrollView>
+          </View>
+
+          {/* NAVBAR */}
+          <View
+            style={[
+              styles.bottomBar,
+              {
+                height:
+                  65 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                borderTopLeftRadius:
+                  78 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push("/home")}
+            >
+              <MaterialCommunityIcons
+                name="home-outline"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push("/historial")}
+            >
+              <MaterialCommunityIcons
+                name="chart-box-outline"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push("/expensesManagement")}
+            >
+              <MaterialCommunityIcons
+                name="swap-horizontal"
+                size={
+                  37 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push("/currentgoal")}
+            >
+              <MaterialCommunityIcons
+                name="layers-outline"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() => router.push("/profile")}
+            >
+              <MaterialCommunityIcons
+                name="account-outline"
+                size={
+                  35 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
       </View>
@@ -656,37 +847,33 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: COLORS.blue,
+    width: "100%",
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    justifyContent: "space-between",
   },
 
-  backButton: {
-    position: "absolute",
-    alignItems: "center",
+  back: {
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
-    color: COLORS.white,
+    color: "#FFFFFF",
     fontWeight: "700",
-    textAlign: "center",
   },
 
-  profileButton: {
-    position: "absolute",
-    backgroundColor: COLORS.cyan,
-    alignItems: "center",
+  headerBell: {
     justifyContent: "center",
   },
 
   cardContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
+    borderTopLeftRadius: 45,
+    borderTopRightRadius: 45,
     overflow: "hidden",
   },
 
@@ -768,5 +955,24 @@ const styles = StyleSheet.create({
   buttonText: {
     color: COLORS.white,
     fontWeight: "700",
+  },
+
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
