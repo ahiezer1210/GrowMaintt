@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { useState } from "react";
 import {
@@ -15,49 +14,58 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { auth } from "../../firebaseConfig";
 
 export default function RecuperarContrasena({ navigation }) {
+  const { width } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
+
   const [correo, setCorreo] = useState("");
   const [cargando, setCargando] = useState(false);
   const [enviado, setEnviado] = useState(false);
 
   const recuperarContrasena = async () => {
-    const email = correo.trim().toLowerCase();
+    const email = correo.trim();
 
     if (!email) {
-      Alert.alert(
-        "Empty field",
-        "Please send your email again."
-      );
+      Alert.alert("Empty field", "Please send your email again.");
       return;
     }
 
-    const formatoCorreo =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoCorreo.test(email)) {
-      Alert.alert(
-        "Incorrect email",
-        "Send a valid email."
-      );
+      Alert.alert("Incorrect email", "Send a valid email.");
       return;
     }
 
     try {
       setCargando(true);
-
       await sendPasswordResetEmail(auth, email);
-
-      await AsyncStorage.setItem(
-        "pendingPasswordReset",
-        JSON.stringify({
-          email,
-          requestedAt: Date.now(),
-        })
-      );
-
       setEnviado(true);
     } catch (error) {
       if (error.code === "auth/user-not-found") {
@@ -65,32 +73,20 @@ export default function RecuperarContrasena({ navigation }) {
           "Email not found",
           "We don't find a count with that email."
         );
-      } else if (
-        error.code === "auth/invalid-email"
-      ) {
-        Alert.alert(
-          "Incorrect email",
-          "The email entered is incorrect."
-        );
-      } else if (
-        error.code === "auth/too-many-requests"
-      ) {
+      } else if (error.code === "auth/invalid-email") {
+        Alert.alert("Too many attempts", "The email entered is incorrect");
+      } else if (error.code === "auth/too-many-requests") {
         Alert.alert(
           "Too many attempts",
           "Wait a few minutes before try again."
         );
-      } else if (
-        error.code === "auth/network-request-failed"
-      ) {
+      } else if (error.code === "auth/network-request-failed") {
         Alert.alert(
           "Without connection",
           "Could not connect to Firebase. Check your Internet connection."
         );
       } else {
-        Alert.alert(
-          "Error",
-          "The recovery email couldn't be sent. Try again."
-        );
+        Alert.alert("Error", "The recovery email couldn't be sent. Try again.");
       }
     } finally {
       setCargando(false);
@@ -104,53 +100,109 @@ export default function RecuperarContrasena({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#081023"
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#081023" />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         {/* Header Azul */}
-        <View style={styles.header}>
+        <View
+          style={[
+            styles.header,
+            {
+              paddingTop: s(55),
+              paddingBottom: s(30),
+            },
+          ]}
+        >
           <TouchableOpacity
-            style={styles.botonRegresar}
+            style={[
+              styles.botonRegresar,
+              {
+                left: horizontalPadding,
+                top: s(55),
+                width: s(45),
+                height: s(45),
+                borderRadius: s(23),
+              },
+            ]}
             onPress={() => navigation.goBack()}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={26}
+              size={s(26)}
               color="#FFFFFF"
             />
           </TouchableOpacity>
 
-          <Text style={styles.titulo}>
+          <Text
+            style={[
+              styles.titulo,
+              {
+                fontSize: s(34),
+                lineHeight: s(40),
+              },
+            ]}
+          >
             Password{"\n"}Recovery
           </Text>
         </View>
 
-        <View style={styles.whiteContainer}>
+        <View
+          style={[
+            styles.whiteContainer,
+            {
+              borderTopLeftRadius: s(35),
+              borderTopRightRadius: s(35),
+            },
+          ]}
+        >
           <ScrollView
             style={styles.whiteScroll}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              {
+                paddingHorizontal: horizontalPadding,
+                paddingTop: s(40),
+                paddingBottom: s(250),
+              },
+            ]}
             showsVerticalScrollIndicator={false}
             keyboardShouldPersistTaps="handled"
-            alwaysBounceVertical={true} 
-            overScrollMode="always" 
+            alwaysBounceVertical={true}
+            overScrollMode="always"
           >
-            <View style={styles.iconContainer}>
+            <View
+              style={[
+                styles.iconContainer,
+                {
+                  height: s(155),
+                  marginBottom: s(10),
+                },
+              ]}
+            >
               <MaterialCommunityIcons
                 name="lock-reset"
-                size={125}
+                size={s(125)}
                 color="#252833"
               />
 
-              <View style={styles.checkCircle}>
+              <View
+                style={[
+                  styles.checkCircle,
+                  {
+                    top: s(8),
+                    width: s(45),
+                    height: s(45),
+                    borderRadius: s(23),
+                    borderWidth: s(5),
+                  },
+                ]}
+              >
                 <MaterialCommunityIcons
                   name="check"
-                  size={21}
+                  size={s(21)}
                   color="#FFFFFF"
                 />
               </View>
@@ -158,12 +210,28 @@ export default function RecuperarContrasena({ navigation }) {
 
             {!enviado ? (
               <>
-                <Text style={styles.label}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      fontSize: s(17),
+                      marginBottom: s(10),
+                    },
+                  ]}
+                >
                   User or email
                 </Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    {
+                      height: s(58),
+                      borderRadius: s(18),
+                      paddingHorizontal: s(18),
+                      fontSize: s(16),
+                    },
+                  ]}
                   value={correo}
                   onChangeText={setCorreo}
                   placeholder="Enter your email"
@@ -174,15 +242,28 @@ export default function RecuperarContrasena({ navigation }) {
                   editable={!cargando}
                 />
 
-                <Text style={styles.descripcion}>
+                <Text
+                  style={[
+                    styles.descripcion,
+                    {
+                      fontSize: s(14),
+                      marginTop: s(22),
+                      marginBottom: s(25),
+                    },
+                  ]}
+                >
                   A link will be sent to your email
                 </Text>
 
                 <TouchableOpacity
                   style={[
                     styles.botonSiguiente,
-                    cargando &&
-                      styles.botonDeshabilitado,
+                    {
+                      height: s(58),
+                      borderRadius: s(30),
+                      marginTop: s(10),
+                    },
+                    cargando && styles.botonDeshabilitado,
                   ]}
                   onPress={recuperarContrasena}
                   disabled={cargando}
@@ -191,7 +272,12 @@ export default function RecuperarContrasena({ navigation }) {
                     <ActivityIndicator color="#FFFFFF" />
                   ) : (
                     <Text
-                      style={styles.textoSiguiente}
+                      style={[
+                        styles.textoSiguiente,
+                        {
+                          fontSize: s(18),
+                        },
+                      ]}
                     >
                       Next
                     </Text>
@@ -199,71 +285,116 @@ export default function RecuperarContrasena({ navigation }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={styles.botonIntentar}
+                  style={[
+                    styles.botonIntentar,
+                    {
+                      paddingVertical: s(12),
+                    },
+                  ]}
                   onPress={() => navigation.goBack()}
                   disabled={cargando}
                 >
-                  <Text style={styles.textoIntentar}>
+                  <Text
+                    style={[
+                      styles.textoIntentar,
+                      {
+                        fontSize: s(15),
+                      },
+                    ]}
+                  >
                     Cancel
                   </Text>
                 </TouchableOpacity>
               </>
             ) : (
-              <View style={styles.confirmacion}>
-                <View style={styles.checkGrande}>
+              <View
+                style={[
+                  styles.confirmacion,
+                  {
+                    paddingTop: s(5),
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.checkGrande,
+                    {
+                      width: s(90),
+                      height: s(90),
+                      borderRadius: s(45),
+                      marginBottom: s(18),
+                    },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name="email-check-outline"
-                    size={55}
+                    size={s(55)}
                     color="#38BDF8"
                   />
                 </View>
 
                 <Text
-                  style={styles.tituloConfirmacion}
+                  style={[
+                    styles.tituloConfirmacion,
+                    {
+                      fontSize: s(25),
+                      marginBottom: s(12),
+                    },
+                  ]}
                 >
                   ¡Sent email!
                 </Text>
 
                 <Text
-                  style={styles.mensajeConfirmacion}
+                  style={[
+                    styles.mensajeConfirmacion,
+                    {
+                      fontSize: s(15),
+                      lineHeight: s(22),
+                    },
+                  ]}
                 >
-                  We've sent a link to recover your
-                  password to:
+                  We've sent a link to recover your password to:
                 </Text>
 
                 <Text
-                  style={styles.correoConfirmacion}
+                  style={[
+                    styles.correoConfirmacion,
+                    {
+                      fontSize: s(16),
+                      marginTop: s(8),
+                      marginBottom: s(12),
+                    },
+                  ]}
                 >
                   {correo}
                 </Text>
 
                 <Text
-                  style={styles.mensajePequeno}
+                  style={[
+                    styles.mensajePequeno,
+                    {
+                      fontSize: s(13),
+                      lineHeight: s(19),
+                      marginBottom: s(15),
+                    },
+                  ]}
                 >
-                  Check your inbox and also the spam
-                  folder.
+                  Check your inbox and also the spam folder.
                 </Text>
 
                 <TouchableOpacity
                   style={styles.botonSiguiente}
                   onPress={() => navigation.goBack()}
                 >
-                  <Text
-                    style={styles.textoSiguiente}
-                  >
-                    Back to the login
-                  </Text>
+                  <Text style={styles.textoSiguiente}>Back to the login</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.botonIntentar}
                   onPress={volverAIntentar}
                 >
-                  <Text
-                    style={styles.textoIntentar}
-                  >
-                    Use another email.
-                  </Text>
+                  <Text style={styles.textoIntentar}>Use another email.</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -324,7 +455,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: 30,
     paddingTop: 40,
-    paddingBottom: 250, 
+    paddingBottom: 250,
   },
 
   iconContainer: {

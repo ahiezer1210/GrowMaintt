@@ -6,9 +6,34 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function AgeConfirmation() {
+  const { width, height } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
   return (
     <View style={styles.screen}>
       <StatusBar
@@ -17,39 +42,132 @@ export default function AgeConfirmation() {
         barStyle="light-content"
       />
 
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          {
+            height: s(115),
+            paddingHorizontal: horizontalPadding,
+          },
+        ]}
+      >
         <TouchableOpacity
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            {
+              width: s(41),
+              height: s(46),
+            },
+          ]}
           onPress={() => router.push("/register")}
         >
-          <MaterialCommunityIcons name="arrow-left" size={22} color="#FFFFFF" />
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={s(22)}
+            color="#FFFFFF"
+          />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>Age Confirmation</Text>
+        <Text
+          style={[
+            styles.headerTitle,
+            {
+              fontSize: s(19),
+            },
+          ]}
+        >
+          Age Confirmation
+        </Text>
 
         <View style={styles.headerSpace} />
       </View>
 
-      <View style={styles.main}>
-        <View style={styles.content}>
-          <Text style={styles.messageText}>
+      <View
+        style={[
+          styles.main,
+          {
+            borderTopLeftRadius: s(36),
+            borderTopRightRadius: s(36),
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.content,
+            {
+              paddingHorizontal: horizontalPadding,
+            },
+          ]}
+        >
+          <Text
+            style={[
+              styles.messageText,
+              {
+                fontSize: s(20),
+                lineHeight: s(24),
+                marginBottom: s(40),
+              },
+            ]}
+          >
             To Use This Application,{"\n"}
             You Must Be 18 Years Or Older.
           </Text>
 
-          <View style={styles.buttonsContainer}>
+          <View
+            style={[
+              styles.buttonsContainer,
+              {
+                marginTop: s(40),
+                gap: s(15),
+              },
+            ]}
+          >
             <TouchableOpacity
-              style={styles.actionButton}
+              style={[
+                styles.actionButton,
+                {
+                  width: s(240),
+                  height: s(53),
+                  borderRadius: s(22),
+                },
+              ]}
               onPress={() => router.push("/verificationage")}
             >
-              <Text style={styles.buttonText}>I Am 18 Or Older</Text>
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    fontSize: s(14),
+                  },
+                ]}
+              >
+                I Am 18 Or Older
+              </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.actionButton, styles.secondButton]}
+              style={[
+                styles.actionButton,
+                styles.secondButton,
+                {
+                  width: s(240),
+                  height: s(53),
+                  borderRadius: s(22),
+                  marginTop: s(14),
+                },
+              ]}
               onPress={() => router.push("/login")}
             >
-              <Text style={styles.buttonText}>I Am Under 18</Text>
+              <Text
+                style={[
+                  styles.buttonText,
+                  {
+                    fontSize: s(14),
+                  },
+                ]}
+              >
+                I Am Under 18
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

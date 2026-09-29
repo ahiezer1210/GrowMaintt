@@ -1,130 +1,95 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import { router } from "expo-router";
-import { getAuth } from "firebase/auth";
-import {
-    collection,
-    onSnapshot,
-    query,
-    where,
-} from "firebase/firestore";
-import { useEffect, useState } from "react";
 import {
     Alert,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View
+    View,
+    useWindowDimensions,
 } from "react-native";
-import { db } from "../../firebaseConfig";
 
 export default function Redemptionhistory() {
-    const [filter, setfilter] = useState("All");
-    const [canjes, setCanjes] = useState([]);
+    const { width } = useWindowDimensions();
 
-    const auth = getAuth();
+    const isSmallScreen = width < 360;
+    const isMediumScreen = width >= 360 && width < 600;
+    const isTablet = width >= 600;
 
-    useEffect(() => {
-        const user = auth.currentUser;
+    const scale = isSmallScreen
+        ? 0.85
+        : isMediumScreen
+            ? 1
+            : isTablet
+                ? 1.15
+                : 1.25;
 
-        if (!user) {
-            setCanjes([]);
-            return;
-        }
+    const horizontalPadding = isSmallScreen
+        ? 10
+        : isMediumScreen
+            ? 14
+            : isTablet
+                ? 30
+                : 45;
 
-        const redeemedRef = collection(db, "Redeemed");
 
-        const redeemedQuery = query(
-            redeemedRef,
-            where("userId", "==", user.uid)
-        );
+    const s = (value) => Math.round(value * scale);
 
-        const unsubscribe = onSnapshot(
-            redeemedQuery,
-            (snapshot) => {
-                const data = snapshot.docs.map((doc) => {
-                    const item = doc.data();
+    const [filter, setfilter] = useState("Todos");
+    const canjes = [
+        {
+            id: "1",
+            tipo: "Hilasal discount",
+            date: "May 10, 2026",
+            discount: "-$20.00",
+            state: "Complete",
+            icon: "pricetag-outline",
+        },
 
-                    let date = "Date unavailable";
+        {
+            id: "2",
+            tipo: "Partner stores",
+            date: "April 28, 2026",
+            discount: "-$10.00",
+            state: "Complete",
+            icon: "pricetag-outline",
+        },
 
-                    if (item.redeemedAt?.toDate) {
-                        date = item.redeemedAt.toDate().toLocaleDateString(
-                            "en-US",
-                            {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                            }
-                        );
-                    } else if (item.redeemedAt) {
-                        const parsedDate = new Date(item.redeemedAt);
+        {
+            id: "3",
+            tipo: "Hilasal discount",
+            date: "July 5, 2026",
+            discount: "-$5.00",
+            state: "In process",
+            icon: "pricetag-outline",
+        },
 
-                        if (!isNaN(parsedDate.getTime())) {
-                            date = parsedDate.toLocaleDateString(
-                                "en-US",
-                                {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric",
-                                }
-                            );
-                        }
-                    }
-
-                    return {
-                        id: doc.id,
-                        tipo: item.title || "Reward",
-                        store: item.store || "Partner stores",
-                        date,
-                        points: Number(item.points || 0),
-                        discount: `-${Number(item.points || 0)} pts`,
-                        state: item.state || "Complete",
-                        code: item.code || "",
-                        icon: "pricetag-outline",
-                    };
-                });
-
-                data.sort((a, b) => {
-                    const dateA = new Date(a.date).getTime();
-                    const dateB = new Date(b.date).getTime();
-
-                    return dateB - dateA;
-                });
-
-                setCanjes(data);
-            },
-            (error) => {
-                console.log("Error getting redemption history:", error);
-                setCanjes([]);
-            }
-        );
-
-        return unsubscribe;
-    }, []);
+        {
+            id: "4",
+            tipo: "Partner stores",
+            date: "March 20, 2026",
+            discount: "-$1.99",
+            state: "Canceled",
+            icon: "pricetag-outline",
+        },
+    ]
 
     const canjesFiltrados =
-        filter === "All"
+        filter === "Todos"
             ? canjes
             : canjes.filter((canje) => canje.state === filter);
-
-    const totalPoints = canjes.reduce(
-        (total, canje) => total + canje.points,
-        0
-    );
-
-    const totalExchanges = canjes.length;
 
     const showDetail = (canje) => {
         Alert.alert(
             canje.tipo,
-            `Store: ${canje.store}\n\n` +
             `Date: ${canje.date}\n\n` +
-            `Points used: ${canje.points}\n\n` +
-            `Status: ${canje.state}\n\n` +
-            (canje.code ? `Code: ${canje.code}\n\n` : ""),
+            `Discount: ${canje.discount}\n\n` +
+            `State: ${canje.state}\n\n`,
             [
                 {
-                    text: "Close",
+                    text: "Cerrar",
                 },
             ]
         );
@@ -132,110 +97,231 @@ export default function Redemptionhistory() {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <Text style={styles.title}>Redemption History</Text>
+            <View
+                style={[
+                    styles.header,
+                    {
+                        paddingTop: s(55),
+                        paddingBottom: s(60),
+                        paddingHorizontal: horizontalPadding,
+                    },
+                ]}
+            >
+                <Text
+                    style={[
+                        styles.title,
+                        {
+                            fontSize: s(28),
+                        },
+                    ]}
+                >
+                    Redemption History
+                </Text>
             </View>
 
-            <View style={styles.card}>
+            <View
+                style={[
+                    styles.card,
+                    {
+                        borderTopLeftRadius: s(35),
+                        borderTopRightRadius: s(35),
+                        paddingTop: s(25),
+                    },
+                ]}
+            >
                 <ScrollView
                     showsVerticalScrollIndicator={false}
-                    contentContainerStyle={styles.scrollContent}
+                    contentContainerStyle={[
+                        styles.scrollContent,
+                        {
+                            paddingHorizontal: horizontalPadding,
+                            paddingTop: s(30),
+                            paddingBottom: s(30),
+                        },
+                    ]}
                 >
 
-                    <View style={styles.resumen}>
 
-                        <Text style={styles.resumenTitleGeneral}>
+                    <View
+                        style={[
+                            styles.resumen,
+                            {
+                                height: s(105),
+                                borderRadius: s(7),
+                                marginBottom: s(25),
+                                paddingTop: s(5),
+                                marginTop: -s(20),
+                            },
+                        ]}
+                    >
+
+                        <Text
+                            style={[
+                                styles.resumenTitleGeneral,
+                                {
+                                    fontSize: s(15),
+                                    marginBottom: s(3),
+                                },
+                            ]}
+                        >
                             Summary of your exchanges
                         </Text>
 
-                        <View style={styles.resumenContent}>
-
-                            <View style={styles.giftContainer}>
+                        <View
+                            style={[
+                                styles.resumenContent,
+                                {
+                                    marginTop: -s(5),
+                                },
+                            ]}
+                        >
+                            <View
+                                style={[
+                                    styles.giftContainer,
+                                    {
+                                        width: s(90),
+                                        marginTop: -s(10),
+                                    },
+                                ]}
+                            >
                                 <Ionicons
                                     name="gift-outline"
-                                    size={80}
+                                    size={s(80)}
                                     color="#081023"
                                 />
                             </View>
 
                             <View style={styles.resumenItem}>
-
                                 <Ionicons
                                     name="star-outline"
-                                    size={25}
+                                    size={s(25)}
                                     color="#081023"
                                 />
 
-                                <Text style={styles.resumenTitle}>
+                                <Text
+                                    style={[
+                                        styles.resumenTitle,
+                                        {
+                                            fontSize: s(11),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
                                     Benefits
                                 </Text>
 
-                                <Text style={styles.resumenValor}>
-                                    {totalExchanges}
+                                <Text
+                                    style={[
+                                        styles.resumenValor,
+                                        {
+                                            fontSize: s(15),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
+                                    12
                                 </Text>
-
                             </View>
 
                             <View style={styles.resumenItem}>
-
                                 <Ionicons
                                     name="wallet-outline"
-                                    size={25}
+                                    size={s(25)}
                                     color="#081023"
                                 />
 
-                                <Text style={styles.resumenTitle}>
+                                <Text
+                                    style={[
+                                        styles.resumenTitle,
+                                        {
+                                            fontSize: s(11),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
                                     Total redeemed
                                 </Text>
 
-                                <Text style={styles.resumenValor}>
-                                    {totalPoints} pts
-                                </Text>
+                                <Text
+                                    style={[
+                                        styles.resumenValor,
+                                        {
+                                            fontSize: s(15),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
 
+                                    $10.00
+                                </Text>
                             </View>
 
                             <View style={styles.resumenItem}>
-
                                 <Ionicons
                                     name="pricetag-outline"
-                                    size={25}
+                                    size={s(25)}
                                     color="#081023"
                                 />
 
-                                <Text style={styles.resumenTitle}>
+                                <Text
+                                    style={[
+                                        styles.resumenTitle,
+                                        {
+                                            fontSize: s(11),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
                                     Exchanges
                                 </Text>
 
-                                <Text style={styles.resumenValor}>
-                                    {totalExchanges}
+                                <Text
+                                    style={[
+                                        styles.resumenValor,
+                                        {
+                                            fontSize: s(15),
+                                            marginTop: s(2),
+                                        },
+                                    ]}
+                                >
+                                    5
                                 </Text>
-
                             </View>
-
                         </View>
                     </View>
 
-                    <View style={styles.filters}>
-
+                    <View
+                        style={[
+                            styles.filters,
+                            {
+                                height: s(55),
+                                borderRadius: s(7),
+                                marginBottom: s(20),
+                            },
+                        ]}
+                    >
                         <Filter
-                            text="All"
+                            text="Todos"
                             icon="list-outline"
-                            active={filter === "All"}
-                            onPress={() => setfilter("All")}
+                            active={filter === "Todos"}
+                            onPress={() => setfilter("Todos")}
+                            scale={scale}
                         />
 
                         <Filter
                             text="Complete"
-                            icon="checkmark-circle-outline"
+                            icon="time-outline"
                             active={filter === "Complete"}
                             onPress={() => setfilter("Complete")}
+                            scale={scale}
                         />
 
                         <Filter
                             text="In process"
-                            icon="time-outline"
+                            icon="checkmark-circle-outline"
                             active={filter === "In process"}
                             onPress={() => setfilter("In process")}
+                            scale={scale}
                         />
 
                         <Filter
@@ -243,12 +329,18 @@ export default function Redemptionhistory() {
                             icon="close-circle-outline"
                             active={filter === "Canceled"}
                             onPress={() => setfilter("Canceled")}
+                            scale={scale}
                         />
-
                     </View>
 
-                    <View style={styles.list}>
-
+                    <View
+                        style={[
+                            styles.list,
+                            {
+                                gap: s(12),
+                            },
+                        ]}
+                    >
                         {canjesFiltrados.length === 0 ? (
                             <View style={styles.sinCanjes}>
 
@@ -259,7 +351,7 @@ export default function Redemptionhistory() {
                                 />
 
                                 <Text style={styles.sinCanjesText}>
-                                    No redemptions in this category
+                                    No hay canjes en esta categoria
                                 </Text>
 
                             </View>
@@ -267,66 +359,124 @@ export default function Redemptionhistory() {
                             canjesFiltrados.map((canje) => (
                                 <TouchableOpacity
                                     key={canje.id}
-                                    style={styles.canje}
+                                    style={[
+                                        styles.canje,
+                                        {
+                                            minHeight: s(75),
+                                            borderRadius: s(10),
+                                            paddingHorizontal: s(7),
+                                            paddingVertical: s(8),
+                                        },
+                                    ]}
                                     onPress={() => showDetail(canje)}
                                     activeOpacity={0.7}
                                 >
 
-                                    <View style={styles.canjeIcon}>
-
+                                    <View
+                                        style={[
+                                            styles.canjeIcon,
+                                            {
+                                                width: s(45),
+                                                height: s(45),
+                                                marginRight: s(4),
+                                            },
+                                        ]}
+                                    >
                                         <Ionicons
                                             name={canje.icon}
-                                            size={27}
+                                            size={s(27)}
                                             color="#081823"
                                         />
-
                                     </View>
 
                                     <View style={styles.canjeInfo}>
 
-                                        <View style={styles.tipoContainer}>
-
-                                            <Text style={styles.tipo}>
+                                        <View
+                                            style={[
+                                                styles.tipoContainer,
+                                                {
+                                                    borderRadius: s(12),
+                                                    paddingHorizontal: s(10),
+                                                    paddingVertical: s(3),
+                                                    marginBottom: s(5),
+                                                },
+                                            ]}
+                                        >
+                                            <Text
+                                                style={[
+                                                    styles.tipo,
+                                                    {
+                                                        fontSize: s(12),
+                                                    },
+                                                ]}
+                                            >
                                                 {canje.tipo}
                                             </Text>
-
                                         </View>
 
-                                        <Text style={styles.date}>
-                                            Redeemed on {canje.date}.
+                                        <Text
+                                            style={[
+                                                styles.date,
+                                                {
+                                                    fontSize: s(12),
+                                                },
+                                            ]}
+                                        >
+                                            redeemed on {canje.date}.
                                         </Text>
 
                                     </View>
 
-                                    <View style={styles.canjeRight}>
-
-                                        <Text style={styles.discount}>
+                                    <View
+                                        style={[
+                                            styles.canjeRight,
+                                            {
+                                                marginLeft: s(5),
+                                            },
+                                        ]}
+                                    >
+                                        <Text
+                                            style={[
+                                                styles.discount,
+                                                {
+                                                    fontSize: s(9),
+                                                    marginBottom: s(2),
+                                                },
+                                            ]}
+                                        >
                                             {canje.discount}
                                         </Text>
 
                                         <Ionicons
                                             name="chevron-forward"
-                                            size={20}
+                                            size={s(20)}
                                             color="#081823"
                                         />
-
                                     </View>
 
                                 </TouchableOpacity>
+
+
                             ))
                         )}
 
                     </View>
 
                 </ScrollView>
+
             </View>
-
-            <View style={styles.bottomBar}>
-
+            <View
+                style={[
+                    styles.bottomBar,
+                    {
+                        height: s(70),
+                    },
+                ]}
+            >
                 <TouchableOpacity onPress={() => router.push("/home")}>
                     <Ionicons
                         name="home-outline"
-                        size={27}
+                        size={s(27)}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
@@ -334,53 +484,55 @@ export default function Redemptionhistory() {
                 <TouchableOpacity onPress={() => router.push("/historial")}>
                     <Ionicons
                         name="bar-chart-outline"
-                        size={27}
+                        size={s(27)}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => router.push("/expensesManagement")}
-                >
+                <TouchableOpacity onPress={() => router.push("/expensesManagement")}>
                     <Ionicons
                         name="swap-horizontal-outline"
-                        size={27}
+                        size={s(27)}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => router.push("/currentgoal")}
-                >
+                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
                     <Ionicons
                         name="layers-outline"
-                        size={27}
+                        size={s(27)}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
 
-                <TouchableOpacity
-                    onPress={() => router.push("/profile")}
-                >
+                <TouchableOpacity onPress={() => router.push("/profile")}>
                     <Ionicons
                         name="person-outline"
-                        size={27}
+                        size={s(27)}
                         color={"#FFFFFF"}
                     />
                 </TouchableOpacity>
 
             </View>
+
         </View>
+
+
     );
 }
+
 
 function Filter({
     text,
     icon,
     active,
     onPress,
+    scale,
 }) {
+    const s = (value) => Math.round(value * scale);
+
     return (
+
         <TouchableOpacity
             style={[
                 styles.filter,
@@ -392,7 +544,7 @@ function Filter({
 
             <Ionicons
                 name={icon}
-                size={14}
+                size={s(14)}
                 color="#081823"
             />
 
@@ -403,6 +555,8 @@ function Filter({
         </TouchableOpacity>
     );
 }
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -466,6 +620,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
+
     },
 
     giftContainer: {
@@ -473,6 +628,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "flex-start",
         marginTop: -10,
+
     },
 
     resumenTitle: {
@@ -515,6 +671,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#BCE8EF",
         borderWidth: 1,
         borderColor: "#081023",
+
     },
 
     filterText: {
@@ -570,7 +727,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#081023",
     },
-
     canjeRight: {
         alignItems: "center",
         justifyContent: "center",
@@ -584,12 +740,6 @@ const styles = StyleSheet.create({
     },
 
     without: {
-        alignItems: "center",
-        justifyContent: "center",
-        paddingVertical: 50,
-    },
-
-    sinCanjes: {
         alignItems: "center",
         justifyContent: "center",
         paddingVertical: 50,

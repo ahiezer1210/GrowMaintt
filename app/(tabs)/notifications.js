@@ -4,8 +4,7 @@ import {
   collection,
   doc,
   onSnapshot,
-  runTransaction,
-  writeBatch,
+  updateDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -15,8 +14,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 import { auth, db } from "../../firebaseConfig";
 
 const categories = [
@@ -27,398 +28,141 @@ const categories = [
   "Security",
 ];
 
-const getSecurityTitle = (type) => {
-  const titles = {
-    new_device_login: "New login detected",
-    login_attempt: "Login detected",
-    password_change: "Password changed",
-    password_reset: "Password reset",
-    email_change: "Email address changed",
-    phone_change: "Phone number changed",
-    profile_change: "Profile information updated",
-    device_unlinked: "Device unlinked",
-    suspicious_activity: "Suspicious activity detected",
-  };
-  return titles[type] || "Security alert";
-};
-
-const getSecurityIcon = (type) => {
-  const icons = {
-    new_device_login: "cellphone-check",
-    login_attempt: "login-variant",
-    password_change: "lock-check-outline",
-    password_reset: "lock-reset",
-    email_change: "email-edit-outline",
-    phone_change: "phone-edit-outline",
-    profile_change: "account-edit-outline",
-    device_unlinked: "cellphone-remove",
-    suspicious_activity: "alert-circle-outline",
-  };
-  return icons[type] || "shield-check-outline";
-};
-
-const getGeneralIcon = (category) => {
-  const icons = {
-    Savings: "cash-multiple",
-    Investment: "finance",
-    Rewards: "medal-outline",
-  };
-  return icons[category] || "bell-outline";
-};
-
-const formatDate = (timestamp) => {
-  if (!timestamp) {
-    return { date: "", time: "", fullDate: "", createdAt: 0 };
-  }
-
-  let dateObject;
-  if (timestamp?.toDate) {
-    dateObject = timestamp.toDate();
-  } else if (timestamp instanceof Date) {
-    dateObject = timestamp;
-  } else if (typeof timestamp === "number") {
-    dateObject = new Date(timestamp);
-  } else {
-    dateObject = new Date(timestamp);
-  }
-
-  if (Number.isNaN(dateObject.getTime())) {
-    return { date: "", time: "", fullDate: "", createdAt: 0 };
-  }
-
-  const date = dateObject.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-  const time = dateObject.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  return {
-    date,
-    time,
-    fullDate: `${date} at ${time}`,
-    createdAt: dateObject.getTime(),
-  };
-};
-
 export default function NotificationsScreen() {
-  const user = auth.currentUser;
-  const params = useLocalSearchParams();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
+
+  const { from } = useLocalSearchParams();
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
-    if (!user?.uid) {
+    const user = auth.currentUser;
+
+    if (!user) {
       setNotifications([]);
-      setLoading(false);
       return;
     }
 
-    setLoading(true);
-    const unsubscribers = [];
-
-    const securityRef = collection(db, "Users", user.uid, "securityAlerts");
-    const unsubscribeSecurity = onSnapshot(
-      securityRef,
-      (snapshot) => {
-        const securityNotifications = snapshot.docs.map((item) => {
-          const alert = item.data();
-          const formatted = formatDate(alert.createdAt);
-
-          return {
-            id: `security-${item.id}`,
-            alertId: item.id,
-            notificationId: null,
-            category: "Security",
-            collectionName: "securityAlerts",
-            type: alert.type || "security",
-            title: getSecurityTitle(alert.type),
-            description:
-              alert.message ||
-              alert.description ||
-              `Your account was accessed from ${alert.deviceName || "another device"}`,
-            deviceName: alert.deviceName || null,
-            amount: null,
-            points: null,
-            store: null,
-            code: null,
-            rewardId: null,
-            rewardTitle: null,
-            redeemedId: null,
-            status: alert.read === true ? "Read" : "Unread",
-            unread: alert.read !== true,
-            time: formatted.time,
-            date: formatted.date,
-            fullDate: formatted.fullDate,
-            icon: getSecurityIcon(alert.type),
-            createdAt: formatted.createdAt,
-          };
-        });
-
-        setNotifications((previous) => {
-          const general = previous.filter((item) => item.category !== "Security");
-          return [...general, ...securityNotifications].sort(
-            (a, b) => b.createdAt - a.createdAt
-          );
-        });
-        setLoading(false);
-      },
-      () => setLoading(false)
+    const ref = collection(
+      db,
+      "Users",
+      user.uid,
+      "securityAlerts"
     );
-    unsubscribers.push(unsubscribeSecurity);
 
-    ["Savings", "Investment", "Rewards"].forEach((category) => {
-      const notificationRef = doc(
-        db,
-        "Notificaciones",
-        `${user.uid}_${category}`
-      );
+    return onSnapshot(
+      ref,
+      (snapshot) => {
+        const data = snapshot.docs
+          .map((item) => {
+            const alert = item.data();
 
-      const unsubscribeGeneral = onSnapshot(
-        notificationRef,
-        (snapshot) => {
-          const data = snapshot.exists() ? snapshot.data() : {};
-          const notificationArray = Array.isArray(data.notifications)
-            ? data.notifications
-            : [];
-
-          const mapped = notificationArray.map((notification, index) => {
-            const formatted = formatDate(notification.createdAt);
-            const notificationId =
-              notification.id ||
-              `${category.toLowerCase()}-${index}-${formatted.createdAt}`;
+            const date = alert.createdAt?.toDate
+              ? alert.createdAt.toDate()
+              : new Date();
 
             return {
-              id: `notification-${snapshot.id}-${notificationId}`,
-              alertId: snapshot.id,
-              notificationId,
-              category: notification.category || category,
-              collectionName: "Notificaciones",
-              type: notification.type || "notification",
-              title: notification.title || "New notification",
-              description:
-                notification.message ||
-                notification.description ||
-                "You have a new notification.",
-              deviceName: notification.deviceName || null,
-              amount: notification.amount ?? null,
-              points: notification.points ?? null,
-              store: notification.store || null,
-              code: notification.code || null,
-              rewardId: notification.rewardId || null,
-              rewardTitle: notification.rewardTitle || null,
-              redeemedId: notification.redeemedId || null,
-              status: notification.read === true ? "Read" : "Unread",
-              unread: notification.read !== true,
-              time: formatted.time,
-              date: formatted.date,
-              fullDate: formatted.fullDate,
-              icon:
-                notification.icon ||
-                getGeneralIcon(notification.category || category),
-              createdAt: formatted.createdAt,
+              id: item.id,
+              alertId: item.id,
+              category: "Security",
+              title: "Security alert",
+              description: `Your account was accessed from ${alert.deviceName || "another device"
+                }`,
+              time: date.toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              date: date.toLocaleDateString([], {
+                month: "long",
+                day: "numeric",
+              }),
+              icon: "shield-check-outline",
+              unread: alert.read !== true,
+              createdAt:
+                alert.createdAt?.toMillis?.() || 0,
             };
-          });
+          })
+          .sort(
+            (a, b) => b.createdAt - a.createdAt
+          );
 
-          setNotifications((previous) => {
-            const others = previous.filter(
-              (item) =>
-                !(
-                  item.collectionName === "Notificaciones" &&
-                  item.category === category
-                )
-            );
-            return [...others, ...mapped].sort(
-              (a, b) => b.createdAt - a.createdAt
-            );
-          });
-          setLoading(false);
-        },
-        () => setLoading(false)
-      );
+        setNotifications(data);
+      },
+      () => setNotifications([])
+    );
+  }, []);
 
-      unsubscribers.push(unsubscribeGeneral);
-    });
-
-    return () => unsubscribers.forEach((unsub) => unsub());
-  }, [user?.uid]);
-
-  const filteredNotifications =
+  const filtered =
     selectedCategory === "All"
       ? notifications
-      : notifications.filter((item) => item.category === selectedCategory);
+      : notifications.filter(
+        (item) =>
+          item.category === selectedCategory
+      );
 
-  const unreadCount = notifications.filter((item) => item.unread).length;
-
-  const volver = () => {
-    const from = params?.from;
-
-    const routes = {
-      "/historial": "/historial",
-      historial: "/historial",
-      "/profile": "/profile",
-      profile: "/Profile",
-      "/Profile": "/Profile",
-      "/Edit_profile": "/Edit_profile",
-      "/edit_profile": "/edit_profile",
-      "/settings": "/settings",
-      "/backup": "/backup",
-      "/linkeddevices": "/linkeddevices",
-      "/logoutalldevices": "/logoutalldevices",
-      "/signout": "/signout",
-      "/currentgoal": "/currentgoal",
-      "/investments": "/investments",
-      "/pointsExchange": "/pointsExchange",
-      "/ExpensesManagement": "/expensesManagement",
-      "/expensesManagement": "/expensesManagement",
-      "/expensesmanagement": "/expensesmanagement",
-      "/registergoals": "/registergoals",
-      "/registerinvestments": "/registerinvestments",
-      "/logout": "/logout",
-      "/investmentreminder": "/investmentreminder",
-      "/savingsreminder": "/savingsreminder",
-      "/privacypolicy": "/privacypolicy",
-      "/deleteaccount": "/deleteaccount",
-      "/usermanual": "/usermanual",
-      home: "/",
-      savings: "/savings",
-      investment: "/investment",
-      rewards: "/pointsExchange",
-      expenses: "/expensesManagement",
-    };
-
-    router.push(routes[from] || "/");
-  };
+  const unreadCount = notifications.filter(
+    (item) => item.unread
+  ).length;
 
   const openNotification = async (notification) => {
-    if (!user?.uid) return;
+    if (notification.category !== "Security") {
+      return;
+    }
 
     try {
-      if (notification.category === "Security") {
-        const ref = doc(
-          db,
-          "Users",
-          user.uid,
-          "securityAlerts",
-          notification.alertId
-        );
+      const user = auth.currentUser;
 
-        if (notification.unread) {
-          await runTransaction(db, async (transaction) => {
-            const snapshot = await transaction.get(ref);
-            if (snapshot.exists()) {
-              transaction.update(ref, { read: true });
-            }
-          });
-        }
-
-        router.push({
-          pathname: "/security_alert",
-          params: {
-            id: notification.alertId,
-            category: "Security",
-            collectionName: "securityAlerts",
-          },
-        });
+      if (!user) {
         return;
       }
 
-      const category = notification.category;
-      const notificationRef = doc(
+      const ref = doc(
         db,
-        "Notificaciones",
-        `${user.uid}_${category}`
+        "Users",
+        user.uid,
+        "securityAlerts",
+        notification.alertId
       );
 
-      if (notification.unread) {
-        await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(notificationRef);
-          if (!snapshot.exists()) return;
-
-          const data = snapshot.data();
-          const arr = Array.isArray(data.notifications)
-            ? data.notifications
-            : [];
-
-          const updated = arr.map((item) => {
-            const itemId =
-              item.id ||
-              `${category.toLowerCase()}-${arr.indexOf(item)}`;
-            if (String(itemId) === String(notification.notificationId)) {
-              return { ...item, read: true };
-            }
-            return item;
-          });
-
-          transaction.update(notificationRef, { notifications: updated });
-        });
-      }
+      await updateDoc(ref, {
+        read: true,
+      });
 
       router.push({
         pathname: "/security_alert",
         params: {
-          id: notification.notificationId,
-          category: notification.category,
-          collectionName: "Notificaciones",
-          parentId: notification.alertId,
+          id: notification.alertId,
         },
       });
     } catch (error) {
-      console.log("Error opening notification:", error);
-    }
-  };
-
-  const markAllAsRead = async () => {
-    if (!user?.uid) return;
-
-    try {
-      // Security
-      const batch = writeBatch(db);
-      const unreadSecurity = notifications.filter(
-        (item) => item.category === "Security" && item.unread
+      console.log(
+        "Error opening notification:",
+        error
       );
-
-      unreadSecurity.forEach((item) => {
-        const ref = doc(
-          db,
-          "Users",
-          user.uid,
-          "securityAlerts",
-          item.alertId
-        );
-        batch.update(ref, { read: true });
-      });
-
-      if (unreadSecurity.length > 0) {
-        await batch.commit();
-      }
-
-      for (const category of ["Savings", "Investment", "Rewards"]) {
-        const notificationRef = doc(
-          db,
-          "Notificaciones",
-          `${user.uid}_${category}`
-        );
-
-        await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(notificationRef);
-          if (!snapshot.exists()) return;
-
-          const data = snapshot.data();
-          const arr = Array.isArray(data.notifications)
-            ? data.notifications
-            : [];
-
-          const updated = arr.map((item) => ({ ...item, read: true }));
-          transaction.update(notificationRef, { notifications: updated });
-        });
-      }
-    } catch (error) {
-      console.log("Error marking notifications as read:", error);
     }
   };
 
@@ -429,21 +173,25 @@ export default function NotificationsScreen() {
         "No notifications",
         "You don't have any notifications here yet.",
       ],
+
       Savings: [
         "cash-multiple",
         "No savings reminders",
         "You don't have any savings reminders yet.",
       ],
+
       Investment: [
         "finance",
         "No investment notices",
         "You don't have any investment notifications yet.",
       ],
+
       Rewards: [
         "medal-outline",
         "No rewards updates",
         "You don't have any rewards notifications yet.",
       ],
+
       Security: [
         "shield-check-outline",
         "No security alerts",
@@ -451,406 +199,602 @@ export default function NotificationsScreen() {
       ],
     };
 
-    const [icon, title, description] = info[selectedCategory] || info.All;
+    const [
+      icon,
+      title,
+      description,
+    ] = info[selectedCategory];
 
     return (
-      <View style={styles.emptyContainer}>
+      <View style={styles.empty}>
         <View style={styles.emptyIcon}>
-          <MaterialCommunityIcons name={icon} size={42} color="#ACADAD" />
+          <MaterialCommunityIcons
+            name={icon}
+            size={38}
+            color="#ACADAD"
+          />
         </View>
-        <Text style={styles.emptyTitle}>{title}</Text>
-        <Text style={styles.emptyText}>{description}</Text>
+
+        <Text style={styles.emptyTitle}>
+          {title}
+        </Text>
+
+        <Text style={styles.emptyText}>
+          {description}
+        </Text>
       </View>
     );
   };
 
+  const nav = (tab, route) => {
+    setActiveTab(tab);
+    router.push(route);
+  };
+
+  const volver = () => {
+    if (from === "/historial") {
+      router.push("/historial");
+    } else if (from === "/profile") {
+      router.push("/profile");
+    } else if (from === "/Edit_profile") {
+      router.push("/Edit_profile");
+    } else if (from === "/settings") {
+      router.push("/settings");
+    } else if (from === "/backup") {
+      router.push("/backup");
+    } else if (from === "/linkeddevices") {
+      router.push("/linkeddevices");
+    } else if (from === "/logoutalldevices") {
+      router.push("/logoutalldevices");
+    } else if (from === "/signout") {
+      router.push("/signout");
+    } else if (from === "/currentgoal") {
+      router.push("/currentgoal");
+    } else if (from === "/investments") {
+      router.push("/investments");
+    } else if (from === "/pointsExchange") {
+      router.push("/pointsExchange");
+    } else if (from === "/ExpensesManagement") {
+      router.push("/expensesManagement");
+    } else if (from === "/registergoals") {
+      router.push("/registergoals");
+    } else {
+      router.push("/home");
+    }
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top", "left", "right"]}>
-      <StatusBar barStyle="light-content" backgroundColor="#071426" />
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#071426"
+      />
 
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={volver}
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons
-              name="arrow-left"
-              size={28}
-              color="#FFFFFF"
-            />
-          </TouchableOpacity>
+      <View
+        style={[
+          styles.header,
+          {
+            height: s(118),
+            paddingHorizontal: horizontalPadding,
+          },
+        ]}
+      >
+        <TouchableOpacity
+          style={[
+            styles.back,
+            {
+              left: s(15),
+              top: s(34),
+              width: s(55),
+              height: s(55),
+            },
+          ]}
+          onPress={volver}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={s(35)}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>Notifications</Text>
+        <Text
+          style={[
+            styles.headerTitle,
+            {
+              fontSize: s(25),
+            },
+          ]}
+        >
+          Notifications
+        </Text>
 
-          <View style={styles.headerRight}>
-            {unreadCount > 0 && <View style={styles.headerDot} />}
+        {unreadCount > 0 && (
+          <View
+            style={[
+              styles.headerDot,
+              {
+                width: s(10),
+                height: s(10),
+                borderRadius: s(5),
+                marginLeft: s(10),
+              },
+            ]}
+          />
+        )}
+      </View>
+
+      <View
+        style={[
+          styles.content,
+          {
+            borderTopLeftRadius: s(45),
+            borderTopRightRadius: s(45),
+            paddingTop: s(28),
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.categories,
+            {
+              paddingHorizontal: s(9),
+              marginBottom: s(20),
+            },
+          ]}
+        >
+          {categories.map((category) => (
             <TouchableOpacity
-              style={styles.markButton}
-              onPress={markAllAsRead}
-              activeOpacity={0.7}
+              key={category}
+              style={[
+                styles.category,
+                {
+                  height: s(35),
+                  paddingHorizontal: s(10),
+                  borderRadius: s(9),
+                },
+                selectedCategory === category &&
+                styles.categoryActive,
+              ]}
+              onPress={() => setSelectedCategory(category)}
+              activeOpacity={0.8}
             >
-              <MaterialCommunityIcons
-                name="check-all"
-                size={24}
-                color="#25B5D1"
-              />
+              <Text
+                style={[
+                  styles.categoryText,
+                  {
+                    fontSize: s(10),
+                  },
+                  selectedCategory === category &&
+                  styles.categoryTextActive,
+                ]}
+              >
+                {category}
+              </Text>
             </TouchableOpacity>
-          </View>
+          ))}
         </View>
 
-        <View style={styles.content}>
-          <View style={styles.categoryContainer}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryScroll}
-            >
-              {categories.map((category) => {
-                const active = selectedCategory === category;
-                return (
-                  <TouchableOpacity
-                    key={category}
+        <ScrollView
+          style={[
+            styles.list,
+            {
+              paddingHorizontal: s(16),
+            },
+          ]}
+          contentContainerStyle={[
+            styles.listContent,
+            {
+              paddingBottom: s(90),
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          {filtered.length === 0
+            ? emptyState()
+            : filtered.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.notification,
+                  {
+                    minHeight: s(76),
+                    borderRadius: s(13),
+                    padding: s(11),
+                    marginBottom: s(12),
+                  },
+                ]}
+                onPress={() =>
+                  openNotification(item)
+                }
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.icon,
+                    {
+                      width: s(35),
+                      marginRight: s(7),
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name={item.icon}
+                    size={s(26)}
+                    color="#172D3D"
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.notificationContent,
+                    {
+                      paddingRight: s(15),
+                    },
+                  ]}
+                >
+                  <Text
                     style={[
-                      styles.categoryButton,
-                      active && styles.categoryButtonActive,
+                      styles.title,
+                      {
+                        fontSize: s(11),
+                        marginBottom: s(3),
+                      },
                     ]}
-                    onPress={() => setSelectedCategory(category)}
-                    activeOpacity={0.8}
+                  >
+                    {item.title}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.description,
+                      {
+                        fontSize: s(9),
+                        lineHeight: s(12),
+                      },
+                    ]}
+                  >
+                    {item.description}
+                  </Text>
+
+                  <View
+                    style={[
+                      styles.dateRow,
+                      {
+                        marginTop: s(4),
+                      },
+                    ]}
                   >
                     <Text
                       style={[
-                        styles.categoryText,
-                        active && styles.categoryTextActive,
+                        styles.time,
+                        {
+                          fontSize: s(8),
+                          marginRight: s(3),
+                        },
                       ]}
                     >
-                      {category}
+                      {item.time}
                     </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
-          </View>
-
-          <ScrollView
-            style={styles.notificationScroll}
-            contentContainerStyle={styles.notificationContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {loading ? (
-              <View style={styles.emptyContainer}>
-                <MaterialCommunityIcons
-                  name="bell-outline"
-                  size={48}
-                  color="#ACADAD"
-                />
-                <Text style={styles.emptyText}>Loading notifications...</Text>
-              </View>
-            ) : filteredNotifications.length === 0 ? (
-              emptyState()
-            ) : (
-              filteredNotifications.map((notification) => (
-                <TouchableOpacity
-                  key={notification.id}
-                  style={styles.notificationCard}
-                  activeOpacity={0.8}
-                  onPress={() => openNotification(notification)}
-                >
-                  <View style={styles.iconContainer}>
-                    <MaterialCommunityIcons
-                      name={notification.icon || "bell-outline"}
-                      size={25}
-                      color="#25B5D1"
-                    />
-                  </View>
-
-                  <View style={styles.notificationInfo}>
-                    <View style={styles.titleRow}>
-                      <Text
-                        style={styles.notificationTitle}
-                        numberOfLines={1}
-                      >
-                        {notification.title}
-                      </Text>
-                      {notification.unread && (
-                        <View style={styles.unreadDot} />
-                      )}
-                    </View>
 
                     <Text
-                      style={styles.notificationDescription}
-                      numberOfLines={2}
+                      style={[
+                        styles.date,
+                        {
+                          fontSize: s(8),
+                        },
+                      ]}
                     >
-                      {notification.description}
+                      {item.date}
                     </Text>
-
-                    <View style={styles.dateRow}>
-                      <Text style={styles.dateText}>
-                        {notification.date}
-                      </Text>
-                      <Text style={styles.timeText}>
-                        {notification.time}
-                      </Text>
-                    </View>
                   </View>
+                </View>
+
+                {item.unread && (
+                  <View
+                    style={[
+                      styles.notificationDot,
+                      {
+                        left: s(11),
+                        top: s(12),
+                        width: s(7),
+                        height: s(7),
+                        borderRadius: s(7),
+                      },
+                    ]}
+                  />
+                )}
+              </TouchableOpacity>
+            ))}
+        </ScrollView>
+
+        {/* BOTTOM NAVIGATION */}
+        <SafeAreaView
+          edges={["bottom"]}
+          style={styles.bottomContainer}
+        >
+          <View
+            style={[
+              styles.bottomBar,
+              {
+                height: s(65),
+                borderTopLeftRadius: s(78),
+              },
+            ]}
+          >
+            {[
+              [
+                "home",
+                "/home",
+                "home-outline",
+                35,
+              ],
+              [
+                "reports",
+                "/historial",
+                "chart-box-outline",
+                35,
+              ],
+              [
+                "swap",
+                "/expensesManagement",
+                "swap-horizontal",
+                37,
+              ],
+              [
+                "layers",
+                "/currentgoal",
+                "layers-outline",
+                35,
+              ],
+              [
+                "account",
+                "/profile",
+                "account-outline",
+                35,
+              ],
+            ].map(
+              ([tab, route, icon, size]) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={styles.navItem}
+                  onPress={() =>
+                    nav(tab, route)
+                  }
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons
+                    name={icon}
+                    size={s(size)}
+                    color="#FFFFFF"
+                  />
                 </TouchableOpacity>
-              ))
+              )
             )}
-          </ScrollView>
-        </View>
-
-        <View style={styles.bottomBar}>
-          <TouchableOpacity
-            style={styles.bottomItem}
-            onPress={() => router.replace("/")}
-          >
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={25}
-              color="#FFFFFF"
-            />
-            <Text style={styles.bottomText}>Home</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.bottomItem}
-            onPress={() => router.replace("/expensesManagement")}
-          >
-            <MaterialCommunityIcons
-              name="wallet-outline"
-              size={25}
-              color="#FFFFFF"
-            />
-            <Text style={styles.bottomText}>Expenses</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.bottomItem}
-            onPress={() => router.replace("/notifications")}
-          >
-            <MaterialCommunityIcons
-              name="bell"
-              size={27}
-              color="#FFFFFF"
-            />
-            <Text style={styles.bottomText}>Notifications</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.bottomItem}
-            onPress={() => router.replace("/Profile")}
-          >
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={25}
-              color="#FFFFFF"
-            />
-            <Text style={styles.bottomText}>Profile</Text>
-          </TouchableOpacity>
-        </View>
+          </View>
+        </SafeAreaView>
       </View>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#071426",
-  },
   container: {
     flex: 1,
     backgroundColor: "#071426",
   },
+
   header: {
-    height: 110,
+    height: 118,
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 20,
+    paddingHorizontal: 25,
   },
-  backButton: {
-    width: 44,
-    height: 44,
+
+  back: {
+    position: "absolute",
+    left: 15,
+    top: 34,
+    width: 55,
+    height: 55,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
+
   headerTitle: {
+    flex: 1,
+    textAlign: "center",
     color: "#FFFFFF",
-    fontSize: 24,
+    fontSize: 25,
     fontWeight: "700",
+    transform: [
+      {
+        translateX: 10,
+      },
+      {
+        translateY: 1,
+      },
+    ],
   },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
+
   headerDot: {
-    width: 9,
-    height: 9,
+    width: 10,
+    height: 10,
     borderRadius: 5,
     backgroundColor: "#27B4D0",
+    marginLeft: 10,
   },
-  markButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+
   content: {
     flex: 1,
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
+    paddingTop: 28,
     overflow: "hidden",
   },
-  categoryContainer: {
-    paddingTop: 22,
-    paddingBottom: 12,
+
+  categories: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 9,
+    marginBottom: 20,
   },
-  categoryScroll: {
-    paddingHorizontal: 20,
-    gap: 10,
-  },
-  categoryButton: {
-    paddingHorizontal: 18,
-    height: 40,
-    borderRadius: 22,
-    backgroundColor: "#F1F3F4",
-    alignItems: "center",
+
+  category: {
+    height: 35,
+    paddingHorizontal: 10,
+    borderRadius: 9,
+    backgroundColor: "#E5E9F3",
     justifyContent: "center",
   },
-  categoryButtonActive: {
-    backgroundColor: "#25B5D1",
+
+  categoryActive: {
+    backgroundColor: "#27B4D0",
   },
+
   categoryText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#6F7378",
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#172D3D",
   },
+
   categoryTextActive: {
     color: "#FFFFFF",
   },
-  notificationScroll: {
+
+  list: {
     flex: 1,
-  },
-  notificationContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 120,
-    paddingTop: 8,
-  },
-  notificationCard: {
-    minHeight: 120,
-    backgroundColor: "#F7F8F9",
-    borderRadius: 17,
-    marginBottom: 12,
     paddingHorizontal: 16,
-    paddingVertical: 15,
-    flexDirection: "row",
-    alignItems: "center",
   },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: "#E4F8FC",
-    alignItems: "center",
+
+  listContent: {
+    paddingBottom: 90,
+  },
+
+  notification: {
+    minHeight: 76,
+    backgroundColor: "#F4F4F4",
+    borderRadius: 13,
+    padding: 11,
+    flexDirection: "row",
+    position: "relative",
+    marginBottom: 12,
+  },
+
+  icon: {
+    width: 35,
     justifyContent: "center",
-    marginRight: 14,
-  },
-  notificationInfo: {
-    flex: 1,
-  },
-  titleRow: {
-    flexDirection: "row",
     alignItems: "center",
+    marginRight: 7,
   },
-  notificationTitle: {
+
+  notificationContent: {
     flex: 1,
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#0A3438",
+    paddingRight: 15,
   },
-  unreadDot: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: "#25B5D1",
-    marginLeft: 8,
+
+  title: {
+    color: "#172D3D",
+    fontSize: 11,
+    fontWeight: "800",
+    marginBottom: 3,
   },
-  notificationDescription: {
-    marginTop: 7,
-    fontSize: 13,
-    lineHeight: 19,
-    color: "#70767A",
+
+  description: {
+    color: "#6D7580",
+    fontSize: 9,
+    lineHeight: 12,
   },
+
   dateRow: {
     flexDirection: "row",
-    alignItems: "center",
-    marginTop: 9,
+    justifyContent: "flex-end",
+    marginTop: 4,
   },
-  dateText: {
-    fontSize: 11,
-    color: "#9A9FA3",
+
+  time: {
+    color: "#172D3D",
+    fontSize: 8,
+    marginRight: 3,
   },
-  timeText: {
-    fontSize: 11,
-    color: "#9A9FA3",
-    marginLeft: 10,
+
+  date: {
+    color: "#172D3D",
+    fontSize: 8,
   },
-  emptyContainer: {
-    flex: 1,
-    minHeight: 400,
-    alignItems: "center",
+
+  notificationDot: {
+    position: "absolute",
+    left: 11,
+    top: 12,
+    width: 7,
+    height: 7,
+    borderRadius: 7,
+    backgroundColor: "#27B4D0",
+  },
+
+  empty: {
+    minHeight: 420,
     justifyContent: "center",
+    alignItems: "center",
     paddingHorizontal: 35,
   },
+
   emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 75,
+    height: 75,
+    borderRadius: 38,
     backgroundColor: "#F1F3F5",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: 15,
   },
+
   emptyTitle: {
     color: "#172D3D",
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "800",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
+
   emptyText: {
     color: "#6D7580",
-    fontSize: 13,
+    fontSize: 11,
     textAlign: "center",
-    lineHeight: 18,
+    lineHeight: 16,
   },
-  bottomBar: {
+
+  bottomContainer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 92,
     backgroundColor: "#25B5D1",
     borderTopLeftRadius: 78,
+  },
+
+  bottomBar: {
+    height: 65,
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 12,
+    borderTopLeftRadius: 78,
   },
-  bottomItem: {
+
+  navItem: {
+    flex: 1,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
-    minWidth: 72,
-  },
-  bottomText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 3,
   },
 });

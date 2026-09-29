@@ -7,9 +7,35 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 
 export default function VerificationScreen() {
+
+  const { width } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
+
   const [code, setCode] = useState(["1", "2", "3", "4", "5", "6"]);
   const [verificationCode, setVerificationCode] = useState("123456");
 
@@ -53,20 +79,81 @@ export default function VerificationScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Verification code</Text>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: s(70),
+            paddingHorizontal: horizontalPadding,
+            paddingBottom: s(35),
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: s(25),
+            },
+          ]}
+        >
+          Verification code
+        </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={styles.instruction}>Enter the code sent to</Text>
+      <View
+        style={[
+          styles.card,
+          {
+            borderTopLeftRadius: s(55),
+            borderTopRightRadius: s(55),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(65),
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.instruction,
+            {
+              fontSize: s(15),
+            },
+          ]}
+        >
+          Enter the code sent to
+        </Text>
 
-        <Text style={styles.instruction}>your email</Text>
-
-        <View style={styles.codeContainer}>
+        <Text
+          style={[
+            styles.instruction,
+            {
+              fontSize: s(15),
+            },
+          ]}
+        >
+          your email
+        </Text>
+        <View
+          style={[
+            styles.codeContainer,
+            {
+              marginTop: s(45),
+              gap: s(9),
+            },
+          ]}
+        >
           {code.map((number, index) => (
             <TextInput
               key={index}
-              style={styles.codeInput}
+              style={[
+                styles.codeInput,
+                {
+                  width: s(42),
+                  height: s(42),
+                  borderRadius: s(22),
+                  fontSize: s(20),
+                },
+              ]}
               value={number}
               onChangeText={(value) => handleCodeChange(value, index)}
               keyboardType="number-pad"
@@ -77,12 +164,52 @@ export default function VerificationScreen() {
           ))}
         </View>
 
-        <TouchableOpacity style={styles.acceptButton} onPress={acceptCode}>
-          <Text style={styles.acceptText}>Accept</Text>
+        <TouchableOpacity
+          style={[
+            styles.acceptButton,
+            {
+              width: s(130),
+              height: s(38),
+              borderRadius: s(20),
+              marginTop: s(65),
+            },
+          ]}
+          onPress={acceptCode}
+        >
+          <Text
+            style={[
+              styles.acceptText,
+              {
+                fontSize: s(15),
+              },
+            ]}
+          >
+            Accept
+          </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.sendButton} onPress={sendAgain}>
-          <Text style={styles.sendText}>Send Again</Text>
+        <TouchableOpacity
+          style={[
+            styles.sendButton,
+            {
+              width: s(130),
+              height: s(35),
+              borderRadius: s(20),
+              marginTop: s(10),
+            },
+          ]}
+          onPress={sendAgain}
+        >
+          <Text
+            style={[
+              styles.sendText,
+              {
+                fontSize: s(15),
+              },
+            ]}
+          >
+            Send Again
+          </Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,7 +1,7 @@
 import { router } from "expo-router";
 import { useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions, } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -14,6 +14,23 @@ import { auth } from "../../firebaseConfig";
 
 
 export default function Inicio() {
+  const { width } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scaleSize = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const s = (value) => Math.round(value * scaleSize);
+
   const scale = useSharedValue(0.7);
   const opacity = useSharedValue(0);
 
@@ -60,17 +77,40 @@ export default function Inicio() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcome}>
+      <Text
+        style={[
+          styles.welcome,
+          {
+            fontSize: s(40),
+            marginBottom: s(55),
+          },
+        ]}
+      >
         ¡Welcome!
       </Text>
 
       <Animated.Image
         source={require("../../assets/images/logo.png")}
-        style={[styles.logo, logoAnimatedStyle]}
+        style={[
+          styles.logo,
+          {
+            width: s(300),
+            height: s(300),
+            marginBottom: s(35),
+          },
+          logoAnimatedStyle,
+        ]}
         resizeMode="contain"
       />
 
-      <Text style={styles.appName}>
+      <Text
+        style={[
+          styles.appName,
+          {
+            fontSize: s(40),
+          },
+        ]}
+      >
         GrowMaint
       </Text>
     </View>

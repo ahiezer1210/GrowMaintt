@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { usePeriods } from "../../context/PeriodContext.js";
 
 const periods = [
@@ -26,6 +26,31 @@ const periods = [
 ];
 
 export default function Expensescreen() {
+
+  const { width, height } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
   const { selectedPeriods, setSelectedPeriods } = usePeriods();
   const [tempSelected, setTempSelected] = useState(selectedPeriods);
 
@@ -52,60 +77,138 @@ export default function Expensescreen() {
   const allSelected = tempSelected.length === periods.length;
 
   const savePeriod = () => {
-    setSelectedPeriods(tempSelected); 
+    setSelectedPeriods(tempSelected);
     router.back();
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: s(65),
+            paddingHorizontal: horizontalPadding,
+            paddingBottom: s(35),
+          },
+        ]}
+      >
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            {
+              width: s(35),
+              height: s(35),
+              marginBottom: s(15),
+            },
+          ]}
         >
-          <Ionicons name="arrow-back" size={25} color="#FFFFFF" />
+          <Ionicons
+            name="arrow-back"
+            size={s(25)}
+            color="#FFFFFF"
+          />
         </TouchableOpacity>
 
-        <Text style={styles.title}> Expenses control period</Text>
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: s(25),
+            },
+          ]}
+        >
+          Expenses control period
+        </Text>
       </View>
 
-      <View style={styles.card}>
+      <View
+        style={[
+          styles.card,
+          {
+            borderTopLeftRadius: s(55),
+            borderTopRightRadius: s(55),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(50),
+          },
+        ]}
+      >
         <Text style={styles.instruction}>Choose when you want to</Text>
         <Text style={styles.instruction}> review your expenses.</Text>
         <Text style={styles.subtitle}> Select one or more options</Text>
 
-        <View style={styles.options}>
+        <View
+          style={[
+            styles.options,
+            {
+              marginTop: s(30),
+              gap: s(12),
+            },
+          ]}
+        >
           {periods.map((period) => {
             const selected = tempSelected.includes(period.id);
             return (
               <TouchableOpacity
                 key={period.id}
-                style={[styles.option, selected && styles.optionSelected]}
+                style={[
+                  styles.option,
+                  {
+                    minHeight: s(70),
+                    borderRadius: s(20),
+                    paddingHorizontal: s(15),
+                  },
+                  selected && styles.optionSelected,
+                ]}
                 onPress={() => togglePeriod(period.id)}
                 activeOpacity={0.8}
               >
                 <View
-                  style={[styles.iconBox, selected && styles.iconBoxSelected]}
+                  style={[
+                    styles.iconBox,
+                    {
+                      width: s(45),
+                      height: s(45),
+                      borderRadius: s(15),
+                    },
+                    selected && styles.iconBoxSelected,
+                  ]}
                 >
                   <Ionicons
                     name={period.icon}
-                    size={23}
+                    size={s(23)}
                     color={selected ? "#FFFFFF" : "#25B7D3"}
                   />
                 </View>
 
-                <View style={styles.optionInfo}>
+                <View
+                  style={[
+                    styles.optionInfo,
+                    {
+                      marginLeft: s(14),
+                    },
+                  ]}
+                >
                   <Text
                     style={[
                       styles.optionTitle,
+                      {
+                        fontSize: s(16),
+                      },
                       selected && styles.optionTitleSelected,
                     ]}
                   >
                     {period.title}
                   </Text>
+
                   <Text
                     style={[
                       styles.optionDescription,
+                      {
+                        fontSize: s(12),
+                        marginTop: s(3),
+                      },
                       selected && styles.optionDescriptionSelected,
                     ]}
                   >
@@ -114,10 +217,22 @@ export default function Expensescreen() {
                 </View>
 
                 <View
-                  style={[styles.checkbox, selected && styles.checkboxSelected]}
+                  style={[
+                    styles.checkbox,
+                    {
+                      width: s(23),
+                      height: s(23),
+                      borderRadius: s(7),
+                    },
+                    selected && styles.checkboxSelected,
+                  ]}
                 >
                   {selected && (
-                    <Ionicons name="checkmark" size={15} color="#FFFFFF" />
+                    <Ionicons
+                      name="checkmark"
+                      size={s(15)}
+                      color="#FFFFFF"
+                    />
                   )}
                 </View>
               </TouchableOpacity>
@@ -169,11 +284,28 @@ export default function Expensescreen() {
         </View>
 
         <TouchableOpacity
-          style={styles.saveButton}
+          style={[
+            styles.saveButton,
+            {
+              width: s(150),
+              height: s(40),
+              borderRadius: s(20),
+              marginTop: s(30),
+            },
+          ]}
           onPress={savePeriod}
           activeOpacity={0.8}
         >
-          <Text style={styles.saveText}>Save period</Text>
+          <Text
+            style={[
+              styles.saveText,
+              {
+                fontSize: s(15),
+              },
+            ]}
+          >
+            Save period
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -191,23 +323,15 @@ const styles = StyleSheet.create({
     paddingBottom: 35,
   },
   backButton: {
-    width: 35,
-    height: 35,
     justifyContent: "center",
-    marginBottom: 15,
   },
   title: {
     color: "#FFFFFF",
-    fontSize: 25,
     fontWeight: "700",
   },
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 55,
-    borderTopRightRadius: 55,
-    paddingHorizontal: 30,
-    paddingTop: 50,
   },
   instruction: {
     color: "#081023",

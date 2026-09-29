@@ -11,10 +11,36 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
 
 export default function VerifyAge() {
+
+  const { width } = useWindowDimensions();
+
+  const isSmallScreen = width < 360;
+  const isMediumScreen = width >= 360 && width < 600;
+  const isTablet = width >= 600;
+  const isLargeScreen = width >= 900;
+
+  const scale = isSmallScreen
+    ? 0.85
+    : isMediumScreen
+      ? 1
+      : isTablet
+        ? 1.15
+        : 1.25;
+
+  const horizontalPadding = isSmallScreen
+    ? 18
+    : isMediumScreen
+      ? 25
+      : isTablet
+        ? 45
+        : 60;
+
+  const s = (value) => Math.round(value * scale);
   const [documentUri, setDocumentUri] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingPhoto, setLoadingPhoto] = useState(true);
@@ -125,37 +151,91 @@ export default function VerifyAge() {
         barStyle="light-content"
       />
 
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          {
+            height: s(115),
+            paddingHorizontal: horizontalPadding,
+          },
+        ]}
+      >
         <TouchableOpacity
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            {
+              width: s(41),
+              height: s(46),
+            },
+          ]}
           onPress={() => router.push("/S.Ageconfirmation")}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={22}
+            size={s(22)}
             color="#FFFFFF"
           />
         </TouchableOpacity>
 
-        <Text style={styles.headerTitle}>
+        <Text
+          style={[
+            styles.headerTitle,
+            {
+              fontSize: s(19),
+            },
+          ]}
+        >
           Identity Verification
         </Text>
 
-        <View style={{ width: 30 }} />
+        <View style={{ width: s(30) }} />
       </View>
 
-      <View style={styles.main}>
-        <Text style={styles.title}>
+      <View
+        style={[
+          styles.main,
+          {
+            borderTopLeftRadius: s(36),
+            borderTopRightRadius: s(36),
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(40),
+          },
+        ]}
+      >
+        <Text
+          style={[
+            styles.title,
+            {
+              fontSize: s(22),
+            },
+          ]}
+        >
           Scan your identity document
         </Text>
 
-        <Text style={styles.subtitle}>
+        <Text
+          style={[
+            styles.subtitle,
+            {
+              marginTop: s(15),
+              fontSize: s(15),
+              lineHeight: s(22),
+            },
+          ]}
+        >
           Take a clear photo of your ID card to
           verify that you are 18 years old or older.
         </Text>
 
         {loadingPhoto ? (
-          <View style={styles.loadingContainer}>
+          <View
+            style={[
+              styles.loadingContainer,
+              {
+                marginTop: s(90),
+              },
+            ]}
+          >
             <ActivityIndicator
               size="large"
               color="#25B7D3"
@@ -163,16 +243,32 @@ export default function VerifyAge() {
           </View>
         ) : !documentUri ? (
           <TouchableOpacity
-            style={styles.scanButton}
+            style={[
+              styles.scanButton,
+              {
+                marginTop: s(50),
+                width: s(220),
+                height: s(220),
+                borderRadius: s(20),
+              },
+            ]}
             onPress={takePhoto}
           >
             <MaterialCommunityIcons
               name="camera"
-              size={32}
+              size={s(32)}
               color="#FFFFFF"
             />
 
-            <Text style={styles.scanText}>
+            <Text
+              style={[
+                styles.scanText,
+                {
+                  marginTop: s(10),
+                  fontSize: s(14),
+                },
+              ]}
+            >
               Scan Document
             </Text>
           </TouchableOpacity>
@@ -181,21 +277,49 @@ export default function VerifyAge() {
             <Image
               key={refreshKey}
               source={{ uri: documentUri }}
-              style={styles.preview}
+              style={[
+                styles.preview,
+                {
+                  width: Math.min(s(320), width - horizontalPadding * 2),
+                  height: s(220),
+                  borderRadius: s(15),
+                  marginTop: s(40),
+                },
+              ]}
             />
 
             <TouchableOpacity
-              style={styles.retakeButton}
+              style={[
+                styles.retakeButton,
+                {
+                  marginTop: s(20),
+                },
+              ]}
               onPress={takePhoto}
               disabled={loading}
             >
-              <Text style={styles.retakeText}>
+              <Text
+                style={[
+                  styles.retakeText,
+                  {
+                    fontSize: s(15),
+                  },
+                ]}
+              >
                 Retake Photo
               </Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={styles.continueButton}
+              style={[
+                styles.continueButton,
+                {
+                  marginTop: s(30),
+                  width: s(240),
+                  height: s(55),
+                  borderRadius: s(22),
+                },
+              ]}
               onPress={saveDocument}
               disabled={loading}
             >
@@ -205,7 +329,14 @@ export default function VerifyAge() {
                   color="#FFFFFF"
                 />
               ) : (
-                <Text style={styles.continueText}>
+                <Text
+                  style={[
+                    styles.continueText,
+                    {
+                      fontSize: s(16),
+                    },
+                  ]}
+                >
                   Continue
                 </Text>
               )}
