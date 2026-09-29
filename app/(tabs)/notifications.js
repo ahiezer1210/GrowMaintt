@@ -30,6 +30,8 @@ const categories = [
 
 export default function NotificationsScreen() {
 
+  const { width } = useWindowDimensions();
+
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
   const isTablet = width >= 600;
@@ -210,7 +212,7 @@ export default function NotificationsScreen() {
         <View style={styles.emptyIcon}>
           <MaterialCommunityIcons
             name={icon}
-            size={38}
+            size={s(38)}
             color="#ACADAD"
           />
         </View>
