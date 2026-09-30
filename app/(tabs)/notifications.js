@@ -158,6 +158,8 @@ export default function NotificationsScreen() {
         pathname: "/security_alert",
         params: {
           id: notification.alertId,
+          category: "Security", // 👈 nuevo
+          collectionName: "securityAlerts", // 👈 nuevo
         },
       });
     } catch (error) {

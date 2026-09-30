@@ -109,7 +109,7 @@ export default function PrivacyScreen() {
                 ],
               },
             ]}
-            onPress={() => router.back()}
+            onPress={() => router.replace("/profile")} // 👈 CAMBIO
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons

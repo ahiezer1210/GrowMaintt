@@ -109,11 +109,7 @@ export default function ManualScreen() {
                 ],
               },
             ]}
-            onPress={() => {
-              if (router.canGoBack()) {
-                router.back();
-              }
-            }}
+            onPress={() => router.replace("/settings")} // 👈 CAMBIO
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons

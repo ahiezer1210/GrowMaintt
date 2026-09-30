@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -111,7 +112,6 @@ export default function Expensescreen() {
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -169,259 +169,244 @@ export default function Expensescreen() {
         </TouchableOpacity>
       </View>
 
-      {/* MAIN */}
       <View
         style={[
           styles.card,
           {
             borderTopLeftRadius: s(55),
             borderTopRightRadius: s(55),
-            paddingHorizontal: horizontalPadding,
-            paddingTop: s(50),
           },
         ]}
       >
-        <Text style={styles.instruction}>
-          Choose when you want to
-        </Text>
-
-        <Text style={styles.instruction}>
-          review your expenses.
-        </Text>
-
-        <Text style={styles.subtitle}>
-          Select one or more options
-        </Text>
-
-        <View
-          style={[
-            styles.options,
-            {
-              marginTop: s(30),
-              gap: s(12),
-            },
-          ]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          bounces={false}
+          contentContainerStyle={{
+            paddingHorizontal: horizontalPadding,
+            paddingTop: s(50),
+            paddingBottom: s(65) + s(30), // altura de la barra inferior + margen
+          }}
         >
-          {periods.map((period) => {
-            const selected = tempSelected.includes(period.id);
+          <Text style={styles.instruction}>Choose when you want to</Text>
 
-            return (
-              <TouchableOpacity
-                key={period.id}
-                style={[
-                  styles.option,
-                  {
-                    minHeight: s(70),
-                    borderRadius: s(20),
-                    paddingHorizontal: s(15),
-                  },
-                  selected && styles.optionSelected,
-                ]}
-                onPress={() => togglePeriod(period.id)}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.iconBox,
-                    {
-                      width: s(45),
-                      height: s(45),
-                      borderRadius: s(15),
-                    },
-                    selected && styles.iconBoxSelected,
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name={period.icon}
-                    size={s(23)}
-                    color={
-                      selected
-                        ? "#FFFFFF"
-                        : "#25B7D3"
-                    }
-                  />
-                </View>
+          <Text style={styles.instruction}>review your expenses.</Text>
 
-                <View
+          <Text style={styles.subtitle}>Select one or more options</Text>
+
+          <View
+            style={[
+              styles.options,
+              {
+                marginTop: s(30),
+                gap: s(12),
+              },
+            ]}
+          >
+            {periods.map((period) => {
+              const selected = tempSelected.includes(period.id);
+
+              return (
+                <TouchableOpacity
+                  key={period.id}
                   style={[
-                    styles.optionInfo,
+                    styles.option,
                     {
-                      marginLeft: s(14),
+                      minHeight: s(70),
+                      borderRadius: s(20),
+                      paddingHorizontal: s(15),
                     },
+                    selected && styles.optionSelected,
                   ]}
+                  onPress={() => togglePeriod(period.id)}
+                  activeOpacity={0.8}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.optionTitle,
+                      styles.iconBox,
                       {
-                        fontSize: s(16),
+                        width: s(45),
+                        height: s(45),
+                        borderRadius: s(15),
                       },
-                      selected &&
-                        styles.optionTitleSelected,
+                      selected && styles.iconBoxSelected,
                     ]}
                   >
-                    {period.title}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.optionDescription,
-                      {
-                        fontSize: s(12),
-                        marginTop: s(3),
-                      },
-                      selected &&
-                        styles.optionDescriptionSelected,
-                    ]}
-                  >
-                    {period.description}
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.checkbox,
-                    {
-                      width: s(23),
-                      height: s(23),
-                      borderRadius: s(7),
-                    },
-                    selected &&
-                      styles.checkboxSelected,
-                  ]}
-                >
-                  {selected && (
                     <MaterialCommunityIcons
-                      name="check"
-                      size={s(15)}
-                      color="#FFFFFF"
+                      name={period.icon}
+                      size={s(23)}
+                      color={selected ? "#FFFFFF" : "#25B7D3"}
                     />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
+                  </View>
+
+                  <View
+                    style={[
+                      styles.optionInfo,
+                      {
+                        marginLeft: s(14),
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {
+                          fontSize: s(16),
+                        },
+                        selected && styles.optionTitleSelected,
+                      ]}
+                    >
+                      {period.title}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.optionDescription,
+                        {
+                          fontSize: s(12),
+                          marginTop: s(3),
+                        },
+                        selected && styles.optionDescriptionSelected,
+                      ]}
+                    >
+                      {period.description}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        width: s(23),
+                        height: s(23),
+                        borderRadius: s(7),
+                      },
+                      selected && styles.checkboxSelected,
+                    ]}
+                  >
+                    {selected && (
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={s(15)}
+                        color="#FFFFFF"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+
+            <TouchableOpacity
+              style={[
+                styles.option,
+                {
+                  minHeight: s(70),
+                  borderRadius: s(20),
+                  paddingHorizontal: s(15),
+                },
+                allSelected && styles.optionSelected,
+              ]}
+              onPress={selectAll}
+              activeOpacity={0.8}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    width: s(45),
+                    height: s(45),
+                    borderRadius: s(15),
+                  },
+                  allSelected && styles.iconBoxSelected,
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="layers-outline"
+                  size={s(23)}
+                  color={allSelected ? "#FFFFFF" : "#25B7D3"}
+                />
+              </View>
+
+              <View
+                style={[
+                  styles.optionInfo,
+                  {
+                    marginLeft: s(14),
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.optionTitle,
+                    {
+                      fontSize: s(16),
+                    },
+                    allSelected && styles.optionTitleSelected,
+                  ]}
+                >
+                  All three
+                </Text>
+
+                <Text
+                  style={[
+                    styles.optionDescription,
+                    {
+                      fontSize: s(12),
+                      marginTop: s(3),
+                    },
+                    allSelected && styles.optionDescriptionSelected,
+                  ]}
+                >
+                  Daily, weekly and monthly
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    width: s(23),
+                    height: s(23),
+                    borderRadius: s(7),
+                  },
+                  allSelected && styles.checkboxSelected,
+                ]}
+              >
+                {allSelected && (
+                  <MaterialCommunityIcons
+                    name="check"
+                    size={s(15)}
+                    color="#FFFFFF"
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
 
           <TouchableOpacity
             style={[
-              styles.option,
+              styles.saveButton,
               {
-                minHeight: s(70),
+                width: s(150),
+                height: s(40),
                 borderRadius: s(20),
-                paddingHorizontal: s(15),
+                marginTop: s(30),
               },
-              allSelected &&
-                styles.optionSelected,
             ]}
-            onPress={selectAll}
+            onPress={savePeriod}
             activeOpacity={0.8}
           >
-            <View
+            <Text
               style={[
-                styles.iconBox,
+                styles.saveText,
                 {
-                  width: s(45),
-                  height: s(45),
-                  borderRadius: s(15),
-                },
-                allSelected &&
-                  styles.iconBoxSelected,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={s(23)}
-                color={
-                  allSelected
-                    ? "#FFFFFF"
-                    : "#25B7D3"
-                }
-              />
-            </View>
-
-            <View
-              style={[
-                styles.optionInfo,
-                {
-                  marginLeft: s(14),
+                  fontSize: s(15),
                 },
               ]}
             >
-              <Text
-                style={[
-                  styles.optionTitle,
-                  {
-                    fontSize: s(16),
-                  },
-                  allSelected &&
-                    styles.optionTitleSelected,
-                ]}
-              >
-                All three
-              </Text>
-
-              <Text
-                style={[
-                  styles.optionDescription,
-                  {
-                    fontSize: s(12),
-                    marginTop: s(3),
-                  },
-                  allSelected &&
-                    styles.optionDescriptionSelected,
-                ]}
-              >
-                Daily, weekly and monthly
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.checkbox,
-                {
-                  width: s(23),
-                  height: s(23),
-                  borderRadius: s(7),
-                },
-                allSelected &&
-                  styles.checkboxSelected,
-              ]}
-            >
-              {allSelected && (
-                <MaterialCommunityIcons
-                  name="check"
-                  size={s(15)}
-                  color="#FFFFFF"
-                />
-              )}
-            </View>
+              Save period
+            </Text>
           </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.saveButton,
-            {
-              width: s(150),
-              height: s(40),
-              borderRadius: s(20),
-              marginTop: s(30),
-            },
-          ]}
-          onPress={savePeriod}
-          activeOpacity={0.8}
-        >
-          <Text
-            style={[
-              styles.saveText,
-              {
-                fontSize: s(15),
-              },
-            ]}
-          >
-            Save period
-          </Text>
-        </TouchableOpacity>
+        </ScrollView>
       </View>
 
       {/* BOTTOM NAVBAR */}
@@ -443,11 +428,7 @@ export default function Expensescreen() {
           >
             <MaterialCommunityIcons
               name={item.icon}
-              size={s(
-                item.icon === "swap-horizontal"
-                  ? 37
-                  : 35
-              )}
+              size={s(item.icon === "swap-horizontal" ? 37 : 35)}
               color="#FFFFFF"
             />
           </TouchableOpacity>

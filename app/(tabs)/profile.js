@@ -29,7 +29,7 @@ export default function Profile() {
             title: t.security,
             icon: "shield-checkmark-outline",
             color: "#27b6d1",
-            route: "/privacyScreen"
+            route: "/privacypolicy"
         },
         {
             title: t.settings,

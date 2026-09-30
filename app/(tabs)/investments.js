@@ -75,7 +75,7 @@ export default function InversionesScreen() {
               transform: [{ translateY: 4 * scale }],
             },
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")} // 👈 CAMBIO
         >
           <MaterialCommunityIcons
             name="arrow-left"

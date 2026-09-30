@@ -8,11 +8,12 @@ const translations = {
 
     backup: "Backup and synchronization",
     changePassword: "Change password",
-    expenseControl: "Expense control period",
+    expensecontrolperiod: "Expense control period",
     linkedDevices: "Linked devices",
     logout: "Log out",
     deleteAccount: "Delete account",
     changeLanguage: "Change language",
+    usermanual: "User Manual",
 
     home: "Home",
     reports: "Reports",
@@ -30,11 +31,12 @@ const translations = {
 
     backup: "Copia de seguridad y sincronización",
     changePassword: "Cambiar contraseña",
-    expenseControl: "Período de control de gastos",
+    expensecontrolperiod: "Período de control de gastos",
     linkedDevices: "Dispositivos vinculados",
     logout: "Cerrar sesión",
     deleteAccount: "Eliminar cuenta",
     changeLanguage: "Cambiar idioma",
+    usermanual: "Manual de usuario",
 
     home: "Inicio",
     reports: "Reportes",

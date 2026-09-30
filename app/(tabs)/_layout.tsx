@@ -50,7 +50,7 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="ExpensesManagement"
+        name="expensesmanagement"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="wallet-outline" size={size} color={color} />
@@ -68,7 +68,7 @@ export default function TabsLayout() {
       />
 
       <Tabs.Screen
-        name="Profile"
+        name="profile"
         options={{
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />

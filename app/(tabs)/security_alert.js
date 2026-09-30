@@ -146,17 +146,13 @@ export default function SecurityAlertScreen() {
   const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const id = Array.isArray(params?.id)
-    ? params.id[0]
-    : params?.id;
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
   const category = Array.isArray(params?.category)
     ? params.category[0]
     : params?.category;
 
-  const collectionName = Array.isArray(
-    params?.collectionName
-  )
+  const collectionName = Array.isArray(params?.collectionName)
     ? params.collectionName[0]
     : params?.collectionName;
 
@@ -205,8 +201,7 @@ export default function SecurityAlertScreen() {
             }
           }
         } else {
-          const notificationCategory =
-            category || "Savings";
+          const notificationCategory = category || "Savings";
 
           const notificationRef = doc(
             db,
@@ -225,70 +220,52 @@ export default function SecurityAlertScreen() {
               ? parentData.notifications
               : [];
 
-            const foundNotification =
-              notificationArray.find(
-                (item) =>
-                  String(item.id) === String(id)
-              );
+            const foundNotification = notificationArray.find(
+              (item) => String(item.id) === String(id)
+            );
 
             if (foundNotification) {
               data = {
                 ...foundNotification,
                 id,
                 category:
-                  foundNotification.category ||
-                  notificationCategory,
+                  foundNotification.category || notificationCategory,
               };
 
               if (foundNotification.read !== true) {
-                await runTransaction(
-                  db,
-                  async (transaction) => {
-                    const currentSnapshot =
-                      await transaction.get(
-                        notificationRef
-                      );
+                await runTransaction(db, async (transaction) => {
+                  const currentSnapshot = await transaction.get(
+                    notificationRef
+                  );
 
-                    if (!currentSnapshot.exists()) {
-                      return;
-                    }
-
-                    const currentData =
-                      currentSnapshot.data();
-
-                    const currentNotifications =
-                      Array.isArray(
-                        currentData.notifications
-                      )
-                        ? currentData.notifications
-                        : [];
-
-                    const updatedNotifications =
-                      currentNotifications.map(
-                        (item) => {
-                          if (
-                            String(item.id) ===
-                            String(id)
-                          ) {
-                            return {
-                              ...item,
-                              read: true,
-                            };
-                          }
-
-                          return item;
-                        }
-                      );
-
-                    transaction.update(
-                      notificationRef,
-                      {
-                        notifications:
-                          updatedNotifications,
-                      }
-                    );
+                  if (!currentSnapshot.exists()) {
+                    return;
                   }
-                );
+
+                  const currentData = currentSnapshot.data();
+
+                  const currentNotifications = Array.isArray(
+                    currentData.notifications
+                  )
+                    ? currentData.notifications
+                    : [];
+
+                  const updatedNotifications =
+                    currentNotifications.map((item) => {
+                      if (String(item.id) === String(id)) {
+                        return {
+                          ...item,
+                          read: true,
+                        };
+                      }
+
+                      return item;
+                    });
+
+                  transaction.update(notificationRef, {
+                    notifications: updatedNotifications,
+                  });
+                });
               }
             }
           }
@@ -296,10 +273,7 @@ export default function SecurityAlertScreen() {
 
         setAlertData(data);
       } catch (error) {
-        console.log(
-          "Error loading notification:",
-          error
-        );
+        console.log("Error loading notification:", error);
         setAlertData(null);
       } finally {
         setLoading(false);
@@ -319,9 +293,7 @@ export default function SecurityAlertScreen() {
 
   const getDisplayDate = () => {
     if (alertData?.createdAt) {
-      const formatted = formatDate(
-        alertData.createdAt
-      );
+      const formatted = formatDate(alertData.createdAt);
 
       if (formatted.date) {
         return formatted.date;
@@ -337,9 +309,7 @@ export default function SecurityAlertScreen() {
 
   const getDisplayTime = () => {
     if (alertData?.createdAt) {
-      const formatted = formatDate(
-        alertData.createdAt
-      );
+      const formatted = formatDate(alertData.createdAt);
 
       if (formatted.time) {
         return formatted.time;
@@ -355,16 +325,10 @@ export default function SecurityAlertScreen() {
 
   const getTitle = () => {
     if (alertData?.category === "Security") {
-      return (
-        alertData?.title ||
-        getSecurityTitle(alertData?.type)
-      );
+      return alertData?.title || getSecurityTitle(alertData?.type);
     }
 
-    return (
-      alertData?.title ||
-      getCategoryTitle(alertData?.category)
-    );
+    return alertData?.title || getCategoryTitle(alertData?.category);
   };
 
   const getIcon = () => {
@@ -372,10 +336,7 @@ export default function SecurityAlertScreen() {
       return getSecurityIcon(alertData?.type);
     }
 
-    return (
-      alertData?.icon ||
-      getCategoryIcon(alertData?.category)
-    );
+    return alertData?.icon || getCategoryIcon(alertData?.category);
   };
 
   const getActivityName = () => {
@@ -413,16 +374,10 @@ export default function SecurityAlertScreen() {
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="#071426"
-        />
+        <StatusBar barStyle="light-content" backgroundColor="#071426" />
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator
-            size="large"
-            color="#25B5D1"
-          />
+          <ActivityIndicator size="large" color="#25B5D1" />
         </View>
       </SafeAreaView>
     );
@@ -431,17 +386,11 @@ export default function SecurityAlertScreen() {
   if (!alertData) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor="#071426"
-        />
+        <StatusBar barStyle="light-content" backgroundColor="#071426" />
 
         <View style={styles.container}>
           <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={goBack}
-            >
+            <TouchableOpacity style={styles.backButton} onPress={goBack}>
               <MaterialCommunityIcons
                 name="arrow-left"
                 size={26}
@@ -449,9 +398,7 @@ export default function SecurityAlertScreen() {
               />
             </TouchableOpacity>
 
-            <Text style={styles.headerTitle}>
-              Security Alert
-            </Text>
+            <Text style={styles.headerTitle}>Security Alert</Text>
 
             <View style={styles.headerSpacer} />
           </View>
@@ -464,9 +411,7 @@ export default function SecurityAlertScreen() {
                 color="#ACADAD"
               />
 
-              <Text style={styles.emptyTitle}>
-                Notification not found
-              </Text>
+              <Text style={styles.emptyTitle}>Notification not found</Text>
 
               <Text style={styles.emptyText}>
                 This notification could not be found.
@@ -483,17 +428,11 @@ export default function SecurityAlertScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#071426"
-      />
+      <StatusBar barStyle="light-content" backgroundColor="#071426" />
 
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={goBack}
-          >
+          <TouchableOpacity style={styles.backButton} onPress={goBack}>
             <MaterialCommunityIcons
               name="arrow-left"
               size={26}
@@ -501,9 +440,7 @@ export default function SecurityAlertScreen() {
             />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>
-            Security Alert
-          </Text>
+          <Text style={styles.headerTitle}>Security Alert</Text>
 
           <View style={styles.headerSpacer} />
         </View>
@@ -521,13 +458,9 @@ export default function SecurityAlertScreen() {
             />
           </View>
 
-          <Text style={styles.title}>
-            {getTitle()}
-          </Text>
+          <Text style={styles.title}>{getTitle()}</Text>
 
-          <Text style={styles.description}>
-            {getDescription()}
-          </Text>
+          <Text style={styles.description}>{getDescription()}</Text>
 
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
@@ -540,14 +473,10 @@ export default function SecurityAlertScreen() {
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>
-                  Category
-                </Text>
+                <Text style={styles.infoLabel}>Category</Text>
 
                 <Text style={styles.infoValue}>
-                  {getCategoryTitle(
-                    alertData.category
-                  )}
+                  {getCategoryTitle(alertData.category)}
                 </Text>
               </View>
             </View>
@@ -564,9 +493,7 @@ export default function SecurityAlertScreen() {
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>
-                  Date
-                </Text>
+                <Text style={styles.infoLabel}>Date</Text>
 
                 <Text style={styles.infoValue}>
                   {getDisplayDate() || "Not available"}
@@ -586,9 +513,7 @@ export default function SecurityAlertScreen() {
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>
-                  Time
-                </Text>
+                <Text style={styles.infoLabel}>Time</Text>
 
                 <Text style={styles.infoValue}>
                   {getDisplayTime() || "Not available"}
@@ -608,13 +533,9 @@ export default function SecurityAlertScreen() {
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>
-                  Activity
-                </Text>
+                <Text style={styles.infoLabel}>Activity</Text>
 
-                <Text style={styles.infoValue}>
-                  {getActivityName()}
-                </Text>
+                <Text style={styles.infoValue}>{getActivityName()}</Text>
               </View>
             </View>
 
@@ -631,12 +552,8 @@ export default function SecurityAlertScreen() {
                     />
                   </View>
 
-                  <View
-                    style={styles.infoTextContainer}
-                  >
-                    <Text style={styles.infoLabel}>
-                      Amount
-                    </Text>
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Amount</Text>
 
                     <Text style={styles.infoValue}>
                       ${Number(amount).toFixed(2)}
@@ -659,16 +576,10 @@ export default function SecurityAlertScreen() {
                     />
                   </View>
 
-                  <View
-                    style={styles.infoTextContainer}
-                  >
-                    <Text style={styles.infoLabel}>
-                      Points used
-                    </Text>
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Points used</Text>
 
-                    <Text style={styles.infoValue}>
-                      {points}
-                    </Text>
+                    <Text style={styles.infoValue}>{points}</Text>
                   </View>
                 </View>
               </>
@@ -687,16 +598,10 @@ export default function SecurityAlertScreen() {
                     />
                   </View>
 
-                  <View
-                    style={styles.infoTextContainer}
-                  >
-                    <Text style={styles.infoLabel}>
-                      Store
-                    </Text>
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Store</Text>
 
-                    <Text style={styles.infoValue}>
-                      {alertData.store}
-                    </Text>
+                    <Text style={styles.infoValue}>{alertData.store}</Text>
                   </View>
                 </View>
               </>
@@ -715,16 +620,10 @@ export default function SecurityAlertScreen() {
                     />
                   </View>
 
-                  <View
-                    style={styles.infoTextContainer}
-                  >
-                    <Text style={styles.infoLabel}>
-                      Code
-                    </Text>
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Code</Text>
 
-                    <Text style={styles.infoValue}>
-                      {alertData.code}
-                    </Text>
+                    <Text style={styles.infoValue}>{alertData.code}</Text>
                   </View>
                 </View>
               </>
@@ -743,12 +642,8 @@ export default function SecurityAlertScreen() {
                     />
                   </View>
 
-                  <View
-                    style={styles.infoTextContainer}
-                  >
-                    <Text style={styles.infoLabel}>
-                      Device
-                    </Text>
+                  <View style={styles.infoTextContainer}>
+                    <Text style={styles.infoLabel}>Device</Text>
 
                     <Text style={styles.infoValue}>
                       {alertData.deviceName}
@@ -763,64 +658,46 @@ export default function SecurityAlertScreen() {
         <View style={styles.bottomBar}>
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() => router.replace("/")}
+            onPress={() => router.replace("/home")}
           >
             <MaterialCommunityIcons
               name="home-outline"
               size={25}
               color="#FFFFFF"
             />
-            <Text style={styles.bottomText}>
-              Home
-            </Text>
+            <Text style={styles.bottomText}>Home</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() =>
-              router.replace("/expensesManagement")
-            }
+            onPress={() => router.replace("/expensesManagement")}
           >
             <MaterialCommunityIcons
               name="wallet-outline"
               size={25}
               color="#FFFFFF"
             />
-            <Text style={styles.bottomText}>
-              Expenses
-            </Text>
+            <Text style={styles.bottomText}>Expenses</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() =>
-              router.replace("/notifications")
-            }
+            onPress={() => router.replace("/notifications")}
           >
-            <MaterialCommunityIcons
-              name="bell"
-              size={27}
-              color="#FFFFFF"
-            />
-            <Text style={styles.bottomText}>
-              Notifications
-            </Text>
+            <MaterialCommunityIcons name="bell" size={27} color="#FFFFFF" />
+            <Text style={styles.bottomText}>Notifications</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() =>
-              router.replace("/Profile")
-            }
+            onPress={() => router.replace("/profile")}
           >
             <MaterialCommunityIcons
               name="account-outline"
               size={25}
               color="#FFFFFF"
             />
-            <Text style={styles.bottomText}>
-              Profile
-            </Text>
+            <Text style={styles.bottomText}>Profile</Text>
           </TouchableOpacity>
         </View>
       </View>
