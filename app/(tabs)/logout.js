@@ -236,7 +236,7 @@ export default function LogoutScreen({ navigation }) {
                 transform: [
                   {
                     translateX:
-                      7 *
+                      4 *
                       (small
                         ? 0.85
                         : tablet

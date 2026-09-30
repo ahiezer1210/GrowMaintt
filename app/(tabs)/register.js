@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#FFFFFF",
     fontWeight: "700",
+    transform: [{ translateX: 4}],
   },
 
   whiteContainer: {

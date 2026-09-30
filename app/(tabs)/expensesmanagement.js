@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
     collection,
@@ -250,14 +250,14 @@ export default function ExpenseManagement() {
 
     return (
         <View style={styles.container}>
+            {/* HEADER */}
             <View
                 style={[
                     styles.header,
                     {
-                        height: s(130),
+                        height: s(118),
                         paddingHorizontal:
                             horizontalPadding,
-                        marginTop: s(30),
                     },
                 ]}
             >
@@ -265,17 +265,20 @@ export default function ExpenseManagement() {
                     style={[
                         styles.backButton,
                         {
-                            width: s(35),
-                            height: s(35),
+                            left: s(15),
+                            top: s(34),
+                            width: s(55),
+                            height: s(55),
                         },
                     ]}
                     onPress={() =>
                         router.back()
                     }
+                    activeOpacity={0.7}
                 >
-                    <Ionicons
-                        name="arrow-back"
-                        size={s(25)}
+                    <MaterialCommunityIcons
+                        name="arrow-left"
+                        size={s(35)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -285,35 +288,41 @@ export default function ExpenseManagement() {
                         styles.headertitle,
                         {
                             fontSize: s(25),
-                            lineHeight: s(27),
+                            lineHeight: s(29),
                         },
                     ]}
                 >
-                    Expense{"\n"}Management
+                    Expense
+                    {"\n"}
+                    Management
                 </Text>
 
                 <TouchableOpacity
                     style={[
                         styles.notification,
                         {
-                            width: s(30),
-                            height: s(30),
-                            borderRadius: s(15),
+                            right: s(15),
+                            top: s(34),
+                            width: s(55),
+                            height: s(55),
                         },
                     ]}
                     onPress={() =>
                         router.push({
-                            pathname: "/notifications",
-                            params : { 
-                                from: "/expensesmanagement"
+                            pathname:
+                                "/notifications",
+                            params: {
+                                from:
+                                    "/expensesmanagement",
                             },
                         })
                     }
+                    activeOpacity={0.7}
                 >
-                    <Ionicons
-                        name="notifications-outline"
-                        size={s(23)}
-                        color="#0E2738"
+                    <MaterialCommunityIcons
+                        name="bell-circle-outline"
+                        size={s(35)}
+                        color="#FFFFFF"
                     />
                 </TouchableOpacity>
             </View>
@@ -667,22 +676,19 @@ export default function ExpenseManagement() {
 
                         <View
                             style={{
-                                height: s(
-                                    70
-                                ),
+                                height: s(70),
                             }}
                         />
                     </>
                 )}
             </ScrollView>
 
+            {/* NAVBAR */}
             <View
                 style={[
                     styles.bottomBar,
                     {
-                        height: s(70),
-                        paddingHorizontal:
-                            horizontalPadding,
+                        height: s(65),
                     },
                 ]}
             >
@@ -692,9 +698,9 @@ export default function ExpenseManagement() {
                     }
                     style={styles.navButton}
                 >
-                    <Ionicons
+                    <MaterialCommunityIcons
                         name="home-outline"
-                        size={s(27)}
+                        size={s(35)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -707,9 +713,9 @@ export default function ExpenseManagement() {
                     }
                     style={styles.navButton}
                 >
-                    <Ionicons
-                        name="bar-chart-outline"
-                        size={s(27)}
+                    <MaterialCommunityIcons
+                        name="chart-box-outline"
+                        size={s(35)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -722,9 +728,9 @@ export default function ExpenseManagement() {
                     }
                     style={styles.navButton}
                 >
-                    <Ionicons
-                        name="swap-horizontal-outline"
-                        size={s(27)}
+                    <MaterialCommunityIcons
+                        name="swap-horizontal"
+                        size={s(37)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -737,9 +743,9 @@ export default function ExpenseManagement() {
                     }
                     style={styles.navButton}
                 >
-                    <Ionicons
+                    <MaterialCommunityIcons
                         name="layers-outline"
-                        size={s(27)}
+                        size={s(35)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -750,9 +756,9 @@ export default function ExpenseManagement() {
                     }
                     style={styles.navButton}
                 >
-                    <Ionicons
-                        name="person-outline"
-                        size={s(27)}
+                    <MaterialCommunityIcons
+                        name="account-outline"
+                        size={s(35)}
                         color="#FFFFFF"
                     />
                 </TouchableOpacity>
@@ -1110,27 +1116,51 @@ const styles = StyleSheet.create({
     },
 
     header: {
+        height: 118,
+        backgroundColor: "#071426",
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#081023",
+        justifyContent: "space-between",
+        paddingHorizontal: 25,
     },
 
     backButton: {
-        alignItems: "flex-start",
+        position: "absolute",
+        left: 15,
+        top: 34,
+        width: 55,
+        height: 55,
+        alignItems: "center",
         justifyContent: "center",
+        zIndex: 999,
+        elevation: 10,
     },
 
     headertitle: {
         flex: 1,
         color: "#FFFFFF",
-        fontWeight: "400",
+        fontWeight: "700",
         textAlign: "center",
+        transform: [
+            {
+                translateX: 3,
+            },
+            {
+                translateY: 7,
+            },
+        ],
     },
 
     notification: {
-        backgroundColor: "#D8F2E2",
+        position: "absolute",
+        right: 15,
+        top: 34,
+        width: 55,
+        height: 55,
         alignItems: "center",
         justifyContent: "center",
+        zIndex: 999,
+        elevation: 10,
     },
 
     content: {
@@ -1224,13 +1254,22 @@ const styles = StyleSheet.create({
     },
 
     bottomBar: {
-        backgroundColor: "#24b6d1",
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        width: "100%",
+        height: 65,
+        backgroundColor: "#25B5D1",
+        borderTopLeftRadius: 78,
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
+        overflow: "hidden",
     },
 
     navButton: {
+        flex: 1,
+        height: "100%",
         alignItems: "center",
         justifyContent: "center",
     },

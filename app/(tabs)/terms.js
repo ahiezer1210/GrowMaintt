@@ -1,6 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -13,8 +13,8 @@ import {
 } from "react-native";
 
 const COLORS = {
-  blue: "#081023",
-  cyan: "#25B7D3",
+  blue: "#071426",
+  cyan: "#25B5D1",
   gray: "#ACADAD",
   white: "#FFFFFF",
 };
@@ -44,6 +44,8 @@ export default function TermsScreen() {
     ? 45
     : 60;
 
+  const s = (value) => Math.round(value * scale);
+
   const buttonHeight = Math.round(50 * scale);
   const buttonRadius = buttonHeight / 2;
 
@@ -55,26 +57,33 @@ export default function TermsScreen() {
       />
 
       <View style={styles.container}>
-       
-        <View style={[styles.header, { height: 160 * scale }]}>
+
+        {/* HEADER */}
+        <View
+          style={[
+            styles.header,
+            {
+              height: s(118),
+              paddingHorizontal: horizontalPadding,
+            },
+          ]}
+        >
           <TouchableOpacity
             style={[
               styles.backButton,
               {
-                left: horizontalPadding,
-                top: isSmallScreen ? 45 : 55,
-                width: 42 * scale,
-                height: 42 * scale,
-                
+                left: s(15),
+                top: s(34),
+                width: s(55),
+                height: s(55),
               },
-              
             ]}
             activeOpacity={0.7}
-            onPress={() => router.back()}
+            onPress={() => router.push("/profile")}
           >
-            <Ionicons
-              name="arrow-back"
-              size={Math.round(28 * scale)}
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={s(35)}
               color={COLORS.white}
             />
           </TouchableOpacity>
@@ -82,41 +91,74 @@ export default function TermsScreen() {
           <Text
             style={[
               styles.headerTitle,
-              { fontSize: Math.round(23 * scale) },
+              {
+                fontSize: s(25),
+                lineHeight: s(29),
+              },
             ]}
           >
-            Terms & Conditions
+            Terms &
+            {"\n"}
+            Conditions
           </Text>
 
           <TouchableOpacity
             style={[
-              styles.profileButton,
+              styles.headerBell,
               {
-                right: horizontalPadding,
-                top: isSmallScreen ? 42 : 50,
-                width: 48 * scale,
-                height: 48 * scale,
-                borderRadius: (48 * scale) / 2,
+                right: s(15),
+                top: s(34),
+                width: s(55),
+                height: s(55),
               },
             ]}
             activeOpacity={0.7}
+            onPress={() =>
+              router.push({
+                pathname: "/notifications",
+                params: {
+                  from: "/terms",
+                },
+              })
+            }
           >
-            <Ionicons
-              name="person-outline"
-              size={Math.round(22 * scale)}
-              color={COLORS.blue}
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={s(35)}
+              color={COLORS.white}
             />
           </TouchableOpacity>
         </View>
 
-        <View style={styles.cardContainer}>
+        {/* CARD PRINCIPAL */}
+        <View
+          style={[
+            styles.cardContainer,
+            {
+              borderTopLeftRadius: s(
+                isTablet
+                  ? 55
+                  : isSmallScreen
+                  ? 35
+                  : 45
+              ),
+              borderTopRightRadius: s(
+                isTablet
+                  ? 55
+                  : isSmallScreen
+                  ? 35
+                  : 45
+              ),
+            },
+          ]}
+        >
           <ScrollView
             style={styles.scroll}
             contentContainerStyle={[
               styles.scrollContent,
               {
                 paddingHorizontal: horizontalPadding,
-                paddingBottom: isSmallScreen ? 35 : 50,
+                paddingBottom: isSmallScreen ? 35 : 100,
               },
             ]}
             showsVerticalScrollIndicator={false}
@@ -268,6 +310,7 @@ export default function TermsScreen() {
               changes directly within the application.
             </Text>
 
+            {/* CHECKBOX */}
             <View style={styles.bottomInsideScroll}>
               <TouchableOpacity
                 style={styles.checkboxRow}
@@ -296,7 +339,9 @@ export default function TermsScreen() {
                 <Text
                   style={[
                     styles.checkboxText,
-                    { fontSize: Math.round(14 * scale) },
+                    {
+                      fontSize: Math.round(14 * scale),
+                    },
                   ]}
                 >
                   I accept all terms and conditions
@@ -317,7 +362,9 @@ export default function TermsScreen() {
                 <Text
                   style={[
                     styles.buttonText,
-                    { fontSize: Math.round(17 * scale) },
+                    {
+                      fontSize: Math.round(17 * scale),
+                    },
                   ]}
                 >
                   Accept
@@ -338,7 +385,9 @@ export default function TermsScreen() {
                 <Text
                   style={[
                     styles.buttonText,
-                    { fontSize: Math.round(17 * scale) },
+                    {
+                      fontSize: Math.round(17 * scale),
+                    },
                   ]}
                 >
                   Reject
@@ -346,6 +395,77 @@ export default function TermsScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
+        </View>
+
+        {/* NAVBAR */}
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height: s(65),
+              borderTopLeftRadius: s(78),
+            },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.navItem}
+            activeOpacity={0.8}
+            onPress={() => router.push("/home")}
+          >
+            <MaterialCommunityIcons
+              name="home-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            activeOpacity={0.8}
+            onPress={() => router.push("/historial")}
+          >
+            <MaterialCommunityIcons
+              name="chart-box-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            activeOpacity={0.8}
+            onPress={() => router.push("/expensesManagement")}
+          >
+            <MaterialCommunityIcons
+              name="swap-horizontal"
+              size={s(37)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            activeOpacity={0.8}
+            onPress={() => router.push("/currentgoal")}
+          >
+            <MaterialCommunityIcons
+              name="layers-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.navItem}
+            activeOpacity={0.8}
+            onPress={() => router.push("/profile")}
+          >
+            <MaterialCommunityIcons
+              name="account-outline"
+              size={s(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -363,38 +483,50 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.blue,
   },
 
+  /* HEADER */
   header: {
+    width: "100%",
     backgroundColor: COLORS.blue,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    justifyContent: "space-between",
   },
 
   backButton: {
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
 
   headerTitle: {
+    flex: 1,
     color: COLORS.white,
     fontWeight: "700",
     textAlign: "center",
+    transform: [
+      {
+        translateX: 3,
+      },
+      {
+        translateY: 7,
+      },
+    ],
   },
 
-  profileButton: {
+  headerBell: {
     position: "absolute",
-    backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
 
+  /* CARD */
   cardContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
-    borderTopLeftRadius: 36,
-    borderTopRightRadius: 36,
     overflow: "hidden",
   },
 
@@ -429,6 +561,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
+  /* CHECKBOX */
   bottomInsideScroll: {
     marginTop: 25,
     alignItems: "center",
@@ -473,5 +606,25 @@ const styles = StyleSheet.create({
   buttonText: {
     color: COLORS.white,
     fontWeight: "700",
+  },
+
+  /* NAVBAR */
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    overflow: "hidden",
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

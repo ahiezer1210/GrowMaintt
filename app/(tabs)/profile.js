@@ -38,7 +38,7 @@ export default function Profile() {
             title: "Terms and\n Conditions",
             icon: "help-circle-outline",
             color: "#27b6d1",
-            route: "/terminos"
+            route: "/terms"
         },
         {
             title: "Log\n Out",

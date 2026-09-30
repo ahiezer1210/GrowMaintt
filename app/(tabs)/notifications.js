@@ -234,12 +234,18 @@ export default function NotificationsScreen() {
   };
 
   const volver = () => {
-    if (from === "/privacypolicy") {
+    if (from === "/backup") {
+      router.push("/backup");
+    } else if (from === "/privacypolicy") {
       router.push("/privacypolicy");
-    } else if (from === "/registerinvestments") {
-      router.push("/registerinvestments");
+    } else if (from === "/terms") {
+      router.push("/terms");
+    } else if (from === "/expensesmanagement") {
+      router.push("/expensesmanagement");
     } else if (from === "/registerexpenses") {
       router.push("/registerexpenses");
+    } else if (from === "/registerinvestments") {
+      router.push("/registerinvestments");
     } else if (from === "/usermanual") {
       router.push("/usermanual");
     } else if (from === "/historial") {
@@ -250,24 +256,30 @@ export default function NotificationsScreen() {
       router.push("/Edit_profile");
     } else if (from === "/settings") {
       router.push("/settings");
-    } else if (from === "/backup") {
-      router.push("/backup");
     } else if (from === "/linkeddevices") {
       router.push("/linkeddevices");
     } else if (from === "/logoutalldevices") {
       router.push("/logoutalldevices");
-    } else if (from === "/signout") {
-      router.push("/signout");
+    } else if (from === "/logout") {
+      router.push("/logout");
     } else if (from === "/currentgoal") {
       router.push("/currentgoal");
     } else if (from === "/investments") {
       router.push("/investments");
     } else if (from === "/pointsExchange") {
       router.push("/pointsExchange");
-    } else if (from === "/ExpensesManagement") {
+    } else if (from === "/redemption_history") {
+      router.push("/redemption_history");
+    } else if (from === "/expensesManagement") {
       router.push("/expensesManagement");
+    } else if (from === "/expensecontrolperiod") {
+      router.push("/expensecontrolperiod");
     } else if (from === "/registergoals") {
       router.push("/registergoals");
+    } else if (from === "/deleteaccount") {
+      router.push("/deleteaccount");
+    } else if (from === "/security_alert") {
+      router.push("/security_alert");
     } else {
       router.push("/home");
     }
@@ -276,7 +288,7 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView
       style={styles.container}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       <StatusBar
         barStyle="light-content"

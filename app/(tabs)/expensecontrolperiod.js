@@ -1,7 +1,13 @@
-import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
+} from "react-native";
 import { usePeriods } from "../../context/PeriodContext.js";
 
 const periods = [
@@ -26,13 +32,11 @@ const periods = [
 ];
 
 export default function Expensescreen() {
-
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
   const isTablet = width >= 600;
-  const isLargeScreen = width >= 900;
 
   const scale = isSmallScreen
     ? 0.85
@@ -51,6 +55,7 @@ export default function Expensescreen() {
         : 60;
 
   const s = (value) => Math.round(value * scale);
+
   const { selectedPeriods, setSelectedPeriods } = usePeriods();
   const [tempSelected, setTempSelected] = useState(selectedPeriods);
 
@@ -81,48 +86,90 @@ export default function Expensescreen() {
     router.back();
   };
 
+  const navItems = [
+    {
+      icon: "home-outline",
+      route: "/home",
+    },
+    {
+      icon: "chart-box-outline",
+      route: "/historial",
+    },
+    {
+      icon: "swap-horizontal",
+      route: "/expensesManagement",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/profile",
+    },
+  ];
+
   return (
     <View style={styles.container}>
+      {/* HEADER */}
       <View
         style={[
           styles.header,
           {
-            paddingTop: s(65),
-            paddingHorizontal: horizontalPadding,
-            paddingBottom: s(35),
+            height: s(118),
+            paddingHorizontal: isSmallScreen
+              ? s(18)
+              : isTablet
+                ? s(45)
+                : s(25),
           },
         ]}
       >
         <TouchableOpacity
+          style={styles.headerButton}
           onPress={() => router.back()}
-          style={[
-            styles.backButton,
-            {
-              width: s(35),
-              height: s(35),
-              marginBottom: s(15),
-            },
-          ]}
+          activeOpacity={0.7}
         >
-          <Ionicons
-            name="arrow-back"
-            size={s(25)}
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={s(35)}
             color="#FFFFFF"
           />
         </TouchableOpacity>
 
         <Text
           style={[
-            styles.title,
+            styles.headerTitle,
             {
               fontSize: s(25),
+              lineHeight: s(29),
             },
           ]}
         >
           Expenses control period
         </Text>
+
+        <TouchableOpacity
+          style={styles.headerButton}
+          onPress={() =>
+            router.push({
+              pathname: "/notifications",
+              params: {
+                from: "/expensecontrolperiod",
+              },
+            })
+          }
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={s(35)}
+            color="#FFFFFF"
+          />
+        </TouchableOpacity>
       </View>
 
+      {/* MAIN */}
       <View
         style={[
           styles.card,
@@ -134,9 +181,17 @@ export default function Expensescreen() {
           },
         ]}
       >
-        <Text style={styles.instruction}>Choose when you want to</Text>
-        <Text style={styles.instruction}> review your expenses.</Text>
-        <Text style={styles.subtitle}> Select one or more options</Text>
+        <Text style={styles.instruction}>
+          Choose when you want to
+        </Text>
+
+        <Text style={styles.instruction}>
+          review your expenses.
+        </Text>
+
+        <Text style={styles.subtitle}>
+          Select one or more options
+        </Text>
 
         <View
           style={[
@@ -149,6 +204,7 @@ export default function Expensescreen() {
         >
           {periods.map((period) => {
             const selected = tempSelected.includes(period.id);
+
             return (
               <TouchableOpacity
                 key={period.id}
@@ -175,10 +231,14 @@ export default function Expensescreen() {
                     selected && styles.iconBoxSelected,
                   ]}
                 >
-                  <Ionicons
+                  <MaterialCommunityIcons
                     name={period.icon}
                     size={s(23)}
-                    color={selected ? "#FFFFFF" : "#25B7D3"}
+                    color={
+                      selected
+                        ? "#FFFFFF"
+                        : "#25B7D3"
+                    }
                   />
                 </View>
 
@@ -196,7 +256,8 @@ export default function Expensescreen() {
                       {
                         fontSize: s(16),
                       },
-                      selected && styles.optionTitleSelected,
+                      selected &&
+                        styles.optionTitleSelected,
                     ]}
                   >
                     {period.title}
@@ -209,7 +270,8 @@ export default function Expensescreen() {
                         fontSize: s(12),
                         marginTop: s(3),
                       },
-                      selected && styles.optionDescriptionSelected,
+                      selected &&
+                        styles.optionDescriptionSelected,
                     ]}
                   >
                     {period.description}
@@ -224,12 +286,13 @@ export default function Expensescreen() {
                       height: s(23),
                       borderRadius: s(7),
                     },
-                    selected && styles.checkboxSelected,
+                    selected &&
+                      styles.checkboxSelected,
                   ]}
                 >
                   {selected && (
-                    <Ionicons
-                      name="checkmark"
+                    <MaterialCommunityIcons
+                      name="check"
                       size={s(15)}
                       color="#FFFFFF"
                     />
@@ -240,33 +303,72 @@ export default function Expensescreen() {
           })}
 
           <TouchableOpacity
-            style={[styles.option, allSelected && styles.optionSelected]}
+            style={[
+              styles.option,
+              {
+                minHeight: s(70),
+                borderRadius: s(20),
+                paddingHorizontal: s(15),
+              },
+              allSelected &&
+                styles.optionSelected,
+            ]}
             onPress={selectAll}
             activeOpacity={0.8}
           >
             <View
-              style={[styles.iconBox, allSelected && styles.iconBoxSelected]}
+              style={[
+                styles.iconBox,
+                {
+                  width: s(45),
+                  height: s(45),
+                  borderRadius: s(15),
+                },
+                allSelected &&
+                  styles.iconBoxSelected,
+              ]}
             >
-              <Ionicons
+              <MaterialCommunityIcons
                 name="layers-outline"
-                size={23}
-                color={allSelected ? "#FFFFFF" : "#25B7D3"}
+                size={s(23)}
+                color={
+                  allSelected
+                    ? "#FFFFFF"
+                    : "#25B7D3"
+                }
               />
             </View>
 
-            <View style={styles.optionInfo}>
+            <View
+              style={[
+                styles.optionInfo,
+                {
+                  marginLeft: s(14),
+                },
+              ]}
+            >
               <Text
                 style={[
                   styles.optionTitle,
-                  allSelected && styles.optionTitleSelected,
+                  {
+                    fontSize: s(16),
+                  },
+                  allSelected &&
+                    styles.optionTitleSelected,
                 ]}
               >
                 All three
               </Text>
+
               <Text
                 style={[
                   styles.optionDescription,
-                  allSelected && styles.optionDescriptionSelected,
+                  {
+                    fontSize: s(12),
+                    marginTop: s(3),
+                  },
+                  allSelected &&
+                    styles.optionDescriptionSelected,
                 ]}
               >
                 Daily, weekly and monthly
@@ -274,10 +376,23 @@ export default function Expensescreen() {
             </View>
 
             <View
-              style={[styles.checkbox, allSelected && styles.checkboxSelected]}
+              style={[
+                styles.checkbox,
+                {
+                  width: s(23),
+                  height: s(23),
+                  borderRadius: s(7),
+                },
+                allSelected &&
+                  styles.checkboxSelected,
+              ]}
             >
               {allSelected && (
-                <Ionicons name="checkmark" size={15} color="#FFFFFF" />
+                <MaterialCommunityIcons
+                  name="check"
+                  size={s(15)}
+                  color="#FFFFFF"
+                />
               )}
             </View>
           </TouchableOpacity>
@@ -308,6 +423,36 @@ export default function Expensescreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* BOTTOM NAVBAR */}
+      <View
+        style={[
+          styles.bottomBar,
+          {
+            height: s(65),
+            borderTopLeftRadius: s(78),
+          },
+        ]}
+      >
+        {navItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            style={styles.navItem}
+            onPress={() => router.push(item.route)}
+            activeOpacity={0.8}
+          >
+            <MaterialCommunityIcons
+              name={item.icon}
+              size={s(
+                item.icon === "swap-horizontal"
+                  ? 37
+                  : 35
+              )}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 }
@@ -315,40 +460,60 @@ export default function Expensescreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
+
+  /* HEADER */
   header: {
-    paddingTop: 65,
-    paddingHorizontal: 30,
-    paddingBottom: 35,
+    backgroundColor: "#071426",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  backButton: {
+
+  headerButton: {
+    width: 35,
+    height: 55,
+    alignItems: "center",
     justifyContent: "center",
   },
-  title: {
+
+  headerTitle: {
+    flex: 1,
     color: "#FFFFFF",
     fontWeight: "700",
+    textAlign: "center",
+    transform: [{ translateY: 7 }],
   },
+
+  /* MAIN */
   card: {
     flex: 1,
     backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 55,
+    borderTopRightRadius: 55,
+    overflow: "hidden",
   },
+
   instruction: {
     color: "#081023",
     fontSize: 15,
     fontWeight: "600",
     textAlign: "center",
   },
+
   subtitle: {
     color: "#6B7280",
     fontSize: 13,
     textAlign: "center",
     marginTop: 8,
   },
+
   options: {
     marginTop: 30,
     gap: 12,
   },
+
   option: {
     minHeight: 70,
     borderRadius: 20,
@@ -359,10 +524,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 15,
   },
+
   optionSelected: {
     backgroundColor: "#25B7D3",
     borderColor: "#25B7D3",
   },
+
   iconBox: {
     width: 45,
     height: 45,
@@ -371,29 +538,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   iconBoxSelected: {
     backgroundColor: "rgba(255,255,255,0.2)",
   },
+
   optionInfo: {
     flex: 1,
     marginLeft: 14,
   },
+
   optionTitle: {
     color: "#081023",
     fontSize: 16,
     fontWeight: "700",
   },
+
   optionTitleSelected: {
     color: "#FFFFFF",
   },
+
   optionDescription: {
     color: "#6B7280",
     fontSize: 12,
     marginTop: 3,
   },
+
   optionDescriptionSelected: {
     color: "#FFFFFF",
   },
+
   checkbox: {
     width: 23,
     height: 23,
@@ -403,10 +577,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
   checkboxSelected: {
     backgroundColor: "#081023",
     borderColor: "#081023",
   },
+
   saveButton: {
     width: 150,
     height: 40,
@@ -417,9 +593,30 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 30,
   },
+
   saveText: {
     color: "#FFFFFF",
     fontSize: 15,
     fontWeight: "700",
+  },
+
+  /* BOTTOM NAVBAR */
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#25B5D1",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingHorizontal: 5,
+  },
+
+  navItem: {
+    flex: 1,
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

@@ -1,9 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useState } from "react";
 import {
     Alert,
     ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
@@ -34,10 +35,10 @@ export default function Redemptionhistory() {
                 ? 30
                 : 45;
 
-
     const s = (value) => Math.round(value * scale);
 
     const [filter, setfilter] = useState("Todos");
+
     const canjes = [
         {
             id: "1",
@@ -74,7 +75,7 @@ export default function Redemptionhistory() {
             state: "Canceled",
             icon: "pricetag-outline",
         },
-    ]
+    ];
 
     const canjesFiltrados =
         filter === "Todos"
@@ -95,37 +96,107 @@ export default function Redemptionhistory() {
         );
     };
 
+    const navItems = [
+        {
+            icon: "home-outline",
+            route: "/home",
+        },
+        {
+            icon: "chart-box-outline",
+            route: "/historial",
+        },
+        {
+            icon: "swap-horizontal",
+            route: "/expensesManagement",
+        },
+        {
+            icon: "layers-outline",
+            route: "/currentgoal",
+        },
+        {
+            icon: "account-outline",
+            route: "/profile",
+        },
+    ];
+
     return (
         <View style={styles.container}>
+            <StatusBar
+                barStyle="light-content"
+                backgroundColor="#071426"
+            />
+
+            {/* HEADER */}
             <View
                 style={[
                     styles.header,
                     {
-                        paddingTop: s(55),
-                        paddingBottom: s(60),
-                        paddingHorizontal: horizontalPadding,
+                        height: s(118),
+                        paddingHorizontal: isSmallScreen
+                            ? s(18)
+                            : isTablet
+                                ? s(45)
+                                : s(25),
                     },
                 ]}
             >
+                {/* BACK */}
+                <TouchableOpacity
+                    style={styles.headerButton}
+                    onPress={() => router.push("/pointsExchange")}
+                >
+                    <MaterialCommunityIcons
+                        name="arrow-left"
+                        size={s(35)}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
+
+                {/* TITLE */}
                 <Text
                     style={[
-                        styles.title,
+                        styles.headerTitle,
                         {
-                            fontSize: s(28),
+                            fontSize: s(25),
+                            lineHeight: s(29),
+                            transform: [
+                                {
+                                    translateY: s(7),
+                                },
+                            ],
                         },
                     ]}
                 >
                     Redemption History
                 </Text>
+
+                {/* NOTIFICATIONS */}
+                <TouchableOpacity
+                    style={styles.headerButton}
+                    onPress={() =>
+                        router.push({
+                            pathname: "/notifications",
+                            params: {
+                                from: "/redemption_history",
+                            },
+                        })
+                    }
+                >
+                    <MaterialCommunityIcons
+                        name="bell-circle-outline"
+                        size={s(35)}
+                        color="#FFFFFF"
+                    />
+                </TouchableOpacity>
             </View>
 
+            {/* MAIN */}
             <View
                 style={[
                     styles.card,
                     {
-                        borderTopLeftRadius: s(35),
-                        borderTopRightRadius: s(35),
-                        paddingTop: s(25),
+                        borderTopLeftRadius: s(45),
+                        borderTopRightRadius: s(45),
                     },
                 ]}
             >
@@ -136,12 +207,11 @@ export default function Redemptionhistory() {
                         {
                             paddingHorizontal: horizontalPadding,
                             paddingTop: s(30),
-                            paddingBottom: s(30),
+                            paddingBottom: s(100),
                         },
                     ]}
                 >
-
-
+                    {/* SUMMARY */}
                     <View
                         style={[
                             styles.resumen,
@@ -154,7 +224,6 @@ export default function Redemptionhistory() {
                             },
                         ]}
                     >
-
                         <Text
                             style={[
                                 styles.resumenTitleGeneral,
@@ -251,7 +320,6 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-
                                     $10.00
                                 </Text>
                             </View>
@@ -290,6 +358,7 @@ export default function Redemptionhistory() {
                         </View>
                     </View>
 
+                    {/* FILTERS */}
                     <View
                         style={[
                             styles.filters,
@@ -333,6 +402,7 @@ export default function Redemptionhistory() {
                         />
                     </View>
 
+                    {/* LIST */}
                     <View
                         style={[
                             styles.list,
@@ -343,7 +413,6 @@ export default function Redemptionhistory() {
                     >
                         {canjesFiltrados.length === 0 ? (
                             <View style={styles.sinCanjes}>
-
                                 <Ionicons
                                     name="document-text-outline"
                                     size={45}
@@ -353,7 +422,6 @@ export default function Redemptionhistory() {
                                 <Text style={styles.sinCanjesText}>
                                     No hay canjes en esta categoria
                                 </Text>
-
                             </View>
                         ) : (
                             canjesFiltrados.map((canje) => (
@@ -371,7 +439,6 @@ export default function Redemptionhistory() {
                                     onPress={() => showDetail(canje)}
                                     activeOpacity={0.7}
                                 >
-
                                     <View
                                         style={[
                                             styles.canjeIcon,
@@ -390,7 +457,6 @@ export default function Redemptionhistory() {
                                     </View>
 
                                     <View style={styles.canjeInfo}>
-
                                         <View
                                             style={[
                                                 styles.tipoContainer,
@@ -424,7 +490,6 @@ export default function Redemptionhistory() {
                                         >
                                             redeemed on {canje.date}.
                                         </Text>
-
                                     </View>
 
                                     <View
@@ -453,74 +518,44 @@ export default function Redemptionhistory() {
                                             color="#081823"
                                         />
                                     </View>
-
                                 </TouchableOpacity>
-
-
                             ))
                         )}
-
                     </View>
-
                 </ScrollView>
-
             </View>
+
+            {/* BOTTOM NAVBAR */}
             <View
                 style={[
                     styles.bottomBar,
                     {
-                        height: s(70),
+                        height: s(65),
+                        borderTopLeftRadius: s(78),
                     },
                 ]}
             >
-                <TouchableOpacity onPress={() => router.push("/home")}>
-                    <Ionicons
-                        name="home-outline"
-                        size={s(27)}
-                        color={"#FFFFFF"}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/historial")}>
-                    <Ionicons
-                        name="bar-chart-outline"
-                        size={s(27)}
-                        color={"#FFFFFF"}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/expensesManagement")}>
-                    <Ionicons
-                        name="swap-horizontal-outline"
-                        size={s(27)}
-                        color={"#FFFFFF"}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/currentgoal")}>
-                    <Ionicons
-                        name="layers-outline"
-                        size={s(27)}
-                        color={"#FFFFFF"}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={() => router.push("/profile")}>
-                    <Ionicons
-                        name="person-outline"
-                        size={s(27)}
-                        color={"#FFFFFF"}
-                    />
-                </TouchableOpacity>
-
+                {navItems.map((item, index) => (
+                    <TouchableOpacity
+                        key={index}
+                        style={styles.navItem}
+                        onPress={() => router.push(item.route)}
+                    >
+                        <MaterialCommunityIcons
+                            name={item.icon}
+                            size={s(
+                                item.icon === "swap-horizontal"
+                                    ? 37
+                                    : 35
+                            )}
+                            color="#FFFFFF"
+                        />
+                    </TouchableOpacity>
+                ))}
             </View>
-
         </View>
-
-
     );
 }
-
 
 function Filter({
     text,
@@ -532,7 +567,6 @@ function Filter({
     const s = (value) => Math.round(value * scale);
 
     return (
-
         <TouchableOpacity
             style={[
                 styles.filter,
@@ -541,7 +575,6 @@ function Filter({
             onPress={onPress}
             activeOpacity={0.7}
         >
-
             <Ionicons
                 name={icon}
                 size={s(14)}
@@ -551,37 +584,43 @@ function Filter({
             <Text style={styles.filterText}>
                 {text}
             </Text>
-
         </TouchableOpacity>
     );
 }
 
-
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#081023",
+        backgroundColor: "#071426",
     },
 
+    /* HEADER */
     header: {
+        backgroundColor: "#071426",
+        flexDirection: "row",
         alignItems: "center",
-        paddingTop: 55,
-        paddingBottom: 60,
+        justifyContent: "space-between",
     },
 
-    title: {
+    headerButton: {
+        width: 35,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    headerTitle: {
+        flex: 1,
         color: "#FFFFFF",
-        fontSize: 28,
         fontWeight: "700",
+        textAlign: "center",
     },
 
     card: {
         flex: 1,
         backgroundColor: "#FFFFFF",
-        borderTopLeftRadius: 35,
-        borderTopRightRadius: 35,
-        paddingTop: 25,
+        borderTopLeftRadius: 45,
+        borderTopRightRadius: 45,
+        overflow: "hidden",
     },
 
     scrollContent: {
@@ -620,7 +659,6 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "center",
-
     },
 
     giftContainer: {
@@ -628,7 +666,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "flex-start",
         marginTop: -10,
-
     },
 
     resumenTitle: {
@@ -671,7 +708,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#BCE8EF",
         borderWidth: 1,
         borderColor: "#081023",
-
     },
 
     filterText: {
@@ -727,6 +763,7 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: "#081023",
     },
+
     canjeRight: {
         alignItems: "center",
         justifyContent: "center",
@@ -739,7 +776,7 @@ const styles = StyleSheet.create({
         marginBottom: 2,
     },
 
-    without: {
+    sinCanjes: {
         alignItems: "center",
         justifyContent: "center",
         paddingVertical: 50,
@@ -751,11 +788,23 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 
+    /* NAVBAR */
     bottomBar: {
-        height: 70,
-        backgroundColor: "#24b6d1",
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: "#25B5D1",
         flexDirection: "row",
-        justifyContent: "space-around",
         alignItems: "center",
+        justifyContent: "space-around",
+        paddingHorizontal: 5,
+    },
+
+    navItem: {
+        flex: 1,
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
     },
 });

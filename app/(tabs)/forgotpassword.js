@@ -29,18 +29,18 @@ export default function RecuperarContrasena({ navigation }) {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (value) => Math.round(value * scale);
 
@@ -52,41 +52,57 @@ export default function RecuperarContrasena({ navigation }) {
     const email = correo.trim();
 
     if (!email) {
-      Alert.alert("Empty field", "Please send your email again.");
+      Alert.alert(
+        "Empty field",
+        "Please enter your email again."
+      );
       return;
     }
 
     const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!formatoCorreo.test(email)) {
-      Alert.alert("Incorrect email", "Send a valid email.");
+      Alert.alert(
+        "Incorrect email",
+        "Please enter a valid email."
+      );
       return;
     }
 
     try {
       setCargando(true);
+
       await sendPasswordResetEmail(auth, email);
+
       setEnviado(true);
     } catch (error) {
       if (error.code === "auth/user-not-found") {
         Alert.alert(
           "Email not found",
-          "We don't find a count with that email."
+          "We couldn't find an account with that email."
         );
       } else if (error.code === "auth/invalid-email") {
-        Alert.alert("Too many attempts", "The email entered is incorrect");
+        Alert.alert(
+          "Incorrect email",
+          "The email entered is incorrect."
+        );
       } else if (error.code === "auth/too-many-requests") {
         Alert.alert(
           "Too many attempts",
-          "Wait a few minutes before try again."
+          "Please wait a few minutes before trying again."
         );
-      } else if (error.code === "auth/network-request-failed") {
+      } else if (
+        error.code === "auth/network-request-failed"
+      ) {
         Alert.alert(
-          "Without connection",
+          "No connection",
           "Could not connect to Firebase. Check your Internet connection."
         );
       } else {
-        Alert.alert("Error", "The recovery email couldn't be sent. Try again.");
+        Alert.alert(
+          "Error",
+          "The recovery email couldn't be sent. Please try again."
+        );
       }
     } finally {
       setCargando(false);
@@ -99,20 +115,30 @@ export default function RecuperarContrasena({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor="#081023" />
+    <SafeAreaView
+      style={styles.safe}
+      edges={["left", "right"]}
+    >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#071426"
+      />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
       >
-        {/* Header Azul */}
+        {/* HEADER */}
         <View
           style={[
             styles.header,
             {
-              paddingTop: s(55),
-              paddingBottom: s(30),
+              height: s(118),
+              paddingHorizontal: horizontalPadding,
             },
           ]}
         >
@@ -120,18 +146,18 @@ export default function RecuperarContrasena({ navigation }) {
             style={[
               styles.botonRegresar,
               {
-                left: horizontalPadding,
-                top: s(55),
-                width: s(45),
-                height: s(45),
-                borderRadius: s(23),
+                left: s(15),
+                top: s(34),
+                width: s(55),
+                height: s(55),
               },
             ]}
             onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={s(26)}
+              size={s(35)}
               color="#FFFFFF"
             />
           </TouchableOpacity>
@@ -140,21 +166,24 @@ export default function RecuperarContrasena({ navigation }) {
             style={[
               styles.titulo,
               {
-                fontSize: s(34),
-                lineHeight: s(40),
+                fontSize: s(25),
+                lineHeight: s(29),
               },
             ]}
           >
-            Password{"\n"}Recovery
+            Password
+            {"\n"}
+            Recovery
           </Text>
         </View>
 
+        {/* CONTENT */}
         <View
           style={[
             styles.whiteContainer,
             {
-              borderTopLeftRadius: s(35),
-              borderTopRightRadius: s(35),
+              borderTopLeftRadius: s(45),
+              borderTopRightRadius: s(45),
             },
           ]}
         >
@@ -263,7 +292,8 @@ export default function RecuperarContrasena({ navigation }) {
                       borderRadius: s(30),
                       marginTop: s(10),
                     },
-                    cargando && styles.botonDeshabilitado,
+                    cargando &&
+                      styles.botonDeshabilitado,
                   ]}
                   onPress={recuperarContrasena}
                   disabled={cargando}
@@ -342,7 +372,7 @@ export default function RecuperarContrasena({ navigation }) {
                     },
                   ]}
                 >
-                  ¡Sent email!
+                  Email sent!
                 </Text>
 
                 <Text
@@ -387,14 +417,18 @@ export default function RecuperarContrasena({ navigation }) {
                   style={styles.botonSiguiente}
                   onPress={() => navigation.goBack()}
                 >
-                  <Text style={styles.textoSiguiente}>Back to the login</Text>
+                  <Text style={styles.textoSiguiente}>
+                    Back to login
+                  </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.botonIntentar}
                   onPress={volverAIntentar}
                 >
-                  <Text style={styles.textoIntentar}>Use another email.</Text>
+                  <Text style={styles.textoIntentar}>
+                    Use another email.
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -408,41 +442,51 @@ export default function RecuperarContrasena({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#081023",
+    backgroundColor: "#071426",
   },
 
   header: {
+    height: 118,
+    backgroundColor: "#071426",
+    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 55,
-    paddingBottom: 30,
-    backgroundColor: "#081023",
+    justifyContent: "space-between",
+    paddingHorizontal: 25,
   },
 
   botonRegresar: {
     position: "absolute",
-    left: 25,
-    top: 55,
-    width: 45,
-    height: 45,
-    borderRadius: 23,
-    justifyContent: "center",
+    left: 15,
+    top: 34,
+    width: 55,
+    height: 55,
     alignItems: "center",
-    zIndex: 10,
+    justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
 
   titulo: {
+    flex: 1,
     color: "#FFFFFF",
-    fontSize: 34,
+    fontSize: 24,
     fontWeight: "700",
     textAlign: "center",
-    lineHeight: 40,
+    transform: [
+      {
+        translateX: 5,
+      },
+      {
+        translateY: 5,
+      },
+    ],
   },
 
   whiteContainer: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 35,
-    borderTopRightRadius: 35,
+    borderTopLeftRadius: 45,
+    borderTopRightRadius: 45,
     overflow: "hidden",
   },
 

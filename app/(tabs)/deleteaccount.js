@@ -15,7 +15,6 @@ import {
 } from "react-native";
 
 import {
-  Ionicons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 
@@ -36,7 +35,7 @@ import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
   cyan: "#25B7D3",
-  dark: "#081023",
+  dark: "#071426",
   white: "#FFFFFF",
   gray: "#ACADAD",
   textDark: "#0A3438",
@@ -44,32 +43,60 @@ const COLORS = {
   cardBg: "#EEF5FF",
 };
 
-const NAV = [
-  ["home-outline", "ion"],
-  ["bar-chart-outline", "ion"],
-  ["swap-horizontal", "material"],
-  ["layers-outline", "material"],
-  ["person-outline", "ion"],
+const navItems = [
+  {
+    icon: "home-outline",
+    route: "/home",
+  },
+  {
+    icon: "chart-box-outline",
+    route: "/historial",
+  },
+  {
+    icon: "swap-horizontal",
+    route: "/expensesManagement",
+  },
+  {
+    icon: "layers-outline",
+    route: "/currentgoal",
+  },
+  {
+    icon: "account-outline",
+    route: "/profile",
+  },
 ];
 
 export default function DeleteAccount({ navigation }) {
   const [password, setPassword] = useState("");
+
   const { width, height } = useWindowDimensions();
 
-  const BASE_WIDTH = 390;
-  const BASE_HEIGHT = 844;
-  const scale = Math.min(width / BASE_WIDTH, height / BASE_HEIGHT);
-  const responsiveScale = Math.max(0.85, Math.min(scale, 1.2));
+  const small = width < 350;
+  const tablet = width >= 600;
 
-  const s = (value) => Math.round(value * responsiveScale);
-  const horizontalPadding = Math.max(20, Math.min(width * 0.08, 40));
-  const small = width < 360;
+  const scale = (value, tabletValue) =>
+    tablet
+      ? tabletValue ?? value * 1.15
+      : small
+      ? value * 0.85
+      : value;
+
+  const s = (value) => Math.round(scale(value));
+
+  const horizontalPadding = small
+    ? 18
+    : tablet
+    ? 45
+    : 25;
 
   const handleDelete = async () => {
     const cleanPassword = password.trim();
 
     if (!cleanPassword) {
-      Alert.alert("Password Required", "Please enter your password to continue.");
+      Alert.alert(
+        "Password Required",
+        "Please enter your password to continue."
+      );
       return;
     }
 
@@ -77,7 +104,10 @@ export default function DeleteAccount({ navigation }) {
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone.",
       [
-        { text: "Cancel", style: "cancel" },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
         {
           text: "Delete",
           style: "destructive",
@@ -86,19 +116,36 @@ export default function DeleteAccount({ navigation }) {
               const user = auth.currentUser;
 
               if (!user) {
-                Alert.alert("Error", "No authenticated user found.");
+                Alert.alert(
+                  "Error",
+                  "No authenticated user found."
+                );
                 return;
               }
 
               if (!user.email) {
-                Alert.alert("Error", "The authenticated user does not have an email address.");
+                Alert.alert(
+                  "Error",
+                  "The authenticated user does not have an email address."
+                );
                 return;
               }
 
-              const credential = EmailAuthProvider.credential(user.email, cleanPassword);
+              const credential =
+                EmailAuthProvider.credential(
+                  user.email,
+                  cleanPassword
+                );
 
-              await reauthenticateWithCredential(user, credential);
-              await deleteDoc(doc(db, "Users", user.uid));
+              await reauthenticateWithCredential(
+                user,
+                credential
+              );
+
+              await deleteDoc(
+                doc(db, "Users", user.uid)
+              );
+
               await deleteUser(user);
 
               Alert.alert(
@@ -108,12 +155,7 @@ export default function DeleteAccount({ navigation }) {
                   {
                     text: "OK",
                     onPress: () => {
-                      if (navigation?.reset) {
-                        navigation.reset({
-                          index: 0,
-                          routes: [{ name: "Login" }],
-                        });
-                      }
+                      router.replace("/login");
                     },
                   },
                 ]
@@ -121,28 +163,67 @@ export default function DeleteAccount({ navigation }) {
 
               setPassword("");
             } catch (error) {
-              console.log("Delete account error:", error);
+              console.log(
+                "Delete account error:",
+                error
+              );
 
               if (
-                error.code === "auth/wrong-password" ||
-                error.code === "auth/invalid-credential"
+                error.code ===
+                  "auth/wrong-password" ||
+                error.code ===
+                  "auth/invalid-credential"
               ) {
-                Alert.alert("Incorrect Password", "The password you entered is incorrect.");
-              } else if (error.code === "auth/requires-recent-login") {
-                Alert.alert("Security", "Please log in again before deleting your account.");
-              } else if (error.code === "auth/invalid-email") {
-                Alert.alert("Error", "The email associated with this account is invalid.");
-              } else if (error.code === "auth/user-disabled") {
-                Alert.alert("Error", "This account has been disabled.");
-              } else if (error.code === "auth/network-request-failed") {
-                Alert.alert("Connection Error", "Please check your internet connection and try again.");
+                Alert.alert(
+                  "Incorrect Password",
+                  "The password you entered is incorrect."
+                );
+              } else if (
+                error.code ===
+                "auth/requires-recent-login"
+              ) {
+                Alert.alert(
+                  "Security",
+                  "Please log in again before deleting your account."
+                );
+              } else if (
+                error.code ===
+                "auth/invalid-email"
+              ) {
+                Alert.alert(
+                  "Error",
+                  "The email associated with this account is invalid."
+                );
+              } else if (
+                error.code ===
+                "auth/user-disabled"
+              ) {
+                Alert.alert(
+                  "Error",
+                  "This account has been disabled."
+                );
+              } else if (
+                error.code ===
+                "auth/network-request-failed"
+              ) {
+                Alert.alert(
+                  "Connection Error",
+                  "Please check your internet connection and try again."
+                );
               } else {
-                Alert.alert("Error", error.message || "An unexpected error occurred.");
+                Alert.alert(
+                  "Error",
+                  error.message ||
+                    "An unexpected error occurred."
+                );
               }
             }
           },
         },
-      ]
+      ],
+      {
+        cancelable: true,
+      }
     );
   };
 
@@ -153,53 +234,176 @@ export default function DeleteAccount({ navigation }) {
   const handleNotifications = () => {
     router.push({
       pathname: "/notifications",
-      params: { from: "/deleteaccount" },
+      params: {
+        from: "/deleteaccount",
+      },
     });
   };
 
   return (
     <SafeAreaView style={styles.safe}>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.dark} />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={COLORS.dark}
+      />
 
       <View style={styles.app}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={
+            Platform.OS === "ios"
+              ? "padding"
+              : "height"
+          }
         >
-          <View style={[styles.topContent, { paddingHorizontal: horizontalPadding }]}>
-            <View style={[styles.header, { minHeight: s(55), marginTop: s(8), marginBottom: s(12) }]}>
-              <TouchableOpacity
-                style={[styles.iconButton, { width: s(40), height: s(40) }]}
-                activeOpacity={0.7}
-                onPress={handleCancel}
-              >
-                <Ionicons name="arrow-back" size={s(24)} color={COLORS.white} />
-              </TouchableOpacity>
+          {/* HEADER */}
+          <View
+            style={[
+              styles.header,
+              {
+                height:
+                  118 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1),
+                paddingHorizontal:
+                  horizontalPadding,
+              },
+            ]}
+          >
+            <TouchableOpacity
+              style={[
+                styles.backButton,
+                {
+                  left: s(15),
+                  top: s(34),
+                  width: s(55),
+                  height: s(55),
+                  transform: [
+                    {
+                      translateY:
+                        4 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
+                },
+              ]}
+              activeOpacity={0.7}
+              onPress={handleCancel}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={
+                  35 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1)
+                }
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
 
-              <Text
-                style={[styles.headerTitle, { fontSize: s(22) }]}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-              >
-                Delete Account
-              </Text>
+            <Text
+              style={[
+                styles.headerTitle,
+                {
+                  fontSize:
+                    25 *
+                    (small
+                      ? 0.85
+                      : tablet
+                      ? 1.15
+                      : 1),
+                  transform: [
+                    {
+                      translateX:
+                        3 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                    {
+                      translateY:
+                        3 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
+                },
+              ]}
+            >
+              Delete Account
+            </Text>
 
-              <TouchableOpacity
-                style={[styles.headerNotification, { width: s(38), height: s(38), borderRadius: s(19) }]}
-                activeOpacity={0.7}
-                onPress={handleNotifications}
-              >
-                <Ionicons name="notifications-outline" size={s(20)} color={COLORS.dark} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[
+                styles.headerBell,
+                {
+                  right: s(15),
+                  top: s(34),
+                  width: s(55),
+                  height: s(55),
+                  transform: [
+                    {
+                      translateY:
+                        4 *
+                        (small
+                          ? 0.85
+                          : tablet
+                          ? 1.15
+                          : 1),
+                    },
+                  ],
+                },
+              ]}
+              activeOpacity={0.7}
+              onPress={handleNotifications}
+            >
+              <MaterialCommunityIcons
+                name="bell-circle-outline"
+                size={
+                  35 *
+                  (small
+                    ? 0.85
+                    : tablet
+                    ? 1.15
+                    : 1)
+                }
+                color={COLORS.white}
+              />
+            </TouchableOpacity>
           </View>
 
+          {/* MAIN */}
           <View
             style={[
               styles.whiteContainer,
               {
-                borderTopLeftRadius: s(40),
-                borderTopRightRadius: s(40),
+                borderTopLeftRadius:
+                  tablet
+                    ? s(55)
+                    : small
+                    ? s(35)
+                    : s(45),
+                borderTopRightRadius:
+                  tablet
+                    ? s(55)
+                    : small
+                    ? s(35)
+                    : s(45),
               },
             ]}
           >
@@ -208,7 +412,8 @@ export default function DeleteAccount({ navigation }) {
               contentContainerStyle={[
                 styles.scrollContent,
                 {
-                  paddingHorizontal: horizontalPadding,
+                  paddingHorizontal:
+                    horizontalPadding,
                   paddingTop: s(24),
                   paddingBottom: s(90),
                 },
@@ -218,7 +423,15 @@ export default function DeleteAccount({ navigation }) {
               keyboardDismissMode="on-drag"
             >
               <View style={styles.content}>
-                <View style={[styles.iconContainer, { marginBottom: s(20) }]}>
+                {/* WARNING ICON */}
+                <View
+                  style={[
+                    styles.iconContainer,
+                    {
+                      marginBottom: s(20),
+                    },
+                  ]}
+                >
                   <View
                     style={[
                       styles.warningCircle,
@@ -237,6 +450,7 @@ export default function DeleteAccount({ navigation }) {
                   </View>
                 </View>
 
+                {/* DESCRIPTION */}
                 <Text
                   style={[
                     styles.description,
@@ -247,11 +461,22 @@ export default function DeleteAccount({ navigation }) {
                     },
                   ]}
                 >
-                  This action will delete all of your data and this action cannot be undone.
+                  This action will delete all of your
+                  data and this action cannot be
+                  undone.
                 </Text>
 
+                {/* FORM */}
                 <View style={styles.formGroup}>
-                  <Text style={[styles.label, { fontSize: s(16), marginBottom: s(8) }]}>
+                  <Text
+                    style={[
+                      styles.label,
+                      {
+                        fontSize: s(16),
+                        marginBottom: s(8),
+                      },
+                    ]}
+                  >
                     Enter your password
                   </Text>
 
@@ -290,7 +515,14 @@ export default function DeleteAccount({ navigation }) {
                     activeOpacity={0.8}
                     onPress={handleDelete}
                   >
-                    <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        {
+                          fontSize: s(15),
+                        },
+                      ]}
+                    >
                       Delete
                     </Text>
                   </TouchableOpacity>
@@ -306,7 +538,14 @@ export default function DeleteAccount({ navigation }) {
                     activeOpacity={0.8}
                     onPress={handleCancel}
                   >
-                    <Text style={[styles.buttonText, { fontSize: s(15) }]}>
+                    <Text
+                      style={[
+                        styles.buttonText,
+                        {
+                          fontSize: s(15),
+                        },
+                      ]}
+                    >
                       Cancel
                     </Text>
                   </TouchableOpacity>
@@ -316,163 +555,194 @@ export default function DeleteAccount({ navigation }) {
           </View>
         </KeyboardAvoidingView>
 
-        <BottomNav small={small} scale={responsiveScale} />
+        {/* BOTTOM NAVBAR */}
+        <View
+          style={[
+            styles.bottomBar,
+            {
+              height:
+                65 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+              borderTopLeftRadius:
+                78 *
+                (small
+                  ? 0.85
+                  : tablet
+                  ? 1.15
+                  : 1),
+            },
+          ]}
+        >
+          {navItems.map((item) => (
+            <TouchableOpacity
+              key={item.route}
+              style={styles.navItem}
+              activeOpacity={0.8}
+              onPress={() =>
+                router.push(item.route)
+              }
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={
+                  item.icon ===
+                  "swap-horizontal"
+                    ? 37 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                    : 35 *
+                      (small
+                        ? 0.85
+                        : tablet
+                        ? 1.15
+                        : 1)
+                }
+                color="#FFFFFF"
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
     </SafeAreaView>
-  );
-}
-
-function BottomNav({ small, scale }) {
-  const s = (value) => Math.round(value * scale);
-
-  const routes = [
-    "/home",
-    "/historial",
-    "/expensesManagement",
-    "/currentgoal",
-    "/profile",
-  ];
-
-  return (
-    <View
-      style={[
-        styles.bottom,
-        {
-          height: s(small ? 68 : 78),
-          borderTopLeftRadius: s(small ? 35 : 45),
-        },
-      ]}
-    >
-      {NAV.map(([icon, type], index) => (
-        <TouchableOpacity
-          key={index}
-          style={styles.navItem}
-          activeOpacity={0.7}
-          onPress={() => router.push(routes[index])}
-        >
-          {type === "ion" ? (
-            <Ionicons
-              name={icon}
-              size={s(small ? 22 : 26)}
-              color={COLORS.white}
-            />
-          ) : (
-            <MaterialCommunityIcons
-              name={icon}
-              size={s(small ? 24 : 28)}
-              color={COLORS.white}
-            />
-          )}
-        </TouchableOpacity>
-      ))}
-    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.dark,
+    backgroundColor: "#071426",
   },
+
   app: {
     flex: 1,
-    backgroundColor: COLORS.dark,
+    backgroundColor: "#071426",
   },
-  topContent: {
-    backgroundColor: COLORS.dark,
-  },
+
   header: {
+    width: "100%",
+    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  iconButton: {
+
+  backButton: {
+    position: "absolute",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
+
   headerTitle: {
-    color: COLORS.white,
-    fontWeight: "600",
+    flex: 1,
+    color: "#FFFFFF",
+    fontWeight: "700",
     textAlign: "center",
   },
-  headerNotification: {
-    backgroundColor: "#DDF4F8",
+
+  headerBell: {
+    position: "absolute",
     alignItems: "center",
     justifyContent: "center",
+    zIndex: 999,
+    elevation: 10,
   },
+
   whiteContainer: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
+
   whiteScroll: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FFFFFF",
   },
+
   scrollContent: {
     flexGrow: 1,
     justifyContent: "center",
   },
+
   content: {
     width: "100%",
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
   },
+
   iconContainer: {
     justifyContent: "center",
     alignItems: "center",
   },
+
   warningCircle: {
-    backgroundColor: COLORS.cardBg,
+    backgroundColor: "#EEF5FF",
     alignItems: "center",
     justifyContent: "center",
   },
+
   description: {
     width: "90%",
     color: "#2C313A",
     textAlign: "center",
     fontWeight: "400",
   },
+
   formGroup: {
     width: "88%",
     maxWidth: 400,
     alignItems: "center",
   },
+
   label: {
     width: "100%",
     color: "#000000",
     fontWeight: "700",
     textAlign: "left",
   },
+
   input: {
     width: "100%",
     borderWidth: 1,
-    borderColor: COLORS.inputBorder,
-    backgroundColor: COLORS.white,
+    borderColor: "#252833",
+    backgroundColor: "#FFFFFF",
     color: "#252833",
   },
+
   darkButton: {
     width: "75%",
     maxWidth: 260,
-    backgroundColor: COLORS.dark,
+    backgroundColor: "#071426",
     justifyContent: "center",
     alignItems: "center",
   },
+
   buttonText: {
-    color: COLORS.white,
+    color: "#FFFFFF",
     fontWeight: "600",
   },
-  bottom: {
+
+  bottomBar: {
     position: "absolute",
-    left: 0,
-    right: 0,
     bottom: 0,
-    backgroundColor: COLORS.cyan,
+    left: 0,
+    width: "100%",
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
+    overflow: "hidden",
     zIndex: 20,
   },
+
   navItem: {
     flex: 1,
     height: "100%",

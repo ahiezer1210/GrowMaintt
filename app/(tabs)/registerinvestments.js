@@ -76,7 +76,6 @@ export default function RegisterInvestment() {
             }
 
             const userRef = doc(db, "Users", user.uid);
-
             const investmentRef = doc(collection(db, "investments"));
 
             const batch = writeBatch(db);
@@ -120,6 +119,7 @@ export default function RegisterInvestment() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
+                {/* HEADER */}
                 <View
                     style={[
                         styles.header,
@@ -131,7 +131,7 @@ export default function RegisterInvestment() {
                 >
                     <TouchableOpacity
                         style={[
-                            styles.back,
+                            styles.headerButton,
                             {
                                 left: s(15),
                                 top: s(34),
@@ -154,15 +154,16 @@ export default function RegisterInvestment() {
                             styles.headerTitle,
                             {
                                 fontSize: s(25),
+                                lineHeight: s(29),
                             },
                         ]}
                     >
-                        Register Investment
+                        {"Register\nInvestment"}
                     </Text>
 
                     <TouchableOpacity
                         style={[
-                            styles.headerBell,
+                            styles.headerButton,
                             {
                                 right: s(15),
                                 top: s(34),
@@ -188,6 +189,7 @@ export default function RegisterInvestment() {
                     </TouchableOpacity>
                 </View>
 
+                {/* MAIN */}
                 <View
                     style={[
                         styles.main,
@@ -413,7 +415,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#071426",
     },
 
-    
+    // HEADER
     header: {
         width: "100%",
         backgroundColor: "#071426",
@@ -422,7 +424,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
     },
 
-    back: {
+    headerButton: {
         position: "absolute",
         alignItems: "center",
         justifyContent: "center",
@@ -435,9 +437,10 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontWeight: "700",
         textAlign: "center",
+        lineHeight: 29,
         transform: [
             {
-                translateX: 7,
+                translateX: 10,
             },
             {
                 translateY: 1,
@@ -445,15 +448,7 @@ const styles = StyleSheet.create({
         ],
     },
 
-    headerBell: {
-        position: "absolute",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 999,
-        elevation: 10,
-    },
-
-    
+    // MAIN
     main: {
         flex: 1,
         backgroundColor: "#FFFFFF",
@@ -548,7 +543,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 
-    
+    // NAVBAR
     bottomBar: {
         position: "absolute",
         bottom: 0,

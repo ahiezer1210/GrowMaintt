@@ -2,12 +2,10 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
   addDoc,
-  arrayUnion,
   collection,
   doc,
   serverTimestamp,
   setDoc,
-  Timestamp,
 } from "firebase/firestore";
 import { useState } from "react";
 import {
@@ -18,819 +16,402 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig.js";
-
-const COLORS = {
-  blue: "#081023",
-  cyan: "#25B7D3",
-  gray: "#ACADAD",
-  white: "#FFFFFF",
-};
+import { auth, db } from "../../firebaseConfig";
 
 export default function Registerexpenses() {
   const { width } = useWindowDimensions();
 
+  const isSmallScreen = width < 380;
+  const isTablet = width >= 768;
+
+  const scale = (size) =>
+    size * (isSmallScreen ? 0.85 : isTablet ? 1.15 : 1);
+
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
   const [expenseType, setExpenseType] = useState("");
-  const [isRecurrent, setIsRecurrent] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [date, setDate] = useState("");
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600;
+  const navItems = [
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
+  ];
 
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-    ? 1
-    : isTablet
-    ? 1.15
-    : 1.25;
-
-  const horizontalPadding = isSmallScreen
-    ? 18
-    : isMediumScreen
-    ? 25
-    : isTablet
-    ? 45
-    : 60;
-
-  const resetForm = () => {
-    setAmount("");
-    setCategory("");
-    setDate("");
-    setDescription("");
-    setExpenseType("");
-    setIsRecurrent(false);
-  };
-
-  const cancelExpenses = () => {
-    resetForm();
-    router.replace("/home");
-  };
-
-  const saveExpenses = async () => {
-    if (!amount.trim()) {
-      Alert.alert("Error", "Please enter the expense amount.");
+  const saveExpense = async () => {
+    if (!amount || !category || !date || !expenseType) {
+      Alert.alert("Error", "Please complete all fields.");
       return;
     }
 
-    if (!category.trim()) {
-      Alert.alert("Error", "Please enter the category.");
-      return;
-    }
+    const numericAmount = parseFloat(amount);
 
-    if (!date.trim()) {
-      Alert.alert("Error", "Please enter the date.");
-      return;
-    }
-
-    if (!expenseType) {
-      Alert.alert("Error", "Please select the expense type.");
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      Alert.alert("Error", "Please enter a valid amount.");
       return;
     }
 
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert("Error", "There is no authenticated user.");
-      return;
-    }
-
-    const amountNumber = Number(amount.replace(",", "."));
-
-    if (isNaN(amountNumber) || amountNumber <= 0) {
-      Alert.alert("Error", "The entered amount is not valid.");
+      Alert.alert("Error", "No user is currently logged in.");
       return;
     }
 
     try {
-      setSaving(true);
+      const roundedAmount = Math.ceil(numericAmount);
+      const savingsAmount = roundedAmount - numericAmount;
 
-      const roundedAmount = Math.ceil(amountNumber);
-
-      const savingsAmount = Number(
-        (roundedAmount - amountNumber).toFixed(2)
-      );
-
-      const expenseRef = await addDoc(
-        collection(db, "Registro de gastos"),
-        {
-          uid: user.uid,
-          amount: amountNumber,
-          category: category.trim(),
-          date: date.trim(),
-          description: description.trim(),
-          roundingAmount: roundedAmount,
-          savingsGenerated: savingsAmount,
-          expenseType: expenseType,
-          isRecurrent: isRecurrent,
-          createdAt: serverTimestamp(),
-        }
-      );
+      await addDoc(collection(db, "Registro de gastos"), {
+        userId: user.uid,
+        amount: numericAmount,
+        roundedAmount,
+        category,
+        expenseType,
+        date,
+        createdAt: serverTimestamp(),
+      });
 
       if (savingsAmount > 0) {
-        await addDoc(
-          collection(db, "Ahorros"),
-          {
-            uid: user.uid,
-            amount: savingsAmount,
-            originalAmount: amountNumber,
-            roundingAmount: roundedAmount,
-            expenseId: expenseRef.id,
-            category: category.trim(),
-            date: date.trim(),
-            description: description.trim(),
-            source: "rounding",
-            createdAt: serverTimestamp(),
-          }
-        );
-
-        const notificationRef = doc(
-          db,
-          "Notificaciones",
-          `${user.uid}_Savings`
-        );
-
-        const savingsNotification = {
-          id: `${expenseRef.id}_saving`,
-          uid: user.uid,
-          type: "saving_completed",
-          category: "Savings",
-          title: "Savings completed",
-          message: `You saved $${savingsAmount.toFixed(
-            2
-          )} from your purchase.`,
+        await addDoc(collection(db, "Ahorros"), {
+          userId: user.uid,
           amount: savingsAmount,
-          expenseId: expenseRef.id,
-          read: false,
-          createdAt: Timestamp.now(),
-        };
+          source: "Expense rounding",
+          expenseAmount: numericAmount,
+          roundedAmount,
+          date,
+          createdAt: serverTimestamp(),
+        });
 
         await setDoc(
-          notificationRef,
+          doc(db, "Notificaciones", `${user.uid}_Savings`),
           {
-            uid: user.uid,
-            category: "Savings",
-            notifications: arrayUnion(savingsNotification),
-            updatedAt: serverTimestamp(),
+            userId: user.uid,
+            type: "Savings",
+            title: "New savings",
+            message: `You saved $${savingsAmount.toFixed(
+              2
+            )} by rounding up your expense.`,
+            amount: savingsAmount,
+            read: false,
+            createdAt: serverTimestamp(),
           },
           { merge: true }
         );
       }
 
-      resetForm();
-
       Alert.alert(
-        "Expense Registered",
+        "Expense registered",
         savingsAmount > 0
-          ? `Expense saved successfully.\n\nExpense: $${amountNumber.toFixed(
+          ? `Expense registered successfully.\n$${savingsAmount.toFixed(
               2
-            )}\nRounded to: $${roundedAmount.toFixed(
-              2
-            )}\nSavings generated: $${savingsAmount.toFixed(2)}`
-          : "Expense saved successfully.\n\nNo savings were generated because the amount was already a whole number.",
-        [
-          {
-            text: "OK",
-          },
-        ]
+            )} was added to your savings.`
+          : "Expense registered successfully."
       );
-    } catch (error) {
-      console.log("ERROR SAVING EXPENSE:", error);
 
+      setAmount("");
+      setCategory("");
+      setExpenseType("");
+      setDate("");
+    } catch (error) {
+      console.error(error);
       Alert.alert(
         "Error",
-        "The expense could not be saved. Please try again."
+        "There was a problem registering the expense."
       );
-    } finally {
-      setSaving(false);
     }
+  };
+
+  const cancelExpenses = () => {
+    setAmount("");
+    setCategory("");
+    setExpenseType("");
+    setDate("");
+    router.replace("/home");
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar
         barStyle="light-content"
-        backgroundColor={COLORS.blue}
+        backgroundColor="#071426"
       />
 
-      <View style={styles.container}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        {/* HEADER */}
+        <View
+          style={[
+            styles.header,
+            {
+              height: scale(118),
+              paddingHorizontal: isSmallScreen
+                ? scale(18)
+                : isTablet
+                ? scale(45)
+                : scale(25),
+            },
+          ]}
         >
-          {/* HEADER */}
-          <View
+          <TouchableOpacity
+            onPress={() => router.push("/home")}
+            style={styles.headerButton}
+          >
+            <MaterialCommunityIcons
+              name="arrow-left"
+              size={scale(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+
+          <Text
             style={[
-              styles.header,
+              styles.headerTitle,
               {
-                height:
-                  118 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1),
-                paddingHorizontal: isSmallScreen
-                  ? 18
-                  : isTablet
-                  ? 45
-                  : 25,
+                fontSize: scale(25),
+                lineHeight: scale(29),
+                transform: [
+                  {
+                    translateX: scale(7),
+                  },
+                  {
+                    translateY: scale(7),
+                  },
+                ],
               },
             ]}
           >
-            <TouchableOpacity
+            Register
+            {"\n"}
+            expenses
+          </Text>
+
+          <TouchableOpacity
+            onPress={() =>
+              router.push({
+                pathname: "/notifications",
+                params: {
+                  from: "/registerexpenses",
+                },
+              })
+            }
+            style={styles.headerButton}
+          >
+            <MaterialCommunityIcons
+              name="bell-circle-outline"
+              size={scale(35)}
+              color="#FFFFFF"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* CONTENT */}
+        <View style={styles.cardContainer}>
+          <ScrollView
+            contentContainerStyle={[
+              styles.scrollContent,
+              {
+                paddingTop: scale(30),
+                paddingBottom: scale(100),
+              },
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            <Text
               style={[
-                styles.back,
+                styles.label,
                 {
-                  transform: [
-                    {
-                      translateY:
-                        4 *
-                        (isSmallScreen
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
+                  fontSize: scale(17),
+                  marginBottom: scale(8),
                 },
               ]}
-              onPress={() => router.push("/home")}
-              activeOpacity={0.7}
             >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
+              Amount
+            </Text>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: scale(52),
+                  fontSize: scale(16),
+                  paddingHorizontal: scale(15),
+                },
+              ]}
+              placeholder="Enter amount"
+              placeholderTextColor="#8A8A8A"
+              keyboardType="decimal-pad"
+              value={amount}
+              onChangeText={setAmount}
+            />
 
             <Text
               style={[
-                styles.headerTitle,
+                styles.label,
                 {
-                  fontSize:
-                    25 *
-                    (isSmallScreen
-                      ? 0.85
-                      : isTablet
-                      ? 1.15
-                      : 1),
-                  transform: [
-                    {
-                      translateX:
-                        7 *
-                        (isSmallScreen
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                    {
-                      translateY:
-                        1 *
-                        (isSmallScreen
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
+                  fontSize: scale(17),
+                  marginTop: scale(20),
+                  marginBottom: scale(8),
                 },
               ]}
             >
-              Register expenses
+              Category
             </Text>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: scale(52),
+                  fontSize: scale(16),
+                  paddingHorizontal: scale(15),
+                },
+              ]}
+              placeholder="Enter category"
+              placeholderTextColor="#8A8A8A"
+              value={category}
+              onChangeText={setCategory}
+            />
+
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: scale(17),
+                  marginTop: scale(20),
+                  marginBottom: scale(8),
+                },
+              ]}
+            >
+              Expense type
+            </Text>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: scale(52),
+                  fontSize: scale(16),
+                  paddingHorizontal: scale(15),
+                },
+              ]}
+              placeholder="Necessary or unnecessary"
+              placeholderTextColor="#8A8A8A"
+              value={expenseType}
+              onChangeText={setExpenseType}
+            />
+
+            <Text
+              style={[
+                styles.label,
+                {
+                  fontSize: scale(17),
+                  marginTop: scale(20),
+                  marginBottom: scale(8),
+                },
+              ]}
+            >
+              Date
+            </Text>
+
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  height: scale(52),
+                  fontSize: scale(16),
+                  paddingHorizontal: scale(15),
+                },
+              ]}
+              placeholder="MM/DD/YYYY"
+              placeholderTextColor="#8A8A8A"
+              value={date}
+              onChangeText={setDate}
+            />
 
             <TouchableOpacity
               style={[
-                styles.headerBell,
+                styles.saveButton,
                 {
-                  transform: [
-                    {
-                      translateY:
-                        4 *
-                        (isSmallScreen
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
+                  height: scale(54),
+                  marginTop: scale(30),
                 },
               ]}
-              onPress={() =>
-                router.push({
-                  pathname: "/notifications",
-                  params: {
-                    from: "/registerexpenses",
-                  },
-                })
-              }
-              activeOpacity={0.7}
+              onPress={saveExpense}
             >
-              <MaterialCommunityIcons
-                name="bell-circle-outline"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
+              <Text
+                style={[
+                  styles.saveButtonText,
+                  {
+                    fontSize: scale(18),
+                  },
+                ]}
+              >
+                Register expense
+              </Text>
             </TouchableOpacity>
-          </View>
 
-          {/* CONTENIDO */}
-          <View style={styles.cardContainer}>
-            <ScrollView
-              style={styles.scroll}
-              contentContainerStyle={[
-                styles.scrollContent,
+            <TouchableOpacity
+              style={[
+                styles.cancelButton,
                 {
-                  paddingHorizontal: horizontalPadding,
-                  paddingBottom: isSmallScreen ? 100 : 110,
+                  height: scale(54),
+                  marginTop: scale(15),
                 },
               ]}
-              showsVerticalScrollIndicator={true}
-              keyboardShouldPersistTaps="handled"
-              keyboardDismissMode="on-drag"
-              nestedScrollEnabled={true}
+              onPress={cancelExpenses}
             >
               <Text
                 style={[
-                  styles.label,
+                  styles.cancelButtonText,
                   {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
+                    fontSize: scale(18),
                   },
                 ]}
               >
-                Amount
+                Cancel
               </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
 
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    height: Math.round(48 * scale),
-                    borderRadius: Math.round(15 * scale),
-                    paddingHorizontal: Math.round(18 * scale),
-                    marginBottom: Math.round(22 * scale),
-                    fontSize: Math.round(14 * scale),
-                  },
-                ]}
-                placeholder="E.g. $4.60"
-                keyboardType="numeric"
-                value={amount}
-                onChangeText={setAmount}
-                placeholderTextColor={COLORS.gray}
-              />
-
-              <Text
-                style={[
-                  styles.roundingInfo,
-                  {
-                    fontSize: Math.round(12 * scale),
-                    marginBottom: Math.round(22 * scale),
-                    lineHeight: Math.round(17 * scale),
-                  },
-                ]}
-              >
-                The amount will be automatically rounded up to generate savings.
-              </Text>
-
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
-                  },
-                ]}
-              >
-                Category
-              </Text>
-
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    height: Math.round(48 * scale),
-                    borderRadius: Math.round(15 * scale),
-                    paddingHorizontal: Math.round(18 * scale),
-                    marginBottom: Math.round(22 * scale),
-                    fontSize: Math.round(14 * scale),
-                  },
-                ]}
-                placeholder="E.g. Transport"
-                value={category}
-                onChangeText={setCategory}
-                placeholderTextColor={COLORS.gray}
-              />
-
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
-                  },
-                ]}
-              >
-                Date
-              </Text>
-
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    height: Math.round(48 * scale),
-                    borderRadius: Math.round(15 * scale),
-                    paddingHorizontal: Math.round(18 * scale),
-                    marginBottom: Math.round(22 * scale),
-                    fontSize: Math.round(14 * scale),
-                  },
-                ]}
-                placeholder="June 23, 2026"
-                value={date}
-                onChangeText={setDate}
-                placeholderTextColor={COLORS.gray}
-              />
-
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
-                  },
-                ]}
-              >
-                Description (optional)
-              </Text>
-
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    height: Math.round(48 * scale),
-                    borderRadius: Math.round(15 * scale),
-                    paddingHorizontal: Math.round(18 * scale),
-                    marginBottom: Math.round(22 * scale),
-                    fontSize: Math.round(14 * scale),
-                  },
-                ]}
-                placeholder="E.g. Going out with friends"
-                value={description}
-                onChangeText={setDescription}
-                placeholderTextColor={COLORS.gray}
-              />
-
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
-                  },
-                ]}
-              >
-                Expense type
-              </Text>
-
-              <View
-                style={[
-                  styles.typeContainer,
-                  {
-                    marginBottom: Math.round(17 * scale),
-                  },
-                ]}
-              >
-                <TouchableOpacity
-                  style={[
-                    styles.typeButton,
-                    {
-                      height: Math.round(42 * scale),
-                      borderRadius: Math.round(13 * scale),
-                    },
-                    expenseType === "weekly" &&
-                      styles.typeButtonActive,
-                  ]}
-                  onPress={() => setExpenseType("weekly")}
-                >
-                  <Text
-                    style={[
-                      styles.typeText,
-                      {
-                        fontSize: Math.round(12 * scale),
-                      },
-                      expenseType === "weekly" &&
-                        styles.typeTextActive,
-                    ]}
-                  >
-                    Weekly
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.typeButton,
-                    {
-                      height: Math.round(42 * scale),
-                      borderRadius: Math.round(13 * scale),
-                    },
-                    expenseType === "unnecessary" &&
-                      styles.typeButtonActive,
-                  ]}
-                  onPress={() =>
-                    setExpenseType("unnecessary")
-                  }
-                >
-                  <Text
-                    style={[
-                      styles.typeText,
-                      {
-                        fontSize: Math.round(12 * scale),
-                      },
-                      expenseType === "unnecessary" &&
-                        styles.typeTextActive,
-                    ]}
-                  >
-                    Unnecessary
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[
-                    styles.typeButton,
-                    {
-                      height: Math.round(42 * scale),
-                      borderRadius: Math.round(13 * scale),
-                    },
-                    expenseType === "monthly" &&
-                      styles.typeButtonActive,
-                  ]}
-                  onPress={() => setExpenseType("monthly")}
-                >
-                  <Text
-                    style={[
-                      styles.typeText,
-                      {
-                        fontSize: Math.round(12 * scale),
-                      },
-                      expenseType === "monthly" &&
-                        styles.typeTextActive,
-                    ]}
-                  >
-                    Monthly
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <Text
-                style={[
-                  styles.label,
-                  {
-                    fontSize: Math.round(14 * scale),
-                    marginBottom: Math.round(10 * scale),
-                  },
-                ]}
-              >
-                It's a recurring expense?
-              </Text>
-
-              <View
-                style={[
-                  styles.optionsContainer,
-                  {
-                    height: Math.round(40 * scale),
-                    borderRadius: Math.round(13 * scale),
-                    paddingHorizontal: Math.round(8 * scale),
-                    marginBottom: Math.round(17 * scale),
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.recurrentText,
-                    {
-                      fontSize: Math.round(13 * scale),
-                    },
-                  ]}
-                >
-                  Activate the option if it is{"\n"}recurring
-                </Text>
-
-                <Switch
-                  value={isRecurrent}
-                  onValueChange={setIsRecurrent}
-                  trackColor={{
-                    false: "#BDBDBD",
-                    true: "#168AFF",
-                  }}
-                  thumbColor="#FFFFFF"
-                />
-              </View>
-
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  {
-                    height: Math.round(50 * scale),
-                    borderRadius: Math.round(25 * scale),
-                    marginTop: Math.round(15 * scale),
-                    opacity: saving ? 0.6 : 1,
-                  },
-                ]}
-                onPress={saveExpenses}
-                disabled={saving}
-              >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {
-                      fontSize: Math.round(17 * scale),
-                    },
-                  ]}
-                >
-                  {saving ? "Saving..." : "Save expenses"}
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.button,
-                  {
-                    height: Math.round(50 * scale),
-                    borderRadius: Math.round(25 * scale),
-                    marginTop: Math.round(12 * scale),
-                  },
-                ]}
-                onPress={cancelExpenses}
-                disabled={saving}
-              >
-                <Text
-                  style={[
-                    styles.buttonText,
-                    {
-                      fontSize: Math.round(17 * scale),
-                    },
-                  ]}
-                >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-
-              <View
-                style={{
-                  height: Math.round(80 * scale),
-                }}
-              />
-            </ScrollView>
-          </View>
-
-          {/* NAVBAR */}
-          <View
-            style={[
-              styles.bottomBar,
-              {
-                height:
-                  65 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1),
-                borderTopLeftRadius:
-                  78 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1),
-              },
-            ]}
-          >
+        {/* BOTTOM NAVBAR */}
+        <View
+          style={[
+            styles.bottomNav,
+            {
+              height: scale(65),
+              borderTopLeftRadius: scale(78),
+            },
+          ]}
+        >
+          {navItems.map((item, index) => (
             <TouchableOpacity
+              key={index}
               style={styles.navItem}
-              activeOpacity={0.8}
-              onPress={() => router.push("/home")}
+              onPress={() => router.push(item.route)}
             >
               <MaterialCommunityIcons
-                name="home-outline"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
+                name={item.icon}
+                size={scale(
+                  item.icon === "swap-horizontal" ? 37 : 35
+                )}
                 color="#FFFFFF"
               />
             </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.navItem}
-              activeOpacity={0.8}
-              onPress={() => router.push("/historial")}
-            >
-              <MaterialCommunityIcons
-                name="chart-box-outline"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.navItem}
-              activeOpacity={0.8}
-              onPress={() => router.push("/expensesManagement")}
-            >
-              <MaterialCommunityIcons
-                name="swap-horizontal"
-                size={
-                  37 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.navItem}
-              activeOpacity={0.8}
-              onPress={() => router.push("/currentgoal")}
-            >
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.navItem}
-              activeOpacity={0.8}
-              onPress={() => router.push("/profile")}
-            >
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={
-                  35 *
-                  (isSmallScreen
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color="#FFFFFF"
-              />
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </View>
+          ))}
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -838,135 +419,94 @@ export default function Registerexpenses() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.blue,
+    backgroundColor: "#071426",
   },
 
   container: {
     flex: 1,
-    backgroundColor: COLORS.blue,
+    backgroundColor: "#071426",
   },
 
   header: {
-    width: "100%",
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
-  back: {
-    width: 30,
-    alignItems: "flex-start",
+  headerButton: {
+    alignItems: "center",
     justifyContent: "center",
   },
 
   headerTitle: {
     color: "#FFFFFF",
     fontWeight: "700",
-  },
-
-  headerBell: {
-    justifyContent: "center",
+    textAlign: "center",
   },
 
   cardContainer: {
     flex: 1,
-    backgroundColor: COLORS.white,
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
     overflow: "hidden",
   },
 
-  scroll: {
-    flex: 1,
-  },
-
   scrollContent: {
-    paddingTop: 30,
+    paddingHorizontal: 25,
   },
 
   label: {
-    color: COLORS.blue,
-    fontWeight: "600",
-  },
-
-  input: {
-    backgroundColor: "#F3F4F5",
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: "#000000",
-    color: COLORS.blue,
-  },
-
-  roundingInfo: {
-    color: COLORS.gray,
-    marginTop: -12,
-  },
-
-  typeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-  },
-
-  typeButton: {
-    flex: 1,
-    backgroundColor: "#F3F4F5",
-    borderRadius: 13,
-    borderWidth: 1,
-    borderColor: "#000000",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 3,
-  },
-
-  typeButtonActive: {
-    backgroundColor: COLORS.cyan,
-    borderColor: COLORS.cyan,
-  },
-
-  typeText: {
-    color: COLORS.blue,
-    fontWeight: "600",
-  },
-
-  typeTextActive: {
-    color: COLORS.white,
-  },
-
-  optionsContainer: {
-    backgroundColor: "#F3F4F5",
-    borderRadius: 13,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "row",
-  },
-
-  recurrentText: {
-    color: COLORS.blue,
-  },
-
-  button: {
-    backgroundColor: COLORS.cyan,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
-  },
-
-  buttonText: {
-    color: COLORS.white,
+    color: "#071426",
     fontWeight: "700",
   },
 
-  bottomBar: {
+  input: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#D5D5D5",
+    borderRadius: 12,
+    color: "#071426",
+    backgroundColor: "#FFFFFF",
+  },
+
+  saveButton: {
+    width: "100%",
+    backgroundColor: "#25B5D1",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  saveButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+
+  cancelButton: {
+    width: "100%",
+    backgroundColor: "#071426",
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  cancelButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+  },
+
+  bottomNav: {
     position: "absolute",
     bottom: 0,
     left: 0,
-    width: "100%",
+    right: 0,
     backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    overflow: "hidden",
+    paddingHorizontal: 5,
   },
 
   navItem: {
