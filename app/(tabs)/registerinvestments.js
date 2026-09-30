@@ -21,9 +21,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { auth, db } from "../../firebaseConfig";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function RegisterInvestment() {
     const { width } = useWindowDimensions();
+    const { t } = useAppSettings();
 
     const [investmentName, setInvestmentName] = useState("");
     const [amount, setAmount] = useState("");
@@ -54,14 +56,16 @@ export default function RegisterInvestment() {
 
     const registrarInversion = async () => {
         if (!investmentName || !amount || !type || !date) {
-            alert("Please complete all the fields.");
+            alert(t.completeAllFields);
             return;
         }
 
-        const investmentAmount = Number(amount);
+        const investmentAmount = Number(
+            amount.replace(",", ".")
+        );
 
         if (isNaN(investmentAmount) || investmentAmount <= 0) {
-            alert("Please enter a valid amount.");
+            alert(t.validAmount);
             return;
         }
 
@@ -71,7 +75,7 @@ export default function RegisterInvestment() {
             const user = auth.currentUser;
 
             if (!user) {
-                alert("You must be logged in.");
+                alert(t.mustBeLoggedIn);
                 return;
             }
 
@@ -100,7 +104,7 @@ export default function RegisterInvestment() {
             await batch.commit();
 
             alert(
-                `Investment registered successfully!\nYou earned ${points} points.`
+                `${t.investmentRegistered}\n${t.pointsEarned} ${points} ${t.points}`
             );
 
             setInvestmentName("");
@@ -109,7 +113,7 @@ export default function RegisterInvestment() {
             setDate("");
         } catch (error) {
             console.log(error);
-            alert("There was an error registering the investment.");
+            alert(t.investmentRegistrationError);
         }
     };
 
@@ -119,7 +123,7 @@ export default function RegisterInvestment() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
-                {/* HEADER */}
+             
                 <View
                     style={[
                         styles.header,
@@ -158,7 +162,7 @@ export default function RegisterInvestment() {
                             },
                         ]}
                     >
-                        {"Register\nInvestment"}
+                        {t.registerInvestment}
                     </Text>
 
                     <TouchableOpacity
@@ -189,7 +193,7 @@ export default function RegisterInvestment() {
                     </TouchableOpacity>
                 </View>
 
-                {/* MAIN */}
+               
                 <View
                     style={[
                         styles.main,
@@ -231,7 +235,7 @@ export default function RegisterInvestment() {
                                     },
                                 ]}
                             >
-                                Register your investment
+                                {t.registerYourInvestment}
                             </Text>
 
                             <Text
@@ -242,25 +246,25 @@ export default function RegisterInvestment() {
                                     },
                                 ]}
                             >
-                                Enter the information about your investment
+                                {t.investmentInformation}
                             </Text>
                         </View>
 
                         <View style={styles.form}>
                             <Text style={styles.label}>
-                                Investment name
+                                {t.investmentName}
                             </Text>
 
                             <TextInput
                                 style={styles.input}
-                                placeholder="Example:savign investment"
+                                placeholder={t.investmentNamePlaceholder}
                                 placeholderTextColor="#999"
                                 value={investmentName}
                                 onChangeText={setInvestmentName}
                             />
 
                             <Text style={styles.label}>
-                                Amount
+                                {t.amount}
                             </Text>
 
                             <View style={styles.amountContainer}>
@@ -277,24 +281,24 @@ export default function RegisterInvestment() {
                             </View>
 
                             <Text style={styles.label}>
-                                Investment type
+                                {t.investmentType}
                             </Text>
 
                             <TextInput
                                 style={styles.input}
-                                placeholder="Example: Business, savings..."
+                                placeholder={t.investmentTypePlaceholder}
                                 placeholderTextColor="#999"
                                 value={type}
                                 onChangeText={setType}
                             />
 
                             <Text style={styles.label}>
-                                Date
+                                {t.date}
                             </Text>
 
                             <TextInput
                                 style={styles.input}
-                                placeholder="DD/MM/YYYY"
+                                placeholder={t.datePlaceholder}
                                 placeholderTextColor="#999"
                                 value={date}
                                 onChangeText={setDate}
@@ -325,14 +329,14 @@ export default function RegisterInvestment() {
                                         },
                                     ]}
                                 >
-                                    Register investment
+                                    {t.registerInvestmentButton}
                                 </Text>
                             </TouchableOpacity>
                         </View>
                     </ScrollView>
                 </View>
 
-                {/* NAVBAR */}
+                
                 <View
                     style={[
                         styles.bottomBar,
@@ -415,7 +419,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#071426",
     },
 
-    // HEADER
+    
     header: {
         width: "100%",
         backgroundColor: "#071426",
@@ -448,7 +452,7 @@ const styles = StyleSheet.create({
         ],
     },
 
-    // MAIN
+   
     main: {
         flex: 1,
         backgroundColor: "#FFFFFF",
@@ -543,7 +547,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 
-    // NAVBAR
+   
     bottomBar: {
         position: "absolute",
         bottom: 0,

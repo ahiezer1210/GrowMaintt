@@ -19,6 +19,7 @@ import {
 } from "react-native";
 
 import { usePeriods } from "../../context/PeriodContext.js";
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
@@ -31,10 +32,10 @@ const COLORS = {
 };
 
 const ACTIONS = [
-  ["card-outline", "Register\nexpenses", "ion", "/registerexpenses"],
-  ["book-outline", "Create\ngoals", "ion", "/registergoals"],
-  ["trending-up-outline", "Investments", "ion", "/investments"],
-  ["hand-coin-outline", "Points\nExchange", "material", "/pointsExchange"],
+  ["card-outline", "registerExpenses", "ion", "/registerexpenses"],
+  ["book-outline", "createGoals", "ion", "/registergoals"],
+  ["trending-up-outline", "investments", "ion", "/investments"],
+  ["hand-coin-outline", "pointsExchange", "material", "/pointsExchange"],
 ];
 
 const NAV = [
@@ -373,6 +374,8 @@ const getIcon = (category, type) => {
 export default function App() {
   const { selectedPeriods } =
     usePeriods();
+
+  const { t } = useAppSettings();
 
   const [period, setPeriod] =
     useState("Monthly");
@@ -781,6 +784,7 @@ export default function App() {
             profilePhoto={
               profilePhoto
             }
+            t={t}
           />
 
           <Balance
@@ -793,6 +797,7 @@ export default function App() {
             small={isSmallScreen}
             scale={scale}
             s={s}
+            t={t}
           />
 
           <Savings
@@ -804,11 +809,13 @@ export default function App() {
             }
             scale={scale}
             s={s}
+            t={t}
           />
 
           <Actions
             scale={scale}
             s={s}
+            t={t}
           />
 
           <View
@@ -856,7 +863,10 @@ export default function App() {
                         styles.activeFilterText,
                     ]}
                   >
-                    {item}
+                    {getPeriodLabel(
+                      item,
+                      t
+                    )}
                   </Text>
                 </TouchableOpacity>
               )
@@ -872,6 +882,7 @@ export default function App() {
                   data={item}
                   small={isSmallScreen}
                   s={s}
+                  t={t}
                 />
               )
             )
@@ -904,7 +915,7 @@ export default function App() {
                   },
                 ]}
               >
-                No records for this period
+                {t.noRecordsForPeriod}
               </Text>
             </View>
           )}
@@ -920,6 +931,14 @@ export default function App() {
   );
 }
 
+function getPeriodLabel(period, t) {
+  if (period === "Daily") return t.daily;
+  if (period === "Weekly") return t.weekly;
+  if (period === "Monthly") return t.monthly;
+
+  return period;
+}
+
 function Header({
   small,
   scale,
@@ -927,6 +946,7 @@ function Header({
   hasNotification,
   username,
   profilePhoto,
+  t,
 }) {
   const size = s(68);
 
@@ -983,7 +1003,7 @@ function Header({
           numberOfLines={1}
           adjustsFontSizeToFit
         >
-          Hello, {username}!
+          {t.hello}, {username}!
         </Text>
 
         <Text
@@ -995,7 +1015,7 @@ function Header({
             },
           ]}
         >
-          Welcome back
+          {t.welcomeBack}
         </Text>
       </View>
 
@@ -1052,6 +1072,7 @@ function Balance({
   small,
   scale,
   s,
+  t,
 }) {
   return (
     <View
@@ -1064,7 +1085,7 @@ function Balance({
     >
       <BalanceItem
         icon="wallet-outline"
-        title="Available Balance"
+        title={t.availableBalance}
         value={formatMoney(
           savings
         )}
@@ -1086,7 +1107,7 @@ function Balance({
 
       <BalanceItem
         icon="receipt-outline"
-        title="Expenses"
+        title={t.expenses}
         value={`-${formatMoney(
           expenses
         )}`}
@@ -1166,6 +1187,7 @@ function Savings({
   percentage,
   scale,
   s,
+  t,
 }) {
   return (
     <View
@@ -1204,7 +1226,7 @@ function Savings({
               },
             ]}
           >
-            {percentage}% Saved
+            {percentage}% {t.savedPercentage}
           </Text>
         </View>
 
@@ -1234,7 +1256,7 @@ function Savings({
           },
         ]}
       >
-        Savings
+        {t.savings}
       </Text>
     </View>
   );
@@ -1243,6 +1265,7 @@ function Savings({
 function Actions({
   scale,
   s,
+  t,
 }) {
   return (
     <View
@@ -1258,12 +1281,12 @@ function Actions({
       {ACTIONS.map(
         ([
           icon,
-          text,
+          translationKey,
           type,
           route,
         ]) => (
           <TouchableOpacity
-            key={text}
+            key={translationKey}
             style={[
               styles.action,
               {
@@ -1329,7 +1352,7 @@ function Actions({
                 },
               ]}
             >
-              {text}
+              {t[translationKey]}
             </Text>
           </TouchableOpacity>
         )
@@ -1342,6 +1365,7 @@ function Transaction({
   data,
   small,
   s,
+  t,
 }) {
   const icon = getIcon(
     data.category,
@@ -1427,7 +1451,9 @@ function Transaction({
           ]}
           numberOfLines={1}
         >
-          {data.dateText}
+          {data.dateText === "No date"
+            ? t.noDate
+            : data.dateText}
         </Text>
       </View>
 
@@ -1452,7 +1478,9 @@ function Transaction({
         ]}
         numberOfLines={1}
       >
-        {data.type}
+        {data.type === "Expense"
+          ? t.expense
+          : t.savings}
       </Text>
 
       <View

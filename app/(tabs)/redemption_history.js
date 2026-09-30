@@ -11,8 +11,11 @@ import {
     View,
     useWindowDimensions,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function Redemptionhistory() {
+    const { t } = useAppSettings();
+
     const { width } = useWindowDimensions();
 
     const isSmallScreen = width < 360;
@@ -82,15 +85,28 @@ export default function Redemptionhistory() {
             ? canjes
             : canjes.filter((canje) => canje.state === filter);
 
+    const getStateLabel = (state) => {
+        switch (state) {
+            case "Complete":
+                return t.complete;
+            case "In process":
+                return t.inProcess;
+            case "Canceled":
+                return t.canceled;
+            default:
+                return state;
+        }
+    };
+
     const showDetail = (canje) => {
         Alert.alert(
             canje.tipo,
-            `Date: ${canje.date}\n\n` +
-            `Discount: ${canje.discount}\n\n` +
-            `State: ${canje.state}\n\n`,
+            `${t.date}: ${canje.date}\n\n` +
+            `${t.discount}: ${canje.discount}\n\n` +
+            `${t.state}: ${getStateLabel(canje.state)}\n\n`,
             [
                 {
-                    text: "Cerrar",
+                    text: t.close,
                 },
             ]
         );
@@ -126,7 +142,7 @@ export default function Redemptionhistory() {
                 backgroundColor="#071426"
             />
 
-            {/* HEADER */}
+  
             <View
                 style={[
                     styles.header,
@@ -140,7 +156,7 @@ export default function Redemptionhistory() {
                     },
                 ]}
             >
-                {/* BACK */}
+          
                 <TouchableOpacity
                     style={styles.headerButton}
                     onPress={() => router.push("/pointsExchange")}
@@ -152,7 +168,7 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-                {/* TITLE */}
+               
                 <Text
                     style={[
                         styles.headerTitle,
@@ -167,7 +183,7 @@ export default function Redemptionhistory() {
                         },
                     ]}
                 >
-                    Redemption History
+                    {t.redemptionHistory}
                 </Text>
 
                 {/* NOTIFICATIONS */}
@@ -190,7 +206,7 @@ export default function Redemptionhistory() {
                 </TouchableOpacity>
             </View>
 
-            {/* MAIN */}
+      
             <View
                 style={[
                     styles.card,
@@ -211,7 +227,7 @@ export default function Redemptionhistory() {
                         },
                     ]}
                 >
-                    {/* SUMMARY */}
+                
                     <View
                         style={[
                             styles.resumen,
@@ -233,7 +249,7 @@ export default function Redemptionhistory() {
                                 },
                             ]}
                         >
-                            Summary of your exchanges
+                            {t.summaryOfYourExchanges}
                         </Text>
 
                         <View
@@ -276,7 +292,7 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    Benefits
+                                    {t.benefits}
                                 </Text>
 
                                 <Text
@@ -308,7 +324,7 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    Total redeemed
+                                    {t.totalRedeemed}
                                 </Text>
 
                                 <Text
@@ -340,7 +356,7 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    Exchanges
+                                    {t.exchanges}
                                 </Text>
 
                                 <Text
@@ -358,7 +374,6 @@ export default function Redemptionhistory() {
                         </View>
                     </View>
 
-                    {/* FILTERS */}
                     <View
                         style={[
                             styles.filters,
@@ -370,7 +385,7 @@ export default function Redemptionhistory() {
                         ]}
                     >
                         <Filter
-                            text="Todos"
+                            text={t.all}
                             icon="list-outline"
                             active={filter === "Todos"}
                             onPress={() => setfilter("Todos")}
@@ -378,7 +393,7 @@ export default function Redemptionhistory() {
                         />
 
                         <Filter
-                            text="Complete"
+                            text={t.complete}
                             icon="time-outline"
                             active={filter === "Complete"}
                             onPress={() => setfilter("Complete")}
@@ -386,7 +401,7 @@ export default function Redemptionhistory() {
                         />
 
                         <Filter
-                            text="In process"
+                            text={t.inProcess}
                             icon="checkmark-circle-outline"
                             active={filter === "In process"}
                             onPress={() => setfilter("In process")}
@@ -394,7 +409,7 @@ export default function Redemptionhistory() {
                         />
 
                         <Filter
-                            text="Canceled"
+                            text={t.canceled}
                             icon="close-circle-outline"
                             active={filter === "Canceled"}
                             onPress={() => setfilter("Canceled")}
@@ -402,7 +417,7 @@ export default function Redemptionhistory() {
                         />
                     </View>
 
-                    {/* LIST */}
+                   
                     <View
                         style={[
                             styles.list,
@@ -420,7 +435,7 @@ export default function Redemptionhistory() {
                                 />
 
                                 <Text style={styles.sinCanjesText}>
-                                    No hay canjes en esta categoria
+                                    {t.noRedemptionsInCategory}
                                 </Text>
                             </View>
                         ) : (
@@ -488,7 +503,7 @@ export default function Redemptionhistory() {
                                                 },
                                             ]}
                                         >
-                                            redeemed on {canje.date}.
+                                            {t.redeemedOn} {canje.date}.
                                         </Text>
                                     </View>
 
@@ -525,7 +540,6 @@ export default function Redemptionhistory() {
                 </ScrollView>
             </View>
 
-            {/* BOTTOM NAVBAR */}
             <View
                 style={[
                     styles.bottomBar,
@@ -594,7 +608,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#071426",
     },
 
-    /* HEADER */
+    
     header: {
         backgroundColor: "#071426",
         flexDirection: "row",
@@ -788,7 +802,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 
-    /* NAVBAR */
+    
     bottomBar: {
         position: "absolute",
         bottom: 0,

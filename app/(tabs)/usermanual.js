@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 
+import { useAppSettings } from "../../context/Appsettings";
+
 const navItems = [
   {
     icon: "home-outline",
@@ -36,6 +38,7 @@ const navItems = [
 
 export default function ManualScreen() {
   const { width, height } = useWindowDimensions();
+  const { t } = useAppSettings();
 
   const [activeTab, setActiveTab] = useState("home");
 
@@ -69,7 +72,7 @@ export default function ManualScreen() {
 
       <View style={styles.app}>
 
-        {/* HEADER */}
+        
         <View
           style={[
             styles.header,
@@ -161,7 +164,7 @@ export default function ManualScreen() {
               },
             ]}
           >
-            User Manual
+            {t.userManual}
           </Text>
 
           <TouchableOpacity
@@ -199,7 +202,7 @@ export default function ManualScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* MAIN */}
+      
         <View
           style={[
             styles.main,
@@ -244,7 +247,7 @@ export default function ManualScreen() {
               ]}
             >
 
-              {/* TITLE */}
+           
               <View style={styles.titleContainer}>
                 <Text
                   style={[
@@ -259,13 +262,13 @@ export default function ManualScreen() {
                     },
                   ]}
                 >
-                  What is GrowMait?
+                  {t.whatIsGrowMait}
                 </Text>
 
                 <View style={styles.titleLine} />
               </View>
 
-              {/* INTRO */}
+            
               <View style={styles.introBox}>
                 <View style={styles.introIcon}>
                   <MaterialCommunityIcons
@@ -303,14 +306,12 @@ export default function ManualScreen() {
                       },
                     ]}
                   >
-                    GrowMait is your ally to keep control of your
-                    finances, expenses and savings. Everything in
-                    one simple, easy and secure place.
+                    {t.growMaitDescription}
                   </Text>
                 </View>
               </View>
 
-              {/* EXPLORE */}
+        
               <View style={styles.sectionHeader}>
                 <View>
                   <Text
@@ -326,7 +327,7 @@ export default function ManualScreen() {
                       },
                     ]}
                   >
-                    Explore GrowMait
+                    {t.exploreGrowMait}
                   </Text>
 
                   <Text
@@ -342,12 +343,12 @@ export default function ManualScreen() {
                       },
                     ]}
                   >
-                    Everything you can do in the app
+                    {t.everythingYouCanDo}
                   </Text>
                 </View>
               </View>
 
-              {/* SECTIONS */}
+            
               <View
                 style={[
                   styles.sectionsContainer,
@@ -357,45 +358,39 @@ export default function ManualScreen() {
                 {[
                   {
                     number: "01",
-                    title: "Home",
+                    title: t.homeSection,
                     icon: "home-outline",
-                    description:
-                      "Know your balance, recent activity and get a quick summary of your finances.",
+                    description: t.homeSectionDescription,
                   },
                   {
                     number: "02",
-                    title: "Add Expense",
+                    title: t.addExpenseSection,
                     icon: "plus-circle-outline",
-                    description:
-                      "Register your daily expenses and classify them by category.",
+                    description: t.addExpenseSectionDescription,
                   },
                   {
                     number: "03",
-                    title: "Reports",
+                    title: t.reportsSection,
                     icon: "chart-box-outline",
-                    description:
-                      "Visualize your income, expenses and savings with charts and statistics.",
+                    description: t.reportsSectionDescription,
                   },
                   {
                     number: "04",
-                    title: "Savings",
+                    title: t.savingsSection,
                     icon: "piggy-bank-outline",
-                    description:
-                      "Create savings goals, contribute regularly and reach your objectives.",
+                    description: t.savingsSectionDescription,
                   },
                   {
                     number: "05",
-                    title: "Transactions",
+                    title: t.transactionsSection,
                     icon: "swap-horizontal",
-                    description:
-                      "Review the history of all your financial movements in detail.",
+                    description: t.transactionsSectionDescription,
                   },
                   {
                     number: "06",
-                    title: "Settings",
+                    title: t.settingsSection,
                     icon: "cog-outline",
-                    description:
-                      "Manage your account preferences and configuration.",
+                    description: t.settingsSectionDescription,
                   },
                 ].map((item) => (
                   <View
@@ -470,7 +465,7 @@ export default function ManualScreen() {
                 ))}
               </View>
 
-              {/* TIPS */}
+
               <View style={styles.tipsHeader}>
                 <View style={styles.tipsIcon}>
                   <MaterialCommunityIcons
@@ -501,7 +496,7 @@ export default function ManualScreen() {
                       },
                     ]}
                   >
-                    Useful Tips
+                    {t.usefulTips}
                   </Text>
 
                   <Text
@@ -517,7 +512,7 @@ export default function ManualScreen() {
                       },
                     ]}
                   >
-                    Small actions for better financial habits
+                    {t.smallActionsBetterHabits}
                   </Text>
                 </View>
               </View>
@@ -528,7 +523,7 @@ export default function ManualScreen() {
                   tablet && styles.tipsGrid,
                 ]}
               >
-                {/* TIP 1 */}
+                
                 <View
                   style={[
                     styles.tipCard,
@@ -564,7 +559,7 @@ export default function ManualScreen() {
                         },
                       ]}
                     >
-                      Keep your data safe
+                      {t.keepDataSafe}
                     </Text>
 
                     <Text
@@ -587,13 +582,12 @@ export default function ManualScreen() {
                         },
                       ]}
                     >
-                      Do not share your password or sign in on
-                      shared devices.
+                      {t.keepDataSafeDescription}
                     </Text>
                   </View>
                 </View>
 
-                {/* TIP 2 */}
+               
                 <View
                   style={[
                     styles.tipCard,
@@ -629,7 +623,7 @@ export default function ManualScreen() {
                         },
                       ]}
                     >
-                      Set realistic goals
+                      {t.setRealisticGoals}
                     </Text>
 
                     <Text
@@ -652,8 +646,7 @@ export default function ManualScreen() {
                         },
                       ]}
                     >
-                      Start with small goals and increase them
-                      little by little.
+                      {t.setRealisticGoalsDescription}
                     </Text>
                   </View>
                 </View>
@@ -663,7 +656,7 @@ export default function ManualScreen() {
           </ScrollView>
         </View>
 
-        {/* NAVBAR - IGUAL AL LOGOUT */}
+        
         <View
           style={[
             styles.bottomBar,
@@ -735,7 +728,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
   },
 
-  /* HEADER */
+  
   header: {
     width: "100%",
     backgroundColor: "#071426",
@@ -759,7 +752,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  /* MAIN */
+ 
   main: {
     flex: 1,
     width: "100%",
@@ -780,7 +773,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-  /* TITLE */
+
   titleContainer: {
     alignItems: "center",
     marginBottom: 18,
@@ -800,7 +793,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  /* INTRO */
+  
   introBox: {
     width: "100%",
     backgroundColor: "#25B7D3",
@@ -830,7 +823,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  /* SECTIONS */
+ 
   sectionHeader: {
     width: "100%",
     marginBottom: 13,
@@ -921,7 +914,7 @@ const styles = StyleSheet.create({
     fontWeight: "400",
   },
 
-  /* TIPS */
+  
   tipsHeader: {
     width: "100%",
     flexDirection: "row",
@@ -1000,7 +993,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 
-  /* NAVBAR - IGUAL AL LOGOUT */
+  
   bottomBar: {
     position: "absolute",
     bottom: 0,

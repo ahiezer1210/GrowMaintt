@@ -33,6 +33,8 @@ import {
 
 import { auth, db } from "../../firebaseConfig";
 
+import { useAppSettings } from "../../context/Appsettings";
+
 const COLORS = {
   cyan: "#25B7D3",
   dark: "#071426",
@@ -67,6 +69,8 @@ const navItems = [
 ];
 
 export default function DeleteAccount({ navigation }) {
+  const { t } = useAppSettings();
+
   const [password, setPassword] = useState("");
 
   const { width, height } = useWindowDimensions();
@@ -94,22 +98,22 @@ export default function DeleteAccount({ navigation }) {
 
     if (!cleanPassword) {
       Alert.alert(
-        "Password Required",
-        "Please enter your password to continue."
+        t.passwordRequired,
+        t.passwordRequiredMessage
       );
       return;
     }
 
     Alert.alert(
-      "Delete Account",
-      "Are you sure you want to delete your account? This action cannot be undone.",
+      t.deleteAccountConfirm,
+      t.deleteAccountConfirmMessage,
       [
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: t.delete,
           style: "destructive",
           onPress: async () => {
             try {
@@ -117,16 +121,16 @@ export default function DeleteAccount({ navigation }) {
 
               if (!user) {
                 Alert.alert(
-                  "Error",
-                  "No authenticated user found."
+                  t.error,
+                  t.noAuthenticatedUser
                 );
                 return;
               }
 
               if (!user.email) {
                 Alert.alert(
-                  "Error",
-                  "The authenticated user does not have an email address."
+                  t.error,
+                  t.noEmail
                 );
                 return;
               }
@@ -149,8 +153,8 @@ export default function DeleteAccount({ navigation }) {
               await deleteUser(user);
 
               Alert.alert(
-                "Account Deleted",
-                "Your account has been successfully deleted.",
+                t.accountDeleted,
+                t.accountDeletedMessage,
                 [
                   {
                     text: "OK",
@@ -175,46 +179,46 @@ export default function DeleteAccount({ navigation }) {
                   "auth/invalid-credential"
               ) {
                 Alert.alert(
-                  "Incorrect Password",
-                  "The password you entered is incorrect."
+                  t.incorrectPassword,
+                  t.incorrectPasswordMessage
                 );
               } else if (
                 error.code ===
                 "auth/requires-recent-login"
               ) {
                 Alert.alert(
-                  "Security",
-                  "Please log in again before deleting your account."
+                  t.security,
+                  t.securityMessage
                 );
               } else if (
                 error.code ===
                 "auth/invalid-email"
               ) {
                 Alert.alert(
-                  "Error",
-                  "The email associated with this account is invalid."
+                  t.error,
+                  t.invalidEmail
                 );
               } else if (
                 error.code ===
                 "auth/user-disabled"
               ) {
                 Alert.alert(
-                  "Error",
-                  "This account has been disabled."
+                  t.error,
+                  t.userDisabled
                 );
               } else if (
                 error.code ===
                 "auth/network-request-failed"
               ) {
                 Alert.alert(
-                  "Connection Error",
-                  "Please check your internet connection and try again."
+                  t.connectionError,
+                  t.connectionErrorMessage
                 );
               } else {
                 Alert.alert(
-                  "Error",
+                  t.error,
                   error.message ||
-                    "An unexpected error occurred."
+                    t.unexpectedError
                 );
               }
             }
@@ -256,7 +260,7 @@ export default function DeleteAccount({ navigation }) {
               : "height"
           }
         >
-          {/* HEADER */}
+      
           <View
             style={[
               styles.header,
@@ -345,7 +349,7 @@ export default function DeleteAccount({ navigation }) {
                 },
               ]}
             >
-              Delete Account
+              {t.deleteAccount}
             </Text>
 
             <TouchableOpacity
@@ -387,7 +391,7 @@ export default function DeleteAccount({ navigation }) {
             </TouchableOpacity>
           </View>
 
-          {/* MAIN */}
+
           <View
             style={[
               styles.whiteContainer,
@@ -450,7 +454,6 @@ export default function DeleteAccount({ navigation }) {
                   </View>
                 </View>
 
-                {/* DESCRIPTION */}
                 <Text
                   style={[
                     styles.description,
@@ -461,12 +464,9 @@ export default function DeleteAccount({ navigation }) {
                     },
                   ]}
                 >
-                  This action will delete all of your
-                  data and this action cannot be
-                  undone.
+                  {t.deleteAccountDescription}
                 </Text>
 
-                {/* FORM */}
                 <View style={styles.formGroup}>
                   <Text
                     style={[
@@ -477,7 +477,7 @@ export default function DeleteAccount({ navigation }) {
                       },
                     ]}
                   >
-                    Enter your password
+                    {t.enterYourPassword}
                   </Text>
 
                   <TextInput
@@ -523,7 +523,7 @@ export default function DeleteAccount({ navigation }) {
                         },
                       ]}
                     >
-                      Delete
+                      {t.delete}
                     </Text>
                   </TouchableOpacity>
 
@@ -546,7 +546,7 @@ export default function DeleteAccount({ navigation }) {
                         },
                       ]}
                     >
-                      Cancel
+                      {t.cancel}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -555,7 +555,7 @@ export default function DeleteAccount({ navigation }) {
           </View>
         </KeyboardAvoidingView>
 
-        {/* BOTTOM NAVBAR */}
+        
         <View
           style={[
             styles.bottomBar,

@@ -38,6 +38,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db } from "../../firebaseConfig";
+import { useAppSettings } from "../../context/Appsettings";
 
 const COLORS = {
   cyan: "#25B5D1",
@@ -58,12 +59,17 @@ const NAV = [
 
 export default function App() {
   const [user, setUser] = useState(null);
+
+  const { t } = useAppSettings();
+
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setPhotoURL] = useState(null);
+
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -131,18 +137,10 @@ export default function App() {
             setEmail(savedEmail);
             setPhotoURL(savedPhotoURL);
 
-            setOriginalUsername(
-              savedUsername
-            );
-            setOriginalPhone(
-              savedPhone
-            );
-            setOriginalEmail(
-              savedEmail
-            );
-            setOriginalPhotoURL(
-              savedPhotoURL
-            );
+            setOriginalUsername(savedUsername);
+            setOriginalPhone(savedPhone);
+            setOriginalEmail(savedEmail);
+            setOriginalPhotoURL(savedPhotoURL);
 
             setNotifications(
               data.notifications !== undefined
@@ -169,8 +167,8 @@ export default function App() {
           );
 
           Alert.alert(
-            "Error",
-            "Unable to load your profile data."
+            t.error,
+            t.unableToLoadProfile
           );
         }
 
@@ -188,8 +186,8 @@ export default function App() {
 
       if (!permission.granted) {
         Alert.alert(
-          "Permission Required",
-          "We need access to your gallery to change your profile picture."
+          t.permissionRequired,
+          t.galleryPermission
         );
 
         return;
@@ -212,9 +210,10 @@ export default function App() {
 
       if (!asset.base64) {
         Alert.alert(
-          "Error",
-          "Unable to process the selected image."
+          t.error,
+          t.unableToProcessImage
         );
+
         return;
       }
 
@@ -229,11 +228,13 @@ export default function App() {
       );
 
       Alert.alert(
-        "Error",
-        "Unable to select the image."
+        t.error,
+        t.unableToSelectImage
       );
     }
   };
+
+
 
   const takePhoto = async () => {
     try {
@@ -242,9 +243,8 @@ export default function App() {
 
       if (!permission.granted) {
         Alert.alert(
-          "Permission Required",
-          "Camera permission status: " +
-            permission.status
+          t.permissionRequired,
+          `${t.cameraPermissionStatus} ${permission.status}`
         );
 
         return;
@@ -258,15 +258,18 @@ export default function App() {
           base64: true,
         });
 
-      if (result.canceled) return;
+      if (result.canceled) {
+        return;
+      }
 
       const asset = result.assets[0];
 
       if (!asset.base64) {
         Alert.alert(
-          "Error",
-          "Unable to process the photo."
+          t.error,
+          t.unableToProcessPhoto
         );
+
         return;
       }
 
@@ -281,32 +284,33 @@ export default function App() {
       );
 
       Alert.alert(
-        "Error",
-        "Unable to take the photo."
+        t.error,
+        t.unableToTakePhoto
       );
     }
   };
 
+
   const deletePhoto = () => {
     if (!photoURL) {
       Alert.alert(
-        "No Profile Picture",
-        "You do not have a profile picture to delete."
+        t.noProfilePicture,
+        t.noProfilePictureMessage
       );
 
       return;
     }
 
     Alert.alert(
-      "Delete Profile Picture",
-      "Are you sure you want to delete your profile picture?",
+      t.deleteProfilePicture,
+      t.deleteProfilePictureMessage,
       [
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
         {
-          text: "Delete",
+          text: t.delete,
           style: "destructive",
           onPress: () => {
             setPhotoURL(null);
@@ -316,31 +320,35 @@ export default function App() {
     );
   };
 
+
+
   const changePhoto = () => {
     Alert.alert(
-      "Profile Picture",
-      "What would you like to do?",
+      t.profilePicture,
+      t.whatWouldYouLikeToDo,
       [
         {
-          text: "Take Photo",
+          text: t.takePhoto,
           onPress: takePhoto,
         },
         {
-          text: "Choose from Gallery",
+          text: t.chooseFromGallery,
           onPress: selectFromGallery,
         },
         {
-          text: "Delete Photo",
+          text: t.deletePhoto,
           onPress: deletePhoto,
           style: "destructive",
         },
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
       ]
     );
   };
+
+
 
   const createSecurityAlert = async ({
     type,
@@ -376,11 +384,12 @@ export default function App() {
     }
   };
 
+
   const updateProfile = async () => {
     if (!user) {
       Alert.alert(
-        "Error",
-        "No authenticated user."
+        t.error,
+        t.noAuthenticatedUser
       );
 
       return;
@@ -388,8 +397,8 @@ export default function App() {
 
     if (!username.trim()) {
       Alert.alert(
-        "Required Field",
-        "Please enter your username."
+        t.requiredField,
+        t.enterUsername
       );
 
       return;
@@ -397,8 +406,8 @@ export default function App() {
 
     if (!phone.trim()) {
       Alert.alert(
-        "Required Field",
-        "Please enter your phone number."
+        t.requiredField,
+        t.enterPhone
       );
 
       return;
@@ -406,8 +415,8 @@ export default function App() {
 
     if (!email.trim()) {
       Alert.alert(
-        "Required Field",
-        "Please enter your email address."
+        t.requiredField,
+        t.enterEmail
       );
 
       return;
@@ -453,6 +462,7 @@ export default function App() {
     try {
       setSaving(true);
 
+
       if (emailChanged) {
         try {
           await updateEmail(
@@ -474,36 +484,38 @@ export default function App() {
             "auth/requires-recent-login"
           ) {
             Alert.alert(
-              "Recent Login Required",
-              "For security reasons, please log in again before changing your email address."
+              t.recentLoginRequired,
+              t.recentLoginMessage
             );
           } else if (
             error?.code ===
             "auth/email-already-in-use"
           ) {
             Alert.alert(
-              "Email Already in Use",
-              "That email address is already being used by another account."
+              t.emailAlreadyInUse,
+              t.emailAlreadyInUseMessage
             );
           } else if (
             error?.code ===
             "auth/invalid-email"
           ) {
             Alert.alert(
-              "Invalid Email",
-              "Please enter a valid email address."
+              t.invalidEmail,
+              t.invalidEmailMessage
             );
           } else {
             Alert.alert(
-              "Email Update Error",
+              t.emailUpdateError,
               error?.message ||
-                "Unable to update your email address."
+                t.emailUpdateErrorMessage
             );
           }
 
           return;
         }
       }
+
+     
 
       const userRef = doc(
         db,
@@ -527,38 +539,50 @@ export default function App() {
         }
       );
 
-      if (usernameChanged || photoChanged) {
+
+
+      if (
+        usernameChanged ||
+        photoChanged
+      ) {
         await createSecurityAlert({
           type: "profile_change",
-          title: "Profile information updated",
+          title:
+            t.profileInformationUpdated,
           message:
-            "Your profile information was updated successfully.",
+            t.profileInformationUpdatedMessage,
         });
       }
+
 
       if (emailChanged) {
         await createSecurityAlert({
           type: "email_change",
-          title: "Email address changed",
+          title:
+            t.emailAddressChanged,
           message:
-            "Your account email address was changed successfully. A verification email has been sent to your new address.",
+            t.emailAddressChangedMessage,
           extraData: {
             newEmail,
           },
         });
       }
 
+
       if (phoneChanged) {
         await createSecurityAlert({
           type: "phone_change",
-          title: "Phone number changed",
+          title:
+            t.phoneNumberChanged,
           message:
-            "Your account phone number was updated successfully.",
+            t.phoneNumberChangedMessage,
           extraData: {
             phone: newPhone,
           },
         });
       }
+
+  
 
       setOriginalUsername(
         newUsername
@@ -576,20 +600,22 @@ export default function App() {
         photoURL
       );
 
+      
+
       if (emailChanged) {
         Alert.alert(
-          "Profile Updated",
-          "Your profile was updated successfully. A verification email was sent to your new email address."
+          t.profileUpdated,
+          t.emailVerificationMessage
         );
       } else if (anyProfileChange) {
         Alert.alert(
-          "Profile Updated",
-          "Your profile has been updated successfully."
+          t.profileUpdated,
+          t.profileUpdatedMessage
         );
       } else {
         Alert.alert(
-          "Settings Saved",
-          "Your settings have been saved successfully."
+          t.settingsSaved,
+          t.settingsSavedMessage
         );
       }
     } catch (error) {
@@ -599,14 +625,16 @@ export default function App() {
       );
 
       Alert.alert(
-        "Error",
+        t.error,
         error?.message ||
-          "Unable to save your changes."
+          t.unableToSaveChanges
       );
     } finally {
       setSaving(false);
     }
   };
+
+ 
 
   if (loading) {
     return (
@@ -631,8 +659,13 @@ export default function App() {
       <View style={styles.app}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          behavior={
+            Platform.OS === "ios"
+              ? "padding"
+              : "height"
+          }
         >
+       
           <View
             style={[
               styles.header,
@@ -644,11 +677,13 @@ export default function App() {
                     : isTablet
                     ? 1.15
                     : 1),
-                paddingHorizontal: isSmall
-                  ? 18
-                  : isTablet
-                  ? 45
-                  : 25,
+
+                paddingHorizontal:
+                  isSmall
+                    ? 18
+                    : isTablet
+                    ? 45
+                    : 25,
               },
             ]}
           >
@@ -699,6 +734,7 @@ export default function App() {
                       : isTablet
                       ? 1.15
                       : 1),
+
                   transform: [
                     {
                       translateX:
@@ -722,7 +758,7 @@ export default function App() {
                 },
               ]}
             >
-              Edit My Profile
+              {t.editMyProfile}
             </Text>
 
             <TouchableOpacity
@@ -744,7 +780,8 @@ export default function App() {
               ]}
               onPress={() =>
                 router.push({
-                  pathname: "/notifications",
+                  pathname:
+                    "/notifications",
                   params: {
                     from: "/edit_profile",
                   },
@@ -767,6 +804,7 @@ export default function App() {
             </TouchableOpacity>
           </View>
 
+          
           <View
             style={[
               styles.whiteContainer,
@@ -794,6 +832,7 @@ export default function App() {
                 {
                   paddingHorizontal:
                     horizontalPadding,
+
                   paddingBottom:
                     45 * scale,
                 },
@@ -803,7 +842,11 @@ export default function App() {
             >
               <View style={styles.profileCard}>
 
-                <View style={styles.photoContainer}>
+        
+
+                <View
+                  style={styles.photoContainer}
+                >
                   {photoURL ? (
                     <Image
                       source={{
@@ -857,17 +900,23 @@ export default function App() {
                           14 * scale,
                       },
                     ]}
-                    onPress={changePhoto}
+                    onPress={
+                      changePhoto
+                    }
                   >
                     <MaterialCommunityIcons
                       name="camera-outline"
                       size={
                         16 * scale
                       }
-                      color={COLORS.white}
+                      color={
+                        COLORS.white
+                      }
                     />
                   </TouchableOpacity>
                 </View>
+
+             
 
                 <Text
                   style={[
@@ -879,8 +928,11 @@ export default function App() {
                   ]}
                   numberOfLines={1}
                 >
-                  {username || "User"}
+                  {username ||
+                    t.user}
                 </Text>
+
+               
 
                 <Text
                   style={[
@@ -898,7 +950,11 @@ export default function App() {
                   ) || "00000000"}
                 </Text>
 
-                <View style={styles.section}>
+              
+
+                <View
+                  style={styles.section}
+                >
                   <Text
                     style={[
                       styles.sectionTitle,
@@ -908,8 +964,12 @@ export default function App() {
                       },
                     ]}
                   >
-                    Account Settings
+                    {
+                      t.accountSettings
+                    }
                   </Text>
+
+                 
 
                   <Text
                     style={[
@@ -920,7 +980,7 @@ export default function App() {
                       },
                     ]}
                   >
-                    Username
+                    {t.username}
                   </Text>
 
                   <TextInput
@@ -939,9 +999,13 @@ export default function App() {
                     onChangeText={
                       setUsername
                     }
-                    placeholder="Username"
+                    placeholder={
+                      t.username
+                    }
                     placeholderTextColor="#777"
                   />
+
+                  
 
                   <Text
                     style={[
@@ -952,7 +1016,7 @@ export default function App() {
                       },
                     ]}
                   >
-                    Phone Number
+                    {t.phoneNumber}
                   </Text>
 
                   <TextInput
@@ -968,11 +1032,15 @@ export default function App() {
                       },
                     ]}
                     value={phone}
-                    onChangeText={setPhone}
+                    onChangeText={
+                      setPhone
+                    }
                     placeholder="+503 0000 0000"
                     placeholderTextColor="#777"
                     keyboardType="phone-pad"
                   />
+
+                 
 
                   <Text
                     style={[
@@ -983,7 +1051,7 @@ export default function App() {
                       },
                     ]}
                   >
-                    Email Address
+                    {t.emailAddress}
                   </Text>
 
                   <TextInput
@@ -999,12 +1067,16 @@ export default function App() {
                       },
                     ]}
                     value={email}
-                    onChangeText={setEmail}
+                    onChangeText={
+                      setEmail
+                    }
                     placeholder="email@gmail.com"
                     placeholderTextColor="#777"
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
+
+                 
 
                   <View
                     style={styles.optionRow}
@@ -1018,17 +1090,23 @@ export default function App() {
                         },
                       ]}
                     >
-                      Push Notifications
+                      {
+                        t.pushNotifications
+                      }
                     </Text>
 
                     <Switch
-                      value={notifications}
+                      value={
+                        notifications
+                      }
                       onValueChange={
                         setNotifications
                       }
                       trackColor={{
-                        false: "#D7D7D7",
-                        true: COLORS.dark,
+                        false:
+                          "#D7D7D7",
+                        true:
+                          COLORS.dark,
                       }}
                       thumbColor={
                         COLORS.white
@@ -1036,6 +1114,8 @@ export default function App() {
                     />
                   </View>
 
+                 
+
                   <View
                     style={styles.optionRow}
                   >
@@ -1048,7 +1128,7 @@ export default function App() {
                         },
                       ]}
                     >
-                      Dark Mode
+                      {t.darkMode}
                     </Text>
 
                     <Switch
@@ -1057,14 +1137,18 @@ export default function App() {
                         setDarkMode
                       }
                       trackColor={{
-                        false: "#D7D7D7",
-                        true: COLORS.cyan,
+                        false:
+                          "#D7D7D7",
+                        true:
+                          COLORS.cyan,
                       }}
                       thumbColor={
                         COLORS.white
                       }
                     />
                   </View>
+
+                
 
                   <TouchableOpacity
                     style={[
@@ -1100,7 +1184,9 @@ export default function App() {
                           },
                         ]}
                       >
-                        Update Profile
+                        {
+                          t.updateProfile
+                        }
                       </Text>
                     )}
                   </TouchableOpacity>
@@ -1109,6 +1195,8 @@ export default function App() {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
+
+       
 
         <View
           style={[
@@ -1132,37 +1220,43 @@ export default function App() {
             },
           ]}
         >
-          {NAV.map((item, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.navItem}
-              activeOpacity={0.7}
-              onPress={() =>
-                router.push(item.route)
-              }
-            >
-              <MaterialCommunityIcons
-                name={item.icon}
-                size={
-                  item.icon ===
-                  "swap-horizontal"
-                    ? 37 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1)
-                    : 35 *
-                      (isSmall
-                        ? 0.85
-                        : isTablet
-                        ? 1.15
-                        : 1)
+          {NAV.map(
+            (item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.navItem}
+                activeOpacity={0.7}
+                onPress={() =>
+                  router.push(
+                    item.route
+                  )
                 }
-                color={COLORS.white}
-              />
-            </TouchableOpacity>
-          ))}
+              >
+                <MaterialCommunityIcons
+                  name={item.icon}
+                  size={
+                    item.icon ===
+                    "swap-horizontal"
+                      ? 37 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1)
+                      : 35 *
+                        (isSmall
+                          ? 0.85
+                          : isTablet
+                          ? 1.15
+                          : 1)
+                  }
+                  color={
+                    COLORS.white
+                  }
+                />
+              </TouchableOpacity>
+            )
+          )}
         </View>
       </View>
     </SafeAreaView>

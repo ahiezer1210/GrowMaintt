@@ -12,36 +12,39 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function Profile() {
 
+    const { t } = useAppSettings();
+
     const menuOptions = [
         {
-            title: "Edit Profile",
+            title: t.editProfile,
             icon: "person-outline",
             color: "#27b6d1",
             route: "/edit_profile"
         },
         {
-            title: "Security",
+            title: t.security,
             icon: "shield-checkmark-outline",
             color: "#27b6d1",
             route: "/privacyScreen"
         },
         {
-            title: "Settings",
+            title: t.settings,
             icon: "settings-outline",
             color: "#27b6d1",
             route: "/settings"
         },
         {
-            title: "Terms and\n Conditions",
+            title: t.termsAndConditions,
             icon: "help-circle-outline",
             color: "#27b6d1",
             route: "/terms"
         },
         {
-            title: "Log\n Out",
+            title: t.logOut,
             icon: "log-out-outline",
             color: "#27b6d1",
             route: "/logout"
@@ -105,7 +108,7 @@ export default function Profile() {
                         },
                     ]}
                 >
-                    Profile
+                    {t.profileTitle}
                 </Text>
 
                 <TouchableOpacity
@@ -209,9 +212,6 @@ export default function Profile() {
                                 ]}
                                 onPress={() => {
 
-                                    // Si entra a Logout desde Profile,
-                                    // enviamos el origen para que la flecha
-                                    // pueda regresar correctamente.
                                     if (option.route === "/logout") {
 
                                         router.push({

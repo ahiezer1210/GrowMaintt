@@ -9,9 +9,11 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function PrivacyScreen() {
   const { width, height } = useWindowDimensions();
+  const { t } = useAppSettings();
 
   const small = width < 350;
   const tablet = width >= 600;
@@ -158,7 +160,7 @@ export default function PrivacyScreen() {
               },
             ]}
           >
-            Privacy Policy
+            {t.privacyPolicy}
           </Text>
 
           <TouchableOpacity
@@ -245,7 +247,7 @@ export default function PrivacyScreen() {
                   },
                 ]}
               >
-                Your Privacy Matters
+                {t.yourPrivacyMatters}
               </Text>
 
               <View
@@ -269,7 +271,7 @@ export default function PrivacyScreen() {
                     },
                   ]}
                 >
-                  Your Privacy is Important
+                  {t.yourPrivacyIsImportant}
                 </Text>
 
                 <Text
@@ -285,12 +287,11 @@ export default function PrivacyScreen() {
                     },
                   ]}
                 >
-                  At GrowMaint, we protect your information and give you
-                  transparency about how we use it.
+                  {t.privacyBannerDescription}
                 </Text>
               </View>
 
-              {/* USER ICON */}
+      
               <View
                 style={[
                   styles.section,
@@ -342,7 +343,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    What information do we collect?
+                    {t.whatInformationCollect}
                   </Text>
 
                   <Text
@@ -358,8 +359,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    We collect information that you provide directly, such as
-                    your contact details and account information.
+                    {t.whatInformationCollectDescription}
                   </Text>
                 </View>
               </View>
@@ -380,7 +380,7 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-              {/* SEARCH ICON */}
+          
               <View
                 style={[
                   styles.section,
@@ -432,7 +432,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    How do we use your information?
+                    {t.howUseInformation}
                   </Text>
 
                   <Text
@@ -448,9 +448,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    We use your information to provide and improve our
-                    services, personalize your experience, and comply with our
-                    legal obligations.
+                    {t.howUseInformationDescription}
                   </Text>
                 </View>
               </View>
@@ -471,7 +469,7 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-              {/* LOCK ICON */}
+        
               <View
                 style={[
                   styles.section,
@@ -523,7 +521,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    How do we protect your data?
+                    {t.howProtectData}
                   </Text>
 
                   <Text
@@ -539,9 +537,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    We implement technical and organizational measures to
-                    protect your data against unauthorized access, loss, or
-                    misuse.
+                    {t.howProtectDataDescription}
                   </Text>
                 </View>
               </View>
@@ -562,7 +558,7 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-              {/* USERS ICON */}
+  
               <View
                 style={[
                   styles.section,
@@ -614,7 +610,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    Who do we share your information with?
+                    {t.whoShareInformation}
                   </Text>
 
                   <Text
@@ -630,9 +626,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    We do not share your personal information with third
-                    parties, except when necessary to provide the service or
-                    when legally required.
+                    {t.whoShareInformationDescription}
                   </Text>
                 </View>
               </View>
@@ -653,7 +647,7 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-              {/* SCALE BALANCE ICON */}
+         
               <View
                 style={[
                   styles.section,
@@ -705,7 +699,7 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    Your rights
+                    {t.yourRights}
                   </Text>
 
                   <Text
@@ -721,16 +715,14 @@ export default function PrivacyScreen() {
                       },
                     ]}
                   >
-                    You have the right to access, correct, delete, or limit
-                    the use of your personal information. You can exercise
-                    your rights at any time.
+                    {t.yourRightsDescription}
                   </Text>
                 </View>
               </View>
             </View>
           </ScrollView>
 
-          {/* NAVBAR IGUAL A LOGOUT */}
+       
           <View
             style={[
               styles.bottomBar,

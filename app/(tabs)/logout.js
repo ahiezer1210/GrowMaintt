@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { auth } from "../../firebaseConfig.js";
+import { useAppSettings } from "../../context/Appsettings";
 
 const navItems = [
   {
@@ -38,6 +39,8 @@ const navItems = [
 ];
 
 export default function LogoutScreen({ navigation }) {
+  const { t } = useAppSettings();
+
   const { width } = useWindowDimensions();
 
   const { from } = useLocalSearchParams();
@@ -102,23 +105,23 @@ export default function LogoutScreen({ navigation }) {
 
   const logout = () => {
     Alert.alert(
-      "Log Out",
-      "Are you sure you want to log out?",
+      t.logOut,
+      t.logOutConfirmation,
       [
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
         {
-          text: "Log Out",
+          text: t.logOut,
           onPress: async () => {
             try {
               await signOut(auth);
               router.replace("/login");
             } catch (error) {
               Alert.alert(
-                "Error",
-                "Could not log out. Please try again."
+                t.error,
+                t.couldNotLogOut
               );
             }
           },
@@ -256,7 +259,7 @@ export default function LogoutScreen({ navigation }) {
               },
             ]}
           >
-            Log Out
+            {t.logOut}
           </Text>
 
           <TouchableOpacity
@@ -393,7 +396,7 @@ export default function LogoutScreen({ navigation }) {
                 },
               ]}
             >
-              Are you sure you want to{"\n"}log out?
+              {t.areYouSureLogOut}
             </Text>
 
             <Text
@@ -416,11 +419,10 @@ export default function LogoutScreen({ navigation }) {
                 },
               ]}
             >
-              You will be logged out of this device. To access your account
-              again, you will need to log in again.
+              {t.loggedOutDescription}
             </Text>
 
-            {button("Log Out", logout)}
+            {button(t.logOut, logout)}
 
             <Text
               style={[
@@ -439,11 +441,11 @@ export default function LogoutScreen({ navigation }) {
                 },
               ]}
             >
-              Or log out from all your{"\n"}devices
+              {t.orLogOutAllDevices}
             </Text>
 
             {button(
-              "Log Out Everywhere",
+              t.logOutEverywhere,
               logoutEverywhere
             )}
           </ScrollView>

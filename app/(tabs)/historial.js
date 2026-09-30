@@ -16,6 +16,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig.js";
 
 const NAV = [
@@ -27,6 +29,8 @@ const NAV = [
 ];
 
 export default function HistorialScreen() {
+  const { t } = useAppSettings();
+
   const [showAll, setShowAll] = useState(false);
   const [movements, setMovements] = useState([]);
   const [selectedMovement, setSelectedMovement] = useState(null);
@@ -109,39 +113,48 @@ export default function HistorialScreen() {
 
                 return {
                   id: saving.id,
+
                   name:
                     saving.category ||
                     expense?.category ||
                     "Savings",
+
                   type: getMovementType(
                     saving.category ||
                       expense?.category ||
                       ""
                   ),
+
                   savings: Number(
                     saving.amount || 0
                   ),
+
                   description:
                     expense?.description ||
                     saving.description ||
                     "",
+
                   amount: Number(
                     expense?.amount ??
                       saving.originalAmount ??
                       0
                   ),
+
                   roundingAmount: Number(
                     expense?.roundingAmount ??
                       saving.roundingAmount ??
                       0
                   ),
+
                   date:
                     expense?.date ||
                     saving.date ||
                     "",
+
                   expenseType:
                     expense?.expenseType ||
                     "",
+
                   isRecurrent:
                     expense?.isRecurrent ||
                     false,
@@ -259,7 +272,7 @@ export default function HistorialScreen() {
             },
           ]}
         >
-          Savings History
+          {t.savingsHistory}
         </Text>
       </View>
 
@@ -270,7 +283,7 @@ export default function HistorialScreen() {
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
             paddingHorizontal:
-            horizontalPadding,
+              horizontalPadding,
             paddingTop: s(28),
           },
         ]}
@@ -311,7 +324,7 @@ export default function HistorialScreen() {
                 },
               ]}
             >
-              The Power of Saving
+              {t.thePowerOfSaving}
             </Text>
 
             <Text
@@ -333,7 +346,7 @@ export default function HistorialScreen() {
                 },
               ]}
             >
-              Keep saving!
+              {t.keepSaving}
             </Text>
           </View>
         </View>
@@ -365,7 +378,7 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            Movements
+            {t.movements}
           </Text>
 
           <Text
@@ -376,7 +389,7 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            Round-up
+            {t.roundUp}
           </Text>
         </View>
 
@@ -476,7 +489,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        Description
+                        {t.description}
                       </Text>
 
                       <Text
@@ -488,7 +501,7 @@ export default function HistorialScreen() {
                         ]}
                       >
                         {item.description ||
-                          "No description"}
+                          t.noDescription}
                       </Text>
                     </View>
 
@@ -508,7 +521,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        Expense
+                        {t.expense}
                       </Text>
 
                       <Text
@@ -539,7 +552,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        Round-up to
+                        {t.roundUpTo}
                       </Text>
 
                       <Text
@@ -573,7 +586,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        Date
+                        {t.date}
                       </Text>
 
                       <Text
@@ -584,7 +597,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        {item.date || "No date"}
+                        {item.date || t.noDate}
                       </Text>
                     </View>
 
@@ -597,7 +610,7 @@ export default function HistorialScreen() {
                           },
                         ]}
                       >
-                        Savings
+                        {t.savings}
                       </Text>
 
                       <Text
@@ -639,7 +652,9 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            {showAll ? "Show less" : "See all"}
+            {showAll
+              ? t.showLess
+              : t.seeAll}
           </Text>
 
           <Ionicons
@@ -671,7 +686,7 @@ export default function HistorialScreen() {
               },
             ]}
           >
-            Total saved: $
+            {t.totalSaved}: $
             {totalSaved.toFixed(2)}
           </Text>
         </View>
@@ -701,7 +716,9 @@ function BottomNav({ small, scale }) {
           <TouchableOpacity
             key={index}
             style={styles.navItem}
-            onPress={() => router.push(routePath)}
+            onPress={() =>
+              router.push(routePath)
+            }
             activeOpacity={0.7}
           >
             {type === "ion" ? (

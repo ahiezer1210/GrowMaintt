@@ -14,8 +14,10 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function VerifyAge() {
+  const { t } = useAppSettings();
 
   const { width } = useWindowDimensions();
 
@@ -41,6 +43,7 @@ export default function VerifyAge() {
         : 60;
 
   const s = (value) => Math.round(value * scale);
+
   const [documentUri, setDocumentUri] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingPhoto, setLoadingPhoto] = useState(true);
@@ -185,7 +188,7 @@ export default function VerifyAge() {
             },
           ]}
         >
-          Identity Verification
+          {t.identityVerification}
         </Text>
 
         <View style={{ width: s(30) }} />
@@ -210,7 +213,7 @@ export default function VerifyAge() {
             },
           ]}
         >
-          Scan your identity document
+          {t.scanYourIdentityDocument}
         </Text>
 
         <Text
@@ -223,8 +226,7 @@ export default function VerifyAge() {
             },
           ]}
         >
-          Take a clear photo of your ID card to
-          verify that you are 18 years old or older.
+          {t.identityDocumentDescription}
         </Text>
 
         {loadingPhoto ? (
@@ -269,7 +271,7 @@ export default function VerifyAge() {
                 },
               ]}
             >
-              Scan Document
+              {t.scanDocument}
             </Text>
           </TouchableOpacity>
         ) : (
@@ -280,7 +282,10 @@ export default function VerifyAge() {
               style={[
                 styles.preview,
                 {
-                  width: Math.min(s(320), width - horizontalPadding * 2),
+                  width: Math.min(
+                    s(320),
+                    width - horizontalPadding * 2
+                  ),
                   height: s(220),
                   borderRadius: s(15),
                   marginTop: s(40),
@@ -306,7 +311,7 @@ export default function VerifyAge() {
                   },
                 ]}
               >
-                Retake Photo
+                {t.retakePhoto}
               </Text>
             </TouchableOpacity>
 
@@ -337,7 +342,7 @@ export default function VerifyAge() {
                     },
                   ]}
                 >
-                  Continue
+                  {t.continue}
                 </Text>
               )}
             </TouchableOpacity>

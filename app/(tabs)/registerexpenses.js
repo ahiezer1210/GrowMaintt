@@ -23,9 +23,11 @@ import {
   View,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function Registerexpenses() {
   const { width } = useWindowDimensions();
+  const { t } = useAppSettings();
 
   const isSmallScreen = width < 380;
   const isTablet = width >= 768;
@@ -48,21 +50,21 @@ export default function Registerexpenses() {
 
   const saveExpense = async () => {
     if (!amount || !category || !date || !expenseType) {
-      Alert.alert("Error", "Please complete all fields.");
+      Alert.alert(t.error, t.enterExpenseAmount);
       return;
     }
 
     const numericAmount = parseFloat(amount);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert("Error", "Please enter a valid amount.");
+      Alert.alert(t.error, t.invalidAmount);
       return;
     }
 
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert("Error", "No user is currently logged in.");
+      Alert.alert(t.error, t.noAuthenticatedUser);
       return;
     }
 
@@ -96,10 +98,10 @@ export default function Registerexpenses() {
           {
             userId: user.uid,
             type: "Savings",
-            title: "New savings",
-            message: `You saved $${savingsAmount.toFixed(
+            title: t.savingsGenerated,
+            message: `${t.savedFromPurchase} $${savingsAmount.toFixed(
               2
-            )} by rounding up your expense.`,
+            )} ${t.fromYourPurchase}`,
             amount: savingsAmount,
             read: false,
             createdAt: serverTimestamp(),
@@ -109,12 +111,12 @@ export default function Registerexpenses() {
       }
 
       Alert.alert(
-        "Expense registered",
+        t.expenseRegistered,
         savingsAmount > 0
-          ? `Expense registered successfully.\n$${savingsAmount.toFixed(
+          ? `${t.expenseSavedSuccessfully}\n$${savingsAmount.toFixed(
               2
-            )} was added to your savings.`
-          : "Expense registered successfully."
+            )} ${t.addedToSavings}`
+          : t.expenseSavedSuccessfully
       );
 
       setAmount("");
@@ -123,10 +125,7 @@ export default function Registerexpenses() {
       setDate("");
     } catch (error) {
       console.error(error);
-      Alert.alert(
-        "Error",
-        "There was a problem registering the expense."
-      );
+      Alert.alert(t.error, t.expenseCouldNotBeSaved);
     }
   };
 
@@ -149,7 +148,7 @@ export default function Registerexpenses() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {/* HEADER */}
+        
         <View
           style={[
             styles.header,
@@ -191,9 +190,7 @@ export default function Registerexpenses() {
               },
             ]}
           >
-            Register
-            {"\n"}
-            expenses
+            {t.registerExpenses}
           </Text>
 
           <TouchableOpacity
@@ -215,7 +212,7 @@ export default function Registerexpenses() {
           </TouchableOpacity>
         </View>
 
-        {/* CONTENT */}
+       
         <View style={styles.cardContainer}>
           <ScrollView
             contentContainerStyle={[
@@ -236,7 +233,7 @@ export default function Registerexpenses() {
                 },
               ]}
             >
-              Amount
+              {t.amount}
             </Text>
 
             <TextInput
@@ -248,7 +245,7 @@ export default function Registerexpenses() {
                   paddingHorizontal: scale(15),
                 },
               ]}
-              placeholder="Enter amount"
+              placeholder={t.amountPlaceholder}
               placeholderTextColor="#8A8A8A"
               keyboardType="decimal-pad"
               value={amount}
@@ -265,7 +262,7 @@ export default function Registerexpenses() {
                 },
               ]}
             >
-              Category
+              {t.category}
             </Text>
 
             <TextInput
@@ -277,7 +274,7 @@ export default function Registerexpenses() {
                   paddingHorizontal: scale(15),
                 },
               ]}
-              placeholder="Enter category"
+              placeholder={t.categoryPlaceholder}
               placeholderTextColor="#8A8A8A"
               value={category}
               onChangeText={setCategory}
@@ -293,7 +290,7 @@ export default function Registerexpenses() {
                 },
               ]}
             >
-              Expense type
+              {t.expenseType}
             </Text>
 
             <TextInput
@@ -305,7 +302,7 @@ export default function Registerexpenses() {
                   paddingHorizontal: scale(15),
                 },
               ]}
-              placeholder="Necessary or unnecessary"
+              placeholder={t.expenseTypePlaceholder}
               placeholderTextColor="#8A8A8A"
               value={expenseType}
               onChangeText={setExpenseType}
@@ -321,7 +318,7 @@ export default function Registerexpenses() {
                 },
               ]}
             >
-              Date
+              {t.date}
             </Text>
 
             <TextInput
@@ -333,7 +330,7 @@ export default function Registerexpenses() {
                   paddingHorizontal: scale(15),
                 },
               ]}
-              placeholder="MM/DD/YYYY"
+              placeholder={t.datePlaceholder}
               placeholderTextColor="#8A8A8A"
               value={date}
               onChangeText={setDate}
@@ -357,7 +354,7 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Register expense
+                {t.registerExpense}
               </Text>
             </TouchableOpacity>
 
@@ -379,13 +376,13 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Cancel
+                {t.cancel}
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
 
-        {/* BOTTOM NAVBAR */}
+       
         <View
           style={[
             styles.bottomNav,

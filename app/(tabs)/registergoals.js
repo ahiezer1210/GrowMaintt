@@ -24,9 +24,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { auth, db } from "../../firebaseConfig.js";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function SavingsGoal() {
   const { width } = useWindowDimensions();
+  const { t } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -54,7 +56,7 @@ export default function SavingsGoal() {
     : 25;
 
   const s = (value) => Math.round(value * scale);
-
+  
   const headerHeight = 118 * scale;
   const bottomHeight = 65 * scale;
 
@@ -147,7 +149,6 @@ export default function SavingsGoal() {
     if (numericDate) {
       const month = Number(numericDate[1]) - 1;
       const day = Number(numericDate[2]);
-
       let year = Number(numericDate[3]);
 
       if (year < 100) {
@@ -274,63 +275,70 @@ export default function SavingsGoal() {
 
     if (!result) {
       Alert.alert(
-        "Error",
-        "Please enter a valid amount, frequency and dates."
+        t.error,
+        t.validAmountFrequencyDates
       );
       return;
     }
 
     setSavingAmount(result.amount.toFixed(2));
 
+    const unitText =
+      result.unit === "day"
+        ? t.perDay
+        : t.perMonth;
+
     Alert.alert(
-      "Saving calculation",
-      `You need to save $${result.amount.toFixed(
+      t.savingCalculation,
+      `${t.needToSave} $${result.amount.toFixed(
         2
-      )} per ${result.unit} for ${
+      )} ${unitText} ${t.forPeriods} ${
         result.periods
-      } ${result.unit}${
-        result.periods !== 1 ? "s" : ""
-      }.`
+      } ${
+        result.unit === "day"
+          ? t.daily.toLowerCase()
+          : t.monthly.toLowerCase()
+      }${result.periods !== 1 ? "s" : ""}.`
     );
   };
 
   const saveGoal = async () => {
     if (!goalName.trim()) {
       Alert.alert(
-        "Error",
-        "Please enter the goal name."
+        t.error,
+        t.enterGoalName
       );
       return;
     }
 
     if (!targetAmount.trim()) {
       Alert.alert(
-        "Error",
-        "Please enter the target amount."
+        t.error,
+        t.enterTargetAmount
       );
       return;
     }
 
     if (!frequency) {
       Alert.alert(
-        "Error",
-        "Please select the saving frequency."
+        t.error,
+        t.selectSavingFrequency
       );
       return;
     }
 
     if (!startDate.trim()) {
       Alert.alert(
-        "Error",
-        "Please enter the start date."
+        t.error,
+        t.enterStartDate
       );
       return;
     }
 
     if (!endDate.trim()) {
       Alert.alert(
-        "Error",
-        "Please enter the end date."
+        t.error,
+        t.enterEndDate
       );
       return;
     }
@@ -339,8 +347,8 @@ export default function SavingsGoal() {
 
     if (!user) {
       Alert.alert(
-        "Error",
-        "There is no authenticated user."
+        t.error,
+        t.noAuthenticatedUser
       );
       return;
     }
@@ -357,8 +365,8 @@ export default function SavingsGoal() {
       amountNumber <= 0
     ) {
       Alert.alert(
-        "Error",
-        "The target amount is not valid."
+        t.error,
+        t.invalidTargetAmount
       );
       return;
     }
@@ -372,8 +380,8 @@ export default function SavingsGoal() {
 
     if (!result) {
       Alert.alert(
-        "Error",
-        "Please check the frequency and dates."
+        t.error,
+        t.checkFrequencyDates
       );
       return;
     }
@@ -393,8 +401,8 @@ export default function SavingsGoal() {
 
         if (mainGoalsSnapshot.size >= 3) {
           Alert.alert(
-            "Maximum reached",
-            "You can have a maximum of 3 main goals."
+            t.maximumReached,
+            t.maximumMainGoals
           );
 
           setSaving(false);
@@ -424,8 +432,8 @@ export default function SavingsGoal() {
       resetForm();
 
       Alert.alert(
-        "Goal Registered",
-        "Your savings goal was saved successfully."
+        t.goalRegistered,
+        t.goalSavedSuccessfully
       );
     } catch (error) {
       console.log(
@@ -434,8 +442,8 @@ export default function SavingsGoal() {
       );
 
       Alert.alert(
-        "Error",
-        "The savings goal could not be saved. Please try again."
+        t.error,
+        t.goalSaveError
       );
     } finally {
       setSaving(false);
@@ -469,7 +477,11 @@ export default function SavingsGoal() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
       >
         <View
           style={[
@@ -480,7 +492,6 @@ export default function SavingsGoal() {
             },
           ]}
         >
-
           <TouchableOpacity
             style={[
               styles.backButton,
@@ -509,7 +520,7 @@ export default function SavingsGoal() {
               },
             ]}
           >
-            Create savings{"\n"}goals
+            {t.createSavingsGoals}
           </Text>
 
           <TouchableOpacity
@@ -559,7 +570,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              Goal name
+              {t.goalName}
             </Text>
 
             <TextInput
@@ -587,7 +598,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              Target amount
+              {t.targetAmount}
             </Text>
 
             <TextInput
@@ -623,7 +634,7 @@ export default function SavingsGoal() {
                   },
                 ]}
               >
-                Main goal
+                {t.mainGoal}
               </Text>
 
               <Switch
@@ -647,7 +658,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              Saving frequency
+              {t.savingFrequency}
             </Text>
 
             <View
@@ -683,7 +694,7 @@ export default function SavingsGoal() {
                       styles.typeTextActive,
                   ]}
                 >
-                  Daily
+                  {t.daily}
                 </Text>
               </TouchableOpacity>
 
@@ -712,7 +723,7 @@ export default function SavingsGoal() {
                       styles.typeTextActive,
                   ]}
                 >
-                  Monthly
+                  {t.monthly}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -726,7 +737,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              Amount to save
+              {t.amountToSave}
             </Text>
 
             <TextInput
@@ -757,8 +768,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              The amount is calculated according to
-              your target, frequency and saving dates.
+              {t.savingAmountDescription}
             </Text>
 
             <TouchableOpacity
@@ -780,7 +790,7 @@ export default function SavingsGoal() {
                   },
                 ]}
               >
-                Calculate saving
+                {t.calculateSaving}
               </Text>
             </TouchableOpacity>
 
@@ -793,7 +803,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              Start date
+              {t.startDate}
             </Text>
 
             <TextInput
@@ -821,7 +831,7 @@ export default function SavingsGoal() {
                 },
               ]}
             >
-              End date
+              {t.endDate}
             </Text>
 
             <TextInput
@@ -862,7 +872,7 @@ export default function SavingsGoal() {
                       },
                     ]}
                   >
-                    Recommended saving
+                    {t.recommendedSaving}
                   </Text>
 
                   <Text
@@ -891,10 +901,9 @@ export default function SavingsGoal() {
                       },
                     ]}
                   >
-                    per{" "}
                     {frequency === "daily"
-                      ? "day"
-                      : "month"}
+                      ? t.perDay
+                      : t.perMonth}
                   </Text>
                 </View>
               )}
@@ -921,8 +930,8 @@ export default function SavingsGoal() {
                 ]}
               >
                 {saving
-                  ? "Saving..."
-                  : "Save goal"}
+                  ? t.saving
+                  : t.saveGoal}
               </Text>
             </TouchableOpacity>
 
@@ -946,7 +955,7 @@ export default function SavingsGoal() {
                   },
                 ]}
               >
-                Cancel
+                {t.cancel}
               </Text>
             </TouchableOpacity>
           </ScrollView>

@@ -12,6 +12,8 @@ import {
   View,
 } from "react-native";
 
+import { useAppSettings } from "../../context/Appsettings";
+
 const COLORS = {
   blue: "#071426",
   cyan: "#25B5D1",
@@ -21,6 +23,7 @@ const COLORS = {
 
 export default function TermsScreen() {
   const { width } = useWindowDimensions();
+  const { t } = useAppSettings();
 
   const [accepted, setAccepted] = useState(false);
 
@@ -58,7 +61,7 @@ export default function TermsScreen() {
 
       <View style={styles.container}>
 
-        {/* HEADER */}
+        
         <View
           style={[
             styles.header,
@@ -97,9 +100,7 @@ export default function TermsScreen() {
               },
             ]}
           >
-            Terms &
-            {"\n"}
-            Conditions
+            {t.termsAndConditions}
           </Text>
 
           <TouchableOpacity
@@ -130,7 +131,7 @@ export default function TermsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* CARD PRINCIPAL */}
+        
         <View
           style={[
             styles.cardContainer,
@@ -172,9 +173,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              By using our application, you expressly agree to
-              these Terms and Conditions. We recommend reading
-              them carefully before getting started.
+              {t.termsIntro}
             </Text>
 
             <Text
@@ -186,7 +185,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              1. User Requirements and Account
+              {t.userRequirementsAccount}
             </Text>
 
             <Text
@@ -198,9 +197,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Age and Accuracy: You must be at least 18 years
-              old to use GrowMaint and agree to provide accurate
-              and up-to-date information.
+              {t.ageAndAccuracy}
             </Text>
 
             <Text
@@ -212,10 +209,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Security: You are solely responsible for
-              maintaining the confidentiality of your account
-              and password, as well as all activities carried
-              out through your account.
+              {t.security}
             </Text>
 
             <Text
@@ -227,7 +221,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              2. Permitted Use of the Platform
+              {t.permittedUsePlatform}
             </Text>
 
             <Text
@@ -239,8 +233,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Purpose: GrowMaint is a tool designed exclusively
-              to help you manage your personal finances.
+              {t.purpose}
             </Text>
 
             <Text
@@ -252,9 +245,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Prohibitions: It is strictly prohibited to use
-              the platform for illegal, fraudulent, or
-              unauthorized activities.
+              {t.prohibitions}
             </Text>
 
             <Text
@@ -266,7 +257,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              3. Limitation of Liability
+              {t.limitationLiability}
             </Text>
 
             <Text
@@ -278,10 +269,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Exclusion of Damages: GrowMaint is not responsible
-              for direct or indirect damages resulting from the
-              use of the application, except where applicable
-              law requires otherwise.
+              {t.exclusionDamages}
             </Text>
 
             <Text
@@ -293,7 +281,7 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              4. Changes and Updates
+              {t.changesUpdates}
             </Text>
 
             <Text
@@ -305,12 +293,10 @@ export default function TermsScreen() {
                 },
               ]}
             >
-              • Changes: We reserve the right to update these
-              terms at any time. We will notify you of important
-              changes directly within the application.
+              {t.changes}
             </Text>
 
-            {/* CHECKBOX */}
+           
             <View style={styles.bottomInsideScroll}>
               <TouchableOpacity
                 style={styles.checkboxRow}
@@ -344,7 +330,7 @@ export default function TermsScreen() {
                     },
                   ]}
                 >
-                  I accept all terms and conditions
+                  {t.acceptAllTerms}
                 </Text>
               </TouchableOpacity>
 
@@ -367,7 +353,7 @@ export default function TermsScreen() {
                     },
                   ]}
                 >
-                  Accept
+                  {t.accept}
                 </Text>
               </TouchableOpacity>
 
@@ -390,14 +376,14 @@ export default function TermsScreen() {
                     },
                   ]}
                 >
-                  Reject
+                  {t.reject}
                 </Text>
               </TouchableOpacity>
             </View>
           </ScrollView>
         </View>
 
-        {/* NAVBAR */}
+     
         <View
           style={[
             styles.bottomBar,
@@ -483,7 +469,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.blue,
   },
 
-  /* HEADER */
+  
   header: {
     width: "100%",
     backgroundColor: COLORS.blue,
@@ -523,7 +509,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  /* CARD */
+  
   cardContainer: {
     flex: 1,
     backgroundColor: COLORS.white,
@@ -608,7 +594,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  /* NAVBAR */
+ 
   bottomBar: {
     position: "absolute",
     bottom: 0,

@@ -25,8 +25,11 @@ import {
   View,
 } from "react-native";
 import { auth, db } from "../../firebaseConfig.js";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function LogoutDevices() {
+  const { t } = useAppSettings();
+
   const { width } = useWindowDimensions();
   const [loading, setLoading] = useState(false);
 
@@ -90,7 +93,10 @@ export default function LogoutDevices() {
     const user = auth.currentUser;
 
     if (!user) {
-      Alert.alert("Error", "There is no active session.");
+      Alert.alert(
+        t.error,
+        t.noActiveSession || "There is no active session."
+      );
       return;
     }
 
@@ -108,8 +114,8 @@ export default function LogoutDevices() {
 
       if (snapshot.empty) {
         Alert.alert(
-          "Error",
-          "No user found in the database.",
+          t.error,
+          t.noUserFound || "No user found in the database.",
         );
         setLoading(false);
         return;
@@ -131,8 +137,9 @@ export default function LogoutDevices() {
       );
 
       Alert.alert(
-        "Error",
-        "Failed to sign out of all devices. Please try again.",
+        t.error,
+        t.logoutAllDevicesError ||
+          "Failed to sign out of all devices. Please try again.",
       );
 
       setLoading(false);
@@ -188,7 +195,7 @@ export default function LogoutDevices() {
               },
             ]}
           >
-            Log out on all your{"\n"}devices
+            {t.logoutAllDevicesTitle}
           </Text>
 
           <TouchableOpacity
@@ -225,12 +232,12 @@ export default function LogoutDevices() {
               {
                 paddingTop: s(10),
                 paddingHorizontal: horizontalPadding,
-                paddingBottom: s(150), 
+                paddingBottom: s(150),
               },
             ]}
             showsVerticalScrollIndicator={false}
-            alwaysBounceVertical={true} 
-            overScrollMode="always" 
+            alwaysBounceVertical={true}
+            overScrollMode="always"
           >
             <Image
               source={require(
@@ -256,8 +263,7 @@ export default function LogoutDevices() {
                 },
               ]}
             >
-              You will be signed out on all the{"\n"}
-              devices you are logged into.
+              {t.logoutAllDevicesDescription}
             </Text>
 
             <Text
@@ -270,7 +276,7 @@ export default function LogoutDevices() {
                 },
               ]}
             >
-              Do you want to continue?
+              {t.logoutAllDevicesQuestion}
             </Text>
 
             <View
@@ -304,7 +310,7 @@ export default function LogoutDevices() {
                     },
                   ]}
                 >
-                  {loading ? "Logging out..." : "Continue"}
+                  {loading ? t.loggingOut : t.continueAction}
                 </Text>
               </TouchableOpacity>
 
@@ -329,7 +335,7 @@ export default function LogoutDevices() {
                     },
                   ]}
                 >
-                  Cancel
+                  {t.cancel}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -399,15 +405,15 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#FFFFFF",
-    overflow: "hidden", 
+    overflow: "hidden",
   },
 
   whiteScroll: {
-    flex: 1, 
+    flex: 1,
   },
 
   content: {
-    flexGrow: 1, 
+    flexGrow: 1,
     alignItems: "center",
   },
 
@@ -438,7 +444,7 @@ const styles = StyleSheet.create({
   },
 
   bottomBar: {
-    position: "absolute", 
+    position: "absolute",
     bottom: 0,
     left: 0,
     width: "100%",
