@@ -14,8 +14,9 @@ import { useAppSettings } from "../../context/Appsettings";
 const OPTIONS = [
   ["shield-checkmark-outline", "backup", "backup"],
   ["key-outline", "changePassword", "newPassword"],
-  ["cash-outline", "expenseControl", "Expensecontrolperiod"],
+  ["cash-outline", "expensecontrolperiod", "expensecontrolperiod"],
   ["phone-portrait-outline", "linkedDevices", "linkeddevices"],
+  ["book-outline", "userManual", "usermanual"], 
   ["log-out-outline", "logout", "logout"],
   ["close-outline", "deleteAccount", "deleteaccount"],
 ];

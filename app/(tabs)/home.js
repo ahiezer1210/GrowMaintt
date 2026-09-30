@@ -952,7 +952,7 @@ function Header({
         ]}
         onPress={() =>
           router.push(
-            "/Profile"
+            "/profile"
           )
         }
       >
