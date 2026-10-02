@@ -132,7 +132,7 @@ export default function RecuperarContrasena({ navigation }) {
             : "height"
         }
       >
-        {/* HEADER */}
+
         <View
           style={[
             styles.header,
@@ -177,7 +177,7 @@ export default function RecuperarContrasena({ navigation }) {
           </Text>
         </View>
 
-        {/* CONTENT */}
+      
         <View
           style={[
             styles.whiteContainer,
