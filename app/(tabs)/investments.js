@@ -11,9 +11,11 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 
 export default function InversionesScreen() {
   const { width, height } = useWindowDimensions();
+  const { colors, t } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -57,6 +59,127 @@ export default function InversionesScreen() {
     { icon: "account-outline", route: "/profile" },
   ];
 
+  const styles = StyleSheet.create({
+    safe: {
+      flex: 1,
+      backgroundColor: colors.primaryBackground,
+    },
+
+    container: {
+      flex: 1,
+      backgroundColor: colors.primaryBackground,
+    },
+
+    header: {
+      backgroundColor: colors.header,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
+
+    backButton: {
+      width: 30,
+      alignItems: "flex-start",
+      justifyContent: "center",
+    },
+
+    headerBell: {
+      justifyContent: "center",
+    },
+
+    headerTitle: {
+      color: colors.white,
+      fontWeight: "700",
+    },
+
+    content: {
+      flex: 1,
+      width: "100%",
+      backgroundColor: colors.background,
+      overflow: "hidden",
+    },
+
+    whiteScroll: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+
+    scrollContent: {
+      flexGrow: 1,
+      paddingTop: 20,
+      paddingBottom: 140,
+    },
+
+    investmentContent: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "space-evenly",
+    },
+
+    investmentImage: {
+      resizeMode: "contain",
+    },
+
+    logoContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    interactiveSymbol: {
+      resizeMode: "contain",
+    },
+
+    logoTextContainer: {
+      justifyContent: "center",
+    },
+
+    interactiveText: {
+      fontWeight: "bold",
+      color: colors.text,
+    },
+
+    brokersText: {
+      fontWeight: "400",
+      color: colors.text,
+    },
+
+    subtitle: {
+      fontWeight: "600",
+      color: colors.text,
+    },
+
+    linkButton: {
+      backgroundColor: colors.icon,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    linkText: {
+      color: colors.white,
+      fontWeight: "500",
+    },
+
+    bottomBar: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      width: "100%",
+      backgroundColor: colors.nav,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-around",
+      overflow: "hidden",
+    },
+
+    navItem: {
+      flex: 1,
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
+
   return (
     <SafeAreaView style={styles.safe}>
       <View
@@ -75,12 +198,13 @@ export default function InversionesScreen() {
               transform: [{ translateY: 4 * scale }],
             },
           ]}
-          onPress={() => router.replace("/home")} // 👈 CAMBIO
+          onPress={() => router.back()}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="arrow-left"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -96,7 +220,7 @@ export default function InversionesScreen() {
             },
           ]}
         >
-          Investments
+          {t.investments}
         </Text>
 
         <TouchableOpacity
@@ -112,7 +236,7 @@ export default function InversionesScreen() {
           <MaterialCommunityIcons
             name="bell-circle-outline"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
       </View>
@@ -223,7 +347,7 @@ export default function InversionesScreen() {
                 },
               ]}
             >
-              Take the next step
+              {t.takeNextStep}
             </Text>
 
             <TouchableOpacity
@@ -257,7 +381,7 @@ export default function InversionesScreen() {
                   },
                 ]}
               >
-                Go to Interactive Brokers
+                {t.goToInteractiveBrokers}
               </Text>
             </TouchableOpacity>
           </View>
@@ -281,8 +405,12 @@ export default function InversionesScreen() {
             >
               <MaterialCommunityIcons
                 name={item.icon}
-                size={item.icon === "swap-horizontal" ? 37 * scale : 35 * scale}
-                color="#FFFFFF"
+                size={
+                  item.icon === "swap-horizontal"
+                    ? 37 * scale
+                    : 35 * scale
+                }
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
@@ -291,124 +419,3 @@ export default function InversionesScreen() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: "#111C2E",
-  },
-
-  container: {
-    flex: 1,
-    backgroundColor: "#111C2E",
-  },
-
-  header: {
-    backgroundColor: "#071426",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-
-  backButton: {
-    width: 30,
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-
-  headerBell: {
-    justifyContent: "center",
-  },
-
-  headerTitle: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-  },
-
-  content: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    overflow: "hidden",
-  },
-
-  whiteScroll: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    paddingTop: 20,
-    paddingBottom: 140,
-  },
-
-  investmentContent: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "space-evenly",
-  },
-
-  investmentImage: {
-    resizeMode: "contain",
-  },
-
-  logoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  interactiveSymbol: {
-    resizeMode: "contain",
-  },
-
-  logoTextContainer: {
-    justifyContent: "center",
-  },
-
-  interactiveText: {
-    fontWeight: "bold",
-    color: "#292929",
-  },
-
-  brokersText: {
-    fontWeight: "400",
-    color: "#292929",
-  },
-
-  subtitle: {
-    fontWeight: "600",
-    color: "#071426",
-  },
-
-  linkButton: {
-    backgroundColor: "#25B5D1",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  linkText: {
-    color: "#FFFFFF",
-    fontWeight: "500",
-  },
-
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    backgroundColor: "#25B5D1",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    overflow: "hidden",
-  },
-
-  navItem: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

@@ -38,7 +38,7 @@ const navItems = [
 
 export default function ManualScreen() {
   const { width, height } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const [activeTab, setActiveTab] = useState("home");
 
@@ -63,16 +63,28 @@ export default function ManualScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#071426"
+        backgroundColor={colors.header}
         barStyle="light-content"
       />
 
-      <View style={styles.app}>
-
-        
+      <View
+        style={[
+          styles.app,
+          {
+            backgroundColor: colors.primaryBackground,
+          },
+        ]}
+      >
         <View
           style={[
             styles.header,
@@ -89,6 +101,7 @@ export default function ManualScreen() {
                 : tablet
                 ? 45
                 : 25,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -109,7 +122,7 @@ export default function ManualScreen() {
                 ],
               },
             ]}
-            onPress={() => router.replace("/settings")} // 👈 CAMBIO
+            onPress={() => router.replace("/settings")}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
@@ -122,7 +135,7 @@ export default function ManualScreen() {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -157,10 +170,11 @@ export default function ManualScreen() {
                         : 1),
                   },
                 ],
+                color: colors.white,
               },
             ]}
           >
-            {t.userManual}
+            {t.usermanual}
           </Text>
 
           <TouchableOpacity
@@ -193,16 +207,16 @@ export default function ManualScreen() {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
 
-      
         <View
           style={[
             styles.main,
             {
+              backgroundColor: colors.background,
               borderTopLeftRadius:
                 tablet ? 55 : small ? 35 : 45,
               borderTopRightRadius:
@@ -242,8 +256,6 @@ export default function ManualScreen() {
                 },
               ]}
             >
-
-           
               <View style={styles.titleContainer}>
                 <Text
                   style={[
@@ -255,17 +267,31 @@ export default function ManualScreen() {
                           (small
                             ? 0.85
                             : 1),
+                      color: colors.text,
                     },
                   ]}
                 >
                   {t.whatIsGrowMait}
                 </Text>
 
-                <View style={styles.titleLine} />
+                <View
+                  style={[
+                    styles.titleLine,
+                    {
+                      backgroundColor: "#25B7D3",
+                    },
+                  ]}
+                />
               </View>
 
-            
-              <View style={styles.introBox}>
+              <View
+                style={[
+                  styles.introBox,
+                  {
+                    backgroundColor: "#25B7D3",
+                  },
+                ]}
+              >
                 <View style={styles.introIcon}>
                   <MaterialCommunityIcons
                     name="wallet-outline"
@@ -299,6 +325,8 @@ export default function ManualScreen() {
                             (small
                               ? 0.85
                               : 1),
+
+                        color: "#081023",
                       },
                     ]}
                   >
@@ -307,7 +335,6 @@ export default function ManualScreen() {
                 </View>
               </View>
 
-        
               <View style={styles.sectionHeader}>
                 <View>
                   <Text
@@ -320,6 +347,7 @@ export default function ManualScreen() {
                             (small
                               ? 0.85
                               : 1),
+                        color: colors.text,
                       },
                     ]}
                   >
@@ -336,6 +364,7 @@ export default function ManualScreen() {
                             (small
                               ? 0.85
                               : 1),
+                        color: colors.secondaryText,
                       },
                     ]}
                   >
@@ -344,7 +373,6 @@ export default function ManualScreen() {
                 </View>
               </View>
 
-            
               <View
                 style={[
                   styles.sectionsContainer,
@@ -393,16 +421,38 @@ export default function ManualScreen() {
                     key={item.number}
                     style={[
                       styles.sectionCard,
+                      {
+                        backgroundColor: colors.card,
+                        borderColor: colors.border,
+                        shadowColor: colors.text,
+                      },
                       tablet && styles.sectionCardTablet,
                     ]}
                   >
                     <View style={styles.numberContainer}>
-                      <Text style={styles.numberText}>
+                      <Text
+                        style={[
+                          styles.numberText,
+                          {
+                            color: colors.secondaryText,
+                          },
+                        ]}
+                      >
                         {item.number}
                       </Text>
                     </View>
 
-                    <View style={styles.sectionIcon}>
+                    <View
+                      style={[
+                        styles.sectionIcon,
+                        {
+                          backgroundColor:
+                            colors.background === "#FFFFFF"
+                              ? "#EAF9FC"
+                              : "#12283C",
+                        },
+                      ]}
+                    >
                       <MaterialCommunityIcons
                         name={item.icon}
                         size={
@@ -428,6 +478,7 @@ export default function ManualScreen() {
                                 (small
                                   ? 0.85
                                   : 1),
+                            color: colors.text,
                           },
                         ]}
                       >
@@ -451,6 +502,8 @@ export default function ManualScreen() {
                                 (small
                                   ? 0.85
                                   : 1),
+
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -461,9 +514,15 @@ export default function ManualScreen() {
                 ))}
               </View>
 
-
               <View style={styles.tipsHeader}>
-                <View style={styles.tipsIcon}>
+                <View
+                  style={[
+                    styles.tipsIcon,
+                    {
+                      backgroundColor: colors.text,
+                    },
+                  ]}
+                >
                   <MaterialCommunityIcons
                     name="lightbulb-on-outline"
                     size={
@@ -474,7 +533,7 @@ export default function ManualScreen() {
                         ? 1.15
                         : 1)
                     }
-                    color="#FFFFFF"
+                    color={colors.background}
                   />
                 </View>
 
@@ -489,6 +548,7 @@ export default function ManualScreen() {
                             (small
                               ? 0.85
                               : 1),
+                        color: colors.text,
                       },
                     ]}
                   >
@@ -505,6 +565,7 @@ export default function ManualScreen() {
                             (small
                               ? 0.85
                               : 1),
+                        color: colors.secondaryText,
                       },
                     ]}
                   >
@@ -519,14 +580,24 @@ export default function ManualScreen() {
                   tablet && styles.tipsGrid,
                 ]}
               >
-                
                 <View
                   style={[
                     styles.tipCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                    },
                     tablet && styles.tipCardTablet,
                   ]}
                 >
-                  <View style={styles.tipIconContainer}>
+                  <View
+                    style={[
+                      styles.tipIconContainer,
+                      {
+                        backgroundColor: colors.background,
+                      },
+                    ]}
+                  >
                     <MaterialCommunityIcons
                       name="shield-check-outline"
                       size={
@@ -537,7 +608,7 @@ export default function ManualScreen() {
                           ? 1.15
                           : 1)
                       }
-                      color="#081023"
+                      color={colors.text}
                     />
                   </View>
 
@@ -552,6 +623,7 @@ export default function ManualScreen() {
                               (small
                                 ? 0.85
                                 : 1),
+                          color: colors.text,
                         },
                       ]}
                     >
@@ -575,6 +647,8 @@ export default function ManualScreen() {
                               (small
                                 ? 0.85
                                 : 1),
+
+                          color: "#25B7D3",
                         },
                       ]}
                     >
@@ -583,14 +657,24 @@ export default function ManualScreen() {
                   </View>
                 </View>
 
-               
                 <View
                   style={[
                     styles.tipCard,
+                    {
+                      backgroundColor: colors.card,
+                      borderColor: colors.border,
+                    },
                     tablet && styles.tipCardTablet,
                   ]}
                 >
-                  <View style={styles.tipIconContainer}>
+                  <View
+                    style={[
+                      styles.tipIconContainer,
+                      {
+                        backgroundColor: colors.background,
+                      },
+                    ]}
+                  >
                     <MaterialCommunityIcons
                       name="bullseye-arrow"
                       size={
@@ -601,7 +685,7 @@ export default function ManualScreen() {
                           ? 1.15
                           : 1)
                       }
-                      color="#081023"
+                      color={colors.text}
                     />
                   </View>
 
@@ -616,6 +700,7 @@ export default function ManualScreen() {
                               (small
                                 ? 0.85
                                 : 1),
+                          color: colors.text,
                         },
                       ]}
                     >
@@ -639,6 +724,8 @@ export default function ManualScreen() {
                               (small
                                 ? 0.85
                                 : 1),
+
+                          color: "#25B7D3",
                         },
                       ]}
                     >
@@ -647,12 +734,10 @@ export default function ManualScreen() {
                   </View>
                 </View>
               </View>
-
             </View>
           </ScrollView>
         </View>
 
-        
         <View
           style={[
             styles.bottomBar,
@@ -672,6 +757,8 @@ export default function ManualScreen() {
                   : tablet
                   ? 1.15
                   : 1),
+
+              backgroundColor: colors.nav,
             },
           ]}
         >
@@ -702,12 +789,11 @@ export default function ManualScreen() {
                         ? 1.15
                         : 1)
                 }
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
         </View>
-
       </View>
     </View>
   );
@@ -716,18 +802,14 @@ export default function ManualScreen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFF",
   },
 
   app: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
-  
   header: {
     width: "100%",
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -740,7 +822,6 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "#FFF",
     fontWeight: "700",
   },
 
@@ -748,11 +829,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
- 
   main: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FFF",
     overflow: "hidden",
   },
 
@@ -769,14 +848,12 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 
-
   titleContainer: {
     alignItems: "center",
     marginBottom: 18,
   },
 
   mainTitle: {
-    color: "#081023",
     fontWeight: "900",
     textAlign: "center",
   },
@@ -785,14 +862,11 @@ const styles = StyleSheet.create({
     width: 42,
     height: 4,
     borderRadius: 5,
-    backgroundColor: "#25B7D3",
     marginTop: 8,
   },
 
-  
   introBox: {
     width: "100%",
-    backgroundColor: "#25B7D3",
     borderRadius: 20,
     padding: 17,
     flexDirection: "row",
@@ -815,23 +889,19 @@ const styles = StyleSheet.create({
   },
 
   introText: {
-    color: "#081023",
     fontWeight: "700",
   },
 
- 
   sectionHeader: {
     width: "100%",
     marginBottom: 13,
   },
 
   sectionHeading: {
-    color: "#081023",
     fontWeight: "900",
   },
 
   sectionSubheading: {
-    color: "#ACADAD",
     marginTop: 3,
     fontWeight: "500",
   },
@@ -849,16 +919,13 @@ const styles = StyleSheet.create({
   sectionCard: {
     width: "100%",
     minHeight: 96,
-    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "#E7EAEA",
     borderRadius: 18,
     marginBottom: 12,
     padding: 13,
     flexDirection: "row",
     alignItems: "center",
     elevation: 2,
-    shadowColor: "#081023",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -879,7 +946,6 @@ const styles = StyleSheet.create({
   },
 
   numberText: {
-    color: "#ACADAD",
     fontSize: 11,
     fontWeight: "800",
   },
@@ -888,7 +954,6 @@ const styles = StyleSheet.create({
     width: 49,
     height: 49,
     borderRadius: 15,
-    backgroundColor: "#EAF9FC",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 13,
@@ -900,17 +965,14 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: "#081023",
     fontWeight: "800",
     marginBottom: 4,
   },
 
   sectionText: {
-    color: "#4E5658",
     fontWeight: "400",
   },
 
-  
   tipsHeader: {
     width: "100%",
     flexDirection: "row",
@@ -923,19 +985,16 @@ const styles = StyleSheet.create({
     width: 43,
     height: 43,
     borderRadius: 14,
-    backgroundColor: "#081023",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 11,
   },
 
   tipsTitle: {
-    color: "#081023",
     fontWeight: "900",
   },
 
   tipsSubtitle: {
-    color: "#ACADAD",
     marginTop: 2,
   },
 
@@ -950,14 +1009,12 @@ const styles = StyleSheet.create({
 
   tipCard: {
     width: "100%",
-    backgroundColor: "#F7F9F9",
     borderRadius: 18,
     padding: 14,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#E8EBEB",
   },
 
   tipCardTablet: {
@@ -968,7 +1025,6 @@ const styles = StyleSheet.create({
     width: 49,
     height: 49,
     borderRadius: 15,
-    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 12,
@@ -979,23 +1035,19 @@ const styles = StyleSheet.create({
   },
 
   tipTitle: {
-    color: "#081023",
     fontWeight: "800",
     marginBottom: 3,
   },
 
   tipDescription: {
-    color: "#25B7D3",
     fontWeight: "600",
   },
 
-  
   bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

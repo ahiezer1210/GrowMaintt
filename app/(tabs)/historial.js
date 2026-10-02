@@ -29,7 +29,7 @@ const NAV = [
 ];
 
 export default function HistorialScreen() {
-  const { t } = useAppSettings();
+  const { colors, t } = useAppSettings();
 
   const [showAll, setShowAll] = useState(false);
   const [movements, setMovements] = useState([]);
@@ -61,6 +61,15 @@ export default function HistorialScreen() {
     : 60;
 
   const s = (size) => Math.round(size * scale);
+
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/historial",
+      },
+    });
+  };
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -229,11 +238,20 @@ export default function HistorialScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[
+        styles.screen,
+        { backgroundColor: colors.primaryBackground },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#071426"
-        barStyle="light-content"
+        backgroundColor={colors.primaryBackground}
+        barStyle={
+          colors.primaryBackground === "#FAFAF7"
+            ? "dark-content"
+            : "light-content"
+        }
       />
 
       <View
@@ -243,6 +261,7 @@ export default function HistorialScreen() {
             height: s(145),
             paddingHorizontal:
               horizontalPadding,
+            backgroundColor: colors.header,
           },
         ]}
       >
@@ -260,7 +279,7 @@ export default function HistorialScreen() {
           <Ionicons
             name="arrow-back"
             size={26 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -269,11 +288,31 @@ export default function HistorialScreen() {
             styles.headerTitle,
             {
               fontSize: s(24),
+              color: colors.white,
             },
           ]}
         >
           {t.savingsHistory}
         </Text>
+
+        <TouchableOpacity
+          style={[
+            styles.notificationButton,
+            {
+              width: 40 * scale,
+              height: 40 * scale,
+              borderRadius: 20 * scale,
+            },
+          ]}
+          onPress={abrirNotificaciones}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name="bell-circle-outline"
+            size={35 * scale}
+            color={colors.white}
+          />
+        </TouchableOpacity>
       </View>
 
       <View
@@ -285,6 +324,7 @@ export default function HistorialScreen() {
             paddingHorizontal:
               horizontalPadding,
             paddingTop: s(28),
+            backgroundColor: colors.background,
           },
         ]}
       >
@@ -295,6 +335,7 @@ export default function HistorialScreen() {
               height: s(108),
               borderRadius: s(10),
               paddingHorizontal: s(18),
+              backgroundColor: colors.primary,
             },
           ]}
         >
@@ -311,7 +352,7 @@ export default function HistorialScreen() {
             <Ionicons
               name="wallet-outline"
               size={s(48)}
-              color="#172B3A"
+              color={colors.icon}
             />
           </View>
 
@@ -321,6 +362,7 @@ export default function HistorialScreen() {
                 styles.cardTitle,
                 {
                   fontSize: s(15),
+                  color: colors.text,
                 },
               ]}
             >
@@ -332,6 +374,7 @@ export default function HistorialScreen() {
                 styles.totalSaved,
                 {
                   fontSize: s(24),
+                  color: colors.text,
                 },
               ]}
             >
@@ -343,6 +386,7 @@ export default function HistorialScreen() {
                 styles.keepSaving,
                 {
                   fontSize: s(13),
+                  color: colors.text,
                 },
               ]}
             >
@@ -357,6 +401,7 @@ export default function HistorialScreen() {
             {
               marginTop: s(18),
               marginBottom: s(14),
+              backgroundColor: colors.border,
             },
           ]}
         />
@@ -375,6 +420,7 @@ export default function HistorialScreen() {
               styles.sectionTitle,
               {
                 fontSize: s(17),
+                color: colors.text,
               },
             ]}
           >
@@ -386,6 +432,7 @@ export default function HistorialScreen() {
               styles.sectionTitle,
               {
                 fontSize: s(17),
+                color: colors.text,
               },
             ]}
           >
@@ -414,6 +461,7 @@ export default function HistorialScreen() {
                     styles.movement,
                     {
                       minHeight: s(70),
+                      borderBottomColor: colors.border,
                     },
                   ]}
                   onPress={() =>
@@ -434,7 +482,7 @@ export default function HistorialScreen() {
                     <Ionicons
                       name={getIcon(item.type)}
                       size={s(34)}
-                      color="#172B3A"
+                      color={colors.icon}
                     />
                   </View>
 
@@ -443,6 +491,7 @@ export default function HistorialScreen() {
                       styles.movementName,
                       {
                         fontSize: s(15),
+                        color: colors.text,
                       },
                     ]}
                     numberOfLines={1}
@@ -456,6 +505,7 @@ export default function HistorialScreen() {
                       {
                         fontSize: s(15),
                         marginLeft: s(8),
+                        color: colors.text,
                       },
                     ]}
                   >
@@ -470,6 +520,8 @@ export default function HistorialScreen() {
                       {
                         paddingHorizontal: s(12),
                         paddingVertical: s(12),
+                        backgroundColor: colors.card,
+                        borderBottomColor: colors.border,
                       },
                     ]}
                   >
@@ -486,6 +538,7 @@ export default function HistorialScreen() {
                           styles.detailLabel,
                           {
                             fontSize: s(13),
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -497,6 +550,7 @@ export default function HistorialScreen() {
                           styles.detailValue,
                           {
                             fontSize: s(13),
+                            color: colors.text,
                           },
                         ]}
                       >
@@ -518,6 +572,7 @@ export default function HistorialScreen() {
                           styles.detailLabel,
                           {
                             fontSize: s(13),
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -529,6 +584,7 @@ export default function HistorialScreen() {
                           styles.detailValue,
                           {
                             fontSize: s(13),
+                            color: colors.text,
                           },
                         ]}
                       >
@@ -549,6 +605,7 @@ export default function HistorialScreen() {
                           styles.detailLabel,
                           {
                             fontSize: s(13),
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -560,6 +617,7 @@ export default function HistorialScreen() {
                           styles.detailValue,
                           {
                             fontSize: s(13),
+                            color: colors.text,
                           },
                         ]}
                       >
@@ -583,6 +641,7 @@ export default function HistorialScreen() {
                           styles.detailLabel,
                           {
                             fontSize: s(13),
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -594,6 +653,7 @@ export default function HistorialScreen() {
                           styles.detailValue,
                           {
                             fontSize: s(13),
+                            color: colors.text,
                           },
                         ]}
                       >
@@ -607,6 +667,7 @@ export default function HistorialScreen() {
                           styles.detailLabel,
                           {
                             fontSize: s(13),
+                            color: colors.secondaryText,
                           },
                         ]}
                       >
@@ -649,6 +710,7 @@ export default function HistorialScreen() {
               {
                 fontSize: s(15),
                 marginRight: s(4),
+                color: colors.text,
               },
             ]}
           >
@@ -664,7 +726,7 @@ export default function HistorialScreen() {
                 : "arrow-forward"
             }
             size={s(22)}
-            color="#172B3A"
+            color={colors.icon}
           />
         </TouchableOpacity>
 
@@ -675,6 +737,7 @@ export default function HistorialScreen() {
               height: s(42),
               borderRadius: s(8),
               marginBottom: s(8),
+              backgroundColor: colors.primary,
             },
           ]}
         >
@@ -683,6 +746,7 @@ export default function HistorialScreen() {
               styles.bottomText,
               {
                 fontSize: s(15),
+                color: colors.text,
               },
             ]}
           >
@@ -695,12 +759,13 @@ export default function HistorialScreen() {
       <BottomNav
         small={isSmallScreen}
         scale={scale}
+        colors={colors}
       />
     </View>
   );
 }
 
-function BottomNav({ small, scale }) {
+function BottomNav({ small, scale, colors }) {
   return (
     <View
       style={[
@@ -708,6 +773,7 @@ function BottomNav({ small, scale }) {
         {
           height: 65 * scale,
           borderTopLeftRadius: 78 * scale,
+          backgroundColor: colors.nav,
         },
       ]}
     >
@@ -725,13 +791,13 @@ function BottomNav({ small, scale }) {
               <Ionicons
                 name={icon}
                 size={small ? 25 : 31}
-                color="#FFFFFF"
+                color={colors.white}
               />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
                 size={small ? 28 : 34}
-                color="#FFFFFF"
+                color={colors.white}
               />
             )}
           </TouchableOpacity>
@@ -788,18 +854,15 @@ function getMovementType(category) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   header: {
     width: "100%",
-    backgroundColor: "#071426",
     alignItems: "center",
     justifyContent: "center",
   },
 
   headerTitle: {
-    color: "#FFFFFF",
     fontWeight: "600",
     textAlign: "center",
   },
@@ -810,15 +873,21 @@ const styles = StyleSheet.create({
     padding: 8,
   },
 
+  notificationButton: {
+    position: "absolute",
+    right: 18,
+    top: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   whitePanel: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FAFAF7",
     overflow: "hidden",
   },
 
   blueCard: {
-    backgroundColor: "#20A9D8",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -833,24 +902,20 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: {
-    color: "#172B3A",
     fontWeight: "700",
   },
 
   totalSaved: {
-    color: "#172B3A",
     fontWeight: "800",
     marginTop: 2,
   },
 
   keepSaving: {
-    color: "#172B3A",
     marginTop: 1,
   },
 
   divider: {
     height: 1,
-    backgroundColor: "#D9D9D9",
   },
 
   sectionHeader: {
@@ -859,7 +924,6 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: "#222222",
     fontWeight: "700",
   },
 
@@ -871,7 +935,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
   },
 
   movementIcon: {
@@ -881,19 +944,15 @@ const styles = StyleSheet.create({
 
   movementName: {
     flex: 1,
-    color: "#222222",
     fontWeight: "600",
   },
 
   movementAmount: {
-    color: "#172B3A",
     fontWeight: "600",
   },
 
   details: {
-    backgroundColor: "#F3F4F5",
     borderBottomWidth: 1,
-    borderBottomColor: "#EEEEEE",
   },
 
   detailRow: {
@@ -903,13 +962,11 @@ const styles = StyleSheet.create({
   },
 
   detailLabel: {
-    color: "#777777",
     fontWeight: "600",
     flex: 1,
   },
 
   detailValue: {
-    color: "#172B3A",
     fontWeight: "600",
     flex: 1.5,
     textAlign: "right",
@@ -929,18 +986,15 @@ const styles = StyleSheet.create({
   },
 
   seeAllText: {
-    color: "#172B3A",
     fontWeight: "500",
   },
 
   bottomTotal: {
-    backgroundColor: "#55C9D5",
     justifyContent: "center",
     alignItems: "center",
   },
 
   bottomText: {
-    color: "#172B3A",
     fontWeight: "700",
   },
 
@@ -949,7 +1003,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#20A9D8",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

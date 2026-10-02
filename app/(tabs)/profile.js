@@ -2,21 +2,111 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import {
+    ActivityIndicator,
     Image,
     ScrollView,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-    useWindowDimensions
+    useWindowDimensions,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import {
+    doc,
+    onSnapshot,
+} from "firebase/firestore";
+
+import { onAuthStateChanged } from "firebase/auth";
+
+import { auth, db } from "../../firebaseConfig";
+
+import { useEffect, useState } from "react";
+
 import { useAppSettings } from "../../context/Appsettings";
 
 export default function Profile() {
 
-    const { t } = useAppSettings();
+    const { colors, t } = useAppSettings();
+
+    const [username, setUsername] = useState("");
+    const [photoURL, setPhotoURL] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        let unsubscribeUser = null;
+        let unsubscribeAuth = null;
+
+        unsubscribeAuth = onAuthStateChanged(
+            auth,
+            (currentUser) => {
+
+                if (!currentUser) {
+                    setUsername("");
+                    setPhotoURL(null);
+                    setLoading(false);
+                    return;
+                }
+
+                const userRef = doc(
+                    db,
+                    "Users",
+                    currentUser.uid
+                );
+
+                unsubscribeUser = onSnapshot(
+                    userRef,
+                    (snapshot) => {
+
+                        if (snapshot.exists()) {
+
+                            const data = snapshot.data();
+
+                            setUsername(
+                                data.username || ""
+                            );
+
+                            setPhotoURL(
+                                data.photoURL || null
+                            );
+
+                        } else {
+
+                            setUsername("");
+                            setPhotoURL(null);
+
+                        }
+
+                        setLoading(false);
+                    },
+                    (error) => {
+
+                        console.log(
+                            "Error loading profile:",
+                            error
+                        );
+
+                        setLoading(false);
+                    }
+                );
+            }
+        );
+
+        return () => {
+
+            if (unsubscribeUser) {
+                unsubscribeUser();
+            }
+
+            if (unsubscribeAuth) {
+                unsubscribeAuth();
+            }
+
+        };
+
+    }, []);
 
     const menuOptions = [
         {
@@ -83,10 +173,44 @@ export default function Profile() {
                 ? 45
                 : 60;
 
-    return (
-        <SafeAreaView style={styles.container}>
+    if (loading) {
+        return (
+            <SafeAreaView
+                style={[
+                    styles.loadingContainer,
+                    {
+                        backgroundColor:
+                            colors.primaryBackground,
+                    },
+                ]}
+            >
+                <ActivityIndicator
+                    size="large"
+                    color={colors.primary}
+                />
+            </SafeAreaView>
+        );
+    }
 
-            <View style={styles.header}>
+    return (
+        <SafeAreaView
+            style={[
+                styles.container,
+                {
+                    backgroundColor:
+                        colors.primaryBackground,
+                },
+            ]}
+        >
+
+            <View
+                style={[
+                    styles.header,
+                    {
+                        backgroundColor: colors.header,
+                    },
+                ]}
+            >
 
                 <TouchableOpacity
                     style={styles.backButton}
@@ -96,7 +220,7 @@ export default function Profile() {
                     <MaterialCommunityIcons
                         name="arrow-left"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
@@ -105,6 +229,7 @@ export default function Profile() {
                         styles.title,
                         {
                             fontSize: 25 * scale,
+                            color: colors.white,
                         },
                     ]}
                 >
@@ -126,7 +251,7 @@ export default function Profile() {
                     <MaterialCommunityIcons
                         name="bell-circle-outline"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
@@ -137,6 +262,7 @@ export default function Profile() {
                     styles.content,
                     {
                         marginTop: isTablet ? 70 : 40,
+                        backgroundColor: colors.background,
                     },
                 ]}
             >
@@ -149,16 +275,39 @@ export default function Profile() {
                             height: isTablet ? 120 : 90,
                             borderRadius: isTablet ? 60 : 45,
                             top: -40,
+                            borderColor: colors.border,
+                            backgroundColor:
+                                colors.primaryBackground,
                         },
                     ]}
                 >
-                    <Image
-                        source={require("../../assets/images/Image.jpg")}
-                        style={styles.logo}
-                    />
+
+                    {photoURL ? (
+                        <Image
+                            source={{
+                                uri: photoURL,
+                            }}
+                            style={styles.logo}
+                        />
+                    ) : (
+                        <View style={styles.placeholder}>
+                            <MaterialCommunityIcons
+                                name="account"
+                                size={
+                                    (isTablet ? 55 : 45) *
+                                    scale
+                                }
+                                color={colors.secondaryText}
+                            />
+                        </View>
+                    )}
+
                 </View>
 
                 <ScrollView
+                    style={{
+                        width: "100%",
+                    }}
                     showsVerticalScrollIndicator={false}
                     bounces={false}
                     contentContainerStyle={[
@@ -176,11 +325,15 @@ export default function Profile() {
                             {
                                 fontSize: isTablet ? 28 : 18,
                                 marginTop: isTablet ? 80 : 60,
-                                marginRight: isTablet ? 40 : 20,
+                                marginRight: 0,
+                                width: "100%",
+                                textAlign: "center",
+                                color: colors.text,
                             },
                         ]}
+                        numberOfLines={1}
                     >
-                        Diana Cardoza
+                        {username || t.user}
                     </Text>
 
                     <View
@@ -212,7 +365,10 @@ export default function Profile() {
                                 ]}
                                 onPress={() => {
 
-                                    if (option.route === "/logout") {
+                                    if (
+                                        option.route ===
+                                        "/logout"
+                                    ) {
 
                                         router.push({
                                             pathname: "/logout",
@@ -221,9 +377,13 @@ export default function Profile() {
                                             },
                                         });
 
-                                    } else if (option.route) {
+                                    } else if (
+                                        option.route
+                                    ) {
 
-                                        router.push(option.route);
+                                        router.push(
+                                            option.route
+                                        );
 
                                     }
 
@@ -235,7 +395,8 @@ export default function Profile() {
                                     style={[
                                         styles.iconContainer,
                                         {
-                                            backgroundColor: option.color,
+                                            backgroundColor:
+                                                option.color,
 
                                             width: isTablet
                                                 ? 70 * scale
@@ -245,8 +406,11 @@ export default function Profile() {
                                                 ? 70 * scale
                                                 : 45 * scale,
 
-                                            borderRadius: 12 * scale,
-                                            marginRight: 16 * scale,
+                                            borderRadius:
+                                                12 * scale,
+
+                                            marginRight:
+                                                16 * scale,
                                         },
                                     ]}
                                 >
@@ -254,7 +418,7 @@ export default function Profile() {
                                     <Ionicons
                                         name={option.icon}
                                         size={25 * scale}
-                                        color="#FFFFFF"
+                                        color={colors.white}
                                     />
 
                                 </View>
@@ -267,7 +431,10 @@ export default function Profile() {
                                                 ? 20 * scale
                                                 : 16 * scale,
 
-                                            lineHeight: 28 * scale,
+                                            lineHeight:
+                                                28 * scale,
+
+                                            color: colors.text,
                                         },
                                     ]}
                                 >
@@ -294,7 +461,10 @@ export default function Profile() {
                                 ? 65 * scale
                                 : 65,
 
-                        borderTopLeftRadius: 78 * scale,
+                        borderTopLeftRadius:
+                            78 * scale,
+
+                        backgroundColor: colors.nav,
                     },
                 ]}
             >
@@ -307,55 +477,65 @@ export default function Profile() {
                     <MaterialCommunityIcons
                         name="home-outline"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => router.push("/historial")}
+                    onPress={() =>
+                        router.push("/historial")
+                    }
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="chart-box-outline"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => router.push("/expensesManagement")}
+                    onPress={() =>
+                        router.push(
+                            "/expensesManagement"
+                        )
+                    }
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="swap-horizontal"
                         size={37 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => router.push("/currentgoal")}
+                    onPress={() =>
+                        router.push("/currentgoal")
+                    }
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="layers-outline"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.navItem}
-                    onPress={() => router.push("/profile")}
+                    onPress={() =>
+                        router.push("/profile")
+                    }
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="account-outline"
                         size={35 * scale}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
@@ -369,7 +549,12 @@ const styles = StyleSheet.create({
 
     container: {
         flex: 1,
-        backgroundColor: "#081023",
+    },
+
+    loadingContainer: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     scrollContent: {
@@ -383,7 +568,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#081023",
         marginTop: -10,
     },
 
@@ -397,7 +581,6 @@ const styles = StyleSheet.create({
     title: {
         flex: 1,
         textAlign: "center",
-        color: "#FFFFFF",
         fontWeight: "700",
         fontSize: 25,
         marginTop: 0,
@@ -415,9 +598,10 @@ const styles = StyleSheet.create({
         top: -40,
         overflow: "hidden",
         borderWidth: 3,
-        borderColor: "#0e2738",
         zIndex: 10,
         elevation: 10,
+        alignItems: "center",
+        justifyContent: "center",
     },
 
     logo: {
@@ -426,8 +610,14 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
     },
 
+    placeholder: {
+        width: "100%",
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
     content: {
-        backgroundColor: "#FFFFFF",
         flex: 1,
         marginTop: 70,
         borderTopLeftRadius: 35,
@@ -437,7 +627,6 @@ const styles = StyleSheet.create({
     },
 
     name: {
-        color: "#0e2738",
         fontSize: 18,
         marginTop: 40,
         fontWeight: "700",
@@ -467,7 +656,6 @@ const styles = StyleSheet.create({
     },
 
     optionText: {
-        color: "#0e2738",
         fontSize: 16,
         fontWeight: "600",
         lineHeight: 20,
@@ -479,7 +667,6 @@ const styles = StyleSheet.create({
         left: 0,
         width: "100%",
         height: 65,
-        backgroundColor: "#25B5D1",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",

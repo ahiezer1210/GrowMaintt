@@ -18,22 +18,24 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
-const getSecurityTitle = (type) => {
+const getSecurityTitle = (type, t) => {
   const titles = {
-    new_device_login: "New login detected",
-    login_attempt: "Login detected",
-    password_change: "Password changed",
-    password_reset: "Password reset",
-    email_change: "Email address changed",
-    phone_change: "Phone number changed",
-    profile_change: "Profile information updated",
-    device_unlinked: "Device unlinked",
-    suspicious_activity: "Suspicious activity detected",
+    new_device_login: t.newLoginDetected,
+    login_attempt: t.loginDetected,
+    password_change: t.passwordChanged,
+    password_reset: t.passwordReset,
+    email_change: t.emailChanged,
+    phone_change: t.phoneChanged,
+    profile_change: t.profileUpdated,
+    device_unlinked: t.deviceUnlinked,
+    suspicious_activity: t.suspiciousActivity,
   };
 
-  return titles[type] || "Security alert";
+  return titles[type] || t.securityAlert;
 };
 
 const getSecurityIcon = (type) => {
@@ -52,15 +54,15 @@ const getSecurityIcon = (type) => {
   return icons[type] || "shield-check-outline";
 };
 
-const getCategoryTitle = (category) => {
+const getCategoryTitle = (category, t) => {
   const titles = {
-    Savings: "Savings",
-    Investment: "Investment",
-    Rewards: "Reward",
-    Security: "Security Alert",
+    Savings: t.savings,
+    Investment: t.investments,
+    Rewards: t.rewards,
+    Security: t.securityAlert,
   };
 
-  return titles[category] || "Notification";
+  return titles[category] || t.notifications;
 };
 
 const getCategoryIcon = (category) => {
@@ -74,26 +76,26 @@ const getCategoryIcon = (category) => {
   return icons[category] || "bell-outline";
 };
 
-const getActivity = (type) => {
+const getActivity = (type, t) => {
   const activities = {
-    saving_completed: "Saving completed",
-    investment_completed: "Investment completed",
-    reward_redeemed: "Reward redeemed",
-    new_device_login: "New login detected",
-    login_attempt: "Login detected",
-    password_change: "Password changed",
-    password_reset: "Password reset",
-    email_change: "Email address changed",
-    phone_change: "Phone number changed",
-    profile_change: "Profile information updated",
-    device_unlinked: "Device unlinked",
-    suspicious_activity: "Suspicious activity detected",
+    saving_completed: t.savingCompleted,
+    investment_completed: t.investmentCompleted,
+    reward_redeemed: t.rewardRedeemed,
+    new_device_login: t.newLoginDetected,
+    login_attempt: t.loginDetected,
+    password_change: t.passwordChanged,
+    password_reset: t.passwordReset,
+    email_change: t.emailChanged,
+    phone_change: t.phoneChanged,
+    profile_change: t.profileUpdated,
+    device_unlinked: t.deviceUnlinked,
+    suspicious_activity: t.suspiciousActivity,
   };
 
-  return activities[type] || "Notification activity";
+  return activities[type] || t.notificationActivity;
 };
 
-const formatDate = (timestamp) => {
+const formatDate = (timestamp, language) => {
   if (!timestamp) {
     return {
       date: "",
@@ -122,13 +124,15 @@ const formatDate = (timestamp) => {
     };
   }
 
-  const date = dateObject.toLocaleDateString("en-US", {
+  const locale = language === "es" ? "es-ES" : "en-US";
+
+  const date = dateObject.toLocaleDateString(locale, {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
 
-  const time = dateObject.toLocaleTimeString("en-US", {
+  const time = dateObject.toLocaleTimeString(locale, {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -136,29 +140,32 @@ const formatDate = (timestamp) => {
   return {
     date,
     time,
-    fullDate: `${date} at ${time}`,
+    fullDate: `${date} ${
+      language === "es" ? "a las" : "at"
+    } ${time}`,
   };
 };
 
 export default function SecurityAlertScreen() {
   const params = useLocalSearchParams();
+  const { colors, t, language } = useAppSettings();
 
   const [alertData, setAlertData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const id = Array.isArray(params?.id)
+    ? params.id[0]
+    : params?.id;
 
   const category = Array.isArray(params?.category)
     ? params.category[0]
     : params?.category;
 
-  const collectionName = Array.isArray(params?.collectionName)
+  const collectionName = Array.isArray(
+    params?.collectionName
+  )
     ? params.collectionName[0]
     : params?.collectionName;
-
-  const parentId = Array.isArray(params?.parentId)
-    ? params.parentId[0]
-    : params?.parentId;
 
   useEffect(() => {
     const loadNotification = async () => {
@@ -201,7 +208,8 @@ export default function SecurityAlertScreen() {
             }
           }
         } else {
-          const notificationCategory = category || "Savings";
+          const notificationCategory =
+            category || "Savings";
 
           const notificationRef = doc(
             db,
@@ -220,52 +228,70 @@ export default function SecurityAlertScreen() {
               ? parentData.notifications
               : [];
 
-            const foundNotification = notificationArray.find(
-              (item) => String(item.id) === String(id)
-            );
+            const foundNotification =
+              notificationArray.find(
+                (item) =>
+                  String(item.id) === String(id)
+              );
 
             if (foundNotification) {
               data = {
                 ...foundNotification,
                 id,
                 category:
-                  foundNotification.category || notificationCategory,
+                  foundNotification.category ||
+                  notificationCategory,
               };
 
               if (foundNotification.read !== true) {
-                await runTransaction(db, async (transaction) => {
-                  const currentSnapshot = await transaction.get(
-                    notificationRef
-                  );
+                await runTransaction(
+                  db,
+                  async (transaction) => {
+                    const currentSnapshot =
+                      await transaction.get(
+                        notificationRef
+                      );
 
-                  if (!currentSnapshot.exists()) {
-                    return;
-                  }
+                    if (!currentSnapshot.exists()) {
+                      return;
+                    }
 
-                  const currentData = currentSnapshot.data();
+                    const currentData =
+                      currentSnapshot.data();
 
-                  const currentNotifications = Array.isArray(
-                    currentData.notifications
-                  )
-                    ? currentData.notifications
-                    : [];
+                    const currentNotifications =
+                      Array.isArray(
+                        currentData.notifications
+                      )
+                        ? currentData.notifications
+                        : [];
 
-                  const updatedNotifications =
-                    currentNotifications.map((item) => {
-                      if (String(item.id) === String(id)) {
-                        return {
-                          ...item,
-                          read: true,
-                        };
+                    const updatedNotifications =
+                      currentNotifications.map(
+                        (item) => {
+                          if (
+                            String(item.id) ===
+                            String(id)
+                          ) {
+                            return {
+                              ...item,
+                              read: true,
+                            };
+                          }
+
+                          return item;
+                        }
+                      );
+
+                    transaction.update(
+                      notificationRef,
+                      {
+                        notifications:
+                          updatedNotifications,
                       }
-
-                      return item;
-                    });
-
-                  transaction.update(notificationRef, {
-                    notifications: updatedNotifications,
-                  });
-                });
+                    );
+                  }
+                );
               }
             }
           }
@@ -273,7 +299,10 @@ export default function SecurityAlertScreen() {
 
         setAlertData(data);
       } catch (error) {
-        console.log("Error loading notification:", error);
+        console.log(
+          "Error loading notification:",
+          error
+        );
         setAlertData(null);
       } finally {
         setLoading(false);
@@ -287,13 +316,16 @@ export default function SecurityAlertScreen() {
     return (
       alertData?.message ||
       alertData?.description ||
-      "A notification was generated for your account."
+      t.newNotificationDescription
     );
   };
 
   const getDisplayDate = () => {
     if (alertData?.createdAt) {
-      const formatted = formatDate(alertData.createdAt);
+      const formatted = formatDate(
+        alertData.createdAt,
+        language
+      );
 
       if (formatted.date) {
         return formatted.date;
@@ -309,7 +341,10 @@ export default function SecurityAlertScreen() {
 
   const getDisplayTime = () => {
     if (alertData?.createdAt) {
-      const formatted = formatDate(alertData.createdAt);
+      const formatted = formatDate(
+        alertData.createdAt,
+        language
+      );
 
       if (formatted.time) {
         return formatted.time;
@@ -325,10 +360,16 @@ export default function SecurityAlertScreen() {
 
   const getTitle = () => {
     if (alertData?.category === "Security") {
-      return alertData?.title || getSecurityTitle(alertData?.type);
+      return (
+        alertData?.title ||
+        getSecurityTitle(alertData?.type, t)
+      );
     }
 
-    return alertData?.title || getCategoryTitle(alertData?.category);
+    return (
+      alertData?.title ||
+      getCategoryTitle(alertData?.category, t)
+    );
   };
 
   const getIcon = () => {
@@ -336,11 +377,14 @@ export default function SecurityAlertScreen() {
       return getSecurityIcon(alertData?.type);
     }
 
-    return alertData?.icon || getCategoryIcon(alertData?.category);
+    return (
+      alertData?.icon ||
+      getCategoryIcon(alertData?.category)
+    );
   };
 
   const getActivityName = () => {
-    return getActivity(alertData?.type);
+    return getActivity(alertData?.type, t);
   };
 
   const getAmount = () => {
@@ -371,13 +415,21 @@ export default function SecurityAlertScreen() {
     router.replace("/notifications");
   };
 
+  const styles = createStyles(colors);
+
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor="#071426" />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.header}
+        />
 
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#25B5D1" />
+          <ActivityIndicator
+            size="large"
+            color={colors.icon}
+          />
         </View>
       </SafeAreaView>
     );
@@ -386,19 +438,27 @@ export default function SecurityAlertScreen() {
   if (!alertData) {
     return (
       <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="light-content" backgroundColor="#071426" />
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={colors.header}
+        />
 
         <View style={styles.container}>
           <View style={styles.header}>
-            <TouchableOpacity style={styles.backButton} onPress={goBack}>
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={goBack}
+            >
               <MaterialCommunityIcons
                 name="arrow-left"
                 size={26}
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
 
-            <Text style={styles.headerTitle}>Security Alert</Text>
+            <Text style={styles.headerTitle}>
+              {t.securityAlert}
+            </Text>
 
             <View style={styles.headerSpacer} />
           </View>
@@ -408,13 +468,15 @@ export default function SecurityAlertScreen() {
               <MaterialCommunityIcons
                 name="bell-off-outline"
                 size={52}
-                color="#ACADAD"
+                color={colors.inactive}
               />
 
-              <Text style={styles.emptyTitle}>Notification not found</Text>
+              <Text style={styles.emptyTitle}>
+                {t.notificationNotFound}
+              </Text>
 
               <Text style={styles.emptyText}>
-                This notification could not be found.
+                {t.notificationCouldNotBeFound}
               </Text>
             </View>
           </View>
@@ -428,19 +490,27 @@ export default function SecurityAlertScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#071426" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.header}
+      />
 
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={goBack}>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={goBack}
+          >
             <MaterialCommunityIcons
               name="arrow-left"
               size={26}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
-          <Text style={styles.headerTitle}>Security Alert</Text>
+          <Text style={styles.headerTitle}>
+            {t.securityAlert}
+          </Text>
 
           <View style={styles.headerSpacer} />
         </View>
@@ -454,13 +524,17 @@ export default function SecurityAlertScreen() {
             <MaterialCommunityIcons
               name={getIcon()}
               size={38}
-              color="#25B5D1"
+              color={colors.icon}
             />
           </View>
 
-          <Text style={styles.title}>{getTitle()}</Text>
+          <Text style={styles.title}>
+            {getTitle()}
+          </Text>
 
-          <Text style={styles.description}>{getDescription()}</Text>
+          <Text style={styles.description}>
+            {getDescription()}
+          </Text>
 
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
@@ -468,15 +542,20 @@ export default function SecurityAlertScreen() {
                 <MaterialCommunityIcons
                   name="shape-outline"
                   size={21}
-                  color="#25B5D1"
+                  color={colors.icon}
                 />
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Category</Text>
+                <Text style={styles.infoLabel}>
+                  {t.category}
+                </Text>
 
                 <Text style={styles.infoValue}>
-                  {getCategoryTitle(alertData.category)}
+                  {getCategoryTitle(
+                    alertData.category,
+                    t
+                  )}
                 </Text>
               </View>
             </View>
@@ -488,15 +567,18 @@ export default function SecurityAlertScreen() {
                 <MaterialCommunityIcons
                   name="calendar-outline"
                   size={21}
-                  color="#25B5D1"
+                  color={colors.icon}
                 />
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Date</Text>
+                <Text style={styles.infoLabel}>
+                  {t.date}
+                </Text>
 
                 <Text style={styles.infoValue}>
-                  {getDisplayDate() || "Not available"}
+                  {getDisplayDate() ||
+                    t.notAvailable}
                 </Text>
               </View>
             </View>
@@ -508,15 +590,18 @@ export default function SecurityAlertScreen() {
                 <MaterialCommunityIcons
                   name="clock-outline"
                   size={21}
-                  color="#25B5D1"
+                  color={colors.icon}
                 />
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Time</Text>
+                <Text style={styles.infoLabel}>
+                  {t.time}
+                </Text>
 
                 <Text style={styles.infoValue}>
-                  {getDisplayTime() || "Not available"}
+                  {getDisplayTime() ||
+                    t.notAvailable}
                 </Text>
               </View>
             </View>
@@ -528,14 +613,18 @@ export default function SecurityAlertScreen() {
                 <MaterialCommunityIcons
                   name="information-outline"
                   size={21}
-                  color="#25B5D1"
+                  color={colors.icon}
                 />
               </View>
 
               <View style={styles.infoTextContainer}>
-                <Text style={styles.infoLabel}>Activity</Text>
+                <Text style={styles.infoLabel}>
+                  {t.activity}
+                </Text>
 
-                <Text style={styles.infoValue}>{getActivityName()}</Text>
+                <Text style={styles.infoValue}>
+                  {getActivityName()}
+                </Text>
               </View>
             </View>
 
@@ -548,12 +637,14 @@ export default function SecurityAlertScreen() {
                     <MaterialCommunityIcons
                       name="cash"
                       size={21}
-                      color="#25B5D1"
+                      color={colors.icon}
                     />
                   </View>
 
                   <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoLabel}>Amount</Text>
+                    <Text style={styles.infoLabel}>
+                      {t.amount}
+                    </Text>
 
                     <Text style={styles.infoValue}>
                       ${Number(amount).toFixed(2)}
@@ -572,14 +663,18 @@ export default function SecurityAlertScreen() {
                     <MaterialCommunityIcons
                       name="star-outline"
                       size={21}
-                      color="#25B5D1"
+                      color={colors.icon}
                     />
                   </View>
 
                   <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoLabel}>Points used</Text>
+                    <Text style={styles.infoLabel}>
+                      {t.pointsUsed}
+                    </Text>
 
-                    <Text style={styles.infoValue}>{points}</Text>
+                    <Text style={styles.infoValue}>
+                      {points}
+                    </Text>
                   </View>
                 </View>
               </>
@@ -594,14 +689,18 @@ export default function SecurityAlertScreen() {
                     <MaterialCommunityIcons
                       name="store-outline"
                       size={21}
-                      color="#25B5D1"
+                      color={colors.icon}
                     />
                   </View>
 
                   <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoLabel}>Store</Text>
+                    <Text style={styles.infoLabel}>
+                      {t.store}
+                    </Text>
 
-                    <Text style={styles.infoValue}>{alertData.store}</Text>
+                    <Text style={styles.infoValue}>
+                      {alertData.store}
+                    </Text>
                   </View>
                 </View>
               </>
@@ -616,14 +715,18 @@ export default function SecurityAlertScreen() {
                     <MaterialCommunityIcons
                       name="ticket-confirmation-outline"
                       size={21}
-                      color="#25B5D1"
+                      color={colors.icon}
                     />
                   </View>
 
                   <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoLabel}>Code</Text>
+                    <Text style={styles.infoLabel}>
+                      {t.code}
+                    </Text>
 
-                    <Text style={styles.infoValue}>{alertData.code}</Text>
+                    <Text style={styles.infoValue}>
+                      {alertData.code}
+                    </Text>
                   </View>
                 </View>
               </>
@@ -638,12 +741,14 @@ export default function SecurityAlertScreen() {
                     <MaterialCommunityIcons
                       name="cellphone"
                       size={21}
-                      color="#25B5D1"
+                      color={colors.icon}
                     />
                   </View>
 
                   <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoLabel}>Device</Text>
+                    <Text style={styles.infoLabel}>
+                      {t.device}
+                    </Text>
 
                     <Text style={styles.infoValue}>
                       {alertData.deviceName}
@@ -658,46 +763,68 @@ export default function SecurityAlertScreen() {
         <View style={styles.bottomBar}>
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() => router.replace("/home")}
+            onPress={() => router.replace("/")}
           >
             <MaterialCommunityIcons
               name="home-outline"
               size={25}
-              color="#FFFFFF"
+              color={colors.white}
             />
-            <Text style={styles.bottomText}>Home</Text>
+
+            <Text style={styles.bottomText}>
+              {t.home}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() => router.replace("/expensesManagement")}
+            onPress={() =>
+              router.replace("/expensesManagement")
+            }
           >
             <MaterialCommunityIcons
               name="wallet-outline"
               size={25}
-              color="#FFFFFF"
+              color={colors.white}
             />
-            <Text style={styles.bottomText}>Expenses</Text>
+
+            <Text style={styles.bottomText}>
+              {t.expenses}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() => router.replace("/notifications")}
+            onPress={() =>
+              router.replace("/notifications")
+            }
           >
-            <MaterialCommunityIcons name="bell" size={27} color="#FFFFFF" />
-            <Text style={styles.bottomText}>Notifications</Text>
+            <MaterialCommunityIcons
+              name="bell"
+              size={27}
+              color={colors.white}
+            />
+
+            <Text style={styles.bottomText}>
+              {t.notifications}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.bottomItem}
-            onPress={() => router.replace("/profile")}
+            onPress={() =>
+              router.replace("/Profile")
+            }
           >
             <MaterialCommunityIcons
               name="account-outline"
               size={25}
-              color="#FFFFFF"
+              color={colors.white}
             />
-            <Text style={styles.bottomText}>Profile</Text>
+
+            <Text style={styles.bottomText}>
+              {t.profile}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -705,183 +832,186 @@ export default function SecurityAlertScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#071426",
-  },
+const createStyles = (colors) =>
+  StyleSheet.create({
+    safeArea: {
+      flex: 1,
+      backgroundColor: colors.header,
+    },
 
-  container: {
-    flex: 1,
-    backgroundColor: "#071426",
-  },
+    container: {
+      flex: 1,
+      backgroundColor: colors.header,
+    },
 
-  loadingContainer: {
-    flex: 1,
-    backgroundColor: "#071426",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    loadingContainer: {
+      flex: 1,
+      backgroundColor: colors.header,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  header: {
-    height: 118,
-    backgroundColor: "#071426",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 24,
-  },
+    header: {
+      height: 118,
+      backgroundColor: colors.header,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 24,
+    },
 
-  backButton: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    backButton: {
+      width: 44,
+      height: 44,
+      alignItems: "center",
+      justifyContent: "center",
+    },
 
-  headerTitle: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "700",
-  },
+    headerTitle: {
+      color: colors.white,
+      fontSize: 24,
+      fontWeight: "700",
+    },
 
-  headerSpacer: {
-    width: 44,
-    height: 44,
-  },
+    headerSpacer: {
+      width: 44,
+      height: 44,
+    },
 
-  content: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 45,
-    borderTopRightRadius: 45,
-  },
+    content: {
+      flex: 1,
+      backgroundColor: colors.background,
+      borderTopLeftRadius: 45,
+      borderTopRightRadius: 45,
+    },
 
-  scrollContent: {
-    paddingHorizontal: 24,
-    paddingTop: 34,
-    paddingBottom: 125,
-    alignItems: "center",
-  },
+    scrollContent: {
+      paddingHorizontal: 24,
+      paddingTop: 34,
+      paddingBottom: 125,
+      alignItems: "center",
+    },
 
-  iconCircle: {
-    width: 82,
-    height: 82,
-    borderRadius: 41,
-    backgroundColor: "#E4F8FC",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 20,
-  },
+    iconCircle: {
+      width: 82,
+      height: 82,
+      borderRadius: 41,
+      backgroundColor: colors.input,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 20,
+    },
 
-  title: {
-    fontSize: 23,
-    fontWeight: "700",
-    color: "#0A3438",
-    textAlign: "center",
-  },
+    title: {
+      fontSize: 23,
+      fontWeight: "700",
+      color: colors.text,
+      textAlign: "center",
+    },
 
-  description: {
-    fontSize: 14,
-    lineHeight: 21,
-    color: "#70767A",
-    textAlign: "center",
-    marginTop: 10,
-    maxWidth: 330,
-  },
+    description: {
+      fontSize: 14,
+      lineHeight: 21,
+      color: colors.secondaryText,
+      textAlign: "center",
+      marginTop: 10,
+      maxWidth: 330,
+    },
 
-  infoCard: {
-    width: "100%",
-    backgroundColor: "#F7F8F9",
-    borderRadius: 18,
-    marginTop: 28,
-    paddingHorizontal: 18,
-    paddingVertical: 6,
-  },
+    infoCard: {
+      width: "100%",
+      backgroundColor: colors.card,
+      borderRadius: 18,
+      marginTop: 28,
+      paddingHorizontal: 18,
+      paddingVertical: 6,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
 
-  infoRow: {
-    minHeight: 68,
-    flexDirection: "row",
-    alignItems: "center",
-  },
+    infoRow: {
+      minHeight: 68,
+      flexDirection: "row",
+      alignItems: "center",
+    },
 
-  infoIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "#E4F8FC",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 13,
-  },
+    infoIcon: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      backgroundColor: colors.input,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 13,
+    },
 
-  infoTextContainer: {
-    flex: 1,
-  },
+    infoTextContainer: {
+      flex: 1,
+    },
 
-  infoLabel: {
-    fontSize: 11,
-    color: "#9A9FA3",
-    marginBottom: 3,
-  },
+    infoLabel: {
+      fontSize: 11,
+      color: colors.secondaryText,
+      marginBottom: 3,
+    },
 
-  infoValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#0A3438",
-  },
+    infoValue: {
+      fontSize: 14,
+      fontWeight: "600",
+      color: colors.text,
+    },
 
-  separator: {
-    height: 1,
-    backgroundColor: "#E5E7E8",
-    marginLeft: 55,
-  },
+    separator: {
+      height: 1,
+      backgroundColor: colors.border,
+      marginLeft: 55,
+    },
 
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 30,
-  },
+    emptyContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      paddingHorizontal: 30,
+    },
 
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#0A3438",
-    marginTop: 16,
-  },
+    emptyTitle: {
+      fontSize: 20,
+      fontWeight: "700",
+      color: colors.text,
+      marginTop: 16,
+    },
 
-  emptyText: {
-    fontSize: 14,
-    color: "#ACADAD",
-    textAlign: "center",
-    marginTop: 8,
-  },
+    emptyText: {
+      fontSize: 14,
+      color: colors.inactive,
+      textAlign: "center",
+      marginTop: 8,
+    },
 
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 92,
-    backgroundColor: "#25B5D1",
-    borderTopLeftRadius: 78,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    paddingHorizontal: 12,
-  },
+    bottomBar: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 92,
+      backgroundColor: colors.nav,
+      borderTopLeftRadius: 78,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-around",
+      paddingHorizontal: 12,
+    },
 
-  bottomItem: {
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 72,
-  },
+    bottomItem: {
+      alignItems: "center",
+      justifyContent: "center",
+      minWidth: 72,
+    },
 
-  bottomText: {
-    color: "#FFFFFF",
-    fontSize: 11,
-    fontWeight: "600",
-    marginTop: 3,
-  },
-});
+    bottomText: {
+      color: colors.white,
+      fontSize: 11,
+      fontWeight: "600",
+      marginTop: 3,
+    },
+  });

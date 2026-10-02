@@ -12,8 +12,14 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { auth } from "../../firebaseConfig.js";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth } from "../../firebaseConfig.js";
+
+const COLORS = {
+  cyan: "#25B5D1",
+  white: "#FFFFFF",
+  blueIcon: "#1464E8",
+};
 
 const navItems = [
   {
@@ -39,7 +45,7 @@ const navItems = [
 ];
 
 export default function LogoutScreen({ navigation }) {
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const { width } = useWindowDimensions();
 
@@ -145,6 +151,7 @@ export default function LogoutScreen({ navigation }) {
           width: ui.buttonW,
           height: ui.buttonH,
           borderRadius: ui.buttonH / 2,
+          backgroundColor: COLORS.cyan,
         },
       ]}
       onPress={onPress}
@@ -155,6 +162,7 @@ export default function LogoutScreen({ navigation }) {
           styles.buttonText,
           {
             fontSize: ui.text,
+            color: COLORS.white,
           },
         ]}
       >
@@ -164,14 +172,28 @@ export default function LogoutScreen({ navigation }) {
   );
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#071426"
+        backgroundColor={colors.header}
         barStyle="light-content"
       />
 
-      <View style={styles.app}>
+      <View
+        style={[
+          styles.app,
+          {
+            backgroundColor: colors.primaryBackground,
+          },
+        ]}
+      >
         <View
           style={[
             styles.header,
@@ -188,6 +210,7 @@ export default function LogoutScreen({ navigation }) {
                 : tablet
                 ? 45
                 : 25,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -221,7 +244,7 @@ export default function LogoutScreen({ navigation }) {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -256,6 +279,7 @@ export default function LogoutScreen({ navigation }) {
                         : 1),
                   },
                 ],
+                color: colors.white,
               },
             ]}
           >
@@ -292,7 +316,7 @@ export default function LogoutScreen({ navigation }) {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
@@ -301,6 +325,7 @@ export default function LogoutScreen({ navigation }) {
           style={[
             styles.main,
             {
+              backgroundColor: colors.background,
               borderTopLeftRadius:
                 tablet ? 55 : small ? 35 : 45,
               borderTopRightRadius:
@@ -377,7 +402,7 @@ export default function LogoutScreen({ navigation }) {
               <MaterialCommunityIcons
                 name="arrow-right-bold"
                 size={ui.arrow}
-                color="#1464E8"
+                color={COLORS.blueIcon}
                 style={styles.arrow}
               />
             </View>
@@ -393,6 +418,7 @@ export default function LogoutScreen({ navigation }) {
                       : small
                       ? 25
                       : 29,
+                  color: colors.text,
                 },
               ]}
             >
@@ -416,6 +442,7 @@ export default function LogoutScreen({ navigation }) {
                       : small
                       ? "92%"
                       : "90%",
+                  color: colors.text,
                 },
               ]}
             >
@@ -438,6 +465,7 @@ export default function LogoutScreen({ navigation }) {
                     : tablet
                     ? 24
                     : 21,
+                  color: colors.text,
                 },
               ]}
             >
@@ -469,6 +497,7 @@ export default function LogoutScreen({ navigation }) {
                   : tablet
                   ? 1.15
                   : 1),
+              backgroundColor: colors.nav,
             },
           ]}
         >
@@ -496,7 +525,7 @@ export default function LogoutScreen({ navigation }) {
                         ? 1.15
                         : 1)
                 }
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
@@ -509,17 +538,14 @@ export default function LogoutScreen({ navigation }) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#FFF",
   },
 
   app: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   header: {
     width: "100%",
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -532,7 +558,6 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "#FFF",
     fontWeight: "700",
   },
 
@@ -543,7 +568,6 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FFF",
     overflow: "hidden",
   },
 
@@ -592,30 +616,25 @@ const styles = StyleSheet.create({
   question: {
     width: "100%",
     textAlign: "center",
-    color: "#111",
     fontWeight: "800",
   },
 
   description: {
     textAlign: "left",
-    color: "#111",
   },
 
   button: {
-    backgroundColor: "#071426",
     alignItems: "center",
     justifyContent: "center",
   },
 
   buttonText: {
-    color: "#FFF",
     fontWeight: "700",
   },
 
   everywhere: {
     width: "100%",
     textAlign: "center",
-    color: "#111",
   },
 
   bottomBar: {
@@ -623,7 +642,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

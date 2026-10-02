@@ -4,6 +4,7 @@ import {
     collection,
     doc,
     increment,
+    serverTimestamp,
     writeBatch,
 } from "firebase/firestore";
 import { useState } from "react";
@@ -20,8 +21,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { auth, db } from "../../firebaseConfig";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 export default function RegisterInvestment() {
     const { width } = useWindowDimensions();
@@ -81,6 +82,7 @@ export default function RegisterInvestment() {
 
             const userRef = doc(db, "Users", user.uid);
             const investmentRef = doc(collection(db, "investments"));
+            const pointsRef = doc(collection(db, "Points"));
 
             const batch = writeBatch(db);
 
@@ -91,6 +93,14 @@ export default function RegisterInvestment() {
                 type: type,
                 date: date,
                 points: points,
+            });
+
+            batch.set(pointsRef, {
+                userId: user.uid,
+                points: points,
+                source: "investment",
+                investmentId: investmentRef.id,
+                createdAt: serverTimestamp(),
             });
 
             batch.set(
@@ -123,7 +133,6 @@ export default function RegisterInvestment() {
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
-             
                 <View
                     style={[
                         styles.header,
@@ -193,7 +202,6 @@ export default function RegisterInvestment() {
                     </TouchableOpacity>
                 </View>
 
-               
                 <View
                     style={[
                         styles.main,
@@ -336,7 +344,6 @@ export default function RegisterInvestment() {
                     </ScrollView>
                 </View>
 
-                
                 <View
                     style={[
                         styles.bottomBar,
@@ -419,7 +426,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#071426",
     },
 
-    
     header: {
         width: "100%",
         backgroundColor: "#071426",
@@ -452,7 +458,6 @@ const styles = StyleSheet.create({
         ],
     },
 
-   
     main: {
         flex: 1,
         backgroundColor: "#FFFFFF",
@@ -547,7 +552,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
     },
 
-   
     bottomBar: {
         position: "absolute",
         bottom: 0,

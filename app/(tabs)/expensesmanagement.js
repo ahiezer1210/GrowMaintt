@@ -16,9 +16,11 @@ import {
     View,
     useWindowDimensions,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig.js";
 
 export default function ExpenseManagement() {
+    const { colors, t } = useAppSettings();
     const { width, height } = useWindowDimensions();
 
     const isSmallScreen = width < 360;
@@ -29,18 +31,20 @@ export default function ExpenseManagement() {
     const scale = isSmallScreen
         ? 0.85
         : isMediumScreen
-            ? 1
-            : isTablet
-                ? 1.15
-                : 1.25;
+        ? 1
+        : isTablet
+        ? 1.15
+        : isLargeScreen
+        ? 1.25
+        : 1;
 
     const horizontalPadding = isSmallScreen
-        ? 18
+        ? 16
         : isMediumScreen
-            ? 25
-            : isTablet
-                ? 45
-                : 60;
+        ? 20
+        : isTablet
+        ? 35
+        : 45;
 
     const s = (value) => Math.round(value * scale);
 
@@ -53,24 +57,12 @@ export default function ExpenseManagement() {
         const user = auth.currentUser;
 
         if (!user) {
-            setExpenses([]);
-            setSavings([]);
             setLoading(false);
             return;
         }
 
-        const expensesRef = collection(
-            db,
-            "Registro de gastos"
-        );
-
-        const savingsRef = collection(
-            db,
-            "Ahorros"
-        );
-
         const expensesQuery = query(
-            expensesRef,
+            collection(db, "Registro de gastos"),
             orderBy("createdAt", "desc")
         );
 
@@ -78,47 +70,33 @@ export default function ExpenseManagement() {
             expensesQuery,
             (snapshot) => {
                 const data = snapshot.docs
-                    .map((document) => ({
-                        id: document.id,
-                        ...document.data(),
+                    .map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
                     }))
-                    .filter(
-                        (expense) =>
-                            expense.uid === user.uid
-                    );
+                    .filter((expense) => expense.uid === user.uid);
 
                 setExpenses(data);
                 setLoading(false);
             },
-            (error) => {
-                console.error(
-                    "Error loading expenses:",
-                    error
-                );
+            () => {
                 setLoading(false);
             }
         );
 
+        const savingsQuery = query(collection(db, "Ahorros"));
+
         const unsubscribeSavings = onSnapshot(
-            savingsRef,
+            savingsQuery,
             (snapshot) => {
                 const data = snapshot.docs
-                    .map((document) => ({
-                        id: document.id,
-                        ...document.data(),
+                    .map((doc) => ({
+                        id: doc.id,
+                        ...doc.data(),
                     }))
-                    .filter(
-                        (saving) =>
-                            saving.uid === user.uid
-                    );
+                    .filter((saving) => saving.uid === user.uid);
 
                 setSavings(data);
-            },
-            (error) => {
-                console.error(
-                    "Error loading savings:",
-                    error
-                );
             }
         );
 
@@ -130,41 +108,29 @@ export default function ExpenseManagement() {
 
     const weeklyExpenses = expenses.filter(
         (expense) =>
-            expense.expenseType?.toLowerCase() ===
-            "weekly"
+            String(expense.expenseType || "").toLowerCase() === "weekly"
     );
 
     const unnecessaryExpenses = expenses.filter(
         (expense) =>
-            expense.expenseType?.toLowerCase() ===
-            "unnecessary"
+            String(expense.expenseType || "").toLowerCase() === "unnecessary"
     );
 
     const scheduledExpenses = expenses.filter(
         (expense) =>
-            expense.expenseType?.toLowerCase() ===
-                "monthly" ||
+            String(expense.expenseType || "").toLowerCase() === "monthly" ||
             expense.isRecurrent === true
     );
 
     const formatAmount = (amount) => {
-        const number = Number(amount);
-
-        if (isNaN(number)) {
-            return "$0.00";
-        }
-
-        return `$${number.toFixed(2)}`;
+        const numericAmount = Number(amount) || 0;
+        return `$${numericAmount.toFixed(2)}`;
     };
 
     const getIcon = (category) => {
-        const value =
-            category?.toLowerCase() || "";
+        const value = String(category || "").toLowerCase();
 
-        if (
-            value.includes("food") ||
-            value.includes("comida")
-        ) {
+        if (value.includes("food") || value.includes("comida")) {
             return "fast-food-outline";
         }
 
@@ -185,10 +151,7 @@ export default function ExpenseManagement() {
             return "bulb-outline";
         }
 
-        if (
-            value.includes("water") ||
-            value.includes("agua")
-        ) {
+        if (value.includes("water") || value.includes("agua")) {
             return "water-outline";
         }
 
@@ -211,19 +174,17 @@ export default function ExpenseManagement() {
     };
 
     const formatDate = (date) => {
-        if (!date) {
-            return "";
-        }
+        if (!date) return "";
 
         if (typeof date === "string") {
             return date;
         }
 
         if (date?.toDate) {
-            const dateObject = date.toDate();
-
-            return dateObject.toLocaleDateString(
-                "en-US",
+            return date.toDate().toLocaleDateString(
+                t.expenseManagement === "Gestión de gastos"
+                    ? "es-ES"
+                    : "en-US",
                 {
                     day: "numeric",
                     month: "short",
@@ -235,29 +196,30 @@ export default function ExpenseManagement() {
         return "";
     };
 
-    const toggleExpense = (
-        expense,
-        section
-    ) => {
-        const selectedId = `${section}-${expense.id}`;
+    const toggleExpense = (section, id) => {
+        const expenseId = `${section}-${id}`;
 
-        setSelectedExpense((currentId) =>
-            currentId === selectedId
-                ? null
-                : selectedId
+        setSelectedExpense((current) =>
+            current === expenseId ? null : expenseId
         );
     };
 
     return (
-        <View style={styles.container}>
-            {/* HEADER */}
+        <View
+            style={[
+                styles.container,
+                {
+                    backgroundColor: colors.primaryBackground,
+                },
+            ]}
+        >
             <View
                 style={[
                     styles.header,
                     {
                         height: s(118),
-                        paddingHorizontal:
-                            horizontalPadding,
+                        paddingHorizontal: horizontalPadding,
+                        backgroundColor: colors.primaryBackground,
                     },
                 ]}
             >
@@ -267,34 +229,29 @@ export default function ExpenseManagement() {
                         {
                             left: s(15),
                             top: s(34),
-                            width: s(55),
-                            height: s(55),
                         },
                     ]}
-                    onPress={() =>
-                        router.back()
-                    }
+                    onPress={() => router.back()}
                     activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="arrow-left"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(30)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <Text
                     style={[
-                        styles.headertitle,
+                        styles.headerTitle,
                         {
                             fontSize: s(25),
                             lineHeight: s(29),
+                            color: colors.white,
                         },
                     ]}
                 >
-                    Expense
-                    {"\n"}
-                    Management
+                    {t.expenseManagement}
                 </Text>
 
                 <TouchableOpacity
@@ -303,17 +260,14 @@ export default function ExpenseManagement() {
                         {
                             right: s(15),
                             top: s(34),
-                            width: s(55),
-                            height: s(55),
+                            backgroundColor: colors.input,
                         },
                     ]}
                     onPress={() =>
                         router.push({
-                            pathname:
-                                "/notifications",
+                            pathname: "/notifications",
                             params: {
-                                from:
-                                    "/expensesmanagement",
+                                from: "/expensesmanagement",
                             },
                         })
                     }
@@ -321,8 +275,8 @@ export default function ExpenseManagement() {
                 >
                     <MaterialCommunityIcons
                         name="bell-circle-outline"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(32)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
             </View>
@@ -331,435 +285,291 @@ export default function ExpenseManagement() {
                 style={[
                     styles.content,
                     {
-                        paddingHorizontal:
-                            horizontalPadding,
-                        marginTop: s(10),
-                        borderTopLeftRadius:
-                            s(35),
-                        borderTopRightRadius:
-                            s(35),
+                        backgroundColor: colors.background,
                     },
                 ]}
                 contentContainerStyle={{
-                    paddingTop: s(12),
-                    paddingBottom: s(20),
+                    paddingHorizontal: horizontalPadding,
+                    paddingTop: s(20),
+                    paddingBottom: s(90),
                 }}
-                showsVerticalScrollIndicator={
-                    false
-                }
+                showsVerticalScrollIndicator={false}
             >
                 {loading ? (
-                    <View
-                        style={[
-                            styles.loadingContainer,
-                            {
-                                paddingTop: s(50),
-                            },
-                        ]}
-                    >
+                    <View style={styles.loadingContainer}>
                         <ActivityIndicator
-                            size={
-                                isTablet
-                                    ? "large"
-                                    : "small"
-                            }
-                            color="#24b6d1"
+                            size="large"
+                            color={colors.icon}
                         />
 
                         <Text
                             style={[
                                 styles.loadingText,
                                 {
+                                    color: colors.secondaryText,
                                     fontSize: s(15),
-                                    marginTop: s(12),
                                 },
                             ]}
                         >
-                            Loading expenses...
+                            {t.loadingExpenses}
                         </Text>
                     </View>
                 ) : (
                     <>
-                        <View
-                            style={[
-                                styles.section,
-                                {
-                                    marginBottom:
-                                        s(10),
-                                },
-                            ]}
-                        >
-                            <View
-                                style={[
-                                    styles.sectionTitleContainer,
-                                    {
-                                        minHeight:
-                                            s(35),
-                                    },
-                                ]}
-                            >
-                                <Ionicons
+                        <View style={styles.section}>
+                            <View style={styles.sectionTitleContainer}>
+                                <MaterialCommunityIcons
                                     name="card-outline"
-                                    size={s(30)}
-                                    color="#0E2738"
+                                    size={s(26)}
+                                    color={colors.icon}
                                 />
 
                                 <Text
                                     style={[
-                                        styles.sectiontitle,
+                                        styles.sectionTitle,
                                         {
-                                            fontSize:
-                                                s(24),
-                                            marginLeft:
-                                                s(6),
+                                            color: colors.text,
+                                            fontSize: s(20),
                                         },
                                     ]}
-                                    numberOfLines={
-                                        2
-                                    }
                                 >
-                                    Weekly expenses
+                                    {t.weeklyExpenses}
                                 </Text>
+
+                                <View
+                                    style={[
+                                        styles.line,
+                                        {
+                                            backgroundColor:
+                                                colors.secondaryText,
+                                        },
+                                    ]}
+                                />
                             </View>
 
-                            <View
-                                style={[
-                                    styles.line,
-                                    {
-                                        marginTop:
-                                            s(12),
-                                        marginBottom:
-                                            s(5),
-                                    },
-                                ]}
-                            />
-
-                            {weeklyExpenses.length >
-                            0 ? (
-                                weeklyExpenses.map(
-                                    (expense) => (
-                                        <ExpenseItem
-                                            key={`weekly-${expense.id}`}
-                                            expense={
-                                                expense
-                                            }
-                                            selected={
-                                                selectedExpense ===
-                                                `weekly-${expense.id}`
-                                            }
-                                            onPress={() =>
-                                                toggleExpense(
-                                                    expense,
-                                                    "weekly"
-                                                )
-                                            }
-                                            formatAmount={
-                                                formatAmount
-                                            }
-                                            formatDate={
-                                                formatDate
-                                            }
-                                            getIcon={
-                                                getIcon
-                                            }
-                                            scale={
-                                                scale
-                                            }
-                                        />
-                                    )
-                                )
+                            {weeklyExpenses.length === 0 ? (
+                                <Text
+                                    style={[
+                                        styles.emptyText,
+                                        {
+                                            color: colors.secondaryText,
+                                            fontSize: s(14),
+                                        },
+                                    ]}
+                                >
+                                    {t.noWeeklyExpenses}
+                                </Text>
                             ) : (
-                                <EmptyMessage
-                                    text="No weekly expenses"
-                                    scale={
-                                        scale
-                                    }
-                                />
+                                weeklyExpenses.map((expense) => (
+                                    <ExpenseItem
+                                        key={expense.id}
+                                        expense={expense}
+                                        section="weekly"
+                                        selectedExpense={selectedExpense}
+                                        toggleExpense={toggleExpense}
+                                        formatAmount={formatAmount}
+                                        formatDate={formatDate}
+                                        getIcon={getIcon}
+                                        colors={colors}
+                                        t={t}
+                                        s={s}
+                                    />
+                                ))
                             )}
                         </View>
 
-                        <View
-                            style={[
-                                styles.section,
-                                {
-                                    marginBottom:
-                                        s(10),
-                                },
-                            ]}
-                        >
-                            <View
-                                style={[
-                                    styles.sectionTitleContainer,
-                                    {
-                                        minHeight:
-                                            s(35),
-                                    },
-                                ]}
-                            >
-                                <Ionicons
+                        <View style={styles.section}>
+                            <View style={styles.sectionTitleContainer}>
+                                <MaterialCommunityIcons
                                     name="coins-outline"
-                                    size={s(30)}
-                                    color="#0E2738"
+                                    size={s(26)}
+                                    color={colors.icon}
                                 />
 
                                 <Text
                                     style={[
-                                        styles.sectiontitle,
+                                        styles.sectionTitle,
                                         {
-                                            fontSize:
-                                                s(24),
-                                            marginLeft:
-                                                s(6),
+                                            color: colors.text,
+                                            fontSize: s(20),
                                         },
                                     ]}
-                                    numberOfLines={
-                                        2
-                                    }
                                 >
-                                    Unnecessary expenses
+                                    {t.unnecessaryExpenses}
                                 </Text>
+
+                                <View
+                                    style={[
+                                        styles.line,
+                                        {
+                                            backgroundColor:
+                                                colors.secondaryText,
+                                        },
+                                    ]}
+                                />
                             </View>
 
-                            <View
-                                style={[
-                                    styles.line,
-                                    {
-                                        marginTop:
-                                            s(12),
-                                        marginBottom:
-                                            s(5),
-                                    },
-                                ]}
-                            />
-
-                            {unnecessaryExpenses.length >
-                            0 ? (
-                                unnecessaryExpenses.map(
-                                    (expense) => (
-                                        <ExpenseItem
-                                            key={`unnecessary-${expense.id}`}
-                                            expense={
-                                                expense
-                                            }
-                                            selected={
-                                                selectedExpense ===
-                                                `unnecessary-${expense.id}`
-                                            }
-                                            onPress={() =>
-                                                toggleExpense(
-                                                    expense,
-                                                    "unnecessary"
-                                                )
-                                            }
-                                            formatAmount={
-                                                formatAmount
-                                            }
-                                            formatDate={
-                                                formatDate
-                                            }
-                                            getIcon={
-                                                getIcon
-                                            }
-                                            scale={
-                                                scale
-                                            }
-                                        />
-                                    )
-                                )
+                            {unnecessaryExpenses.length === 0 ? (
+                                <Text
+                                    style={[
+                                        styles.emptyText,
+                                        {
+                                            color: colors.secondaryText,
+                                            fontSize: s(14),
+                                        },
+                                    ]}
+                                >
+                                    {t.noUnnecessaryExpenses}
+                                </Text>
                             ) : (
-                                <EmptyMessage
-                                    text="No unnecessary expenses"
-                                    scale={
-                                        scale
-                                    }
-                                />
+                                unnecessaryExpenses.map((expense) => (
+                                    <ExpenseItem
+                                        key={expense.id}
+                                        expense={expense}
+                                        section="unnecessary"
+                                        selectedExpense={selectedExpense}
+                                        toggleExpense={toggleExpense}
+                                        formatAmount={formatAmount}
+                                        formatDate={formatDate}
+                                        getIcon={getIcon}
+                                        colors={colors}
+                                        t={t}
+                                        s={s}
+                                    />
+                                ))
                             )}
                         </View>
 
-                        <View
-                            style={[
-                                styles.section,
-                                {
-                                    marginBottom:
-                                        s(10),
-                                },
-                            ]}
-                        >
-                            <View
-                                style={[
-                                    styles.sectionTitleContainer,
-                                    {
-                                        minHeight:
-                                            s(35),
-                                    },
-                                ]}
-                            >
-                                <Ionicons
+                        <View style={styles.section}>
+                            <View style={styles.sectionTitleContainer}>
+                                <MaterialCommunityIcons
                                     name="calendar-outline"
-                                    size={s(30)}
-                                    color="#0E2738"
+                                    size={s(26)}
+                                    color={colors.icon}
                                 />
 
                                 <Text
                                     style={[
-                                        styles.sectiontitle,
+                                        styles.sectionTitle,
                                         {
-                                            fontSize:
-                                                s(24),
-                                            marginLeft:
-                                                s(6),
+                                            color: colors.text,
+                                            fontSize: s(20),
                                         },
                                     ]}
-                                    numberOfLines={
-                                        2
-                                    }
                                 >
-                                    Scheduled expenses
+                                    {t.scheduledExpenses}
                                 </Text>
+
+                                <View
+                                    style={[
+                                        styles.line,
+                                        {
+                                            backgroundColor:
+                                                colors.secondaryText,
+                                        },
+                                    ]}
+                                />
                             </View>
 
-                            <View
-                                style={[
-                                    styles.line,
-                                    {
-                                        marginTop:
-                                            s(12),
-                                        marginBottom:
-                                            s(5),
-                                    },
-                                ]}
-                            />
-
-                            {scheduledExpenses.length >
-                            0 ? (
-                                scheduledExpenses.map(
-                                    (expense) => (
-                                        <ScheduledExpense
-                                            key={`scheduled-${expense.id}`}
-                                            expense={
-                                                expense
-                                            }
-                                            selected={
-                                                selectedExpense ===
-                                                `scheduled-${expense.id}`
-                                            }
-                                            onPress={() =>
-                                                toggleExpense(
-                                                    expense,
-                                                    "scheduled"
-                                                )
-                                            }
-                                            formatAmount={
-                                                formatAmount
-                                            }
-                                            formatDate={
-                                                formatDate
-                                            }
-                                            getIcon={
-                                                getIcon
-                                            }
-                                            scale={
-                                                scale
-                                            }
-                                        />
-                                    )
-                                )
+                            {scheduledExpenses.length === 0 ? (
+                                <Text
+                                    style={[
+                                        styles.emptyText,
+                                        {
+                                            color: colors.secondaryText,
+                                            fontSize: s(14),
+                                        },
+                                    ]}
+                                >
+                                    {t.noScheduledExpenses}
+                                </Text>
                             ) : (
-                                <EmptyMessage
-                                    text="No scheduled expenses"
-                                    scale={
-                                        scale
-                                    }
-                                />
+                                scheduledExpenses.map((expense) => (
+                                    <ScheduledExpense
+                                        key={expense.id}
+                                        expense={expense}
+                                        selectedExpense={selectedExpense}
+                                        toggleExpense={toggleExpense}
+                                        formatAmount={formatAmount}
+                                        formatDate={formatDate}
+                                        getIcon={getIcon}
+                                        colors={colors}
+                                        t={t}
+                                        s={s}
+                                    />
+                                ))
                             )}
                         </View>
-
-                        <View
-                            style={{
-                                height: s(70),
-                            }}
-                        />
                     </>
                 )}
             </ScrollView>
 
-            {/* NAVBAR */}
             <View
                 style={[
                     styles.bottomBar,
                     {
                         height: s(65),
+                        backgroundColor: colors.nav,
                     },
                 ]}
             >
                 <TouchableOpacity
-                    onPress={() =>
-                        router.push("/home")
-                    }
                     style={styles.navButton}
+                    onPress={() => router.push("/home")}
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="home-outline"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(27)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() =>
-                        router.push(
-                            "/historial"
-                        )
-                    }
                     style={styles.navButton}
+                    onPress={() => router.push("/historial")}
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="chart-box-outline"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(27)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() =>
-                        router.push(
-                            "/expensesManagement"
-                        )
-                    }
                     style={styles.navButton}
+                    onPress={() => router.push("/expensesManagement")}
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="swap-horizontal"
-                        size={s(37)}
-                        color="#FFFFFF"
+                        size={s(29)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() =>
-                        router.push(
-                            "/currentgoal"
-                        )
-                    }
                     style={styles.navButton}
+                    onPress={() => router.push("/currentgoal")}
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="layers-outline"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(27)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() =>
-                        router.push("/profile")
-                    }
                     style={styles.navButton}
+                    onPress={() => router.push("/profile")}
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="account-outline"
-                        size={s(35)}
-                        color="#FFFFFF"
+                        size={s(27)}
+                        color={colors.white}
                     />
                 </TouchableOpacity>
             </View>
@@ -769,85 +579,94 @@ export default function ExpenseManagement() {
 
 function ExpenseItem({
     expense,
-    selected,
-    onPress,
+    section,
+    selectedExpense,
+    toggleExpense,
     formatAmount,
     formatDate,
     getIcon,
-    scale,
+    colors,
+    t,
+    s,
 }) {
-    const s = (value) =>
-        Math.round(value * scale);
+    const isSelected =
+        selectedExpense === `${section}-${expense.id}`;
 
     return (
         <View>
             <TouchableOpacity
+                style={styles.expenseRow}
+                onPress={() => toggleExpense(section, expense.id)}
                 activeOpacity={0.7}
-                onPress={onPress}
-                style={[
-                    styles.expenseRow,
-                    {
-                        minHeight: s(45),
-                        paddingVertical: s(4),
-                    },
-                ]}
             >
                 <View
                     style={[
                         styles.expenseIcon,
                         {
-                            width: s(45),
-                            height: s(40),
-                            borderRadius: s(16),
+                            width: s(43),
+                            height: s(43),
+                            borderRadius: s(12),
+                            backgroundColor: colors.icon,
                         },
                     ]}
                 >
                     <Ionicons
-                        name={getIcon(
-                            expense.category
-                        )}
-                        size={s(28)}
-                        color="#FFFFFF"
+                        name={getIcon(expense.category)}
+                        size={s(23)}
+                        color={colors.white}
                     />
                 </View>
 
-                <Text
-                    style={[
-                        styles.expensename,
-                        {
-                            marginLeft: s(9),
-                            fontSize: s(15),
-                        },
-                    ]}
-                    numberOfLines={1}
-                >
-                    {expense.category}
-                </Text>
+                <View style={styles.expenseInfo}>
+                    <Text
+                        style={[
+                            styles.expenseName,
+                            {
+                                color: colors.text,
+                                fontSize: s(15),
+                            },
+                        ]}
+                        numberOfLines={1}
+                    >
+                        {expense.description ||
+                            expense.category ||
+                            t.expenseType}
+                    </Text>
+
+                    <Text
+                        style={[
+                            styles.date,
+                            {
+                                color: colors.icon,
+                                fontSize: s(12),
+                            },
+                        ]}
+                    >
+                        {formatDate(expense.date)}
+                    </Text>
+                </View>
 
                 <Text
                     style={[
                         styles.amount,
                         {
-                            fontSize: s(14),
-                            minWidth: s(35),
-                            marginLeft: s(5),
+                            color: colors.icon,
+                            fontSize: s(16),
                         },
                     ]}
                 >
-                    {formatAmount(
-                        expense.amount
-                    )}
+                    {formatAmount(expense.amount)}
                 </Text>
             </TouchableOpacity>
 
-            {selected && (
+            {isSelected && (
                 <ExpenseDetails
                     expense={expense}
-                    formatAmount={
-                        formatAmount
-                    }
+                    formatAmount={formatAmount}
                     formatDate={formatDate}
-                    scale={scale}
+                    colors={colors}
+                    t={t}
+                    s={s}
                 />
             )}
         </View>
@@ -856,99 +675,95 @@ function ExpenseItem({
 
 function ScheduledExpense({
     expense,
-    selected,
-    onPress,
+    selectedExpense,
+    toggleExpense,
     formatAmount,
     formatDate,
     getIcon,
-    scale,
+    colors,
+    t,
+    s,
 }) {
-    const s = (value) =>
-        Math.round(value * scale);
+    const isSelected =
+        selectedExpense === `scheduled-${expense.id}`;
 
     return (
         <View>
             <TouchableOpacity
+                style={styles.expenseRow}
+                onPress={() =>
+                    toggleExpense("scheduled", expense.id)
+                }
                 activeOpacity={0.7}
-                onPress={onPress}
-                style={[
-                    styles.expenseRow,
-                    {
-                        minHeight: s(45),
-                        paddingVertical: s(4),
-                    },
-                ]}
             >
                 <View
                     style={[
                         styles.expenseIcon,
                         {
-                            width: s(45),
-                            height: s(40),
-                            borderRadius: s(16),
+                            width: s(43),
+                            height: s(43),
+                            borderRadius: s(12),
+                            backgroundColor: colors.icon,
                         },
                     ]}
                 >
                     <Ionicons
-                        name={getIcon(
-                            expense.category
-                        )}
-                        size={s(28)}
-                        color="#FFFFFF"
+                        name={getIcon(expense.category)}
+                        size={s(23)}
+                        color={colors.white}
                     />
                 </View>
 
-                <Text
-                    style={[
-                        styles.expensename,
-                        {
-                            marginLeft: s(9),
-                            fontSize: s(15),
-                        },
-                    ]}
-                    numberOfLines={1}
-                >
-                    {expense.category}
-                </Text>
+                <View style={styles.expenseInfo}>
+                    <Text
+                        style={[
+                            styles.expenseName,
+                            {
+                                color: colors.text,
+                                fontSize: s(15),
+                            },
+                        ]}
+                        numberOfLines={1}
+                    >
+                        {expense.description ||
+                            expense.category ||
+                            t.expenseType}
+                    </Text>
 
-                <Text
-                    style={[
-                        styles.date,
-                        {
-                            fontSize: s(11),
-                            marginRight: s(18),
-                        },
-                    ]}
-                    numberOfLines={1}
-                >
-                    {formatDate(
-                        expense.date
-                    )}
-                </Text>
+                    <Text
+                        style={[
+                            styles.date,
+                            {
+                                color: colors.icon,
+                                fontSize: s(12),
+                            },
+                        ]}
+                    >
+                        {formatDate(expense.date)}
+                    </Text>
+                </View>
 
                 <Text
                     style={[
                         styles.amount,
                         {
-                            fontSize: s(14),
-                            minWidth: s(35),
+                            color: colors.icon,
+                            fontSize: s(16),
                         },
                     ]}
                 >
-                    {formatAmount(
-                        expense.amount
-                    )}
+                    {formatAmount(expense.amount)}
                 </Text>
             </TouchableOpacity>
 
-            {selected && (
+            {isSelected && (
                 <ExpenseDetails
                     expense={expense}
-                    formatAmount={
-                        formatAmount
-                    }
+                    formatAmount={formatAmount}
                     formatDate={formatDate}
-                    scale={scale}
+                    colors={colors}
+                    t={t}
+                    s={s}
                 />
             )}
         </View>
@@ -959,85 +774,81 @@ function ExpenseDetails({
     expense,
     formatAmount,
     formatDate,
-    scale,
+    colors,
+    t,
+    s,
 }) {
-    const s = (value) =>
-        Math.round(value * scale);
-
     return (
         <View
             style={[
                 styles.detailsContainer,
                 {
-                    marginLeft: s(54),
-                    marginTop: s(5),
-                    marginBottom: s(12),
-                    padding: s(12),
+                    backgroundColor: colors.input,
+                    padding: s(15),
                     borderRadius: s(12),
                 },
             ]}
         >
             <DetailRow
-                label="Amount"
-                value={formatAmount(
-                    expense.amount
-                )}
-                scale={scale}
+                label={t.amount}
+                value={formatAmount(expense.amount)}
+                colors={colors}
+                s={s}
             />
 
             <DetailRow
-                label="Category"
+                label={t.category}
+                value={expense.category || t.notAvailable}
+                colors={colors}
+                s={s}
+            />
+
+            <DetailRow
+                label={t.date}
                 value={
-                    expense.category ||
-                    "N/A"
+                    formatDate(expense.date) ||
+                    t.notAvailable
                 }
-                scale={scale}
+                colors={colors}
+                s={s}
             />
 
             <DetailRow
-                label="Date"
-                value={
-                    formatDate(
-                        expense.date
-                    ) || "N/A"
-                }
-                scale={scale}
-            />
-
-            <DetailRow
-                label="Description"
+                label={t.description}
                 value={
                     expense.description ||
-                    "N/A"
+                    t.notAvailable
                 }
-                scale={scale}
+                colors={colors}
+                s={s}
             />
 
             <DetailRow
-                label="Rounded amount"
-                value={formatAmount(
-                    expense.roundingAmount
-                )}
-                scale={scale}
+                label={t.roundedAmount}
+                value={formatAmount(expense.roundingAmount)}
+                colors={colors}
+                s={s}
             />
 
             <DetailRow
-                label="Expense type"
+                label={t.expenseType}
                 value={
                     expense.expenseType ||
-                    "N/A"
+                    t.notAvailable
                 }
-                scale={scale}
+                colors={colors}
+                s={s}
             />
 
             <DetailRow
-                label="Recurring"
+                label={t.recurring}
                 value={
                     expense.isRecurrent
-                        ? "Yes"
-                        : "No"
+                        ? t.yes
+                        : t.no
                 }
-                scale={scale}
+                colors={colors}
+                s={s}
             />
         </View>
     );
@@ -1046,25 +857,17 @@ function ExpenseDetails({
 function DetailRow({
     label,
     value,
-    scale,
+    colors,
+    s,
 }) {
-    const s = (number) =>
-        Math.round(number * scale);
-
     return (
-        <View
-            style={[
-                styles.detailRow,
-                {
-                    marginBottom: s(6),
-                },
-            ]}
-        >
+        <View style={styles.detailRow}>
             <Text
                 style={[
                     styles.detailLabel,
                     {
-                        fontSize: s(12),
+                        color: colors.secondaryText,
+                        fontSize: s(13),
                     },
                 ]}
             >
@@ -1075,9 +878,11 @@ function DetailRow({
                 style={[
                     styles.detailValue,
                     {
-                        fontSize: s(12),
+                        color: colors.text,
+                        fontSize: s(13),
                     },
                 ]}
+                numberOfLines={2}
             >
                 {value}
             </Text>
@@ -1085,60 +890,31 @@ function DetailRow({
     );
 }
 
-function EmptyMessage({
-    text,
-    scale,
-}) {
-    return (
-        <Text
-            style={[
-                styles.emptyText,
-                {
-                    fontSize: Math.round(
-                        13 * scale
-                    ),
-                    marginVertical:
-                        Math.round(
-                            10 * scale
-                        ),
-                },
-            ]}
-        >
-            {text}
-        </Text>
-    );
-}
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#081023",
     },
 
     header: {
-        height: 118,
-        backgroundColor: "#071426",
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 25,
+        justifyContent: "center",
+        position: "relative",
     },
 
     backButton: {
         position: "absolute",
-        left: 15,
-        top: 34,
         width: 55,
         height: 55,
+        borderRadius: 28,
         alignItems: "center",
         justifyContent: "center",
         zIndex: 999,
         elevation: 10,
     },
 
-    headertitle: {
+    headerTitle: {
         flex: 1,
-        color: "#FFFFFF",
         fontWeight: "700",
         textAlign: "center",
         transform: [
@@ -1153,10 +929,9 @@ const styles = StyleSheet.create({
 
     notification: {
         position: "absolute",
-        right: 15,
-        top: 34,
         width: 55,
         height: 55,
+        borderRadius: 28,
         alignItems: "center",
         justifyContent: "center",
         zIndex: 999,
@@ -1165,90 +940,98 @@ const styles = StyleSheet.create({
 
     content: {
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        borderTopLeftRadius: 35,
+        borderTopRightRadius: 35,
+        overflow: "hidden",
     },
 
     section: {
         width: "100%",
+        marginBottom: 30,
     },
 
     sectionTitleContainer: {
         flexDirection: "row",
         alignItems: "center",
+        marginBottom: 18,
     },
 
-    sectiontitle: {
-        color: "#172128",
+    sectionTitle: {
         fontWeight: "400",
-        flex: 1,
         flexShrink: 1,
+        marginLeft: 10,
     },
 
     line: {
         height: 1,
-        backgroundColor: "#777777",
-        width: "100%",
+        flex: 1,
+        marginLeft: 12,
     },
 
     expenseRow: {
         flexDirection: "row",
         alignItems: "center",
+        paddingVertical: 10,
     },
 
     expenseIcon: {
-        backgroundColor: "#24b6d1",
-        justifyContent: "center",
         alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12,
     },
 
-    expensename: {
+    expenseInfo: {
         flex: 1,
-        color: "#26313b",
+        marginRight: 8,
+    },
+
+    expenseName: {
         fontWeight: "400",
+        marginBottom: 3,
     },
 
     amount: {
-        color: "#0066ff",
         fontWeight: "700",
         textAlign: "right",
     },
 
     date: {
-        color: "#0066ff",
         flexShrink: 1,
     },
 
     emptyText: {
-        color: "#888888",
-        fontWeight: "400",
+        marginTop: 4,
+        paddingLeft: 5,
     },
 
     loadingContainer: {
         alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 80,
     },
 
     loadingText: {
-        color: "#777777",
+        marginTop: 12,
     },
 
     detailsContainer: {
-        backgroundColor: "#F2F8FA",
+        marginTop: 5,
+        marginBottom: 10,
     },
 
     detailRow: {
         flexDirection: "row",
-        alignItems: "flex-start",
+        alignItems: "center",
+        paddingVertical: 7,
     },
 
     detailLabel: {
         width: "40%",
-        color: "#777777",
         fontWeight: "600",
     },
 
     detailValue: {
         flex: 1,
-        color: "#26313b",
         fontWeight: "400",
         textAlign: "right",
     },
@@ -1258,18 +1041,16 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         width: "100%",
-        height: 65,
-        backgroundColor: "#25B5D1",
-        borderTopLeftRadius: 78,
         flexDirection: "row",
-        justifyContent: "space-around",
         alignItems: "center",
-        overflow: "hidden",
+        borderTopLeftRadius: 78,
+        elevation: 15,
+        zIndex: 100,
     },
 
     navButton: {
         flex: 1,
-        height: "100%",
+        height: 65,
         alignItems: "center",
         justifyContent: "center",
     },

@@ -1,6 +1,12 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useState } from "react";
+import {
+    collection,
+    onSnapshot,
+    query,
+    where,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
 import {
     Alert,
     ScrollView,
@@ -12,6 +18,7 @@ import {
     useWindowDimensions,
 } from "react-native";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 export default function Redemptionhistory() {
     const { t } = useAppSettings();
@@ -41,49 +48,150 @@ export default function Redemptionhistory() {
     const s = (value) => Math.round(value * scale);
 
     const [filter, setfilter] = useState("Todos");
+    const [canjes, setCanjes] = useState([]);
 
-    const canjes = [
-        {
-            id: "1",
-            tipo: "Hilasal discount",
-            date: "May 10, 2026",
-            discount: "-$20.00",
-            state: "Complete",
-            icon: "pricetag-outline",
-        },
+    useEffect(() => {
+        const user = auth.currentUser;
 
-        {
-            id: "2",
-            tipo: "Partner stores",
-            date: "April 28, 2026",
-            discount: "-$10.00",
-            state: "Complete",
-            icon: "pricetag-outline",
-        },
+        if (!user) {
+            setCanjes([]);
+            return;
+        }
 
-        {
-            id: "3",
-            tipo: "Hilasal discount",
-            date: "July 5, 2026",
-            discount: "-$5.00",
-            state: "In process",
-            icon: "pricetag-outline",
-        },
+        const redeemedQuery = query(
+            collection(db, "Redeemed"),
+            where("userId", "==", user.uid)
+        );
 
-        {
-            id: "4",
-            tipo: "Partner stores",
-            date: "March 20, 2026",
-            discount: "-$1.99",
-            state: "Canceled",
-            icon: "pricetag-outline",
+        const unsubscribe = onSnapshot(
+            redeemedQuery,
+            (snapshot) => {
+                const redeemed = snapshot.docs.map((item) => {
+                    const data = item.data();
+
+                    let redeemedDate = null;
+
+                    if (data.redeemedAt?.toDate) {
+                        redeemedDate = data.redeemedAt.toDate();
+                    } else if (data.redeemedAt) {
+                        redeemedDate = new Date(data.redeemedAt);
+                    }
+
+                    return {
+                        id: item.id,
+                        rewardId: data.rewardId || "",
+                        store: data.store || "",
+                        title: data.title || "",
+                        points: typeof data.points === "number"
+                            ? data.points
+                            : 0,
+                        code: data.code || "",
+                        date: redeemedDate,
+                        state: "Complete",
+                        icon: "pricetag-outline",
+                    };
+                });
+
+                redeemed.sort((a, b) => {
+                    if (!a.date) return 1;
+                    if (!b.date) return -1;
+                    return b.date.getTime() - a.date.getTime();
+                });
+
+                setCanjes(redeemed);
+            },
+            (error) => {
+                console.log(
+                    "Error getting redemption history:",
+                    error
+                );
+                setCanjes([]);
+            }
+        );
+
+        return () => unsubscribe();
+    }, []);
+
+    const rewardTranslations = {
+        hilasal: {
+            title: t.rewardHilasalTitle,
+            description: t.rewardHilasalDescription,
         },
-    ];
+        dollarcity: {
+            title: t.rewardDollarcityTitle,
+            description: t.rewardDollarcityDescription,
+        },
+        groupq: {
+            title: t.rewardGroupQTitle,
+            description: t.rewardGroupQDescription,
+        },
+        microsoft: {
+            title: t.rewardMicrosoftTitle,
+            description: t.rewardMicrosoftDescription,
+        },
+        neveria: {
+            title: t.rewardNeveriaTitle,
+            description: t.rewardNeveriaDescription,
+        },
+        donli: {
+            title: t.rewardDonLiTitle,
+            description: t.rewardDonLiDescription,
+        },
+    };
+
+    const getRewardTitle = (canje) => {
+        const translatedReward =
+            rewardTranslations[canje.rewardId];
+
+        if (translatedReward?.title) {
+            return translatedReward.title;
+        }
+
+        return canje.title;
+    };
+
+    const getTypeLabel = (canje) => {
+        const title = getRewardTitle(canje);
+
+        switch (canje.rewardId) {
+            case "hilasal":
+                return `${canje.store} ${title}`;
+            case "dollarcity":
+                return `${canje.store} ${title}`;
+            case "groupq":
+                return `${canje.store} ${title}`;
+            case "microsoft":
+                return `${canje.store} ${title}`;
+            case "neveria":
+                return `${canje.store} ${title}`;
+            case "donli":
+                return `${canje.store} ${title}`;
+            default:
+                return canje.store || title;
+        }
+    };
+
+    const formatDate = (date) => {
+        if (!date) {
+            return "";
+        }
+
+        return date.toLocaleDateString(
+            t.language === "es" ? "es-SV" : "en-US",
+            {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+            }
+        );
+    };
 
     const canjesFiltrados =
         filter === "Todos"
             ? canjes
-            : canjes.filter((canje) => canje.state === filter);
+            : canjes.filter(
+                (canje) => canje.state === filter
+            );
 
     const getStateLabel = (state) => {
         switch (state) {
@@ -99,11 +207,16 @@ export default function Redemptionhistory() {
     };
 
     const showDetail = (canje) => {
+        const rewardTitle = getRewardTitle(canje);
+        const date = formatDate(canje.date);
+
         Alert.alert(
-            canje.tipo,
-            `${t.date}: ${canje.date}\n\n` +
-            `${t.discount}: ${canje.discount}\n\n` +
-            `${t.state}: ${getStateLabel(canje.state)}\n\n`,
+            getTypeLabel(canje),
+            `${t.date}: ${date}\n\n` +
+            `${t.reward}: ${rewardTitle}\n\n` +
+            `${t.pointsUsed}: ${canje.points}\n\n` +
+            `${t.state}: ${getStateLabel(canje.state)}\n\n` +
+            `${t.code}: ${canje.code}`,
             [
                 {
                     text: t.close,
@@ -142,7 +255,6 @@ export default function Redemptionhistory() {
                 backgroundColor="#071426"
             />
 
-  
             <View
                 style={[
                     styles.header,
@@ -156,7 +268,6 @@ export default function Redemptionhistory() {
                     },
                 ]}
             >
-          
                 <TouchableOpacity
                     style={styles.headerButton}
                     onPress={() => router.push("/pointsExchange")}
@@ -168,7 +279,6 @@ export default function Redemptionhistory() {
                     />
                 </TouchableOpacity>
 
-               
                 <Text
                     style={[
                         styles.headerTitle,
@@ -186,7 +296,6 @@ export default function Redemptionhistory() {
                     {t.redemptionHistory}
                 </Text>
 
-                {/* NOTIFICATIONS */}
                 <TouchableOpacity
                     style={styles.headerButton}
                     onPress={() =>
@@ -206,7 +315,6 @@ export default function Redemptionhistory() {
                 </TouchableOpacity>
             </View>
 
-      
             <View
                 style={[
                     styles.card,
@@ -227,7 +335,6 @@ export default function Redemptionhistory() {
                         },
                     ]}
                 >
-                
                     <View
                         style={[
                             styles.resumen,
@@ -304,7 +411,7 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    12
+                                    {canjes.length}
                                 </Text>
                             </View>
 
@@ -336,7 +443,14 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    $10.00
+                                    {canjes
+                                        .reduce(
+                                            (total, canje) =>
+                                                total +
+                                                canje.points,
+                                            0
+                                        )
+                                        .toFixed(1)}
                                 </Text>
                             </View>
 
@@ -368,7 +482,7 @@ export default function Redemptionhistory() {
                                         },
                                     ]}
                                 >
-                                    5
+                                    {canjes.length}
                                 </Text>
                             </View>
                         </View>
@@ -417,7 +531,6 @@ export default function Redemptionhistory() {
                         />
                     </View>
 
-                   
                     <View
                         style={[
                             styles.list,
@@ -451,7 +564,9 @@ export default function Redemptionhistory() {
                                             paddingVertical: s(8),
                                         },
                                     ]}
-                                    onPress={() => showDetail(canje)}
+                                    onPress={() =>
+                                        showDetail(canje)
+                                    }
                                     activeOpacity={0.7}
                                 >
                                     <View
@@ -491,7 +606,7 @@ export default function Redemptionhistory() {
                                                     },
                                                 ]}
                                             >
-                                                {canje.tipo}
+                                                {getTypeLabel(canje)}
                                             </Text>
                                         </View>
 
@@ -503,7 +618,8 @@ export default function Redemptionhistory() {
                                                 },
                                             ]}
                                         >
-                                            {t.redeemedOn} {canje.date}.
+                                            {t.redeemedOn}{" "}
+                                            {formatDate(canje.date)}.
                                         </Text>
                                     </View>
 
@@ -524,7 +640,7 @@ export default function Redemptionhistory() {
                                                 },
                                             ]}
                                         >
-                                            {canje.discount}
+                                            {canje.points} pts
                                         </Text>
 
                                         <Ionicons
@@ -608,7 +724,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#071426",
     },
 
-    
     header: {
         backgroundColor: "#071426",
         flexDirection: "row",
@@ -802,7 +917,6 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
 
-    
     bottomBar: {
         position: "absolute",
         bottom: 0,

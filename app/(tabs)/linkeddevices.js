@@ -26,10 +26,12 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig.js";
 
 export default function Devices() {
   const { width, height } = useWindowDimensions();
+  const { colors, t, language } = useAppSettings();
 
   const [devices, setDevices] = useState([]);
   const [currentDeviceId, setCurrentDeviceId] = useState(null);
@@ -111,7 +113,7 @@ export default function Devices() {
         let deviceName =
           Device.deviceName ||
           Device.modelName ||
-          "My device";
+          t.myDevice;
 
         let deviceType = "phone";
 
@@ -201,8 +203,8 @@ export default function Devices() {
             );
 
             Alert.alert(
-              "Error",
-              "The linked devices could not be loaded."
+              t.error,
+              t.devicesLoadError
             );
           }
         );
@@ -213,8 +215,8 @@ export default function Devices() {
         );
 
         Alert.alert(
-          "Error",
-          "The device could not be registered."
+          t.error,
+          t.deviceRegisterError
         );
       }
     };
@@ -241,7 +243,7 @@ export default function Devices() {
         unsubscribeDevices();
       }
     };
-  }, []);
+  }, [language]);
 
   const getDeviceIcon = (device) => {
     if (device.deviceType === "desktop") {
@@ -257,14 +259,14 @@ export default function Devices() {
 
   const getDeviceName = (device) => {
     if (device.id === currentDeviceId) {
-      return "My device";
+      return t.myDevice;
     }
 
     if (device.deviceName) {
       return device.deviceName;
     }
 
-    return "Unknown device";
+    return t.unknownDevice;
   };
 
   const getDeviceDetails = (device) => {
@@ -273,14 +275,14 @@ export default function Devices() {
 
     if (device.deviceType === "desktop") {
       return `${location}\n${
-        device.systemName || "Desktop"
+        device.systemName || t.desktop
       }`;
     }
 
     const model =
       device.modelName ||
       device.systemName ||
-      "Mobile device";
+      t.mobileDevice;
 
     return `${model}\n${location}`;
   };
@@ -289,7 +291,7 @@ export default function Devices() {
     if (device.id === currentDeviceId) {
       return {
         active: true,
-        text: "Active now",
+        text: t.activeNow,
       };
     }
 
@@ -303,7 +305,7 @@ export default function Devices() {
     if (!lastActiveDate) {
       return {
         active: false,
-        text: "Last active: unknown",
+        text: t.lastActiveUnknown,
       };
     }
 
@@ -327,59 +329,71 @@ export default function Devices() {
     if (minutes < 1) {
       return {
         active: false,
-        text: "Last active: just now",
+        text: t.lastActiveJustNow,
       };
     }
 
     if (minutes < 60) {
       return {
         active: false,
-        text: `Last active: ${minutes} min ago`,
+        text: `${t.lastActive}: ${minutes} ${
+          language === "es"
+            ? "min atrás"
+            : "min ago"
+        }`,
       };
     }
 
     if (hours < 24) {
       return {
         active: false,
-        text: `Last active: ${hours}h ago`,
+        text: `${t.lastActive}: ${hours}h ${
+          language === "es"
+            ? "atrás"
+            : "ago"
+        }`,
       };
     }
 
     if (days === 1) {
       return {
         active: false,
-        text: "Last active: yesterday",
+        text: t.lastActiveYesterday,
       };
     }
 
     return {
       active: false,
-      text: `Last active: ${days} days ago`,
+      text: `${t.lastActive}: ${days} ${
+        language === "es"
+          ? "días atrás"
+          : "days ago"
+      }`,
     };
   };
 
   const unlinkDevice = (device) => {
     if (device.id === currentDeviceId) {
       Alert.alert(
-        "Current device",
-        "You cannot unlink the device you are currently using."
+        t.currentDevice,
+        t.cannotUnlinkCurrent
       );
 
       return;
     }
 
     Alert.alert(
-      "Unlink device",
-      `Are you sure you want to unlink ${getDeviceName(
+      t.unlinkDevice,
+      `${t.areYouSureUnlink} ${getDeviceName(
         device
       )}?`,
       [
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
         {
-          text: "Unlink",
+          text: t.unlink,
           style: "destructive",
           onPress: async () => {
             try {
@@ -412,11 +426,12 @@ export default function Devices() {
                 {
                   uid: user.uid,
                   type: "device_unlinked",
-                  title: "Device unlinked",
-                  message: `The device ${deviceName} was removed from your linked devices.`,
+                  title: t.deviceUnlinked,
+                  message: `${t.deviceRemoved} ${deviceName}.`,
                   deviceId: device.id,
                   deviceName:
-                    device.deviceName || deviceName,
+                    device.deviceName ||
+                    deviceName,
                   read: false,
                   createdAt: serverTimestamp(),
                 }
@@ -428,8 +443,8 @@ export default function Devices() {
               );
 
               Alert.alert(
-                "Error",
-                "The device could not be unlinked."
+                t.error,
+                t.deviceUnlinkError
               );
             }
           },
@@ -446,6 +461,161 @@ export default function Devices() {
       },
     });
   };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.header,
+    },
+
+    header: {
+      width: "100%",
+      backgroundColor: colors.header,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    backButton: {
+      justifyContent: "center",
+      alignItems: "flex-start",
+    },
+
+    title: {
+      flex: 1,
+      color: colors.white,
+      fontWeight: "700",
+      textAlign: "center",
+    },
+
+    headerBell: {
+      justifyContent: "center",
+    },
+
+    main: {
+      flex: 1,
+      width: "100%",
+      backgroundColor: colors.background,
+      overflow: "hidden",
+    },
+
+    content: {
+      flex: 1,
+    },
+
+    contentContainer: {
+      paddingBottom: 90,
+    },
+
+    sectionTitle: {
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    deviceCard: {
+      backgroundColor: colors.card,
+      flexDirection: "row",
+      alignItems: "center",
+      elevation: 3,
+      shadowColor: colors.black,
+      shadowOpacity: 0.07,
+      shadowRadius: 8,
+      shadowOffset: {
+        width: 0,
+        height: 3,
+      },
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+
+    deviceIcon: {
+      backgroundColor: colors.input,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    deviceInfo: {
+      flex: 1,
+      minWidth: 0,
+    },
+
+    deviceName: {
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    deviceDetails: {
+      color: colors.secondaryText,
+    },
+
+    status: {
+      flexDirection: "row",
+      alignItems: "center",
+      minWidth: 0,
+    },
+
+    dot: {
+      backgroundColor: colors.inactive,
+    },
+
+    activeDot: {
+      backgroundColor: colors.icon,
+    },
+
+    activeText: {
+      color: colors.icon,
+      fontWeight: "600",
+    },
+
+    lastActive: {
+      color: colors.secondaryText,
+    },
+
+    unlinkButton: {
+      backgroundColor: colors.input,
+    },
+
+    unlinkText: {
+      color: colors.text,
+      fontWeight: "700",
+    },
+
+    infoCard: {
+      backgroundColor: colors.input,
+      flexDirection: "row",
+    },
+
+    infoTextContainer: {
+      flex: 1,
+    },
+
+    infoTitle: {
+      fontWeight: "700",
+      color: colors.text,
+    },
+
+    infoText: {
+      color: colors.secondaryText,
+    },
+
+    bottomBar: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      width: "100%",
+      backgroundColor: colors.nav,
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-around",
+      overflow: "hidden",
+    },
+
+    navButton: {
+      flex: 1,
+      height: "100%",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
 
   return (
     <View style={styles.container}>
@@ -478,7 +648,7 @@ export default function Devices() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={s(35)}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -499,7 +669,7 @@ export default function Devices() {
             },
           ]}
         >
-          Linked{"\n"}Devices
+          {t.linkedDevicesTitle}
         </Text>
 
         <TouchableOpacity
@@ -519,7 +689,7 @@ export default function Devices() {
           <MaterialCommunityIcons
             name="bell-circle-outline"
             size={s(35)}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
       </View>
@@ -554,7 +724,7 @@ export default function Devices() {
               },
             ]}
           >
-            Devices
+            {t.devices}
           </Text>
 
           {devices.map((device) => {
@@ -588,7 +758,7 @@ export default function Devices() {
                   <Ionicons
                     name={getDeviceIcon(device)}
                     size={s(28)}
-                    color="#3A7AFE"
+                    color={colors.icon}
                   />
                 </View>
 
@@ -665,8 +835,7 @@ export default function Devices() {
                       borderRadius: s(10),
                       marginLeft: s(8),
                     },
-                    device.id ===
-                      currentDeviceId && {
+                    device.id === currentDeviceId && {
                       opacity: 0.35,
                     },
                   ]}
@@ -683,7 +852,7 @@ export default function Devices() {
                       },
                     ]}
                   >
-                    Unlink
+                    {t.unlink}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -703,7 +872,7 @@ export default function Devices() {
             <Ionicons
               name="shield-checkmark-outline"
               size={s(25)}
-              color="#3A7AFE"
+              color={colors.icon}
             />
 
             <View
@@ -723,7 +892,7 @@ export default function Devices() {
                   },
                 ]}
               >
-                Keep your account secure
+                {t.keepAccountSecure}
               </Text>
 
               <Text
@@ -735,8 +904,7 @@ export default function Devices() {
                   },
                 ]}
               >
-                If you don't recognize a device,
-                unlink it to protect your account.
+                {t.unknownDeviceSecurity}
               </Text>
             </View>
           </View>
@@ -763,7 +931,7 @@ export default function Devices() {
               <MaterialCommunityIcons
                 name={item.icon}
                 size={s(35)}
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
@@ -772,156 +940,3 @@ export default function Devices() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#071426",
-  },
-
-  header: {
-    width: "100%",
-    backgroundColor: "#071426",
-    flexDirection: "row",
-    alignItems: "center",
-  },
-
-  backButton: {
-    justifyContent: "center",
-    alignItems: "flex-start",
-  },
-
-  title: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontWeight: "700",
-    textAlign: "center",
-  },
-
-  headerBell: {
-    justifyContent: "center",
-  },
-
-  main: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#FFFFFF",
-    overflow: "hidden",
-  },
-
-  content: {
-    flex: 1,
-  },
-
-  contentContainer: {
-    paddingBottom: 90,
-  },
-
-  sectionTitle: {
-    fontWeight: "700",
-    color: "#222",
-  },
-
-  deviceCard: {
-    backgroundColor: "#FFF",
-    flexDirection: "row",
-    alignItems: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-  },
-
-  deviceIcon: {
-    backgroundColor: "#EEF4FF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  deviceInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-
-  deviceName: {
-    fontWeight: "700",
-    color: "#222",
-  },
-
-  deviceDetails: {
-    color: "#777",
-  },
-
-  status: {
-    flexDirection: "row",
-    alignItems: "center",
-    minWidth: 0,
-  },
-
-  dot: {
-    backgroundColor: "#999",
-  },
-
-  activeDot: {
-    backgroundColor: "#25B7D3",
-  },
-
-  activeText: {
-    color: "#259E8C",
-    fontWeight: "600",
-  },
-
-  lastActive: {
-    color: "#030101",
-  },
-
-  unlinkButton: {
-    backgroundColor: "#FFF1F1",
-  },
-
-  unlinkText: {
-    color: "#081023",
-    fontWeight: "700",
-  },
-
-  infoCard: {
-    backgroundColor: "#EEF4FF",
-    flexDirection: "row",
-  },
-
-  infoTextContainer: {
-    flex: 1,
-  },
-
-  infoTitle: {
-    fontWeight: "700",
-    color: "#222",
-  },
-
-  infoText: {
-    color: "#666",
-  },
-
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    backgroundColor: "#25B5D1",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    overflow: "hidden",
-  },
-
-  navButton: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});

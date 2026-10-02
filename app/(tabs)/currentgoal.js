@@ -21,8 +21,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 export default function SavingsGoalsScreen() {
   const { colors, t } = useAppSettings();
@@ -217,10 +217,21 @@ export default function SavingsGoalsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
-        barStyle="light-content"
-        backgroundColor="#081023"
+        barStyle={
+          colors.primaryBackground === "#FAFAF7"
+            ? "dark-content"
+            : "light-content"
+        }
+        backgroundColor={colors.primaryBackground}
       />
 
       <View
@@ -228,6 +239,7 @@ export default function SavingsGoalsScreen() {
           styles.header,
           {
             paddingHorizontal: horizontalPadding,
+            backgroundColor: colors.header,
           },
         ]}
       >
@@ -239,7 +251,7 @@ export default function SavingsGoalsScreen() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -248,6 +260,7 @@ export default function SavingsGoalsScreen() {
             styles.headerTitle,
             {
               fontSize: 25 * scale,
+              color: colors.white,
             },
           ]}
           numberOfLines={1}
@@ -263,7 +276,7 @@ export default function SavingsGoalsScreen() {
           <MaterialCommunityIcons
             name="bell-circle-outline"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
       </View>
@@ -274,6 +287,7 @@ export default function SavingsGoalsScreen() {
           {
             borderTopLeftRadius: 35 * scale,
             borderTopRightRadius: 35 * scale,
+            backgroundColor: colors.background,
           },
         ]}
       >
@@ -285,6 +299,7 @@ export default function SavingsGoalsScreen() {
               paddingHorizontal: horizontalPadding,
               paddingTop: s(20),
               paddingBottom: s(110),
+              backgroundColor: colors.background,
             },
           ]}
         >
@@ -302,6 +317,7 @@ export default function SavingsGoalsScreen() {
                   styles.noGoalsText,
                   {
                     fontSize: s(16),
+                    color: colors.secondaryText,
                   },
                 ]}
               >
@@ -324,6 +340,7 @@ export default function SavingsGoalsScreen() {
                         borderRadius: s(25),
                         padding: s(22),
                         marginBottom: s(30),
+                        backgroundColor: colors.primary,
                       },
                     ]}
                   >
@@ -366,7 +383,7 @@ export default function SavingsGoalsScreen() {
                             : "chevron-down"
                         }
                         size={s(25)}
-                        color="#fff"
+                        color={colors.white}
                       />
                     </View>
 
@@ -503,6 +520,7 @@ export default function SavingsGoalsScreen() {
                           {
                             marginTop: s(15),
                             paddingTop: s(15),
+                            borderTopColor: "rgba(255,255,255,0.25)",
                           },
                         ]}
                       >
@@ -512,6 +530,7 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(14),
                               marginBottom: s(5),
+                              color: colors.white,
                             },
                           ]}
                         >
@@ -524,6 +543,7 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(13),
                               marginBottom: s(15),
+                              color: "rgba(255,255,255,0.85)",
                             },
                           ]}
                         >
@@ -537,6 +557,7 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(14),
                               marginBottom: s(8),
+                              color: colors.white,
                             },
                           ]}
                         >
@@ -551,10 +572,13 @@ export default function SavingsGoalsScreen() {
                               borderRadius: s(12),
                               padding: s(12),
                               marginBottom: s(10),
+                              backgroundColor: colors.background,
+                              borderColor: colors.border,
+                              color: colors.text,
                             },
                           ]}
                           placeholder={t.enterAmount}
-                          placeholderTextColor="#999"
+                          placeholderTextColor={colors.secondaryText}
                           keyboardType="decimal-pad"
                           value={abono}
                           onChangeText={setAbono}
@@ -566,6 +590,7 @@ export default function SavingsGoalsScreen() {
                             {
                               borderRadius: s(20),
                               height: s(42),
+                              backgroundColor: colors.nav,
                             },
                           ]}
                           onPress={() =>
@@ -578,6 +603,7 @@ export default function SavingsGoalsScreen() {
                               styles.addMoneyButtonText,
                               {
                                 fontSize: s(14),
+                                color: colors.white,
                               },
                             ]}
                           >
@@ -600,6 +626,7 @@ export default function SavingsGoalsScreen() {
                       {
                         fontSize: s(19),
                         marginBottom: s(15),
+                        color: colors.text,
                       },
                     ]}
                   >
@@ -640,9 +667,15 @@ export default function SavingsGoalsScreen() {
                               borderRadius: s(18),
                               padding: s(16),
                               marginBottom: s(15),
+                              backgroundColor: colors.background,
                             },
-                            expandedGoal === goal.id &&
+                            expandedGoal === goal.id && [
                               styles.expandedOtherGoal,
+                              {
+                                backgroundColor:
+                                  colors.background,
+                              },
+                            ],
                           ]}
                         >
                           <View
@@ -656,6 +689,8 @@ export default function SavingsGoalsScreen() {
                                   height: s(48),
                                   borderRadius: s(15),
                                   marginRight: s(13),
+                                  backgroundColor:
+                                    colors.nav,
                                 },
                               ]}
                             >
@@ -665,7 +700,7 @@ export default function SavingsGoalsScreen() {
                                   "wallet-outline"
                                 }
                                 size={s(24)}
-                                color="#0b1624"
+                                color={colors.white}
                               />
                             </View>
 
@@ -678,6 +713,7 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(16),
                                     marginBottom: s(4),
+                                    color: colors.text,
                                   },
                                 ]}
                                 numberOfLines={2}
@@ -690,6 +726,7 @@ export default function SavingsGoalsScreen() {
                                   styles.otherGoalAmount,
                                   {
                                     fontSize: s(13),
+                                    color: colors.secondaryText,
                                   },
                                 ]}
                               >
@@ -705,7 +742,7 @@ export default function SavingsGoalsScreen() {
                                   : "chevron-down"
                               }
                               size={s(23)}
-                              color="#0b1624"
+                              color={colors.icon}
                             />
                           </View>
 
@@ -725,6 +762,8 @@ export default function SavingsGoalsScreen() {
                                 {
                                   width: `${goalProgress}%`,
                                   borderRadius: s(10),
+                                  backgroundColor:
+                                    colors.primary,
                                 },
                               ]}
                             />
@@ -737,6 +776,8 @@ export default function SavingsGoalsScreen() {
                                 {
                                   marginTop: s(15),
                                   paddingTop: s(15),
+                                  borderTopColor:
+                                    colors.border,
                                 },
                               ]}
                             >
@@ -746,6 +787,7 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(14),
                                     marginBottom: s(5),
+                                    color: colors.text,
                                   },
                                 ]}
                               >
@@ -758,6 +800,8 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(13),
                                     marginBottom: s(15),
+                                    color:
+                                      colors.secondaryText,
                                   },
                                 ]}
                               >
@@ -771,6 +815,7 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(14),
                                     marginBottom: s(8),
+                                    color: colors.text,
                                   },
                                 ]}
                               >
@@ -785,10 +830,17 @@ export default function SavingsGoalsScreen() {
                                     borderRadius: s(12),
                                     padding: s(12),
                                     marginBottom: s(10),
+                                    backgroundColor:
+                                      colors.background,
+                                    borderColor:
+                                      colors.border,
+                                    color: colors.text,
                                   },
                                 ]}
                                 placeholder={t.enterAmount}
-                                placeholderTextColor="#999"
+                                placeholderTextColor={
+                                  colors.secondaryText
+                                }
                                 keyboardType="decimal-pad"
                                 value={abono}
                                 onChangeText={setAbono}
@@ -800,6 +852,8 @@ export default function SavingsGoalsScreen() {
                                   {
                                     borderRadius: s(20),
                                     height: s(42),
+                                    backgroundColor:
+                                      colors.nav,
                                   },
                                 ]}
                                 onPress={() =>
@@ -812,6 +866,7 @@ export default function SavingsGoalsScreen() {
                                     styles.addMoneyButtonText,
                                     {
                                       fontSize: s(14),
+                                      color: colors.white,
                                     },
                                   ]}
                                 >
@@ -843,6 +898,7 @@ export default function SavingsGoalsScreen() {
               ? 65 * scale
               : 65,
             borderTopLeftRadius: 78 * scale,
+            backgroundColor: colors.nav,
           },
         ]}
       >
@@ -866,7 +922,7 @@ export default function SavingsGoalsScreen() {
                   ? 37 * scale
                   : 35 * scale
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         ))}
@@ -878,7 +934,6 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
   },
 
   header: {
@@ -886,7 +941,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#081023",
   },
 
   backButton: {
@@ -899,7 +953,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 25,
   },
@@ -913,17 +966,14 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
 
   scrollContent: {
-    backgroundColor: "#FFFFFF",
     minHeight: "100%",
   },
 
   mainGoalCard: {
-    backgroundColor: "#25B7D3",
   },
 
   mainGoalHeader: {
@@ -991,16 +1041,13 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: "#0b1624",
     fontWeight: "bold",
   },
 
   otherGoalCard: {
-    backgroundColor: "#f2f2f2",
   },
 
   expandedOtherGoal: {
-    backgroundColor: "#f2f2f2",
   },
 
   otherGoalTop: {
@@ -1009,7 +1056,6 @@ const styles = StyleSheet.create({
   },
 
   goalIconContainer: {
-    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1019,12 +1065,10 @@ const styles = StyleSheet.create({
   },
 
   otherGoalTitle: {
-    color: "#0b1624",
     fontWeight: "bold",
   },
 
   otherGoalAmount: {
-    color: "#6b7280",
   },
 
   otherProgressBackground: {
@@ -1034,43 +1078,33 @@ const styles = StyleSheet.create({
 
   otherProgressBar: {
     height: "100%",
-    backgroundColor: "#25B7D3",
   },
 
   expandedContent: {
     borderTopWidth: 1,
-    borderTopColor: "rgba(11,24,38,0.15)",
   },
 
   descriptionTitle: {
     fontWeight: "bold",
-    color: "#0b1624",
   },
 
   descriptionText: {
-    color: "#4b5563",
   },
 
   addMoneyTitle: {
     fontWeight: "bold",
-    color: "#0b1624",
   },
 
   addMoneyInput: {
-    backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#ccc",
-    color: "#0b1624",
   },
 
   addMoneyButton: {
-    backgroundColor: "#0b1624",
     alignItems: "center",
     justifyContent: "center",
   },
 
   addMoneyButtonText: {
-    color: "#fff",
     fontWeight: "bold",
   },
 
@@ -1080,7 +1114,6 @@ const styles = StyleSheet.create({
   },
 
   noGoalsText: {
-    color: "#6b7280",
     fontWeight: "bold",
   },
 
@@ -1089,7 +1122,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

@@ -23,7 +23,7 @@ const COLORS = {
 
 export default function TermsScreen() {
   const { width } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const [accepted, setAccepted] = useState(false);
 
@@ -53,21 +53,34 @@ export default function TermsScreen() {
   const buttonRadius = buttonHeight / 2;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={COLORS.blue}
+        backgroundColor={colors.header}
       />
 
-      <View style={styles.container}>
-
-        
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.primaryBackground,
+          },
+        ]}
+      >
         <View
           style={[
             styles.header,
             {
               height: s(118),
               paddingHorizontal: horizontalPadding,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -87,7 +100,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="arrow-left"
               size={s(35)}
-              color={COLORS.white}
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -97,6 +110,7 @@ export default function TermsScreen() {
               {
                 fontSize: s(25),
                 lineHeight: s(29),
+                color: colors.white,
               },
             ]}
           >
@@ -126,16 +140,16 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="bell-circle-outline"
               size={s(35)}
-              color={COLORS.white}
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
 
-        
         <View
           style={[
             styles.cardContainer,
             {
+              backgroundColor: colors.background,
               borderTopLeftRadius: s(
                 isTablet
                   ? 55
@@ -170,6 +184,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -182,6 +197,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(17 * scale),
                   lineHeight: Math.round(24 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -194,6 +210,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -206,6 +223,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -218,6 +236,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(17 * scale),
                   lineHeight: Math.round(24 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -230,6 +249,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -242,6 +262,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -254,6 +275,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(17 * scale),
                   lineHeight: Math.round(24 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -266,6 +288,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -278,6 +301,7 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(17 * scale),
                   lineHeight: Math.round(24 * scale),
+                  color: colors.text,
                 },
               ]}
             >
@@ -290,13 +314,13 @@ export default function TermsScreen() {
                 {
                   fontSize: Math.round(16 * scale),
                   lineHeight: Math.round(23 * scale),
+                  color: colors.text,
                 },
               ]}
             >
               {t.changes}
             </Text>
 
-           
             <View style={styles.bottomInsideScroll}>
               <TouchableOpacity
                 style={styles.checkboxRow}
@@ -309,8 +333,12 @@ export default function TermsScreen() {
                     {
                       width: Math.round(22 * scale),
                       height: Math.round(22 * scale),
+                      borderColor: colors.border,
                     },
-                    accepted && styles.checkboxChecked,
+                    accepted && {
+                      backgroundColor: COLORS.cyan,
+                      borderColor: COLORS.cyan,
+                    },
                   ]}
                 >
                   {accepted && (
@@ -327,6 +355,7 @@ export default function TermsScreen() {
                     styles.checkboxText,
                     {
                       fontSize: Math.round(14 * scale),
+                      color: colors.text,
                     },
                   ]}
                 >
@@ -340,6 +369,7 @@ export default function TermsScreen() {
                   {
                     height: buttonHeight,
                     borderRadius: buttonRadius,
+                    backgroundColor: COLORS.cyan,
                   },
                 ]}
                 onPress={() => setAccepted(true)}
@@ -350,6 +380,7 @@ export default function TermsScreen() {
                     styles.buttonText,
                     {
                       fontSize: Math.round(17 * scale),
+                      color: COLORS.white,
                     },
                   ]}
                 >
@@ -363,6 +394,7 @@ export default function TermsScreen() {
                   {
                     height: buttonHeight,
                     borderRadius: buttonRadius,
+                    backgroundColor: COLORS.cyan,
                   },
                 ]}
                 onPress={() => setAccepted(false)}
@@ -373,6 +405,7 @@ export default function TermsScreen() {
                     styles.buttonText,
                     {
                       fontSize: Math.round(17 * scale),
+                      color: COLORS.white,
                     },
                   ]}
                 >
@@ -383,13 +416,13 @@ export default function TermsScreen() {
           </ScrollView>
         </View>
 
-     
         <View
           style={[
             styles.bottomBar,
             {
               height: s(65),
               borderTopLeftRadius: s(78),
+              backgroundColor: colors.nav,
             },
           ]}
         >
@@ -401,7 +434,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="home-outline"
               size={s(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -413,7 +446,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="chart-box-outline"
               size={s(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -425,7 +458,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="swap-horizontal"
               size={s(37)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -437,7 +470,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="layers-outline"
               size={s(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -449,7 +482,7 @@ export default function TermsScreen() {
             <MaterialCommunityIcons
               name="account-outline"
               size={s(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
@@ -461,18 +494,14 @@ export default function TermsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: COLORS.blue,
   },
 
   container: {
     flex: 1,
-    backgroundColor: COLORS.blue,
   },
 
-  
   header: {
     width: "100%",
-    backgroundColor: COLORS.blue,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -488,7 +517,6 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     flex: 1,
-    color: COLORS.white,
     fontWeight: "700",
     textAlign: "center",
     transform: [
@@ -509,10 +537,8 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
 
-  
   cardContainer: {
     flex: 1,
-    backgroundColor: COLORS.white,
     overflow: "hidden",
   },
 
@@ -525,14 +551,12 @@ const styles = StyleSheet.create({
   },
 
   intro: {
-    color: COLORS.blue,
     fontWeight: "400",
     textAlign: "left",
     marginBottom: 12,
   },
 
   heading: {
-    color: COLORS.blue,
     fontWeight: "800",
     marginTop: 10,
     marginBottom: 4,
@@ -540,14 +564,12 @@ const styles = StyleSheet.create({
   },
 
   paragraph: {
-    color: COLORS.blue,
     fontWeight: "400",
     textAlign: "left",
     marginBottom: 8,
     width: "100%",
   },
 
-  /* CHECKBOX */
   bottomInsideScroll: {
     marginTop: 25,
     alignItems: "center",
@@ -563,25 +585,17 @@ const styles = StyleSheet.create({
 
   checkbox: {
     borderWidth: 1.5,
-    borderColor: COLORS.gray,
     borderRadius: 4,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
 
-  checkboxChecked: {
-    backgroundColor: COLORS.cyan,
-    borderColor: COLORS.cyan,
-  },
-
   checkboxText: {
-    color: COLORS.blue,
     textAlign: "left",
   },
 
   actionButton: {
-    backgroundColor: COLORS.cyan,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 12,
@@ -590,17 +604,14 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: COLORS.white,
     fontWeight: "700",
   },
 
- 
   bottomBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

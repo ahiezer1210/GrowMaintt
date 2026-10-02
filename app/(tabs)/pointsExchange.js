@@ -22,6 +22,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
 const rewards = [
@@ -77,6 +78,7 @@ const rewards = [
 
 export default function PointExchange() {
   const { width } = useWindowDimensions();
+  const { colors, t } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isPhone = width < 600;
@@ -113,6 +115,33 @@ export default function PointExchange() {
     100
   );
 
+  const rewardTranslations = {
+    hilasal: {
+      title: t.rewardHilasalTitle,
+      description: t.rewardHilasalDescription,
+    },
+    dollarcity: {
+      title: t.rewardDollarcityTitle,
+      description: t.rewardDollarcityDescription,
+    },
+    groupq: {
+      title: t.rewardGroupQTitle,
+      description: t.rewardGroupQDescription,
+    },
+    microsoft: {
+      title: t.rewardMicrosoftTitle,
+      description: t.rewardMicrosoftDescription,
+    },
+    neveria: {
+      title: t.rewardNeveriaTitle,
+      description: t.rewardNeveriaDescription,
+    },
+    donli: {
+      title: t.rewardDonLiTitle,
+      description: t.rewardDonLiDescription,
+    },
+  };
+
   useEffect(() => {
     const user = auth.currentUser;
 
@@ -136,7 +165,11 @@ export default function PointExchange() {
     let totalRedeemed = 0;
 
     const updateAvailablePoints = () => {
-      const available = Math.max(totalPoints - totalRedeemed, 0);
+      const available = Math.max(
+        totalPoints - totalRedeemed,
+        0
+      );
+
       setAvailablePoints(available);
     };
 
@@ -211,18 +244,24 @@ export default function PointExchange() {
   const redeemReward = async (reward) => {
     const user = auth.currentUser;
 
+    const translatedReward =
+      rewardTranslations[reward.id] || {};
+
+    const rewardTitle =
+      translatedReward.title || reward.title;
+
     if (!user) {
       Alert.alert(
-        "Session required",
-        "Please log in again to redeem your reward."
+        t.sessionRequired,
+        t.sessionRequiredMessage
       );
       return;
     }
 
     if (availablePoints < reward.points) {
       Alert.alert(
-        "Not enough points",
-        `You need ${reward.points} points to redeem this reward.`
+        t.notEnoughPoints,
+        `${t.need} ${reward.points} ${t.pointsToRedeem}`
       );
       return;
     }
@@ -240,7 +279,10 @@ export default function PointExchange() {
         where("userId", "==", user.uid)
       );
 
-      const [pointsSnapshot, redeemedSnapshot] = await Promise.all([
+      const [
+        pointsSnapshot,
+        redeemedSnapshot,
+      ] = await Promise.all([
         new Promise((resolve, reject) => {
           const unsubscribe = onSnapshot(
             pointsQuery,
@@ -295,16 +337,21 @@ export default function PointExchange() {
 
       if (currentAvailablePoints < reward.points) {
         Alert.alert(
-          "Not enough points",
-          "You no longer have enough points for this reward."
+          t.notEnoughPoints,
+          t.notEnoughPointsNow
         );
         return;
       }
 
       const code = generarCodigo(reward.store);
 
-      const redeemedRef = doc(collection(db, "Redeemed"));
-      const rewardRef = doc(collection(db, "Recompensas"));
+      const redeemedRef = doc(
+        collection(db, "Redeemed")
+      );
+
+      const rewardRef = doc(
+        collection(db, "Recompensas")
+      );
 
       const notificationRef = doc(
         db,
@@ -317,10 +364,10 @@ export default function PointExchange() {
         uid: user.uid,
         type: "reward_redeemed",
         category: "Rewards",
-        title: "Reward unlocked",
-        message: `Your ${reward.title.toLowerCase()} at ${reward.store} is ready. You used ${reward.points} points.`,
+        title: t.rewardUnlocked,
+        message: `${t.yourReward} ${rewardTitle.toLowerCase()} ${t.at} ${reward.store} ${t.isReady}. ${t.youUsed} ${reward.points} ${t.points}.`,
         rewardId: reward.id,
-        rewardTitle: reward.title,
+        rewardTitle: rewardTitle,
         store: reward.store,
         points: reward.points,
         code: code,
@@ -329,56 +376,66 @@ export default function PointExchange() {
         createdAt: Timestamp.now(),
       };
 
-      await runTransaction(db, async (transaction) => {
-        transaction.set(redeemedRef, {
-          userId: user.uid,
-          rewardId: reward.id,
-          store: reward.store,
-          title: reward.title,
-          points: reward.points,
-          code: code,
-          redeemedAt: serverTimestamp(),
-        });
+      await runTransaction(
+        db,
+        async (transaction) => {
+          transaction.set(redeemedRef, {
+            userId: user.uid,
+            rewardId: reward.id,
+            store: reward.store,
+            title: rewardTitle,
+            points: reward.points,
+            code: code,
+            redeemedAt: serverTimestamp(),
+          });
 
-        transaction.set(rewardRef, {
-          userId: user.uid,
-          rewardId: reward.id,
-          store: reward.store,
-          title: reward.title,
-          description: reward.description,
-          points: reward.points,
-          code: code,
-          status: "active",
-          redeemedAt: serverTimestamp(),
-        });
+          transaction.set(rewardRef, {
+            userId: user.uid,
+            rewardId: reward.id,
+            store: reward.store,
+            title: rewardTitle,
+            description:
+              translatedReward.description ||
+              reward.description,
+            points: reward.points,
+            code: code,
+            status: "active",
+            redeemedAt: serverTimestamp(),
+          });
 
-        transaction.set(
-          notificationRef,
-          {
-            uid: user.uid,
-            category: "Rewards",
-            notifications: arrayUnion(rewardNotification),
-            updatedAt: serverTimestamp(),
-          },
-          { merge: true }
-        );
-      });
+          transaction.set(
+            notificationRef,
+            {
+              uid: user.uid,
+              category: "Rewards",
+              notifications: arrayUnion(
+                rewardNotification
+              ),
+              updatedAt: serverTimestamp(),
+            },
+            { merge: true }
+          );
+        }
+      );
 
       Alert.alert(
-        "Reward unlocked!",
-        `Your ${reward.title.toLowerCase()} at ${reward.store} is ready.\n\nCode: ${code}\n\nPoints used: ${reward.points}`,
+        t.rewardUnlockedExclamation,
+        `${t.yourReward} ${rewardTitle.toLowerCase()} ${t.at} ${reward.store} ${t.isReady}.\n\n${t.code}: ${code}\n\n${t.pointsUsed}: ${reward.points}`,
         [
           {
-            text: "OK",
+            text: t.ok,
           },
         ]
       );
     } catch (error) {
-      console.log("Error redeeming reward:", error);
+      console.log(
+        "Error redeeming reward:",
+        error
+      );
 
       Alert.alert(
-        "Something went wrong",
-        "We couldn't redeem this reward. Please try again."
+        t.somethingWentWrong,
+        t.redeemRewardError
       );
     } finally {
       setRedeemingReward(null);
@@ -386,26 +443,32 @@ export default function PointExchange() {
   };
 
   const confirmarCanje = (reward) => {
+    const translatedReward =
+      rewardTranslations[reward.id] || {};
+
+    const rewardTitle =
+      translatedReward.title || reward.title;
+
     if (availablePoints < reward.points) {
       Alert.alert(
-        "Reward locked",
-        `You need ${reward.points} points to unlock this reward.\n\nYou currently have ${availablePoints.toFixed(
+        t.rewardLocked,
+        `${t.need} ${reward.points} ${t.pointsToUnlock}\n\n${t.currentlyHave} ${availablePoints.toFixed(
           1
-        )} points.`
+        )} ${t.points}.`
       );
       return;
     }
 
     Alert.alert(
-      "Redeem reward",
-      `Redeem ${reward.points} points for ${reward.title.toLowerCase()} at ${reward.store}?`,
+      t.redeemReward,
+      `${t.redeem} ${reward.points} ${t.pointsFor} ${rewardTitle.toLowerCase()} ${t.at} ${reward.store}?`,
       [
         {
-          text: "Cancel",
+          text: t.cancel,
           style: "cancel",
         },
         {
-          text: "Redeem",
+          text: t.redeem,
           onPress: () => redeemReward(reward),
         },
       ]
@@ -424,19 +487,36 @@ export default function PointExchange() {
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
-    { icon: "swap-horizontal", route: "/expensesManagement" },
-    { icon: "layers-outline", route: "/currentgoal" },
-    { icon: "account-outline", route: "/profile" },
+    {
+      icon: "swap-horizontal",
+      route: "/expensesManagement",
+    },
+    {
+      icon: "layers-outline",
+      route: "/currentgoal",
+    },
+    {
+      icon: "account-outline",
+      route: "/profile",
+    },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.primaryBackground,
+        },
+      ]}
+    >
       <View
         style={[
           styles.header,
           {
             height: headerHeight,
             paddingHorizontal: horizontalPadding,
+            backgroundColor: colors.header,
           },
         ]}
       >
@@ -444,7 +524,9 @@ export default function PointExchange() {
           style={[
             styles.backButton,
             {
-              transform: [{ translateY: 4 * scale }],
+              transform: [
+                { translateY: 4 * scale },
+              ],
             },
           ]}
           onPress={() => router.push("/home")}
@@ -452,7 +534,7 @@ export default function PointExchange() {
           <MaterialCommunityIcons
             name="arrow-left"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -462,6 +544,7 @@ export default function PointExchange() {
             {
               fontSize: 25 * scale,
               lineHeight: 27 * scale,
+              color: colors.white,
               transform: [
                 { translateX: 7 * scale },
                 { translateY: 1 * scale },
@@ -469,16 +552,18 @@ export default function PointExchange() {
             },
           ]}
         >
-          Redeem your
+          {t.redeemYour}
           {"\n"}
-          points!
+          {t.pointsExclamation}
         </Text>
 
         <TouchableOpacity
           style={[
             styles.headerBell,
             {
-              transform: [{ translateY: 4 * scale }],
+              transform: [
+                { translateY: 4 * scale },
+              ],
             },
           ]}
           onPress={abrirNotificaciones}
@@ -487,7 +572,7 @@ export default function PointExchange() {
           <MaterialCommunityIcons
             name="bell-circle-outline"
             size={35 * scale}
-            color="#FFFFFF"
+            color={colors.white}
           />
         </TouchableOpacity>
       </View>
@@ -497,7 +582,7 @@ export default function PointExchange() {
         contentContainerStyle={{
           paddingBottom: 100 * scale,
           flexGrow: 1,
-          backgroundColor: "white",
+          backgroundColor: colors.background,
         }}
         showsVerticalScrollIndicator={false}
       >
@@ -508,6 +593,7 @@ export default function PointExchange() {
               paddingHorizontal: horizontalPadding,
               paddingTop: 12 * scale,
               paddingBottom: 18 * scale,
+              backgroundColor: colors.primaryBackground,
             },
           ]}
         >
@@ -517,6 +603,7 @@ export default function PointExchange() {
               {
                 height: 75 * scale,
                 borderRadius: 18 * scale,
+                backgroundColor: colors.card,
               },
             ]}
           >
@@ -525,10 +612,11 @@ export default function PointExchange() {
                 styles.smallTitle,
                 {
                   fontSize: 12 * scale,
+                  color: colors.secondaryText,
                 },
               ]}
             >
-              Available points
+              {t.availablePoints}
             </Text>
 
             <Text
@@ -536,6 +624,7 @@ export default function PointExchange() {
                 styles.points,
                 {
                   fontSize: 22 * scale,
+                  color: colors.text,
                 },
               ]}
             >
@@ -550,10 +639,11 @@ export default function PointExchange() {
                   styles.infoTitle,
                   {
                     fontSize: 13 * scale,
+                    color: colors.white,
                   },
                 ]}
               >
-                Next points goal
+                {t.nextPointsGoal}
               </Text>
 
               <Text
@@ -561,6 +651,7 @@ export default function PointExchange() {
                   styles.infoNumber,
                   {
                     fontSize: 20 * scale,
+                    color: colors.white,
                   },
                 ]}
               >
@@ -573,6 +664,7 @@ export default function PointExchange() {
                 styles.separator,
                 {
                   height: 35 * scale,
+                  backgroundColor: colors.border,
                 },
               ]}
             />
@@ -583,10 +675,11 @@ export default function PointExchange() {
                   styles.infoTitle,
                   {
                     fontSize: 13 * scale,
+                    color: colors.white,
                   },
                 ]}
               >
-                Redeemed points
+                {t.redeemedPoints}
               </Text>
 
               <Text
@@ -594,6 +687,7 @@ export default function PointExchange() {
                   styles.usedPoints,
                   {
                     fontSize: 20 * scale,
+                    color: colors.icon,
                   },
                 ]}
               >
@@ -616,6 +710,7 @@ export default function PointExchange() {
                 {
                   height: 15 * scale,
                   borderRadius: 10 * scale,
+                  backgroundColor: colors.border,
                 },
               ]}
             >
@@ -624,6 +719,7 @@ export default function PointExchange() {
                   styles.progress,
                   {
                     width: `${progressPercentage}%`,
+                    backgroundColor: colors.icon,
                   },
                 ]}
               />
@@ -634,6 +730,7 @@ export default function PointExchange() {
                 styles.progressText,
                 {
                   fontSize: 10 * scale,
+                  color: colors.white,
                 },
               ]}
             >
@@ -645,6 +742,7 @@ export default function PointExchange() {
                 styles.goal,
                 {
                   fontSize: 8 * scale,
+                  color: colors.white,
                 },
               ]}
             >
@@ -658,11 +756,12 @@ export default function PointExchange() {
               {
                 fontSize: 12 * scale,
                 marginTop: 7 * scale,
+                color: colors.white,
               },
             ]}
           >
-            {Math.round(progressPercentage)}% of your goal, ¡You´re making
-            progress!
+            {Math.round(progressPercentage)}%{" "}
+            {t.ofYourGoal}
           </Text>
         </View>
 
@@ -672,6 +771,7 @@ export default function PointExchange() {
             {
               paddingTop: 25 * scale,
               marginTop: isTablet ? -40 : -70,
+              backgroundColor: colors.background,
             },
           ]}
         >
@@ -680,15 +780,22 @@ export default function PointExchange() {
               styles.sectionTitle,
               {
                 fontSize: 22 * scale,
+                color: colors.text,
               },
             ]}
           >
-            ¡Rewards!
+            {t.rewardsExclamation}
           </Text>
 
           {rewards.map((item) => {
-            const isUnlocked = availablePoints >= item.points;
-            const isRedeeming = redeemingReward === item.id;
+            const isUnlocked =
+              availablePoints >= item.points;
+
+            const isRedeeming =
+              redeemingReward === item.id;
+
+            const translatedReward =
+              rewardTranslations[item.id] || {};
 
             return (
               <View
@@ -698,6 +805,7 @@ export default function PointExchange() {
                     minHeight: 65 * scale,
                     marginBottom: 10 * scale,
                     paddingHorizontal: 8 * scale,
+                    backgroundColor: colors.card,
                     opacity: isUnlocked ? 1 : 0.55,
                   },
                 ]}
@@ -710,13 +818,14 @@ export default function PointExchange() {
                       width: 38 * scale,
                       height: 38 * scale,
                       borderRadius: 19 * scale,
+                      backgroundColor: colors.icon,
                     },
                   ]}
                 >
                   <MaterialCommunityIcons
                     name={item.icon}
                     size={23 * scale}
-                    color="white"
+                    color={colors.white}
                   />
                 </View>
 
@@ -724,7 +833,9 @@ export default function PointExchange() {
                   style={[
                     styles.rewardName,
                     {
-                      width: isTablet ? 120 * scale : 85 * scale,
+                      width: isTablet
+                        ? 120 * scale
+                        : 85 * scale,
                       paddingLeft: 8 * scale,
                     },
                   ]}
@@ -734,10 +845,12 @@ export default function PointExchange() {
                       styles.rewardTitle,
                       {
                         fontSize: 14 * scale,
+                        color: colors.text,
                       },
                     ]}
                   >
-                    {item.title}
+                    {translatedReward.title ||
+                      item.title}
                   </Text>
 
                   <Text
@@ -745,6 +858,7 @@ export default function PointExchange() {
                       styles.store,
                       {
                         fontSize: 13 * scale,
+                        color: colors.icon,
                       },
                     ]}
                   >
@@ -752,16 +866,25 @@ export default function PointExchange() {
                   </Text>
                 </View>
 
-                <View style={styles.rewardDescription}>
+                <View
+                  style={[
+                    styles.rewardDescription,
+                    {
+                      borderLeftColor: colors.border,
+                    },
+                  ]}
+                >
                   <Text
                     style={[
                       styles.description,
                       {
                         fontSize: 13 * scale,
+                        color: colors.secondaryText,
                       },
                     ]}
                   >
-                    {item.description}
+                    {translatedReward.description ||
+                      item.description}
                   </Text>
                 </View>
 
@@ -769,7 +892,9 @@ export default function PointExchange() {
                   style={[
                     styles.rewardAction,
                     {
-                      width: isTablet ? 100 * scale : 82 * scale,
+                      width: isTablet
+                        ? 100 * scale
+                        : 82 * scale,
                     },
                   ]}
                 >
@@ -778,6 +903,7 @@ export default function PointExchange() {
                       styles.rewardPoints,
                       {
                         fontSize: 10 * scale,
+                        color: colors.icon,
                       },
                     ]}
                   >
@@ -791,8 +917,11 @@ export default function PointExchange() {
                         paddingVertical: 5 * scale,
                         paddingHorizontal: 7 * scale,
                         borderRadius: 7 * scale,
+                        backgroundColor: colors.icon,
                       },
-                      !isUnlocked && styles.lockedButton,
+                      !isUnlocked && {
+                        backgroundColor: colors.inactive,
+                      },
                     ]}
                     onPress={() => confirmarCanje(item)}
                     disabled={isRedeeming}
@@ -803,14 +932,15 @@ export default function PointExchange() {
                         styles.redeemButtonText,
                         {
                           fontSize: 9 * scale,
+                          color: colors.white,
                         },
                       ]}
                     >
                       {isRedeeming
                         ? "..."
                         : isUnlocked
-                          ? "Redeem"
-                          : "Locked"}
+                          ? t.redeem
+                          : t.locked}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -826,6 +956,7 @@ export default function PointExchange() {
           {
             height: bottomHeight,
             borderTopLeftRadius: 78 * scale,
+            backgroundColor: colors.nav,
           },
         ]}
       >
@@ -843,7 +974,7 @@ export default function PointExchange() {
                   ? 37 * scale
                   : 35 * scale
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         ))}
@@ -855,7 +986,6 @@ export default function PointExchange() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#081023",
   },
 
   scroll: {
@@ -864,7 +994,6 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -881,13 +1010,11 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
   },
 
   pointsheader: {
-    backgroundColor: "#ffffff",
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     borderBottomLeftRadius: 18,
@@ -898,7 +1025,6 @@ const styles = StyleSheet.create({
   },
 
   pointsCard: {
-    backgroundColor: "#081023",
     padding: 14,
     marginTop: 0,
     height: 300,
@@ -906,7 +1032,6 @@ const styles = StyleSheet.create({
 
   smallTitle: {
     textAlign: "center",
-    color: "#555",
   },
 
   points: {
@@ -923,26 +1048,22 @@ const styles = StyleSheet.create({
 
   infoTitle: {
     marginTop: 10,
-    color: "#ffffff",
   },
 
   infoNumber: {
     fontWeight: "bold",
     textAlign: "center",
     marginTop: 3,
-    color: "#ffffff",
   },
 
   usedPoints: {
     fontWeight: "bold",
-    color: "#14aeca",
     textAlign: "center",
     marginTop: 3,
   },
 
   separator: {
     width: 1,
-    backgroundColor: "#ddd",
   },
 
   progressContainer: {
@@ -950,20 +1071,17 @@ const styles = StyleSheet.create({
   },
 
   progressBar: {
-    backgroundColor: "#eeeeee",
     overflow: "hidden",
   },
 
   progress: {
-    width: "100%",
-    backgroundColor: "#29b6b1",
+    height: "100%",
   },
 
   progressText: {
     position: "absolute",
     left: "12%",
     top: -1,
-    color: "white",
     fontWeight: "bold",
   },
 
@@ -975,12 +1093,10 @@ const styles = StyleSheet.create({
 
   goalText: {
     textAlign: "center",
-    color: "#FFFFFF",
   },
 
   content: {
     width: "100%",
-    backgroundColor: "white",
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
     paddingHorizontal: 14,
@@ -994,17 +1110,14 @@ const styles = StyleSheet.create({
   },
 
   reward: {
-    backgroundColor: "white",
     minHeight: 58,
     borderRadius: 12,
-    marginBottom: 7,
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
   },
 
   iconCircle: {
-    backgroundColor: "#24b3ce",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1018,21 +1131,17 @@ const styles = StyleSheet.create({
   },
 
   store: {
-    color: "#24b3ce",
     marginTop: 2,
   },
 
   rewardDescription: {
     flex: 1,
     borderLeftWidth: 1,
-    borderLeftColor: "#ddd",
     paddingLeft: 7,
     paddingRight: 4,
   },
 
-  description: {
-    color: "#555",
-  },
+  description: {},
 
   rewardAction: {
     alignItems: "flex-end",
@@ -1040,23 +1149,16 @@ const styles = StyleSheet.create({
   },
 
   rewardPoints: {
-    color: "#24b3ce",
     textAlign: "right",
     marginBottom: 4,
   },
 
   redeemButton: {
-    backgroundColor: "#25B5D1",
     alignItems: "center",
     justifyContent: "center",
   },
 
-  lockedButton: {
-    backgroundColor: "#B3B3B3",
-  },
-
   redeemButtonText: {
-    color: "#FFFFFF",
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -1066,7 +1168,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

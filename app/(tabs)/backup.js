@@ -778,7 +778,6 @@ const BackupScreen = ({ navigation }) => {
         barStyle="light-content"
       />
 
-      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -794,15 +793,7 @@ const BackupScreen = ({ navigation }) => {
             router.push("/settings")
           }
           activeOpacity={0.7}
-          style={[
-            styles.backButton,
-            {
-              left: 15 * scale,
-              top: 34 * scale,
-              width: 55 * scale,
-              height: 55 * scale,
-            },
-          ]}
+          style={styles.backButton}
         >
           <MaterialCommunityIcons
             name="arrow-left"
@@ -823,18 +814,11 @@ const BackupScreen = ({ navigation }) => {
         </Text>
 
         <TouchableOpacity
-          style={[
-            styles.notification,
-            {
-              right: 15 * scale,
-              top: 34 * scale,
-              width: 55 * scale,
-              height: 55 * scale,
-            },
-          ]}
+          style={styles.notification}
           onPress={() =>
             router.push({
-              pathname: "/notifications",
+              pathname:
+                "/notifications",
               params: {
                 from: "/backup",
               },
@@ -864,7 +848,9 @@ const BackupScreen = ({ navigation }) => {
             style={styles.successHeader}
           >
             <MaterialCommunityIcons
-              color={colors.text}
+              color={
+                colors.text
+              }
               name={
                 backupStatus ===
                 "Backup Failed"
@@ -881,7 +867,8 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.successTitle,
                 {
-                  color: colors.text,
+                  color:
+                    colors.text,
                 },
               ]}
             >
@@ -919,7 +906,8 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.progressText,
                 {
-                  color: colors.icon,
+                  color:
+                    colors.icon,
                 },
               ]}
             >
@@ -963,7 +951,8 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.infoValueDark,
                 {
-                  color: colors.text,
+                  color:
+                    colors.text,
                 },
               ]}
             >
@@ -1028,7 +1017,8 @@ const BackupScreen = ({ navigation }) => {
               styles.sectionTitle,
               {
                 fontSize: 13 * scale,
-                color: colors.text,
+                color:
+                  colors.text,
               },
             ]}
           >
@@ -1070,7 +1060,8 @@ const BackupScreen = ({ navigation }) => {
                 {
                   fontSize:
                     11.5 * scale,
-                  color: colors.text,
+                  color:
+                    colors.text,
                 },
               ]}
             >
@@ -1087,7 +1078,8 @@ const BackupScreen = ({ navigation }) => {
               }
               thumbColor="#FFFFFF"
               trackColor={{
-                false: colors.border,
+                false:
+                  colors.border,
                 true:
                   colors.primaryBackground,
               }}
@@ -1103,7 +1095,8 @@ const BackupScreen = ({ navigation }) => {
                 {
                   fontSize:
                     11.5 * scale,
-                  color: colors.text,
+                  color:
+                    colors.text,
                 },
               ]}
             >
@@ -1120,7 +1113,8 @@ const BackupScreen = ({ navigation }) => {
               }
               thumbColor="#FFFFFF"
               trackColor={{
-                false: colors.border,
+                false:
+                  colors.border,
                 true:
                   colors.primaryBackground,
               }}
@@ -1136,7 +1130,8 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.encryptionTitle,
                 {
-                  color: colors.text,
+                  color:
+                    colors.text,
                 },
               ]}
             >
@@ -1168,7 +1163,8 @@ const BackupScreen = ({ navigation }) => {
                   {
                     fontSize:
                       11.5 * scale,
-                    color: colors.text,
+                    color:
+                      colors.text,
                   },
                 ]}
               >
@@ -1294,7 +1290,6 @@ const BackupScreen = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      {/* NAVBAR */}
       <View
         style={[
           styles.bottomBarContainer,
@@ -1306,13 +1301,16 @@ const BackupScreen = ({ navigation }) => {
       >
         <SafeAreaView
           edges={["bottom"]}
-          style={styles.bottomBarWrapper}
+          style={
+            styles.bottomBarWrapper
+          }
         >
           <View
             style={[
               styles.bottomTabBar,
               {
-                height: 65 * scale,
+                height:
+                  65 * scale,
                 borderTopLeftRadius:
                   78 * scale,
               },
@@ -1322,9 +1320,13 @@ const BackupScreen = ({ navigation }) => {
               ([icon, route], index) => (
                 <TouchableOpacity
                   key={index}
-                  style={styles.tabItem}
+                  style={
+                    styles.tabItem
+                  }
                   onPress={() =>
-                    router.push(route)
+                    router.push(
+                      route
+                    )
                   }
                   activeOpacity={0.7}
                 >
@@ -1333,8 +1335,10 @@ const BackupScreen = ({ navigation }) => {
                     size={
                       icon ===
                       "swap-horizontal"
-                        ? 37 * scale
-                        : 35 * scale
+                        ? 37 *
+                          scale
+                        : 35 *
+                          scale
                     }
                     color="#FFFFFF"
                   />
@@ -1355,7 +1359,6 @@ const styles = StyleSheet.create({
 
   header: {
     height: 118,
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1381,8 +1384,10 @@ const styles = StyleSheet.create({
     fontSize: 25,
     fontWeight: "700",
     textAlign: "center",
-    transform: [{ translateY: 3}],
-    transform: [{ translateX: -2}],
+    transform: [
+      { translateY: 3 },
+      { translateX: -2 },
+    ],
   },
 
   notification: {

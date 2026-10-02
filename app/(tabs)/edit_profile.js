@@ -10,7 +10,6 @@ import {
   ScrollView,
   StatusBar,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -37,8 +36,8 @@ import {
   updateEmail,
 } from "firebase/auth";
 
-import { auth, db } from "../../firebaseConfig";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
   cyan: "#25B5D1",
@@ -66,9 +65,6 @@ export default function App() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [photoURL, setPhotoURL] = useState(null);
-
-  const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -141,18 +137,6 @@ export default function App() {
             setOriginalPhone(savedPhone);
             setOriginalEmail(savedEmail);
             setOriginalPhotoURL(savedPhotoURL);
-
-            setNotifications(
-              data.notifications !== undefined
-                ? data.notifications
-                : true
-            );
-
-            setDarkMode(
-              data.darkMode !== undefined
-                ? data.darkMode
-                : false
-            );
           } else {
             const currentEmail =
               currentUser.email || "";
@@ -234,8 +218,6 @@ export default function App() {
     }
   };
 
-
-
   const takePhoto = async () => {
     try {
       const permission =
@@ -290,7 +272,6 @@ export default function App() {
     }
   };
 
-
   const deletePhoto = () => {
     if (!photoURL) {
       Alert.alert(
@@ -320,8 +301,6 @@ export default function App() {
     );
   };
 
-
-
   const changePhoto = () => {
     Alert.alert(
       t.profilePicture,
@@ -347,8 +326,6 @@ export default function App() {
       ]
     );
   };
-
-
 
   const createSecurityAlert = async ({
     type,
@@ -383,7 +360,6 @@ export default function App() {
       );
     }
   };
-
 
   const updateProfile = async () => {
     if (!user) {
@@ -462,7 +438,6 @@ export default function App() {
     try {
       setSaving(true);
 
-
       if (emailChanged) {
         try {
           await updateEmail(
@@ -515,8 +490,6 @@ export default function App() {
         }
       }
 
-     
-
       const userRef = doc(
         db,
         "Users",
@@ -530,16 +503,12 @@ export default function App() {
           phone: newPhone,
           email: newEmail,
           photoURL: photoURL || null,
-          notifications,
-          darkMode,
           updatedAt: serverTimestamp(),
         },
         {
           merge: true,
         }
       );
-
-
 
       if (
         usernameChanged ||
@@ -554,7 +523,6 @@ export default function App() {
         });
       }
 
-
       if (emailChanged) {
         await createSecurityAlert({
           type: "email_change",
@@ -568,7 +536,6 @@ export default function App() {
         });
       }
 
-
       if (phoneChanged) {
         await createSecurityAlert({
           type: "phone_change",
@@ -581,8 +548,6 @@ export default function App() {
           },
         });
       }
-
-  
 
       setOriginalUsername(
         newUsername
@@ -599,8 +564,6 @@ export default function App() {
       setOriginalPhotoURL(
         photoURL
       );
-
-      
 
       if (emailChanged) {
         Alert.alert(
@@ -634,7 +597,14 @@ export default function App() {
     }
   };
 
- 
+  const abrirNotificaciones = () => {
+    router.push({
+      pathname: "/notifications",
+      params: {
+        from: "/profile",
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -665,7 +635,6 @@ export default function App() {
               : "height"
           }
         >
-       
           <View
             style={[
               styles.header,
@@ -735,16 +704,12 @@ export default function App() {
                       ? 1.15
                       : 1),
 
+                  position: "absolute",
+                  left: 0,
+                  right: 0,
+                  textAlign: "center",
+
                   transform: [
-                    {
-                      translateX:
-                        7 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
                     {
                       translateY:
                         1 *
@@ -765,46 +730,22 @@ export default function App() {
               style={[
                 styles.notificationButton,
                 {
-                  transform: [
-                    {
-                      translateY:
-                        4 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
+                  width: 40 * scale,
+                  height: 40 * scale,
+                  borderRadius: 20 * scale,
                 },
               ]}
-              onPress={() =>
-                router.push({
-                  pathname:
-                    "/notifications",
-                  params: {
-                    from: "/edit_profile",
-                  },
-                })
-              }
+              onPress={abrirNotificaciones}
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
                 name="bell-circle-outline"
-                size={
-                  35 *
-                  (isSmall
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
+                size={35 * scale}
                 color={COLORS.white}
               />
             </TouchableOpacity>
           </View>
 
-          
           <View
             style={[
               styles.whiteContainer,
@@ -841,8 +782,6 @@ export default function App() {
               keyboardShouldPersistTaps="handled"
             >
               <View style={styles.profileCard}>
-
-        
 
                 <View
                   style={styles.photoContainer}
@@ -916,8 +855,6 @@ export default function App() {
                   </TouchableOpacity>
                 </View>
 
-             
-
                 <Text
                   style={[
                     styles.name,
@@ -931,8 +868,6 @@ export default function App() {
                   {username ||
                     t.user}
                 </Text>
-
-               
 
                 <Text
                   style={[
@@ -950,8 +885,6 @@ export default function App() {
                   ) || "00000000"}
                 </Text>
 
-              
-
                 <View
                   style={styles.section}
                 >
@@ -968,8 +901,6 @@ export default function App() {
                       t.accountSettings
                     }
                   </Text>
-
-                 
 
                   <Text
                     style={[
@@ -1005,8 +936,6 @@ export default function App() {
                     placeholderTextColor="#777"
                   />
 
-                  
-
                   <Text
                     style={[
                       styles.label,
@@ -1039,8 +968,6 @@ export default function App() {
                     placeholderTextColor="#777"
                     keyboardType="phone-pad"
                   />
-
-                 
 
                   <Text
                     style={[
@@ -1075,80 +1002,6 @@ export default function App() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
-
-                 
-
-                  <View
-                    style={styles.optionRow}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        {
-                          fontSize:
-                            14 * scale,
-                        },
-                      ]}
-                    >
-                      {
-                        t.pushNotifications
-                      }
-                    </Text>
-
-                    <Switch
-                      value={
-                        notifications
-                      }
-                      onValueChange={
-                        setNotifications
-                      }
-                      trackColor={{
-                        false:
-                          "#D7D7D7",
-                        true:
-                          COLORS.dark,
-                      }}
-                      thumbColor={
-                        COLORS.white
-                      }
-                    />
-                  </View>
-
-                 
-
-                  <View
-                    style={styles.optionRow}
-                  >
-                    <Text
-                      style={[
-                        styles.optionText,
-                        {
-                          fontSize:
-                            14 * scale,
-                        },
-                      ]}
-                    >
-                      {t.darkMode}
-                    </Text>
-
-                    <Switch
-                      value={darkMode}
-                      onValueChange={
-                        setDarkMode
-                      }
-                      trackColor={{
-                        false:
-                          "#D7D7D7",
-                        true:
-                          COLORS.cyan,
-                      }}
-                      thumbColor={
-                        COLORS.white
-                      }
-                    />
-                  </View>
-
-                
 
                   <TouchableOpacity
                     style={[
@@ -1195,8 +1048,6 @@ export default function App() {
             </ScrollView>
           </View>
         </KeyboardAvoidingView>
-
-       
 
         <View
           style={[
@@ -1301,6 +1152,7 @@ const styles = StyleSheet.create({
   },
 
   notificationButton: {
+    alignItems: "center",
     justifyContent: "center",
   },
 
@@ -1390,19 +1242,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     color: "#333",
     marginBottom: 17,
-  },
-
-  optionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginTop: 5,
-    marginBottom: 8,
-  },
-
-  optionText: {
-    color: COLORS.textDark,
-    fontWeight: "500",
   },
 
   updateButton: {
