@@ -23,12 +23,40 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { auth, db } from "../../firebaseConfig.js";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig.js";
 
 export default function SavingsGoal() {
   const { width } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() === "#081023" ||
+    colors.background?.toLowerCase() === "#071426" ||
+    colors.primaryBackground?.toLowerCase() === "#081023" ||
+    colors.primaryBackground?.toLowerCase() === "#071426";
+
+  const isSpanish = t.daily === "Diario";
+
+  const placeholderGoalName = isSpanish
+    ? "Ej. Comprar un teléfono nuevo"
+    : "E.g. Buy a new phone";
+
+  const placeholderTargetAmount = isSpanish
+    ? "Ej. $300.00"
+    : "E.g. $300.00";
+
+  const placeholderCalculated = isSpanish
+    ? "Calculado automáticamente"
+    : "Calculated automatically";
+
+  const placeholderStartDate = isSpanish
+    ? "23 de junio de 2026"
+    : "June 23, 2026";
+
+  const placeholderEndDate = isSpanish
+    ? "23 de diciembre de 2026"
+    : "December 23, 2026";
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -56,7 +84,7 @@ export default function SavingsGoal() {
     : 25;
 
   const s = (value) => Math.round(value * scale);
-  
+
   const headerHeight = 118 * scale;
   const bottomHeight = 65 * scale;
 
@@ -101,7 +129,7 @@ export default function SavingsGoal() {
     const text = value.trim();
 
     const namedDate = text.match(
-      /^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/
+      /^([A-Za-zÁÉÍÓÚáéíóúÑñ]+)\s+(\d{1,2}),?\s*(\d{4})$/
     );
 
     if (namedDate) {
@@ -118,9 +146,25 @@ export default function SavingsGoal() {
         october: 9,
         november: 10,
         december: 11,
+        enero: 0,
+        febrero: 1,
+        marzo: 2,
+        abril: 3,
+        mayo: 4,
+        junio: 5,
+        julio: 6,
+        agosto: 7,
+        septiembre: 8,
+        octubre: 9,
+        noviembre: 10,
+        diciembre: 11,
       };
 
-      const monthName = namedDate[1].toLowerCase();
+      const monthName = namedDate[1]
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
       const month = months[monthName];
       const day = Number(namedDate[2]);
       const year = Number(namedDate[3]);
@@ -288,17 +332,26 @@ export default function SavingsGoal() {
         ? t.perDay
         : t.perMonth;
 
+    const periodText =
+      result.unit === "day"
+        ? result.periods === 1
+          ? t.daily.toLowerCase()
+          : isSpanish
+          ? "días"
+          : "days"
+        : result.periods === 1
+        ? t.monthly.toLowerCase()
+        : isSpanish
+        ? "meses"
+        : "months";
+
     Alert.alert(
       t.savingCalculation,
       `${t.needToSave} $${result.amount.toFixed(
         2
       )} ${unitText} ${t.forPeriods} ${
         result.periods
-      } ${
-        result.unit === "day"
-          ? t.daily.toLowerCase()
-          : t.monthly.toLowerCase()
-      }${result.periods !== 1 ? "s" : ""}.`
+      } ${periodText}.`
     );
   };
 
@@ -474,7 +527,14 @@ export default function SavingsGoal() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={
@@ -489,6 +549,7 @@ export default function SavingsGoal() {
             {
               height: headerHeight,
               paddingHorizontal: horizontalPadding,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -507,7 +568,7 @@ export default function SavingsGoal() {
             <MaterialCommunityIcons
               name="arrow-left"
               size={35 * scale}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -538,7 +599,7 @@ export default function SavingsGoal() {
             <MaterialCommunityIcons
               name="bell-circle-outline"
               size={35 * scale}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
@@ -547,6 +608,7 @@ export default function SavingsGoal() {
           style={[
             styles.card,
             {
+              backgroundColor: colors.background,
               borderTopLeftRadius: 45 * scale,
               borderTopRightRadius: 45 * scale,
               paddingHorizontal: horizontalPadding,
@@ -565,6 +627,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -581,9 +644,14 @@ export default function SavingsGoal() {
                   borderRadius: s(15),
                   paddingHorizontal: s(18),
                   marginBottom: s(22),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#F3F4F5",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
-              placeholder="E.g. Buy a new phone"
+              placeholder={placeholderGoalName}
               value={goalName}
               onChangeText={setGoalName}
               placeholderTextColor="#ACADAD"
@@ -593,6 +661,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -609,9 +678,14 @@ export default function SavingsGoal() {
                   borderRadius: s(15),
                   paddingHorizontal: s(18),
                   marginBottom: s(22),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#F3F4F5",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
-              placeholder="E.g. $300.00"
+              placeholder={placeholderTargetAmount}
               keyboardType="numeric"
               value={targetAmount}
               onChangeText={setTargetAmount}
@@ -630,6 +704,7 @@ export default function SavingsGoal() {
                 style={[
                   styles.mainGoalText,
                   {
+                    color: colors.text,
                     fontSize: s(14),
                   },
                 ]}
@@ -653,6 +728,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -676,6 +752,10 @@ export default function SavingsGoal() {
                     height: s(42),
                     borderRadius: s(13),
                     marginHorizontal: s(3),
+                    backgroundColor: isDarkTheme
+                      ? colors.primaryBackground
+                      : "#F3F4F5",
+                    borderColor: colors.border,
                   },
                   frequency === "daily" &&
                     styles.typeButtonActive,
@@ -688,10 +768,12 @@ export default function SavingsGoal() {
                   style={[
                     styles.typeText,
                     {
+                      color:
+                        frequency === "daily"
+                          ? "#FFFFFF"
+                          : colors.text,
                       fontSize: s(12),
                     },
-                    frequency === "daily" &&
-                      styles.typeTextActive,
                   ]}
                 >
                   {t.daily}
@@ -705,6 +787,10 @@ export default function SavingsGoal() {
                     height: s(42),
                     borderRadius: s(13),
                     marginHorizontal: s(3),
+                    backgroundColor: isDarkTheme
+                      ? colors.primaryBackground
+                      : "#F3F4F5",
+                    borderColor: colors.border,
                   },
                   frequency === "monthly" &&
                     styles.typeButtonActive,
@@ -717,10 +803,12 @@ export default function SavingsGoal() {
                   style={[
                     styles.typeText,
                     {
+                      color:
+                        frequency === "monthly"
+                          ? "#FFFFFF"
+                          : colors.text,
                       fontSize: s(12),
                     },
-                    frequency === "monthly" &&
-                      styles.typeTextActive,
                   ]}
                 >
                   {t.monthly}
@@ -732,6 +820,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -748,9 +837,14 @@ export default function SavingsGoal() {
                   borderRadius: s(15),
                   paddingHorizontal: s(18),
                   marginBottom: s(22),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#F3F4F5",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
-              placeholder="Calculated automatically"
+              placeholder={placeholderCalculated}
               value={savingAmount}
               editable={false}
               selectTextOnFocus={false}
@@ -765,6 +859,7 @@ export default function SavingsGoal() {
                   lineHeight: s(17),
                   marginTop: -s(12),
                   marginBottom: s(15),
+                  color: colors.secondaryText,
                 },
               ]}
             >
@@ -778,6 +873,9 @@ export default function SavingsGoal() {
                   height: s(40),
                   borderRadius: s(18),
                   marginBottom: s(17),
+                  backgroundColor: isDarkTheme
+                    ? "#25B7D3"
+                    : "#081023",
                 },
               ]}
               onPress={handleCalculate}
@@ -798,6 +896,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -814,9 +913,14 @@ export default function SavingsGoal() {
                   borderRadius: s(15),
                   paddingHorizontal: s(18),
                   marginBottom: s(22),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#F3F4F5",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
-              placeholder="June 23, 2026"
+              placeholder={placeholderStartDate}
               value={startDate}
               onChangeText={setStartDate}
               placeholderTextColor="#ACADAD"
@@ -826,6 +930,7 @@ export default function SavingsGoal() {
               style={[
                 styles.label,
                 {
+                  color: colors.text,
                   fontSize: s(14),
                   marginBottom: s(10),
                 },
@@ -842,9 +947,14 @@ export default function SavingsGoal() {
                   borderRadius: s(15),
                   paddingHorizontal: s(18),
                   marginBottom: s(22),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#F3F4F5",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
-              placeholder="December 23, 2026"
+              placeholder={placeholderEndDate}
               value={endDate}
               onChangeText={setEndDate}
               placeholderTextColor="#ACADAD"
@@ -861,6 +971,9 @@ export default function SavingsGoal() {
                       borderRadius: s(15),
                       padding: s(15),
                       marginBottom: s(5),
+                      backgroundColor: isDarkTheme
+                        ? colors.primaryBackground
+                        : "#F3F4F5",
                     },
                   ]}
                 >
@@ -868,6 +981,7 @@ export default function SavingsGoal() {
                     style={[
                       styles.calculationTitle,
                       {
+                        color: colors.text,
                         fontSize: s(13),
                       },
                     ]}
@@ -897,6 +1011,7 @@ export default function SavingsGoal() {
                     style={[
                       styles.calculationText,
                       {
+                        color: colors.secondaryText,
                         fontSize: s(12),
                       },
                     ]}
@@ -968,6 +1083,7 @@ export default function SavingsGoal() {
           {
             height: bottomHeight,
             borderTopLeftRadius: 78 * scale,
+            backgroundColor: colors.nav,
           },
         ]}
       >
@@ -985,7 +1101,7 @@ export default function SavingsGoal() {
                   ? 37 * scale
                   : 35 * scale
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         ))}

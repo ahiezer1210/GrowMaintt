@@ -59,7 +59,7 @@ const NAV = [
 export default function App() {
   const [user, setUser] = useState(null);
 
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const [username, setUsername] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,6 +90,12 @@ export default function App() {
     : isTablet
     ? 45
     : 25;
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() === "#081023" ||
+    colors.background?.toLowerCase() === "#071426" ||
+    colors.primaryBackground?.toLowerCase() === "#081023" ||
+    colors.primaryBackground?.toLowerCase() === "#071426";
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(
@@ -609,7 +615,13 @@ export default function App() {
   if (loading) {
     return (
       <SafeAreaView
-        style={styles.loadingContainer}
+        style={[
+          styles.loadingContainer,
+          {
+            backgroundColor:
+              colors.primaryBackground,
+          },
+        ]}
       >
         <ActivityIndicator
           size="large"
@@ -620,13 +632,29 @@ export default function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={[
+        styles.safe,
+        {
+          backgroundColor:
+            colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={COLORS.dark}
+        backgroundColor={colors.header}
       />
 
-      <View style={styles.app}>
+      <View
+        style={[
+          styles.app,
+          {
+            backgroundColor:
+              colors.primaryBackground,
+          },
+        ]}
+      >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={
@@ -653,6 +681,9 @@ export default function App() {
                     : isTablet
                     ? 45
                     : 25,
+
+                backgroundColor:
+                  colors.header,
               },
             ]}
           >
@@ -688,7 +719,7 @@ export default function App() {
                     ? 1.15
                     : 1)
                 }
-                color={COLORS.white}
+                color={colors.white}
               />
             </TouchableOpacity>
 
@@ -720,6 +751,8 @@ export default function App() {
                           : 1),
                     },
                   ],
+
+                  color: colors.white,
                 },
               ]}
             >
@@ -741,7 +774,7 @@ export default function App() {
               <MaterialCommunityIcons
                 name="bell-circle-outline"
                 size={35 * scale}
-                color={COLORS.white}
+                color={colors.white}
               />
             </TouchableOpacity>
           </View>
@@ -750,6 +783,9 @@ export default function App() {
             style={[
               styles.whiteContainer,
               {
+                backgroundColor:
+                  colors.background,
+
                 borderTopLeftRadius:
                   isTablet
                     ? 55
@@ -767,7 +803,13 @@ export default function App() {
             ]}
           >
             <ScrollView
-              style={styles.whiteScroll}
+              style={[
+                styles.whiteScroll,
+                {
+                  backgroundColor:
+                    colors.background,
+                },
+              ]}
               contentContainerStyle={[
                 styles.profileScroll,
                 {
@@ -781,8 +823,15 @@ export default function App() {
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
             >
-              <View style={styles.profileCard}>
-
+              <View
+                style={[
+                  styles.profileCard,
+                  {
+                    backgroundColor:
+                      colors.background,
+                  },
+                ]}
+              >
                 <View
                   style={styles.photoContainer}
                 >
@@ -800,6 +849,8 @@ export default function App() {
                             82 * scale,
                           borderRadius:
                             41 * scale,
+                          borderColor:
+                            colors.background,
                         },
                       ]}
                     />
@@ -814,6 +865,10 @@ export default function App() {
                             82 * scale,
                           borderRadius:
                             41 * scale,
+                          backgroundColor:
+                            colors.nav,
+                          borderColor:
+                            colors.background,
                         },
                       ]}
                     >
@@ -822,7 +877,9 @@ export default function App() {
                         size={
                           40 * scale
                         }
-                        color={COLORS.gray}
+                        color={
+                          colors.secondaryText
+                        }
                       />
                     </View>
                   )}
@@ -837,6 +894,8 @@ export default function App() {
                           27 * scale,
                         borderRadius:
                           14 * scale,
+                        borderColor:
+                          colors.background,
                       },
                     ]}
                     onPress={
@@ -861,6 +920,8 @@ export default function App() {
                     {
                       fontSize:
                         20 * scale,
+                      color:
+                        colors.text,
                     },
                   ]}
                   numberOfLines={1}
@@ -875,6 +936,8 @@ export default function App() {
                     {
                       fontSize:
                         11 * scale,
+                      color:
+                        colors.secondaryText,
                     },
                   ]}
                 >
@@ -894,6 +957,8 @@ export default function App() {
                       {
                         fontSize:
                           21 * scale,
+                        color:
+                          colors.text,
                       },
                     ]}
                   >
@@ -908,6 +973,8 @@ export default function App() {
                       {
                         fontSize:
                           14 * scale,
+                        color:
+                          colors.text,
                       },
                     ]}
                   >
@@ -924,6 +991,11 @@ export default function App() {
                           14 * scale,
                         borderRadius:
                           9 * scale,
+                        backgroundColor:
+                          colors.input ||
+                          colors.border,
+                        color:
+                          colors.text,
                       },
                     ]}
                     value={username}
@@ -933,7 +1005,9 @@ export default function App() {
                     placeholder={
                       t.username
                     }
-                    placeholderTextColor="#777"
+                    placeholderTextColor={
+                      colors.secondaryText
+                    }
                   />
 
                   <Text
@@ -942,6 +1016,8 @@ export default function App() {
                       {
                         fontSize:
                           14 * scale,
+                        color:
+                          colors.text,
                       },
                     ]}
                   >
@@ -958,6 +1034,11 @@ export default function App() {
                           14 * scale,
                         borderRadius:
                           9 * scale,
+                        backgroundColor:
+                          colors.input ||
+                          colors.border,
+                        color:
+                          colors.text,
                       },
                     ]}
                     value={phone}
@@ -965,7 +1046,9 @@ export default function App() {
                       setPhone
                     }
                     placeholder="+503 0000 0000"
-                    placeholderTextColor="#777"
+                    placeholderTextColor={
+                      colors.secondaryText
+                    }
                     keyboardType="phone-pad"
                   />
 
@@ -975,6 +1058,8 @@ export default function App() {
                       {
                         fontSize:
                           14 * scale,
+                        color:
+                          colors.text,
                       },
                     ]}
                   >
@@ -991,6 +1076,11 @@ export default function App() {
                           14 * scale,
                         borderRadius:
                           9 * scale,
+                        backgroundColor:
+                          colors.input ||
+                          colors.border,
+                        color:
+                          colors.text,
                       },
                     ]}
                     value={email}
@@ -998,7 +1088,9 @@ export default function App() {
                       setEmail
                     }
                     placeholder="email@gmail.com"
-                    placeholderTextColor="#777"
+                    placeholderTextColor={
+                      colors.secondaryText
+                    }
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
@@ -1011,6 +1103,10 @@ export default function App() {
                           48 * scale,
                         borderRadius:
                           24 * scale,
+                        backgroundColor:
+                          isDarkTheme
+                            ? COLORS.cyan
+                            : colors.header,
                       },
                       saving &&
                         styles.updateButtonDisabled,
@@ -1034,6 +1130,8 @@ export default function App() {
                           {
                             fontSize:
                               14 * scale,
+                            color:
+                              COLORS.white,
                           },
                         ]}
                       >
@@ -1068,6 +1166,9 @@ export default function App() {
                   : isTablet
                   ? 1.15
                   : 1),
+
+              backgroundColor:
+                colors.nav,
             },
           ]}
         >
@@ -1102,7 +1203,7 @@ export default function App() {
                           : 1)
                   }
                   color={
-                    COLORS.white
+                    colors.white
                   }
                 />
               </TouchableOpacity>
@@ -1117,24 +1218,20 @@ export default function App() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: COLORS.dark,
   },
 
   app: {
     flex: 1,
-    backgroundColor: COLORS.dark,
   },
 
   loadingContainer: {
     flex: 1,
-    backgroundColor: COLORS.dark,
     alignItems: "center",
     justifyContent: "center",
   },
 
   header: {
     width: "100%",
-    backgroundColor: COLORS.dark,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -1147,7 +1244,6 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: COLORS.white,
     fontWeight: "700",
   },
 
@@ -1158,13 +1254,11 @@ const styles = StyleSheet.create({
 
   whiteContainer: {
     flex: 1,
-    backgroundColor: COLORS.white,
     overflow: "hidden",
   },
 
   whiteScroll: {
     flex: 1,
-    backgroundColor: COLORS.white,
   },
 
   profileScroll: {
@@ -1174,7 +1268,6 @@ const styles = StyleSheet.create({
 
   profileCard: {
     width: "100%",
-    backgroundColor: COLORS.white,
     paddingBottom: 50,
   },
 
@@ -1186,15 +1279,12 @@ const styles = StyleSheet.create({
 
   profileImage: {
     borderWidth: 2,
-    borderColor: COLORS.white,
   },
 
   profilePlaceholder: {
-    backgroundColor: "#172037",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: COLORS.white,
   },
 
   cameraButton: {
@@ -1205,18 +1295,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: COLORS.white,
   },
 
   name: {
     textAlign: "center",
-    color: COLORS.textDark,
     fontWeight: "700",
   },
 
   id: {
     textAlign: "center",
-    color: "#777",
     marginTop: 3,
   },
 
@@ -1225,29 +1312,24 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: COLORS.textDark,
     fontWeight: "700",
     marginBottom: 22,
   },
 
   label: {
-    color: COLORS.textDark,
     fontWeight: "600",
     marginBottom: 7,
   },
 
   input: {
     width: "100%",
-    backgroundColor: COLORS.lightGray,
     paddingHorizontal: 15,
-    color: "#333",
     marginBottom: 17,
   },
 
   updateButton: {
     width: "60%",
     alignSelf: "center",
-    backgroundColor: COLORS.dark,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 22,
@@ -1258,7 +1340,6 @@ const styles = StyleSheet.create({
   },
 
   updateText: {
-    color: COLORS.white,
     fontWeight: "600",
   },
 
@@ -1267,7 +1348,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: COLORS.cyan,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

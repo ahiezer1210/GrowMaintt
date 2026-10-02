@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,7 +14,7 @@ import { usePeriods } from "../../context/PeriodContext.js";
 
 export default function Expensescreen() {
   const { width } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -43,6 +44,12 @@ export default function Expensescreen() {
   useEffect(() => {
     setTempSelected(selectedPeriods);
   }, [selectedPeriods]);
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() === "#081023" ||
+    colors.background?.toLowerCase() === "#071426" ||
+    colors.primaryBackground?.toLowerCase() === "#081023" ||
+    colors.primaryBackground?.toLowerCase() === "#071426";
 
   const periods = [
     {
@@ -112,7 +119,14 @@ export default function Expensescreen() {
   ];
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <View
         style={[
           styles.header,
@@ -123,6 +137,7 @@ export default function Expensescreen() {
               : isTablet
                 ? s(45)
                 : s(25),
+            backgroundColor: colors.header,
           },
         ]}
       >
@@ -144,6 +159,7 @@ export default function Expensescreen() {
             {
               fontSize: s(25),
               lineHeight: s(29),
+              color: colors.white,
             },
           ]}
         >
@@ -178,236 +194,303 @@ export default function Expensescreen() {
             borderTopRightRadius: s(55),
             paddingHorizontal: horizontalPadding,
             paddingTop: s(50),
+            backgroundColor: colors.background,
           },
         ]}
       >
-        <Text style={styles.instruction}>
-          {t.chooseWhen}
-        </Text>
-
-        <Text style={styles.instruction}>
-          {t.reviewExpenses}
-        </Text>
-
-        <Text style={styles.subtitle}>
-          {t.selectOneOrMore}
-        </Text>
-
-        <View
-          style={[
-            styles.options,
-            {
-              marginTop: s(30),
-              gap: s(12),
-            },
-          ]}
-        >
-          {periods.map((period) => {
-            const selected = tempSelected.includes(period.id);
-
-            return (
-              <TouchableOpacity
-                key={period.id}
-                style={[
-                  styles.option,
-                  {
-                    minHeight: s(70),
-                    borderRadius: s(20),
-                    paddingHorizontal: s(15),
-                  },
-                  selected && styles.optionSelected,
-                ]}
-                onPress={() => togglePeriod(period.id)}
-                activeOpacity={0.8}
-              >
-                <View
-                  style={[
-                    styles.iconBox,
-                    {
-                      width: s(45),
-                      height: s(45),
-                      borderRadius: s(15),
-                    },
-                    selected && styles.iconBoxSelected,
-                  ]}
-                >
-                  <MaterialCommunityIcons
-                    name={period.icon}
-                    size={s(23)}
-                    color={selected ? "#FFFFFF" : "#25B7D3"}
-                  />
-                </View>
-
-                <View
-                  style={[
-                    styles.optionInfo,
-                    {
-                      marginLeft: s(14),
-                    },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.optionTitle,
-                      {
-                        fontSize: s(16),
-                      },
-                      selected && styles.optionTitleSelected,
-                    ]}
-                  >
-                    {period.title}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.optionDescription,
-                      {
-                        fontSize: s(12),
-                        marginTop: s(3),
-                      },
-                      selected &&
-                        styles.optionDescriptionSelected,
-                    ]}
-                  >
-                    {period.description}
-                  </Text>
-                </View>
-
-                <View
-                  style={[
-                    styles.checkbox,
-                    {
-                      width: s(23),
-                      height: s(23),
-                      borderRadius: s(7),
-                    },
-                    selected && styles.checkboxSelected,
-                  ]}
-                >
-                  {selected && (
-                    <MaterialCommunityIcons
-                      name="check"
-                      size={s(15)}
-                      color="#FFFFFF"
-                    />
-                  )}
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-
-          <TouchableOpacity
-            style={[
-              styles.option,
-              {
-                minHeight: s(70),
-                borderRadius: s(20),
-                paddingHorizontal: s(15),
-              },
-              allSelected && styles.optionSelected,
-            ]}
-            onPress={selectAll}
-            activeOpacity={0.8}
-          >
-            <View
-              style={[
-                styles.iconBox,
-                {
-                  width: s(45),
-                  height: s(45),
-                  borderRadius: s(15),
-                },
-                allSelected && styles.iconBoxSelected,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name="layers-outline"
-                size={s(23)}
-                color={allSelected ? "#FFFFFF" : "#25B7D3"}
-              />
-            </View>
-
-            <View
-              style={[
-                styles.optionInfo,
-                {
-                  marginLeft: s(14),
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.optionTitle,
-                  {
-                    fontSize: s(16),
-                  },
-                  allSelected && styles.optionTitleSelected,
-                ]}
-              >
-                {t.allThree}
-              </Text>
-
-              <Text
-                style={[
-                  styles.optionDescription,
-                  {
-                    fontSize: s(12),
-                    marginTop: s(3),
-                  },
-                  allSelected &&
-                    styles.optionDescriptionSelected,
-                ]}
-              >
-                {t.dailyWeeklyMonthly}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.checkbox,
-                {
-                  width: s(23),
-                  height: s(23),
-                  borderRadius: s(7),
-                },
-                allSelected && styles.checkboxSelected,
-              ]}
-            >
-              {allSelected && (
-                <MaterialCommunityIcons
-                  name="check"
-                  size={s(15)}
-                  color="#FFFFFF"
-                />
-              )}
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={[
-            styles.saveButton,
-            {
-              width: s(150),
-              height: s(40),
-              borderRadius: s(20),
-              marginTop: s(30),
-            },
-          ]}
-          onPress={savePeriod}
-          activeOpacity={0.8}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: s(100),
+          }}
         >
           <Text
             style={[
-              styles.saveText,
+              styles.instruction,
               {
-                fontSize: s(15),
+                color: colors.text,
               },
             ]}
           >
-            {t.savePeriod}
+            {t.chooseWhen}
           </Text>
-        </TouchableOpacity>
+
+          <Text
+            style={[
+              styles.instruction,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            {t.reviewExpenses}
+          </Text>
+
+          <Text
+            style={[
+              styles.subtitle,
+              {
+                color: colors.secondaryText,
+              },
+            ]}
+          >
+            {t.selectOneOrMore}
+          </Text>
+
+          <View
+            style={[
+              styles.options,
+              {
+                marginTop: s(30),
+                gap: s(12),
+              },
+            ]}
+          >
+            {periods.map((period) => {
+              const selected = tempSelected.includes(period.id);
+
+              return (
+                <TouchableOpacity
+                  key={period.id}
+                  style={[
+                    styles.option,
+                    {
+                      minHeight: s(70),
+                      borderRadius: s(20),
+                      paddingHorizontal: s(15),
+                      backgroundColor: selected
+                        ? "#25B7D3"
+                        : isDarkTheme
+                          ? colors.primaryBackground
+                          : "#FFFFFF",
+                      borderColor: selected
+                        ? "#25B7D3"
+                        : colors.border,
+                    },
+                  ]}
+                  onPress={() => togglePeriod(period.id)}
+                  activeOpacity={0.8}
+                >
+                  <View
+                    style={[
+                      styles.iconBox,
+                      {
+                        width: s(45),
+                        height: s(45),
+                        borderRadius: s(15),
+                        backgroundColor: selected
+                          ? "rgba(255,255,255,0.2)"
+                          : isDarkTheme
+                            ? "#172037"
+                            : "#E8F9FC",
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcons
+                      name={period.icon}
+                      size={s(23)}
+                      color={selected ? "#FFFFFF" : "#25B7D3"}
+                    />
+                  </View>
+
+                  <View
+                    style={[
+                      styles.optionInfo,
+                      {
+                        marginLeft: s(14),
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.optionTitle,
+                        {
+                          fontSize: s(16),
+                          color: selected
+                            ? "#FFFFFF"
+                            : colors.text,
+                        },
+                      ]}
+                    >
+                      {period.title}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.optionDescription,
+                        {
+                          fontSize: s(12),
+                          marginTop: s(3),
+                          color: selected
+                            ? "#FFFFFF"
+                            : colors.secondaryText,
+                        },
+                      ]}
+                    >
+                      {period.description}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        width: s(23),
+                        height: s(23),
+                        borderRadius: s(7),
+                        borderColor: selected
+                          ? "#081023"
+                          : colors.border,
+                        backgroundColor: selected
+                          ? "#081023"
+                          : "transparent",
+                      },
+                    ]}
+                  >
+                    {selected && (
+                      <MaterialCommunityIcons
+                        name="check"
+                        size={s(15)}
+                        color="#FFFFFF"
+                      />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+
+            <TouchableOpacity
+              style={[
+                styles.option,
+                {
+                  minHeight: s(70),
+                  borderRadius: s(20),
+                  paddingHorizontal: s(15),
+                  backgroundColor: allSelected
+                    ? "#25B7D3"
+                    : isDarkTheme
+                      ? colors.primaryBackground
+                      : "#FFFFFF",
+                  borderColor: allSelected
+                    ? "#25B7D3"
+                    : colors.border,
+                },
+              ]}
+              onPress={selectAll}
+              activeOpacity={0.8}
+            >
+              <View
+                style={[
+                  styles.iconBox,
+                  {
+                    width: s(45),
+                    height: s(45),
+                    borderRadius: s(15),
+                    backgroundColor: allSelected
+                      ? "rgba(255,255,255,0.2)"
+                      : isDarkTheme
+                        ? "#172037"
+                        : "#E8F9FC",
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name="layers-outline"
+                  size={s(23)}
+                  color={allSelected ? "#FFFFFF" : "#25B7D3"}
+                />
+              </View>
+
+              <View
+                style={[
+                  styles.optionInfo,
+                  {
+                    marginLeft: s(14),
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.optionTitle,
+                    {
+                      fontSize: s(16),
+                      color: allSelected
+                        ? "#FFFFFF"
+                        : colors.text,
+                    },
+                  ]}
+                >
+                  {t.allThree}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.optionDescription,
+                    {
+                      fontSize: s(12),
+                      marginTop: s(3),
+                      color: allSelected
+                        ? "#FFFFFF"
+                        : colors.secondaryText,
+                    },
+                  ]}
+                >
+                  {t.dailyWeeklyMonthly}
+                </Text>
+              </View>
+
+              <View
+                style={[
+                  styles.checkbox,
+                  {
+                    width: s(23),
+                    height: s(23),
+                    borderRadius: s(7),
+                    borderColor: allSelected
+                      ? "#081023"
+                      : colors.border,
+                    backgroundColor: allSelected
+                      ? "#081023"
+                      : "transparent",
+                  },
+                ]}
+              >
+                {allSelected && (
+                  <MaterialCommunityIcons
+                    name="check"
+                    size={s(15)}
+                    color="#FFFFFF"
+                  />
+                )}
+              </View>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              {
+                width: s(150),
+                height: s(40),
+                borderRadius: s(20),
+                marginTop: s(30),
+              },
+            ]}
+            onPress={savePeriod}
+            activeOpacity={0.8}
+          >
+            <Text
+              style={[
+                styles.saveText,
+                {
+                  fontSize: s(15),
+                },
+              ]}
+            >
+              {t.savePeriod}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
 
       <View
@@ -416,6 +499,7 @@ export default function Expensescreen() {
           {
             height: s(65),
             borderTopLeftRadius: s(78),
+            backgroundColor: colors.nav,
           },
         ]}
       >

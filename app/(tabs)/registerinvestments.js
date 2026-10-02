@@ -26,7 +26,7 @@ import { auth, db } from "../../firebaseConfig";
 
 export default function RegisterInvestment() {
     const { width } = useWindowDimensions();
-    const { t } = useAppSettings();
+    const { t, colors } = useAppSettings();
 
     const [investmentName, setInvestmentName] = useState("");
     const [amount, setAmount] = useState("");
@@ -54,6 +54,12 @@ export default function RegisterInvestment() {
                 : 60;
 
     const s = (value) => Math.round(value * scale);
+
+    const isDarkTheme =
+        colors.background?.toLowerCase() === "#081023" ||
+        colors.background?.toLowerCase() === "#071426" ||
+        colors.primaryBackground?.toLowerCase() === "#081023" ||
+        colors.primaryBackground?.toLowerCase() === "#071426";
 
     const registrarInversion = async () => {
         if (!investmentName || !amount || !type || !date) {
@@ -128,7 +134,14 @@ export default function RegisterInvestment() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView
+            style={[
+                styles.container,
+                {
+                    backgroundColor: colors.background,
+                },
+            ]}
+        >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -139,6 +152,7 @@ export default function RegisterInvestment() {
                         {
                             height: s(118),
                             paddingHorizontal: horizontalPadding,
+                            backgroundColor: colors.header,
                         },
                     ]}
                 >
@@ -168,6 +182,7 @@ export default function RegisterInvestment() {
                             {
                                 fontSize: s(25),
                                 lineHeight: s(29),
+                                color: colors.white,
                             },
                         ]}
                     >
@@ -206,6 +221,7 @@ export default function RegisterInvestment() {
                     style={[
                         styles.main,
                         {
+                            backgroundColor: colors.background,
                             borderTopLeftRadius: s(
                                 isTablet
                                     ? 55
@@ -240,6 +256,7 @@ export default function RegisterInvestment() {
                                     styles.title,
                                     {
                                         fontSize: s(23),
+                                        color: colors.text,
                                     },
                                 ]}
                             >
@@ -251,6 +268,7 @@ export default function RegisterInvestment() {
                                     styles.subtitle,
                                     {
                                         fontSize: s(14),
+                                        color: colors.secondaryText,
                                     },
                                 ]}
                             >
@@ -258,28 +276,73 @@ export default function RegisterInvestment() {
                             </Text>
                         </View>
 
-                        <View style={styles.form}>
-                            <Text style={styles.label}>
+                        <View
+                            style={[
+                                styles.form,
+                                {
+                                    backgroundColor: colors.background,
+                                },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.label,
+                                    {
+                                        color: colors.text,
+                                    },
+                                ]}
+                            >
                                 {t.investmentName}
                             </Text>
 
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        borderColor: colors.border,
+                                        color: colors.text,
+                                        backgroundColor: isDarkTheme
+                                            ? colors.primaryBackground
+                                            : "#FAFAFA",
+                                    },
+                                ]}
                                 placeholder={t.investmentNamePlaceholder}
                                 placeholderTextColor="#999"
                                 value={investmentName}
                                 onChangeText={setInvestmentName}
                             />
 
-                            <Text style={styles.label}>
+                            <Text
+                                style={[
+                                    styles.label,
+                                    {
+                                        color: colors.text,
+                                    },
+                                ]}
+                            >
                                 {t.amount}
                             </Text>
 
-                            <View style={styles.amountContainer}>
+                            <View
+                                style={[
+                                    styles.amountContainer,
+                                    {
+                                        borderColor: colors.border,
+                                        backgroundColor: isDarkTheme
+                                            ? colors.primaryBackground
+                                            : "#FAFAFA",
+                                    },
+                                ]}
+                            >
                                 <Text style={styles.dollar}>$</Text>
 
                                 <TextInput
-                                    style={styles.amountInput}
+                                    style={[
+                                        styles.amountInput,
+                                        {
+                                            color: colors.text,
+                                        },
+                                    ]}
                                     placeholder="0.00"
                                     placeholderTextColor="#999"
                                     keyboardType="decimal-pad"
@@ -288,24 +351,56 @@ export default function RegisterInvestment() {
                                 />
                             </View>
 
-                            <Text style={styles.label}>
+                            <Text
+                                style={[
+                                    styles.label,
+                                    {
+                                        color: colors.text,
+                                    },
+                                ]}
+                            >
                                 {t.investmentType}
                             </Text>
 
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        borderColor: colors.border,
+                                        color: colors.text,
+                                        backgroundColor: isDarkTheme
+                                            ? colors.primaryBackground
+                                            : "#FAFAFA",
+                                    },
+                                ]}
                                 placeholder={t.investmentTypePlaceholder}
                                 placeholderTextColor="#999"
                                 value={type}
                                 onChangeText={setType}
                             />
 
-                            <Text style={styles.label}>
+                            <Text
+                                style={[
+                                    styles.label,
+                                    {
+                                        color: colors.text,
+                                    },
+                                ]}
+                            >
                                 {t.date}
                             </Text>
 
                             <TextInput
-                                style={styles.input}
+                                style={[
+                                    styles.input,
+                                    {
+                                        borderColor: colors.border,
+                                        color: colors.text,
+                                        backgroundColor: isDarkTheme
+                                            ? colors.primaryBackground
+                                            : "#FAFAFA",
+                                    },
+                                ]}
                                 placeholder={t.datePlaceholder}
                                 placeholderTextColor="#999"
                                 value={date}
@@ -350,6 +445,7 @@ export default function RegisterInvestment() {
                         {
                             height: s(65),
                             borderTopLeftRadius: s(78),
+                            backgroundColor: colors.nav,
                         },
                     ]}
                 >

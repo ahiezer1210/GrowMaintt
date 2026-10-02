@@ -33,7 +33,7 @@ const translations = {
     backupErrorMessage:
       "The backup could not be completed. Please try again.",
     settingsSaved: "Settings Saved",
-    settingsSavedMessage:
+    backupSettingsSavedMessage:
       "Your backup settings have been saved successfully.",
     settingsError: "Error",
     settingsErrorMessage:
@@ -520,9 +520,9 @@ const translations = {
     everythingYouNeedToKnow:
       "Everything you need to know",
     whatIsGrowMait:
-      "What is GrowMait?",
+      "What is GrowMaint?",
     growMaitDescription:
-      "GrowMait is your ally to keep control of your finances, expenses and savings. Everything in one simple, easy and secure place.",
+      "GrowMaint is your ally to keep control of your finances, expenses and savings. Everything in one simple, easy and secure place.",
     exploreGrowMait:
       "Explore GrowMaint",
     everythingYouCanDo:
@@ -659,6 +659,8 @@ const translations = {
       "It's a recurring expense?",
     activateRecurring:
       "Activate the option if it is\nrecurring",
+    registerExpense:
+      "Register expense",
     saveExpenses:
       "Save expenses",
 
@@ -846,7 +848,7 @@ const translations = {
     backupErrorMessage:
       "No se pudo completar la copia de seguridad. Inténtalo nuevamente.",
     settingsSaved: "Configuración guardada",
-    settingsSavedMessage:
+    backupSettingsSavedMessage:
       "La configuración de tu copia de seguridad se guardó correctamente.",
     settingsError: "Error",
     settingsErrorMessage:
@@ -1426,9 +1428,9 @@ const translations = {
     everythingYouNeedToKnow:
       "Todo lo que necesitas saber",
     whatIsGrowMait:
-      "¿Qué es GrowMait?",
+      "¿Qué es GrowMaint?",
     growMaitDescription:
-      "GrowMait es tu aliado para mantener el control de tus finanzas, gastos y ahorros. Todo en un solo lugar, simple, fácil y seguro.",
+      "GrowMaint es tu aliado para mantener el control de tus finanzas, gastos y ahorros. Todo en un solo lugar, simple, fácil y seguro.",
     exploreGrowMait:
       "Explora GrowMaint",
     everythingYouCanDo:
@@ -1565,6 +1567,8 @@ const translations = {
       "¿Es un gasto recurrente?",
     activateRecurring:
       "Activa la opción si es\nrecurrente",
+    registerExpense:
+      "Registrar gasto",
     saveExpenses:
       "Guardar gastos",
 

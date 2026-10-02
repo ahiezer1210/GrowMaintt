@@ -21,7 +21,13 @@ import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
 export default function Redemptionhistory() {
-    const { t } = useAppSettings();
+    const { t, colors } = useAppSettings();
+
+    const isDarkTheme =
+        colors.background?.toLowerCase() === "#081023" ||
+        colors.background?.toLowerCase() === "#071426" ||
+        colors.primaryBackground?.toLowerCase() === "#081023" ||
+        colors.primaryBackground?.toLowerCase() === "#071426";
 
     const { width } = useWindowDimensions();
 
@@ -249,16 +255,24 @@ export default function Redemptionhistory() {
     ];
 
     return (
-        <View style={styles.container}>
+        <View
+            style={[
+                styles.container,
+                {
+                    backgroundColor: colors.background,
+                },
+            ]}
+        >
             <StatusBar
                 barStyle="light-content"
-                backgroundColor="#071426"
+                backgroundColor={colors.header}
             />
 
             <View
                 style={[
                     styles.header,
                     {
+                        backgroundColor: colors.header,
                         height: s(118),
                         paddingHorizontal: isSmallScreen
                             ? s(18)
@@ -275,7 +289,7 @@ export default function Redemptionhistory() {
                     <MaterialCommunityIcons
                         name="arrow-left"
                         size={s(35)}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
 
@@ -283,6 +297,7 @@ export default function Redemptionhistory() {
                     style={[
                         styles.headerTitle,
                         {
+                            color: colors.white,
                             fontSize: s(25),
                             lineHeight: s(29),
                             transform: [
@@ -310,7 +325,7 @@ export default function Redemptionhistory() {
                     <MaterialCommunityIcons
                         name="bell-circle-outline"
                         size={s(35)}
-                        color="#FFFFFF"
+                        color={colors.white}
                     />
                 </TouchableOpacity>
             </View>
@@ -319,6 +334,7 @@ export default function Redemptionhistory() {
                 style={[
                     styles.card,
                     {
+                        backgroundColor: colors.background,
                         borderTopLeftRadius: s(45),
                         borderTopRightRadius: s(45),
                     },
@@ -351,6 +367,7 @@ export default function Redemptionhistory() {
                             style={[
                                 styles.resumenTitleGeneral,
                                 {
+                                    color: "#081023",
                                     fontSize: s(15),
                                     marginBottom: s(3),
                                 },
@@ -394,6 +411,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
+                                            color: "#081023",
                                             fontSize: s(11),
                                             marginTop: s(2),
                                         },
@@ -406,6 +424,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenValor,
                                         {
+                                            color: "#081023",
                                             fontSize: s(15),
                                             marginTop: s(2),
                                         },
@@ -426,6 +445,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
+                                            color: "#081023",
                                             fontSize: s(11),
                                             marginTop: s(2),
                                         },
@@ -438,6 +458,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenValor,
                                         {
+                                            color: "#081023",
                                             fontSize: s(15),
                                             marginTop: s(2),
                                         },
@@ -465,6 +486,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
+                                            color: "#081023",
                                             fontSize: s(11),
                                             marginTop: s(2),
                                         },
@@ -477,6 +499,7 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenValor,
                                         {
+                                            color: "#081023",
                                             fontSize: s(15),
                                             marginTop: s(2),
                                         },
@@ -492,6 +515,10 @@ export default function Redemptionhistory() {
                         style={[
                             styles.filters,
                             {
+                                backgroundColor: isDarkTheme
+                                    ? colors.primaryBackground
+                                    : colors.background,
+                                borderColor: colors.border,
                                 height: s(55),
                                 borderRadius: s(7),
                                 marginBottom: s(20),
@@ -504,6 +531,8 @@ export default function Redemptionhistory() {
                             active={filter === "Todos"}
                             onPress={() => setfilter("Todos")}
                             scale={scale}
+                            colors={colors}
+                            isDarkTheme={isDarkTheme}
                         />
 
                         <Filter
@@ -512,6 +541,8 @@ export default function Redemptionhistory() {
                             active={filter === "Complete"}
                             onPress={() => setfilter("Complete")}
                             scale={scale}
+                            colors={colors}
+                            isDarkTheme={isDarkTheme}
                         />
 
                         <Filter
@@ -520,6 +551,8 @@ export default function Redemptionhistory() {
                             active={filter === "In process"}
                             onPress={() => setfilter("In process")}
                             scale={scale}
+                            colors={colors}
+                            isDarkTheme={isDarkTheme}
                         />
 
                         <Filter
@@ -528,6 +561,8 @@ export default function Redemptionhistory() {
                             active={filter === "Canceled"}
                             onPress={() => setfilter("Canceled")}
                             scale={scale}
+                            colors={colors}
+                            isDarkTheme={isDarkTheme}
                         />
                     </View>
 
@@ -547,7 +582,14 @@ export default function Redemptionhistory() {
                                     color="#ACADAD"
                                 />
 
-                                <Text style={styles.sinCanjesText}>
+                                <Text
+                                    style={[
+                                        styles.sinCanjesText,
+                                        {
+                                            color: colors.secondaryText,
+                                        },
+                                    ]}
+                                >
                                     {t.noRedemptionsInCategory}
                                 </Text>
                             </View>
@@ -558,6 +600,11 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.canje,
                                         {
+                                            backgroundColor:
+                                                isDarkTheme
+                                                    ? colors.primaryBackground
+                                                    : colors.background,
+                                            borderColor: colors.border,
                                             minHeight: s(75),
                                             borderRadius: s(10),
                                             paddingHorizontal: s(7),
@@ -582,7 +629,7 @@ export default function Redemptionhistory() {
                                         <Ionicons
                                             name={canje.icon}
                                             size={s(27)}
-                                            color="#081823"
+                                            color={colors.icon}
                                         />
                                     </View>
 
@@ -602,6 +649,7 @@ export default function Redemptionhistory() {
                                                 style={[
                                                     styles.tipo,
                                                     {
+                                                        color: "#081023",
                                                         fontSize: s(12),
                                                     },
                                                 ]}
@@ -614,6 +662,7 @@ export default function Redemptionhistory() {
                                             style={[
                                                 styles.date,
                                                 {
+                                                    color: colors.text,
                                                     fontSize: s(12),
                                                 },
                                             ]}
@@ -635,6 +684,7 @@ export default function Redemptionhistory() {
                                             style={[
                                                 styles.discount,
                                                 {
+                                                    color: colors.text,
                                                     fontSize: s(9),
                                                     marginBottom: s(2),
                                                 },
@@ -646,7 +696,7 @@ export default function Redemptionhistory() {
                                         <Ionicons
                                             name="chevron-forward"
                                             size={s(20)}
-                                            color="#081823"
+                                            color={colors.icon}
                                         />
                                     </View>
                                 </TouchableOpacity>
@@ -660,6 +710,7 @@ export default function Redemptionhistory() {
                 style={[
                     styles.bottomBar,
                     {
+                        backgroundColor: colors.nav,
                         height: s(65),
                         borderTopLeftRadius: s(78),
                     },
@@ -678,7 +729,7 @@ export default function Redemptionhistory() {
                                     ? 37
                                     : 35
                             )}
-                            color="#FFFFFF"
+                            color={colors.white}
                         />
                     </TouchableOpacity>
                 ))}
@@ -693,6 +744,8 @@ function Filter({
     active,
     onPress,
     scale,
+    colors,
+    isDarkTheme,
 }) {
     const s = (value) => Math.round(value * scale);
 
@@ -701,6 +754,10 @@ function Filter({
             style={[
                 styles.filter,
                 active && styles.filterActive,
+                active && {
+                    backgroundColor: "#BCE8EF",
+                    borderColor: "#081023",
+                },
             ]}
             onPress={onPress}
             activeOpacity={0.7}
@@ -708,10 +765,17 @@ function Filter({
             <Ionicons
                 name={icon}
                 size={s(14)}
-                color="#081823"
+                color={active ? "#081823" : colors.icon}
             />
 
-            <Text style={styles.filterText}>
+            <Text
+                style={[
+                    styles.filterText,
+                    {
+                        color: active ? "#081823" : colors.text,
+                    },
+                ]}
+            >
                 {text}
             </Text>
         </TouchableOpacity>

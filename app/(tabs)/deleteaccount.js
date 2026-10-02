@@ -69,7 +69,7 @@ const navItems = [
 ];
 
 export default function DeleteAccount({ navigation }) {
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const [password, setPassword] = useState("");
 
@@ -92,6 +92,12 @@ export default function DeleteAccount({ navigation }) {
     : tablet
     ? 45
     : 25;
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() === "#081023" ||
+    colors.background?.toLowerCase() === "#071426" ||
+    colors.primaryBackground?.toLowerCase() === "#081023" ||
+    colors.primaryBackground?.toLowerCase() === "#071426";
 
   const handleDelete = async () => {
     const cleanPassword = password.trim();
@@ -245,13 +251,29 @@ export default function DeleteAccount({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView
+      style={[
+        styles.safe,
+        {
+          backgroundColor:
+            colors.primaryBackground,
+        },
+      ]}
+    >
       <StatusBar
         barStyle="light-content"
-        backgroundColor={COLORS.dark}
+        backgroundColor={colors.header}
       />
 
-      <View style={styles.app}>
+      <View
+        style={[
+          styles.app,
+          {
+            backgroundColor:
+              colors.primaryBackground,
+          },
+        ]}
+      >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={
@@ -260,7 +282,6 @@ export default function DeleteAccount({ navigation }) {
               : "height"
           }
         >
-      
           <View
             style={[
               styles.header,
@@ -274,6 +295,8 @@ export default function DeleteAccount({ navigation }) {
                     : 1),
                 paddingHorizontal:
                   horizontalPadding,
+                backgroundColor:
+                  colors.header,
               },
             ]}
           >
@@ -311,7 +334,7 @@ export default function DeleteAccount({ navigation }) {
                     ? 1.15
                     : 1)
                 }
-                color={COLORS.white}
+                color={colors.white}
               />
             </TouchableOpacity>
 
@@ -346,6 +369,7 @@ export default function DeleteAccount({ navigation }) {
                           : 1),
                     },
                   ],
+                  color: colors.white,
                 },
               ]}
             >
@@ -386,16 +410,17 @@ export default function DeleteAccount({ navigation }) {
                     ? 1.15
                     : 1)
                 }
-                color={COLORS.white}
+                color={colors.white}
               />
             </TouchableOpacity>
           </View>
-
 
           <View
             style={[
               styles.whiteContainer,
               {
+                backgroundColor:
+                  colors.background,
                 borderTopLeftRadius:
                   tablet
                     ? s(55)
@@ -412,7 +437,13 @@ export default function DeleteAccount({ navigation }) {
             ]}
           >
             <ScrollView
-              style={styles.whiteScroll}
+              style={[
+                styles.whiteScroll,
+                {
+                  backgroundColor:
+                    colors.background,
+                },
+              ]}
               contentContainerStyle={[
                 styles.scrollContent,
                 {
@@ -426,8 +457,15 @@ export default function DeleteAccount({ navigation }) {
               keyboardShouldPersistTaps="handled"
               keyboardDismissMode="on-drag"
             >
-              <View style={styles.content}>
-                {/* WARNING ICON */}
+              <View
+                style={[
+                  styles.content,
+                  {
+                    backgroundColor:
+                      colors.background,
+                  },
+                ]}
+              >
                 <View
                   style={[
                     styles.iconContainer,
@@ -443,6 +481,10 @@ export default function DeleteAccount({ navigation }) {
                         width: s(135),
                         height: s(135),
                         borderRadius: s(67.5),
+                        backgroundColor:
+                          isDarkTheme
+                            ? "#172037"
+                            : COLORS.cardBg,
                       },
                     ]}
                   >
@@ -461,6 +503,7 @@ export default function DeleteAccount({ navigation }) {
                       fontSize: s(15),
                       lineHeight: s(21),
                       marginBottom: s(24),
+                      color: colors.text,
                     },
                   ]}
                 >
@@ -474,6 +517,7 @@ export default function DeleteAccount({ navigation }) {
                       {
                         fontSize: s(16),
                         marginBottom: s(8),
+                        color: colors.text,
                       },
                     ]}
                   >
@@ -489,18 +533,29 @@ export default function DeleteAccount({ navigation }) {
                         paddingHorizontal: s(16),
                         fontSize: s(15),
                         marginBottom: s(24),
+                        borderColor:
+                          colors.border,
+                        backgroundColor:
+                          isDarkTheme
+                            ? colors.primaryBackground
+                            : COLORS.white,
+                        color: colors.text,
                       },
                     ]}
                     value={password}
                     onChangeText={setPassword}
                     placeholder=""
-                    placeholderTextColor="#A8ADB5"
+                    placeholderTextColor={
+                      colors.secondaryText
+                    }
                     secureTextEntry
                     autoCapitalize="none"
                     autoCorrect={false}
                     textContentType="password"
                     returnKeyType="done"
-                    onSubmitEditing={handleDelete}
+                    onSubmitEditing={
+                      handleDelete
+                    }
                   />
 
                   <TouchableOpacity
@@ -510,6 +565,10 @@ export default function DeleteAccount({ navigation }) {
                         height: s(46),
                         borderRadius: s(23),
                         marginBottom: s(12),
+                        backgroundColor:
+                          isDarkTheme
+                            ? COLORS.cyan
+                            : COLORS.dark,
                       },
                     ]}
                     activeOpacity={0.8}
@@ -520,6 +579,8 @@ export default function DeleteAccount({ navigation }) {
                         styles.buttonText,
                         {
                           fontSize: s(15),
+                          color:
+                            COLORS.white,
                         },
                       ]}
                     >
@@ -533,6 +594,10 @@ export default function DeleteAccount({ navigation }) {
                       {
                         height: s(46),
                         borderRadius: s(23),
+                        backgroundColor:
+                          isDarkTheme
+                            ? COLORS.cyan
+                            : COLORS.dark,
                       },
                     ]}
                     activeOpacity={0.8}
@@ -543,6 +608,8 @@ export default function DeleteAccount({ navigation }) {
                         styles.buttonText,
                         {
                           fontSize: s(15),
+                          color:
+                            COLORS.white,
                         },
                       ]}
                     >
@@ -555,7 +622,6 @@ export default function DeleteAccount({ navigation }) {
           </View>
         </KeyboardAvoidingView>
 
-        
         <View
           style={[
             styles.bottomBar,
@@ -574,6 +640,8 @@ export default function DeleteAccount({ navigation }) {
                   : tablet
                   ? 1.15
                   : 1),
+              backgroundColor:
+                colors.nav,
             },
           ]}
         >
@@ -604,7 +672,7 @@ export default function DeleteAccount({ navigation }) {
                         ? 1.15
                         : 1)
                 }
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
@@ -617,17 +685,14 @@ export default function DeleteAccount({ navigation }) {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   app: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   header: {
     width: "100%",
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -643,7 +708,6 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     flex: 1,
-    color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
   },
@@ -658,13 +722,11 @@ const styles = StyleSheet.create({
 
   whiteContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
 
   whiteScroll: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
   },
 
   scrollContent: {
@@ -674,7 +736,6 @@ const styles = StyleSheet.create({
 
   content: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
     alignItems: "center",
   },
 
@@ -684,14 +745,12 @@ const styles = StyleSheet.create({
   },
 
   warningCircle: {
-    backgroundColor: "#EEF5FF",
     alignItems: "center",
     justifyContent: "center",
   },
 
   description: {
     width: "90%",
-    color: "#2C313A",
     textAlign: "center",
     fontWeight: "400",
   },
@@ -704,7 +763,6 @@ const styles = StyleSheet.create({
 
   label: {
     width: "100%",
-    color: "#000000",
     fontWeight: "700",
     textAlign: "left",
   },
@@ -712,21 +770,16 @@ const styles = StyleSheet.create({
   input: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#252833",
-    backgroundColor: "#FFFFFF",
-    color: "#252833",
   },
 
   darkButton: {
     width: "75%",
     maxWidth: 260,
-    backgroundColor: "#071426",
     justifyContent: "center",
     alignItems: "center",
   },
 
   buttonText: {
-    color: "#FFFFFF",
     fontWeight: "600",
   },
 
@@ -735,7 +788,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

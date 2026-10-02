@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -43,7 +44,6 @@ export default function AgeConfirmation() {
         barStyle="light-content"
       />
 
-      {/* HEADER */}
       <View
         style={[
           styles.header,
@@ -91,7 +91,6 @@ export default function AgeConfirmation() {
         />
       </View>
 
-      {/* MAIN */}
       <View
         style={[
           styles.main,
@@ -101,86 +100,91 @@ export default function AgeConfirmation() {
           },
         ]}
       >
-        <View
-          style={[
-            styles.content,
-            {
-              paddingHorizontal: horizontalPadding,
-            },
-          ]}
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <Text
-            style={[
-              styles.messageText,
-              {
-                fontSize: s(20),
-                lineHeight: s(24),
-                marginBottom: s(40),
-              },
-            ]}
-          >
-            To Use This Application,{"\n"}
-            You Must Be 18 Years Or Older.
-          </Text>
-
           <View
             style={[
-              styles.buttonsContainer,
+              styles.content,
               {
-                marginTop: s(40),
-                gap: s(15),
+                paddingHorizontal: horizontalPadding,
               },
             ]}
           >
-            <TouchableOpacity
+            <Text
               style={[
-                styles.actionButton,
+                styles.messageText,
                 {
-                  width: s(240),
-                  height: s(53),
-                  borderRadius: s(22),
+                  fontSize: s(20),
+                  lineHeight: s(24),
+                  marginBottom: s(40),
                 },
               ]}
-              onPress={() => router.push("/verificationage")}
             >
-              <Text
-                style={[
-                  styles.buttonText,
-                  {
-                    fontSize: s(14),
-                  },
-                ]}
-              >
-                I Am 18 Or Older
-              </Text>
-            </TouchableOpacity>
+              To Use This Application,{"\n"}
+              You Must Be 18 Years Or Older.
+            </Text>
 
-            <TouchableOpacity
+            <View
               style={[
-                styles.actionButton,
-                styles.secondButton,
+                styles.buttonsContainer,
                 {
-                  width: s(240),
-                  height: s(53),
-                  borderRadius: s(22),
-                  marginTop: s(14),
+                  marginTop: s(40),
+                  gap: s(15),
                 },
               ]}
-              onPress={() => router.push("/login")}
             >
-              <Text
+              <TouchableOpacity
                 style={[
-                  styles.buttonText,
+                  styles.actionButton,
                   {
-                    fontSize: s(14),
+                    width: s(240),
+                    height: s(53),
+                    borderRadius: s(22),
                   },
                 ]}
+                onPress={() => router.push("/verificationage")}
               >
-                I Am Under 18
-              </Text>
-            </TouchableOpacity>
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      fontSize: s(14),
+                    },
+                  ]}
+                >
+                  I Am 18 Or Older
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.actionButton,
+                  styles.secondButton,
+                  {
+                    width: s(240),
+                    height: s(53),
+                    borderRadius: s(22),
+                    marginTop: s(14),
+                  },
+                ]}
+                onPress={() => router.push("/login")}
+              >
+                <Text
+                  style={[
+                    styles.buttonText,
+                    {
+                      fontSize: s(14),
+                    },
+                  ]}
+                >
+                  I Am Under 18
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </View>
     </View>
   );

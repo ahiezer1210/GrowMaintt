@@ -22,12 +22,19 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 export default function Registerexpenses() {
   const { width } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() !== "#ffffff" &&
+    colors.background?.toLowerCase() !== "#fff" &&
+    colors.background?.toLowerCase() !== "#f5f5f5" &&
+    colors.background?.toLowerCase() !== "#f4f4f4" &&
+    colors.background?.toLowerCase() !== "#f3f4f5";
 
   const isSmallScreen = width < 380;
   const isTablet = width >= 768;
@@ -138,17 +145,28 @@ export default function Registerexpenses() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView
+      style={[
+        styles.safeArea,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <StatusBar
         barStyle="light-content"
-        backgroundColor="#071426"
+        backgroundColor={colors.header}
       />
 
       <KeyboardAvoidingView
-        style={styles.container}
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background,
+          },
+        ]}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        
         <View
           style={[
             styles.header,
@@ -159,6 +177,7 @@ export default function Registerexpenses() {
                 : isTablet
                 ? scale(45)
                 : scale(25),
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -169,7 +188,7 @@ export default function Registerexpenses() {
             <MaterialCommunityIcons
               name="arrow-left"
               size={scale(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -187,6 +206,7 @@ export default function Registerexpenses() {
                     translateY: scale(7),
                   },
                 ],
+                color: colors.white,
               },
             ]}
           >
@@ -207,13 +227,19 @@ export default function Registerexpenses() {
             <MaterialCommunityIcons
               name="bell-circle-outline"
               size={scale(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
 
-       
-        <View style={styles.cardContainer}>
+        <View
+          style={[
+            styles.cardContainer,
+            {
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
           <ScrollView
             contentContainerStyle={[
               styles.scrollContent,
@@ -230,6 +256,7 @@ export default function Registerexpenses() {
                 {
                   fontSize: scale(17),
                   marginBottom: scale(8),
+                  color: colors.text,
                 },
               ]}
             >
@@ -243,6 +270,11 @@ export default function Registerexpenses() {
                   height: scale(52),
                   fontSize: scale(16),
                   paddingHorizontal: scale(15),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#FFFFFF",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
               placeholder={t.amountPlaceholder}
@@ -259,6 +291,7 @@ export default function Registerexpenses() {
                   fontSize: scale(17),
                   marginTop: scale(20),
                   marginBottom: scale(8),
+                  color: colors.text,
                 },
               ]}
             >
@@ -272,6 +305,11 @@ export default function Registerexpenses() {
                   height: scale(52),
                   fontSize: scale(16),
                   paddingHorizontal: scale(15),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#FFFFFF",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
               placeholder={t.categoryPlaceholder}
@@ -287,6 +325,7 @@ export default function Registerexpenses() {
                   fontSize: scale(17),
                   marginTop: scale(20),
                   marginBottom: scale(8),
+                  color: colors.text,
                 },
               ]}
             >
@@ -300,6 +339,11 @@ export default function Registerexpenses() {
                   height: scale(52),
                   fontSize: scale(16),
                   paddingHorizontal: scale(15),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#FFFFFF",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
               placeholder={t.expenseTypePlaceholder}
@@ -315,6 +359,7 @@ export default function Registerexpenses() {
                   fontSize: scale(17),
                   marginTop: scale(20),
                   marginBottom: scale(8),
+                  color: colors.text,
                 },
               ]}
             >
@@ -328,6 +373,11 @@ export default function Registerexpenses() {
                   height: scale(52),
                   fontSize: scale(16),
                   paddingHorizontal: scale(15),
+                  backgroundColor: isDarkTheme
+                    ? colors.primaryBackground
+                    : "#FFFFFF",
+                  borderColor: colors.border,
+                  color: colors.text,
                 },
               ]}
               placeholder={t.datePlaceholder}
@@ -342,6 +392,7 @@ export default function Registerexpenses() {
                 {
                   height: scale(54),
                   marginTop: scale(30),
+                  backgroundColor: "#25B5D1",
                 },
               ]}
               onPress={saveExpense}
@@ -364,6 +415,9 @@ export default function Registerexpenses() {
                 {
                   height: scale(54),
                   marginTop: scale(15),
+                  backgroundColor: isDarkTheme
+                    ? "#25B5D1"
+                    : "#071426",
                 },
               ]}
               onPress={cancelExpenses}
@@ -382,13 +436,13 @@ export default function Registerexpenses() {
           </ScrollView>
         </View>
 
-       
         <View
           style={[
             styles.bottomNav,
             {
               height: scale(65),
               borderTopLeftRadius: scale(78),
+              backgroundColor: colors.nav,
             },
           ]}
         >
@@ -403,7 +457,7 @@ export default function Registerexpenses() {
                 size={scale(
                   item.icon === "swap-horizontal" ? 37 : 35
                 )}
-                color="#FFFFFF"
+                color={colors.white}
               />
             </TouchableOpacity>
           ))}
@@ -416,16 +470,13 @@ export default function Registerexpenses() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   container: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   header: {
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -437,14 +488,12 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
   },
 
   cardContainer: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 45,
     borderTopRightRadius: 45,
     overflow: "hidden",
@@ -455,22 +504,17 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    color: "#071426",
     fontWeight: "700",
   },
 
   input: {
     width: "100%",
     borderWidth: 1,
-    borderColor: "#D5D5D5",
     borderRadius: 12,
-    color: "#071426",
-    backgroundColor: "#FFFFFF",
   },
 
   saveButton: {
     width: "100%",
-    backgroundColor: "#25B5D1",
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
@@ -483,7 +527,6 @@ const styles = StyleSheet.create({
 
   cancelButton: {
     width: "100%",
-    backgroundColor: "#071426",
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
@@ -499,7 +542,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

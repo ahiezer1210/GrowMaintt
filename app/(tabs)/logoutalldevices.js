@@ -24,14 +24,21 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig.js";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig.js";
 
 export default function LogoutDevices() {
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const { width } = useWindowDimensions();
   const [loading, setLoading] = useState(false);
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() !== "#ffffff" &&
+    colors.background?.toLowerCase() !== "#fff" &&
+    colors.background?.toLowerCase() !== "#f5f5f5" &&
+    colors.background?.toLowerCase() !== "#f4f4f4" &&
+    colors.background?.toLowerCase() !== "#f3f4f5";
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -147,10 +154,17 @@ export default function LogoutDevices() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
+    <SafeAreaView
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#071426"
+        backgroundColor={colors.header}
         barStyle="light-content"
       />
 
@@ -164,6 +178,7 @@ export default function LogoutDevices() {
             {
               height: s(115),
               paddingHorizontal: horizontalPadding,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -182,7 +197,7 @@ export default function LogoutDevices() {
             <MaterialCommunityIcons
               name="arrow-left"
               size={s(35)}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -192,6 +207,7 @@ export default function LogoutDevices() {
               {
                 fontSize: s(19),
                 lineHeight: s(23),
+                color: colors.white,
               },
             ]}
           >
@@ -211,7 +227,7 @@ export default function LogoutDevices() {
             <MaterialCommunityIcons
               name="bell-circle-outline"
               size={35 * scale}
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
@@ -222,6 +238,7 @@ export default function LogoutDevices() {
             {
               borderTopLeftRadius: s(36),
               borderTopRightRadius: s(36),
+              backgroundColor: colors.background,
             },
           ]}
         >
@@ -260,6 +277,7 @@ export default function LogoutDevices() {
                   lineHeight: s(20),
                   marginTop: s(20),
                   transform: [{ translateY: -23 * scale }],
+                  color: colors.text,
                 },
               ]}
             >
@@ -273,6 +291,7 @@ export default function LogoutDevices() {
                   fontSize: s(25),
                   marginTop: s(25),
                   transform: [{ translateY: -29 * scale }],
+                  color: colors.text,
                 },
               ]}
             >
@@ -296,6 +315,9 @@ export default function LogoutDevices() {
                     height: s(44),
                     borderRadius: s(22),
                     opacity: loading ? 0.6 : 1,
+                    backgroundColor: isDarkTheme
+                      ? "#25B5D1"
+                      : "#071426",
                   },
                 ]}
                 onPress={logoutEverywhere}
@@ -322,6 +344,9 @@ export default function LogoutDevices() {
                     height: s(44),
                     borderRadius: s(22),
                     marginTop: s(12),
+                    backgroundColor: isDarkTheme
+                      ? "#25B5D1"
+                      : "#071426",
                   },
                 ]}
                 onPress={() => router.back()}
@@ -347,6 +372,7 @@ export default function LogoutDevices() {
               {
                 height: 65 * scale,
                 borderTopLeftRadius: 78 * scale,
+                backgroundColor: colors.nav,
               },
             ]}
           >
@@ -360,7 +386,7 @@ export default function LogoutDevices() {
                 <MaterialCommunityIcons
                   name={item.icon}
                   size={35 * scale}
-                  color="#FFFFFF"
+                  color={colors.white}
                 />
               </TouchableOpacity>
             ))}
@@ -374,12 +400,10 @@ export default function LogoutDevices() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#071426",
   },
 
   header: {
     width: "100%",
-    backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -391,7 +415,6 @@ const styles = StyleSheet.create({
 
   headerTitle: {
     flex: 1,
-    color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
     transform: [{ translateY: 9 }],
@@ -404,7 +427,6 @@ const styles = StyleSheet.create({
   main: {
     flex: 1,
     width: "100%",
-    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
 
@@ -418,12 +440,10 @@ const styles = StyleSheet.create({
   },
 
   description: {
-    color: "#071426",
     textAlign: "center",
   },
 
   question: {
-    color: "#071426",
     textAlign: "center",
     fontWeight: "400",
   },
@@ -433,7 +453,6 @@ const styles = StyleSheet.create({
   },
 
   actionButton: {
-    backgroundColor: "#071426",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -448,7 +467,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

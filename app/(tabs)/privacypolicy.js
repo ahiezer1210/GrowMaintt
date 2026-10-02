@@ -13,10 +13,16 @@ import { useAppSettings } from "../../context/Appsettings";
 
 export default function PrivacyScreen() {
   const { width, height } = useWindowDimensions();
-  const { t } = useAppSettings();
+  const { t, colors } = useAppSettings();
 
   const small = width < 350;
   const tablet = width >= 600;
+
+  const isDarkTheme =
+    colors.background?.toLowerCase() === "#081023" ||
+    colors.background?.toLowerCase() === "#071426" ||
+    colors.primaryBackground?.toLowerCase() === "#081023" ||
+    colors.primaryBackground?.toLowerCase() === "#071426";
 
   const scale = (value, tabletValue) =>
     tablet
@@ -64,15 +70,28 @@ export default function PrivacyScreen() {
   };
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={[
+        styles.screen,
+        {
+          backgroundColor: colors.background,
+        },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#071426"
+        backgroundColor={colors.header}
         barStyle="light-content"
       />
 
-      <View style={styles.app}>
-        {/* HEADER IGUAL A LOGOUT */}
+      <View
+        style={[
+          styles.app,
+          {
+            backgroundColor: colors.header,
+          },
+        ]}
+      >
         <View
           style={[
             styles.header,
@@ -89,6 +108,7 @@ export default function PrivacyScreen() {
                 : tablet
                 ? 45
                 : 25,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -109,7 +129,7 @@ export default function PrivacyScreen() {
                 ],
               },
             ]}
-            onPress={() => router.replace("/profile")} // 👈 CAMBIO
+            onPress={() => router.replace("/profile")}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
@@ -122,7 +142,7 @@ export default function PrivacyScreen() {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
 
@@ -193,7 +213,7 @@ export default function PrivacyScreen() {
                   ? 1.15
                   : 1)
               }
-              color="#FFFFFF"
+              color={colors.white}
             />
           </TouchableOpacity>
         </View>
@@ -202,6 +222,7 @@ export default function PrivacyScreen() {
           style={[
             styles.main,
             {
+              backgroundColor: colors.background,
               borderTopLeftRadius: tablet
                 ? 55
                 : small
@@ -241,6 +262,7 @@ export default function PrivacyScreen() {
                 style={[
                   styles.mainTitle,
                   {
+                    color: colors.text,
                     fontSize: Math.round(
                       scale(22, 28)
                     ),
@@ -291,7 +313,6 @@ export default function PrivacyScreen() {
                 </Text>
               </View>
 
-      
               <View
                 style={[
                   styles.section,
@@ -325,7 +346,7 @@ export default function PrivacyScreen() {
                         ? 1.15
                         : 1)
                     )}
-                    color="#071426"
+                    color={colors.text}
                   />
                 </View>
 
@@ -334,6 +355,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color: colors.text,
                         fontSize: Math.round(
                           scale(14, 16)
                         ),
@@ -350,6 +372,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionText,
                       {
+                        color: colors.secondaryText,
                         fontSize: Math.round(
                           scale(12, 14)
                         ),
@@ -380,7 +403,6 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-          
               <View
                 style={[
                   styles.section,
@@ -414,7 +436,7 @@ export default function PrivacyScreen() {
                         ? 1.15
                         : 1)
                     )}
-                    color="#071426"
+                    color={colors.text}
                   />
                 </View>
 
@@ -423,6 +445,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color: colors.text,
                         fontSize: Math.round(
                           scale(14, 16)
                         ),
@@ -439,6 +462,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionText,
                       {
+                        color: colors.secondaryText,
                         fontSize: Math.round(
                           scale(12, 14)
                         ),
@@ -469,7 +493,6 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-        
               <View
                 style={[
                   styles.section,
@@ -503,7 +526,7 @@ export default function PrivacyScreen() {
                         ? 1.15
                         : 1)
                     )}
-                    color="#071426"
+                    color={colors.text}
                   />
                 </View>
 
@@ -512,6 +535,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color: colors.text,
                         fontSize: Math.round(
                           scale(14, 16)
                         ),
@@ -528,6 +552,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionText,
                       {
+                        color: colors.secondaryText,
                         fontSize: Math.round(
                           scale(12, 14)
                         ),
@@ -558,7 +583,6 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-  
               <View
                 style={[
                   styles.section,
@@ -592,7 +616,7 @@ export default function PrivacyScreen() {
                         ? 1.15
                         : 1)
                     )}
-                    color="#071426"
+                    color={colors.text}
                   />
                 </View>
 
@@ -601,6 +625,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color: colors.text,
                         fontSize: Math.round(
                           scale(14, 16)
                         ),
@@ -617,6 +642,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionText,
                       {
+                        color: colors.secondaryText,
                         fontSize: Math.round(
                           scale(12, 14)
                         ),
@@ -647,7 +673,6 @@ export default function PrivacyScreen() {
                 ]}
               />
 
-         
               <View
                 style={[
                   styles.section,
@@ -681,7 +706,7 @@ export default function PrivacyScreen() {
                         ? 1.15
                         : 1)
                     )}
-                    color="#071426"
+                    color={colors.text}
                   />
                 </View>
 
@@ -690,6 +715,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color: colors.text,
                         fontSize: Math.round(
                           scale(14, 16)
                         ),
@@ -706,6 +732,7 @@ export default function PrivacyScreen() {
                     style={[
                       styles.sectionText,
                       {
+                        color: colors.secondaryText,
                         fontSize: Math.round(
                           scale(12, 14)
                         ),
@@ -722,7 +749,6 @@ export default function PrivacyScreen() {
             </View>
           </ScrollView>
 
-       
           <View
             style={[
               styles.bottomBar,
@@ -741,6 +767,7 @@ export default function PrivacyScreen() {
                     : tablet
                     ? 1.15
                     : 1),
+                backgroundColor: colors.nav,
               },
             ]}
           >
@@ -768,7 +795,7 @@ export default function PrivacyScreen() {
                           ? 1.15
                           : 1)
                   }
-                  color="#FFFFFF"
+                  color={colors.white}
                 />
               </TouchableOpacity>
             ))}
