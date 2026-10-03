@@ -13,7 +13,6 @@ import { useAppSettings } from "../../context/Appsettings";
 
 const OPTIONS = [
   ["shield-checkmark-outline", "backup", "backup"],
-  ["key-outline", "changePassword", "newPassword"],
   ["cash-outline", "expensecontrolperiod", "expensecontrolperiod"],
   ["phone-portrait-outline", "linkedDevices", "linkeddevices"],
   ["book-outline", "usermanual", "usermanual"],

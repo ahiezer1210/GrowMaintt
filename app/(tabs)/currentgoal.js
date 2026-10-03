@@ -245,7 +245,7 @@ export default function SavingsGoalsScreen() {
       >
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
@@ -905,7 +905,7 @@ export default function SavingsGoalsScreen() {
         {[
           ["home-outline", "/home"],
           ["chart-box-outline", "/historial"],
-          ["swap-horizontal", "/expensesManagement"],
+          ["swap-horizontal", "/expensesmanagement"],
           ["layers-outline", "/currentgoal"],
           ["account-outline", "/profile"],
         ].map(([icon, route], index) => (

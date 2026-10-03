@@ -34,10 +34,9 @@ export default function Registerexpenses() {
   const small = width < 350;
   const tablet = width >= 600;
 
-  const headerScale = small ? 0.85 : tablet ? 1.15 : 1;
+  const hs = small ? 0.85 : tablet ? 1.15 : 1;
 
-  const scale = (size) =>
-    size * (small ? 0.85 : tablet ? 1.15 : 1);
+  const scale = (size) => size * hs;
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -45,44 +44,28 @@ export default function Registerexpenses() {
   const [date, setDate] = useState("");
 
   const navItems = [
-    {
-      icon: "home-outline",
-      route: "/home",
-    },
-    {
-      icon: "chart-box-outline",
-      route: "/historial",
-    },
-    {
-      icon: "swap-horizontal",
-      route: "/expensesManagement",
-    },
-    {
-      icon: "layers-outline",
-      route: "/currentgoal",
-    },
-    {
-      icon: "account-outline",
-      route: "/profile",
-    },
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
   ];
+
+  // Vuelve al Home que ya existe en la pila (no apila otro Home)
+  const goHome = () => {
+    router.replace("/home");
+  };
 
   const saveExpense = async () => {
     if (!amount || !category || !expenseType || !date) {
-      Alert.alert(
-        "Error",
-        "Please complete all fields."
-      );
+      Alert.alert("Error", "Please complete all fields.");
       return;
     }
 
     const numericAmount = parseFloat(amount);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert(
-        "Error",
-        "Please enter a valid amount."
-      );
+      Alert.alert("Error", "Please enter a valid amount.");
       return;
     }
 
@@ -90,17 +73,16 @@ export default function Registerexpenses() {
       const user = auth.currentUser;
 
       if (!user) {
-        Alert.alert(
-          "Error",
-          "There is no authenticated user."
-        );
+        Alert.alert("Error", "There is no authenticated user.");
         return;
       }
 
       const roundedAmount = Math.ceil(numericAmount);
       const savings = roundedAmount - numericAmount;
 
+      // Se guarda "uid" (lo que lee Home) y "userId" (por compatibilidad)
       await addDoc(collection(db, "Registro de gastos"), {
+        uid: user.uid,
         userId: user.uid,
         amount: numericAmount,
         roundedAmount,
@@ -112,6 +94,7 @@ export default function Registerexpenses() {
 
       if (savings > 0) {
         await addDoc(collection(db, "Ahorros"), {
+          uid: user.uid,
           userId: user.uid,
           amount: savings,
           source: "Expense rounding",
@@ -119,11 +102,7 @@ export default function Registerexpenses() {
         });
       }
 
-      const notificationRef = doc(
-        db,
-        "Notificaciones",
-        `${user.uid}_Savings`
-      );
+      const notificationRef = doc(db, "Notificaciones", `${user.uid}_Savings`);
 
       await setDoc(
         notificationRef,
@@ -140,10 +119,7 @@ export default function Registerexpenses() {
         { merge: true }
       );
 
-      Alert.alert(
-        "Success",
-        "Expense registered successfully."
-      );
+      Alert.alert("Success", "Expense registered successfully.");
 
       setAmount("");
       setCategory("");
@@ -152,10 +128,7 @@ export default function Registerexpenses() {
     } catch (error) {
       console.error("Error saving expense:", error);
 
-      Alert.alert(
-        "Error",
-        "The expense could not be saved."
-      );
+      Alert.alert("Error", "The expense could not be saved.");
     }
   };
 
@@ -165,7 +138,7 @@ export default function Registerexpenses() {
     setExpenseType("");
     setDate("");
 
-    router.replace("/home");
+    goHome();
   };
 
   const abrirNotificaciones = () => {
@@ -179,48 +152,24 @@ export default function Registerexpenses() {
 
   return (
     <View
-      style={[
-        styles.screen,
-        {
-          backgroundColor: colors.primaryBackground,
-        },
-      ]}
+      style={[styles.screen, { backgroundColor: colors.primaryBackground }]}
     >
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle={
-          isDarkTheme
-            ? "light-content"
-            : "dark-content"
-        }
+        barStyle={isDarkTheme ? "light-content" : "dark-content"}
       />
 
       <View
-        style={[
-          styles.app,
-          {
-            backgroundColor: colors.primaryBackground,
-          },
-        ]}
+        style={[styles.app, { backgroundColor: colors.primaryBackground }]}
       >
         {/* HEADER */}
         <View
           style={[
             styles.header,
             {
-              height:
-                118 *
-                (small
-                  ? 0.85
-                  : tablet
-                  ? 1.15
-                  : 1),
-              paddingHorizontal: small
-                ? 18
-                : tablet
-                ? 45
-                : 25,
+              height: 118 * hs,
+              paddingHorizontal: small ? 18 : tablet ? 45 : 25,
               backgroundColor: colors.header,
             },
           ]}
@@ -228,68 +177,26 @@ export default function Registerexpenses() {
           <TouchableOpacity
             style={[
               styles.back,
-              {
-                transform: [
-                  {
-                    translateY:
-                      4 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
-              },
+              { transform: [{ translateY: 4 * hs }] },
             ]}
-            onPress={() => router.back()}
+            onPress={goHome}
             activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={
-                35 *
-                (small
-                  ? 0.85
-                  : tablet
-                  ? 1.15
-                  : 1)
-              }
+              size={35 * hs}
               color={colors.white}
             />
           </TouchableOpacity>
 
           <Text
+            pointerEvents="none"
             style={[
               styles.headerTitle,
               {
-                fontSize:
-                  25 *
-                  (small
-                    ? 0.85
-                    : tablet
-                    ? 1.15
-                    : 1),
-                transform: [
-                  {
-                    translateX:
-                      4 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1),
-                  },
-                  {
-                    translateY:
-                      1 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
+                fontSize: 25 * hs,
+                transform: [{ translateX: 4 * hs }, { translateY: 1 * hs }],
                 color: colors.white,
               },
             ]}
@@ -300,33 +207,14 @@ export default function Registerexpenses() {
           <TouchableOpacity
             style={[
               styles.headerBell,
-              {
-                transform: [
-                  {
-                    translateY:
-                      4 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1),
-                  },
-                ],
-              },
+              { transform: [{ translateY: 4 * hs }] },
             ]}
             onPress={abrirNotificaciones}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="bell-circle-outline"
-              size={
-                35 *
-                (small
-                  ? 0.85
-                  : tablet
-                  ? 1.15
-                  : 1)
-              }
+              size={35 * hs}
               color={colors.white}
             />
           </TouchableOpacity>
@@ -338,20 +226,14 @@ export default function Registerexpenses() {
             styles.main,
             {
               backgroundColor: colors.background,
-              borderTopLeftRadius:
-                tablet ? 55 : small ? 35 : 45,
-              borderTopRightRadius:
-                tablet ? 55 : small ? 35 : 45,
+              borderTopLeftRadius: tablet ? 55 : small ? 35 : 45,
+              borderTopRightRadius: tablet ? 55 : small ? 35 : 45,
             },
           ]}
         >
           <KeyboardAvoidingView
             style={styles.keyboard}
-            behavior={
-              Platform.OS === "ios"
-                ? "padding"
-                : undefined
-            }
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
             <ScrollView
               contentContainerStyle={[
@@ -368,10 +250,7 @@ export default function Registerexpenses() {
               <Text
                 style={[
                   styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: scale(16),
-                  },
+                  { color: colors.text, fontSize: scale(16) },
                 ]}
               >
                 Amount
@@ -390,19 +269,14 @@ export default function Registerexpenses() {
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="$0.00"
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholderTextColor={colors.secondaryText}
                 keyboardType="decimal-pad"
               />
 
               <Text
                 style={[
                   styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: scale(16),
-                  },
+                  { color: colors.text, fontSize: scale(16) },
                 ]}
               >
                 Category
@@ -421,18 +295,13 @@ export default function Registerexpenses() {
                 value={category}
                 onChangeText={setCategory}
                 placeholder="E.g. Food"
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholderTextColor={colors.secondaryText}
               />
 
               <Text
                 style={[
                   styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: scale(16),
-                  },
+                  { color: colors.text, fontSize: scale(16) },
                 ]}
               >
                 Expense Type
@@ -451,18 +320,13 @@ export default function Registerexpenses() {
                 value={expenseType}
                 onChangeText={setExpenseType}
                 placeholder="E.g. Necessary"
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholderTextColor={colors.secondaryText}
               />
 
               <Text
                 style={[
                   styles.label,
-                  {
-                    color: colors.text,
-                    fontSize: scale(16),
-                  },
+                  { color: colors.text, fontSize: scale(16) },
                 ]}
               >
                 Date
@@ -481,9 +345,7 @@ export default function Registerexpenses() {
                 value={date}
                 onChangeText={setDate}
                 placeholder="DD/MM/YYYY"
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholderTextColor={colors.secondaryText}
               />
 
               <TouchableOpacity
@@ -500,14 +362,7 @@ export default function Registerexpenses() {
                 onPress={saveExpense}
                 activeOpacity={0.8}
               >
-                <Text
-                  style={[
-                    styles.saveButtonText,
-                    {
-                      fontSize: scale(17),
-                    },
-                  ]}
-                >
+                <Text style={[styles.saveButtonText, { fontSize: scale(17) }]}>
                   Save
                 </Text>
               </TouchableOpacity>
@@ -519,9 +374,7 @@ export default function Registerexpenses() {
                     width: scale(225),
                     height: scale(54),
                     borderRadius: scale(27),
-                    backgroundColor: isDarkTheme
-                      ? "#2A2A2A"
-                      : "#E5E5E5",
+                    backgroundColor: isDarkTheme ? "#2A2A2A" : "#E5E5E5",
                     marginTop: scale(12),
                   },
                 ]}
@@ -531,10 +384,7 @@ export default function Registerexpenses() {
                 <Text
                   style={[
                     styles.cancelButtonText,
-                    {
-                      color: colors.text,
-                      fontSize: scale(17),
-                    },
+                    { color: colors.text, fontSize: scale(17) },
                   ]}
                 >
                   Cancel
@@ -549,20 +399,8 @@ export default function Registerexpenses() {
           style={[
             styles.bottomBar,
             {
-              height:
-                65 *
-                (small
-                  ? 0.85
-                  : tablet
-                  ? 1.15
-                  : 1),
-              borderTopLeftRadius:
-                78 *
-                (small
-                  ? 0.85
-                  : tablet
-                  ? 1.15
-                  : 1),
+              height: 65 * hs,
+              borderTopLeftRadius: 78 * hs,
               backgroundColor: colors.nav,
             },
           ]}
@@ -572,25 +410,13 @@ export default function Registerexpenses() {
               key={item.route}
               style={styles.navItem}
               activeOpacity={0.8}
-              onPress={() => router.push(item.route)}
+              onPress={() =>
+                item.route === "/home" ? goHome() : router.push(item.route)
+              }
             >
               <MaterialCommunityIcons
                 name={item.icon}
-                size={
-                  item.icon === "swap-horizontal"
-                    ? 37 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1)
-                    : 35 *
-                      (small
-                        ? 0.85
-                        : tablet
-                        ? 1.15
-                        : 1)
-                }
+                size={(item.icon === "swap-horizontal" ? 37 : 35) * hs}
                 color={colors.white}
               />
             </TouchableOpacity>

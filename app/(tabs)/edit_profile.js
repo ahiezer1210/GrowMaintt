@@ -79,17 +79,9 @@ export default function App() {
   const isSmall = width < 360;
   const isTablet = width >= 768;
 
-  const scale = isSmall
-    ? 0.85
-    : isTablet
-    ? 1.15
-    : 1;
+  const scale = isSmall ? 0.85 : isTablet ? 1.15 : 1;
 
-  const horizontalPadding = isSmall
-    ? 18
-    : isTablet
-    ? 45
-    : 25;
+  const horizontalPadding = isSmall ? 18 : isTablet ? 45 : 25;
 
   const isDarkTheme =
     colors.background?.toLowerCase() === "#081023" ||
@@ -98,73 +90,49 @@ export default function App() {
     colors.primaryBackground?.toLowerCase() === "#071426";
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (currentUser) => {
-        if (!currentUser) {
-          setLoading(false);
-          return;
-        }
-
-        setUser(currentUser);
-
-        try {
-          const userRef = doc(
-            db,
-            "Users",
-            currentUser.uid
-          );
-
-          const userSnap = await getDoc(userRef);
-
-          if (userSnap.exists()) {
-            const data = userSnap.data();
-
-            const savedUsername =
-              data.username || "";
-
-            const savedPhone =
-              data.phone || "";
-
-            const savedEmail =
-              data.email ||
-              currentUser.email ||
-              "";
-
-            const savedPhotoURL =
-              data.photoURL || null;
-
-            setUsername(savedUsername);
-            setPhone(savedPhone);
-            setEmail(savedEmail);
-            setPhotoURL(savedPhotoURL);
-
-            setOriginalUsername(savedUsername);
-            setOriginalPhone(savedPhone);
-            setOriginalEmail(savedEmail);
-            setOriginalPhotoURL(savedPhotoURL);
-          } else {
-            const currentEmail =
-              currentUser.email || "";
-
-            setEmail(currentEmail);
-            setOriginalEmail(currentEmail);
-          }
-        } catch (error) {
-          console.log(
-            "Error loading profile:",
-            error
-          );
-
-          Alert.alert(
-            t.error,
-            t.unableToLoadProfile
-          );
-        }
-
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      if (!currentUser) {
         setLoading(false);
+        return;
       }
-    );
+
+      setUser(currentUser);
+
+      try {
+        const userRef = doc(db, "Users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+          const data = userSnap.data();
+
+          const savedUsername = data.username || "";
+          const savedPhone = data.phone || "";
+          const savedEmail = data.email || currentUser.email || "";
+          const savedPhotoURL = data.photoURL || null;
+
+          setUsername(savedUsername);
+          setPhone(savedPhone);
+          setEmail(savedEmail);
+          setPhotoURL(savedPhotoURL);
+
+          setOriginalUsername(savedUsername);
+          setOriginalPhone(savedPhone);
+          setOriginalEmail(savedEmail);
+          setOriginalPhotoURL(savedPhotoURL);
+        } else {
+          const currentEmail = currentUser.email || "";
+
+          setEmail(currentEmail);
+          setOriginalEmail(currentEmail);
+        }
+      } catch (error) {
+        console.log("Error loading profile:", error);
+
+        Alert.alert(t.error, t.unableToLoadProfile);
+      }
+
+      setLoading(false);
+    });
 
     return unsubscribe;
   }, []);
@@ -175,22 +143,17 @@ export default function App() {
         await ImagePicker.requestMediaLibraryPermissionsAsync();
 
       if (!permission.granted) {
-        Alert.alert(
-          t.permissionRequired,
-          t.galleryPermission
-        );
-
+        Alert.alert(t.permissionRequired, t.galleryPermission);
         return;
       }
 
-      const result =
-        await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ["images"],
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.5,
-          base64: true,
-        });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ["images"],
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+        base64: true,
+      });
 
       if (result.canceled) {
         return;
@@ -199,52 +162,36 @@ export default function App() {
       const asset = result.assets[0];
 
       if (!asset.base64) {
-        Alert.alert(
-          t.error,
-          t.unableToProcessImage
-        );
-
+        Alert.alert(t.error, t.unableToProcessImage);
         return;
       }
 
-      const imageBase64 =
-        `data:image/jpeg;base64,${asset.base64}`;
-
-      setPhotoURL(imageBase64);
+      setPhotoURL(`data:image/jpeg;base64,${asset.base64}`);
     } catch (error) {
-      console.log(
-        "Error selecting image:",
-        error
-      );
+      console.log("Error selecting image:", error);
 
-      Alert.alert(
-        t.error,
-        t.unableToSelectImage
-      );
+      Alert.alert(t.error, t.unableToSelectImage);
     }
   };
 
   const takePhoto = async () => {
     try {
-      const permission =
-        await ImagePicker.requestCameraPermissionsAsync();
+      const permission = await ImagePicker.requestCameraPermissionsAsync();
 
       if (!permission.granted) {
         Alert.alert(
           t.permissionRequired,
           `${t.cameraPermissionStatus} ${permission.status}`
         );
-
         return;
       }
 
-      const result =
-        await ImagePicker.launchCameraAsync({
-          allowsEditing: true,
-          aspect: [1, 1],
-          quality: 0.5,
-          base64: true,
-        });
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+        base64: true,
+      });
 
       if (result.canceled) {
         return;
@@ -253,84 +200,59 @@ export default function App() {
       const asset = result.assets[0];
 
       if (!asset.base64) {
-        Alert.alert(
-          t.error,
-          t.unableToProcessPhoto
-        );
-
+        Alert.alert(t.error, t.unableToProcessPhoto);
         return;
       }
 
-      const imageBase64 =
-        `data:image/jpeg;base64,${asset.base64}`;
-
-      setPhotoURL(imageBase64);
+      setPhotoURL(`data:image/jpeg;base64,${asset.base64}`);
     } catch (error) {
-      console.log(
-        "Camera error:",
-        error
-      );
+      console.log("Camera error:", error);
 
-      Alert.alert(
-        t.error,
-        t.unableToTakePhoto
-      );
+      Alert.alert(t.error, t.unableToTakePhoto);
     }
   };
 
   const deletePhoto = () => {
     if (!photoURL) {
-      Alert.alert(
-        t.noProfilePicture,
-        t.noProfilePictureMessage
-      );
-
+      Alert.alert(t.noProfilePicture, t.noProfilePictureMessage);
       return;
     }
 
-    Alert.alert(
-      t.deleteProfilePicture,
-      t.deleteProfilePictureMessage,
-      [
-        {
-          text: t.cancel,
-          style: "cancel",
+    Alert.alert(t.deleteProfilePicture, t.deleteProfilePictureMessage, [
+      {
+        text: t.cancel,
+        style: "cancel",
+      },
+      {
+        text: t.delete,
+        style: "destructive",
+        onPress: () => {
+          setPhotoURL(null);
         },
-        {
-          text: t.delete,
-          style: "destructive",
-          onPress: () => {
-            setPhotoURL(null);
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const changePhoto = () => {
-    Alert.alert(
-      t.profilePicture,
-      t.whatWouldYouLikeToDo,
-      [
-        {
-          text: t.takePhoto,
-          onPress: takePhoto,
-        },
-        {
-          text: t.chooseFromGallery,
-          onPress: selectFromGallery,
-        },
-        {
-          text: t.deletePhoto,
-          onPress: deletePhoto,
-          style: "destructive",
-        },
-        {
-          text: t.cancel,
-          style: "cancel",
-        },
-      ]
-    );
+    Alert.alert(t.profilePicture, t.whatWouldYouLikeToDo, [
+      {
+        text: t.takePhoto,
+        onPress: takePhoto,
+      },
+      {
+        text: t.chooseFromGallery,
+        onPress: selectFromGallery,
+      },
+      {
+        text: t.deletePhoto,
+        onPress: deletePhoto,
+        style: "destructive",
+      },
+      {
+        text: t.cancel,
+        style: "cancel",
+      },
+    ]);
   };
 
   const createSecurityAlert = async ({
@@ -342,153 +264,75 @@ export default function App() {
     try {
       if (!user) return;
 
-      await addDoc(
-        collection(
-          db,
-          "Users",
-          user.uid,
-          "securityAlerts"
-        ),
-        {
-          uid: user.uid,
-          type,
-          title,
-          message,
-          read: false,
-          createdAt: serverTimestamp(),
-          ...extraData,
-        }
-      );
+      await addDoc(collection(db, "Users", user.uid, "securityAlerts"), {
+        uid: user.uid,
+        type,
+        title,
+        message,
+        read: false,
+        createdAt: serverTimestamp(),
+        ...extraData,
+      });
     } catch (error) {
-      console.log(
-        "Error creating security alert:",
-        error
-      );
+      console.log("Error creating security alert:", error);
     }
   };
 
   const updateProfile = async () => {
     if (!user) {
-      Alert.alert(
-        t.error,
-        t.noAuthenticatedUser
-      );
-
+      Alert.alert(t.error, t.noAuthenticatedUser);
       return;
     }
 
     if (!username.trim()) {
-      Alert.alert(
-        t.requiredField,
-        t.enterUsername
-      );
-
+      Alert.alert(t.requiredField, t.enterUsername);
       return;
     }
 
     if (!phone.trim()) {
-      Alert.alert(
-        t.requiredField,
-        t.enterPhone
-      );
-
+      Alert.alert(t.requiredField, t.enterPhone);
       return;
     }
 
     if (!email.trim()) {
-      Alert.alert(
-        t.requiredField,
-        t.enterEmail
-      );
-
+      Alert.alert(t.requiredField, t.enterEmail);
       return;
     }
 
-    const newUsername =
-      username.trim();
+    const newUsername = username.trim();
+    const newPhone = phone.trim();
+    const newEmail = email.trim();
 
-    const newPhone =
-      phone.trim();
+    const oldEmail = (originalEmail || user.email || "").trim();
 
-    const newEmail =
-      email.trim();
-
-    const oldEmail =
-      (
-        originalEmail ||
-        user.email ||
-        ""
-      ).trim();
-
-    const usernameChanged =
-      newUsername !==
-      originalUsername.trim();
-
-    const phoneChanged =
-      newPhone !==
-      originalPhone.trim();
-
-    const emailChanged =
-      newEmail.toLowerCase() !==
-      oldEmail.toLowerCase();
-
-    const photoChanged =
-      photoURL !== originalPhotoURL;
+    const usernameChanged = newUsername !== originalUsername.trim();
+    const phoneChanged = newPhone !== originalPhone.trim();
+    const emailChanged = newEmail.toLowerCase() !== oldEmail.toLowerCase();
+    const photoChanged = photoURL !== originalPhotoURL;
 
     const anyProfileChange =
-      usernameChanged ||
-      phoneChanged ||
-      emailChanged ||
-      photoChanged;
+      usernameChanged || phoneChanged || emailChanged || photoChanged;
 
     try {
       setSaving(true);
 
       if (emailChanged) {
         try {
-          await updateEmail(
-            user,
-            newEmail
-          );
-
-          await sendEmailVerification(
-            user
-          );
+          await updateEmail(user, newEmail);
+          await sendEmailVerification(user);
         } catch (error) {
-          console.log(
-            "Error updating authentication email:",
-            error
-          );
+          console.log("Error updating authentication email:", error);
 
-          if (
-            error?.code ===
-            "auth/requires-recent-login"
-          ) {
-            Alert.alert(
-              t.recentLoginRequired,
-              t.recentLoginMessage
-            );
-          } else if (
-            error?.code ===
-            "auth/email-already-in-use"
-          ) {
-            Alert.alert(
-              t.emailAlreadyInUse,
-              t.emailAlreadyInUseMessage
-            );
-          } else if (
-            error?.code ===
-            "auth/invalid-email"
-          ) {
-            Alert.alert(
-              t.invalidEmail,
-              t.invalidEmailMessage
-            );
+          if (error?.code === "auth/requires-recent-login") {
+            Alert.alert(t.recentLoginRequired, t.recentLoginMessage);
+          } else if (error?.code === "auth/email-already-in-use") {
+            Alert.alert(t.emailAlreadyInUse, t.emailAlreadyInUseMessage);
+          } else if (error?.code === "auth/invalid-email") {
+            Alert.alert(t.invalidEmail, t.invalidEmailMessage);
           } else {
             Alert.alert(
               t.emailUpdateError,
-              error?.message ||
-                t.emailUpdateErrorMessage
+              error?.message || t.emailUpdateErrorMessage
             );
           }
 
@@ -496,11 +340,7 @@ export default function App() {
         }
       }
 
-      const userRef = doc(
-        db,
-        "Users",
-        user.uid
-      );
+      const userRef = doc(db, "Users", user.uid);
 
       await setDoc(
         userRef,
@@ -516,26 +356,19 @@ export default function App() {
         }
       );
 
-      if (
-        usernameChanged ||
-        photoChanged
-      ) {
+      if (usernameChanged || photoChanged) {
         await createSecurityAlert({
           type: "profile_change",
-          title:
-            t.profileInformationUpdated,
-          message:
-            t.profileInformationUpdatedMessage,
+          title: t.profileInformationUpdated,
+          message: t.profileInformationUpdatedMessage,
         });
       }
 
       if (emailChanged) {
         await createSecurityAlert({
           type: "email_change",
-          title:
-            t.emailAddressChanged,
-          message:
-            t.emailAddressChangedMessage,
+          title: t.emailAddressChanged,
+          message: t.emailAddressChangedMessage,
           extraData: {
             newEmail,
           },
@@ -545,59 +378,30 @@ export default function App() {
       if (phoneChanged) {
         await createSecurityAlert({
           type: "phone_change",
-          title:
-            t.phoneNumberChanged,
-          message:
-            t.phoneNumberChangedMessage,
+          title: t.phoneNumberChanged,
+          message: t.phoneNumberChangedMessage,
           extraData: {
             phone: newPhone,
           },
         });
       }
 
-      setOriginalUsername(
-        newUsername
-      );
-
-      setOriginalPhone(
-        newPhone
-      );
-
-      setOriginalEmail(
-        newEmail
-      );
-
-      setOriginalPhotoURL(
-        photoURL
-      );
+      setOriginalUsername(newUsername);
+      setOriginalPhone(newPhone);
+      setOriginalEmail(newEmail);
+      setOriginalPhotoURL(photoURL);
 
       if (emailChanged) {
-        Alert.alert(
-          t.profileUpdated,
-          t.emailVerificationMessage
-        );
+        Alert.alert(t.profileUpdated, t.emailVerificationMessage);
       } else if (anyProfileChange) {
-        Alert.alert(
-          t.profileUpdated,
-          t.profileUpdatedMessage
-        );
+        Alert.alert(t.profileUpdated, t.profileUpdatedMessage);
       } else {
-        Alert.alert(
-          t.settingsSaved,
-          t.settingsSavedMessage
-        );
+        Alert.alert(t.settingsSaved, t.settingsSavedMessage);
       }
     } catch (error) {
-      console.log(
-        "Error:",
-        error
-      );
+      console.log("Error:", error);
 
-      Alert.alert(
-        t.error,
-        error?.message ||
-          t.unableToSaveChanges
-      );
+      Alert.alert(t.error, error?.message || t.unableToSaveChanges);
     } finally {
       setSaving(false);
     }
@@ -607,9 +411,17 @@ export default function App() {
     router.push({
       pathname: "/notifications",
       params: {
-        from: "/profile",
+        from: "/edit_profile",
       },
     });
+  };
+
+  const goBack = () => {
+    if (router.push("/profile")) {
+      router.back();
+    } else {
+      router.replace("/profile");
+    }
   };
 
   if (loading) {
@@ -617,141 +429,48 @@ export default function App() {
       <SafeAreaView
         style={[
           styles.loadingContainer,
-          {
-            backgroundColor:
-              colors.primaryBackground,
-          },
+          { backgroundColor: colors.primaryBackground },
         ]}
       >
-        <ActivityIndicator
-          size="large"
-          color={COLORS.cyan}
-        />
+        <ActivityIndicator size="large" color={COLORS.cyan} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView
-      style={[
-        styles.safe,
-        {
-          backgroundColor:
-            colors.primaryBackground,
-        },
-      ]}
+      style={[styles.safe, { backgroundColor: colors.primaryBackground }]}
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.header}
-      />
+      <StatusBar barStyle="light-content" backgroundColor={colors.header} />
 
       <View
-        style={[
-          styles.app,
-          {
-            backgroundColor:
-              colors.primaryBackground,
-          },
-        ]}
+        style={[styles.app, { backgroundColor: colors.primaryBackground }]}
       >
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={
-            Platform.OS === "ios"
-              ? "padding"
-              : "height"
-          }
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <View
             style={[
               styles.header,
               {
-                height:
-                  118 *
-                  (isSmall
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1),
-
-                paddingHorizontal:
-                  isSmall
-                    ? 18
-                    : isTablet
-                    ? 45
-                    : 25,
-
-                backgroundColor:
-                  colors.header,
+                height: 118 * scale,
+                paddingHorizontal: horizontalPadding,
+                backgroundColor: colors.header,
               },
             ]}
           >
-            <TouchableOpacity
-              style={[
-                styles.headerButton,
-                {
-                  transform: [
-                    {
-                      translateY:
-                        4 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
-                },
-              ]}
-              onPress={() =>
-                router.push("/profile")
-              }
-              activeOpacity={0.7}
-            >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={
-                  35 *
-                  (isSmall
-                    ? 0.85
-                    : isTablet
-                    ? 1.15
-                    : 1)
-                }
-                color={colors.white}
-              />
-            </TouchableOpacity>
-
             <Text
+              pointerEvents="none"
               style={[
                 styles.headerTitle,
                 {
-                  fontSize:
-                    25 *
-                    (isSmall
-                      ? 0.85
-                      : isTablet
-                      ? 1.15
-                      : 1),
-
+                  fontSize: 25 * scale,
                   position: "absolute",
                   left: 0,
                   right: 0,
                   textAlign: "center",
-
-                  transform: [
-                    {
-                      translateY:
-                        1 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1),
-                    },
-                  ],
-
+                  transform: [{ translateY: 1 * scale }],
                   color: colors.white,
                 },
               ]}
@@ -761,11 +480,33 @@ export default function App() {
 
             <TouchableOpacity
               style={[
+                styles.headerButton,
+                {
+                  zIndex: 10,
+                  elevation: 10,
+                  transform: [{ translateY: 4 * scale }],
+                },
+              ]}
+              onPress={goBack}
+              activeOpacity={0.7}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={35 * scale}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
                 styles.notificationButton,
                 {
                   width: 40 * scale,
                   height: 40 * scale,
                   borderRadius: 20 * scale,
+                  zIndex: 10,
+                  elevation: 10,
                 },
               ]}
               onPress={abrirNotificaciones}
@@ -783,41 +524,22 @@ export default function App() {
             style={[
               styles.whiteContainer,
               {
-                backgroundColor:
-                  colors.background,
-
-                borderTopLeftRadius:
-                  isTablet
-                    ? 55
-                    : isSmall
-                    ? 35
-                    : 45,
-
-                borderTopRightRadius:
-                  isTablet
-                    ? 55
-                    : isSmall
-                    ? 35
-                    : 45,
+                backgroundColor: colors.background,
+                borderTopLeftRadius: isTablet ? 55 : isSmall ? 35 : 45,
+                borderTopRightRadius: isTablet ? 55 : isSmall ? 35 : 45,
               },
             ]}
           >
             <ScrollView
               style={[
                 styles.whiteScroll,
-                {
-                  backgroundColor:
-                    colors.background,
-                },
+                { backgroundColor: colors.background },
               ]}
               contentContainerStyle={[
                 styles.profileScroll,
                 {
-                  paddingHorizontal:
-                    horizontalPadding,
-
-                  paddingBottom:
-                    45 * scale,
+                  paddingHorizontal: horizontalPadding,
+                  paddingBottom: 45 * scale,
                 },
               ]}
               showsVerticalScrollIndicator={false}
@@ -826,31 +548,20 @@ export default function App() {
               <View
                 style={[
                   styles.profileCard,
-                  {
-                    backgroundColor:
-                      colors.background,
-                  },
+                  { backgroundColor: colors.background },
                 ]}
               >
-                <View
-                  style={styles.photoContainer}
-                >
+                <View style={styles.photoContainer}>
                   {photoURL ? (
                     <Image
-                      source={{
-                        uri: photoURL,
-                      }}
+                      source={{ uri: photoURL }}
                       style={[
                         styles.profileImage,
                         {
-                          width:
-                            82 * scale,
-                          height:
-                            82 * scale,
-                          borderRadius:
-                            41 * scale,
-                          borderColor:
-                            colors.background,
+                          width: 82 * scale,
+                          height: 82 * scale,
+                          borderRadius: 41 * scale,
+                          borderColor: colors.background,
                         },
                       ]}
                     />
@@ -859,27 +570,18 @@ export default function App() {
                       style={[
                         styles.profilePlaceholder,
                         {
-                          width:
-                            82 * scale,
-                          height:
-                            82 * scale,
-                          borderRadius:
-                            41 * scale,
-                          backgroundColor:
-                            colors.nav,
-                          borderColor:
-                            colors.background,
+                          width: 82 * scale,
+                          height: 82 * scale,
+                          borderRadius: 41 * scale,
+                          backgroundColor: colors.nav,
+                          borderColor: colors.background,
                         },
                       ]}
                     >
                       <MaterialCommunityIcons
                         name="account"
-                        size={
-                          40 * scale
-                        }
-                        color={
-                          colors.secondaryText
-                        }
+                        size={40 * scale}
+                        color={colors.secondaryText}
                       />
                     </View>
                   )}
@@ -888,28 +590,18 @@ export default function App() {
                     style={[
                       styles.cameraButton,
                       {
-                        width:
-                          27 * scale,
-                        height:
-                          27 * scale,
-                        borderRadius:
-                          14 * scale,
-                        borderColor:
-                          colors.background,
+                        width: 27 * scale,
+                        height: 27 * scale,
+                        borderRadius: 14 * scale,
+                        borderColor: colors.background,
                       },
                     ]}
-                    onPress={
-                      changePhoto
-                    }
+                    onPress={changePhoto}
                   >
                     <MaterialCommunityIcons
                       name="camera-outline"
-                      size={
-                        16 * scale
-                      }
-                      color={
-                        COLORS.white
-                      }
+                      size={16 * scale}
+                      color={COLORS.white}
                     />
                   </TouchableOpacity>
                 </View>
@@ -917,65 +609,36 @@ export default function App() {
                 <Text
                   style={[
                     styles.name,
-                    {
-                      fontSize:
-                        20 * scale,
-                      color:
-                        colors.text,
-                    },
+                    { fontSize: 20 * scale, color: colors.text },
                   ]}
                   numberOfLines={1}
                 >
-                  {username ||
-                    t.user}
+                  {username || t.user}
                 </Text>
 
                 <Text
                   style={[
                     styles.id,
-                    {
-                      fontSize:
-                        11 * scale,
-                      color:
-                        colors.secondaryText,
-                    },
+                    { fontSize: 11 * scale, color: colors.secondaryText },
                   ]}
                 >
-                  ID:{" "}
-                  {user?.uid?.slice(
-                    0,
-                    8
-                  ) || "00000000"}
+                  ID: {user?.uid?.slice(0, 8) || "00000000"}
                 </Text>
 
-                <View
-                  style={styles.section}
-                >
+                <View style={styles.section}>
                   <Text
                     style={[
                       styles.sectionTitle,
-                      {
-                        fontSize:
-                          21 * scale,
-                        color:
-                          colors.text,
-                      },
+                      { fontSize: 21 * scale, color: colors.text },
                     ]}
                   >
-                    {
-                      t.accountSettings
-                    }
+                    {t.accountSettings}
                   </Text>
 
                   <Text
                     style={[
                       styles.label,
-                      {
-                        fontSize:
-                          14 * scale,
-                        color:
-                          colors.text,
-                      },
+                      { fontSize: 14 * scale, color: colors.text },
                     ]}
                   >
                     {t.username}
@@ -985,40 +648,23 @@ export default function App() {
                     style={[
                       styles.input,
                       {
-                        height:
-                          48 * scale,
-                        fontSize:
-                          14 * scale,
-                        borderRadius:
-                          9 * scale,
-                        backgroundColor:
-                          colors.input ||
-                          colors.border,
-                        color:
-                          colors.text,
+                        height: 48 * scale,
+                        fontSize: 14 * scale,
+                        borderRadius: 9 * scale,
+                        backgroundColor: colors.input || colors.border,
+                        color: colors.text,
                       },
                     ]}
                     value={username}
-                    onChangeText={
-                      setUsername
-                    }
-                    placeholder={
-                      t.username
-                    }
-                    placeholderTextColor={
-                      colors.secondaryText
-                    }
+                    onChangeText={setUsername}
+                    placeholder={t.username}
+                    placeholderTextColor={colors.secondaryText}
                   />
 
                   <Text
                     style={[
                       styles.label,
-                      {
-                        fontSize:
-                          14 * scale,
-                        color:
-                          colors.text,
-                      },
+                      { fontSize: 14 * scale, color: colors.text },
                     ]}
                   >
                     {t.phoneNumber}
@@ -1028,39 +674,24 @@ export default function App() {
                     style={[
                       styles.input,
                       {
-                        height:
-                          48 * scale,
-                        fontSize:
-                          14 * scale,
-                        borderRadius:
-                          9 * scale,
-                        backgroundColor:
-                          colors.input ||
-                          colors.border,
-                        color:
-                          colors.text,
+                        height: 48 * scale,
+                        fontSize: 14 * scale,
+                        borderRadius: 9 * scale,
+                        backgroundColor: colors.input || colors.border,
+                        color: colors.text,
                       },
                     ]}
                     value={phone}
-                    onChangeText={
-                      setPhone
-                    }
+                    onChangeText={setPhone}
                     placeholder="+503 0000 0000"
-                    placeholderTextColor={
-                      colors.secondaryText
-                    }
+                    placeholderTextColor={colors.secondaryText}
                     keyboardType="phone-pad"
                   />
 
                   <Text
                     style={[
                       styles.label,
-                      {
-                        fontSize:
-                          14 * scale,
-                        color:
-                          colors.text,
-                      },
+                      { fontSize: 14 * scale, color: colors.text },
                     ]}
                   >
                     {t.emailAddress}
@@ -1070,27 +701,17 @@ export default function App() {
                     style={[
                       styles.input,
                       {
-                        height:
-                          48 * scale,
-                        fontSize:
-                          14 * scale,
-                        borderRadius:
-                          9 * scale,
-                        backgroundColor:
-                          colors.input ||
-                          colors.border,
-                        color:
-                          colors.text,
+                        height: 48 * scale,
+                        fontSize: 14 * scale,
+                        borderRadius: 9 * scale,
+                        backgroundColor: colors.input || colors.border,
+                        color: colors.text,
                       },
                     ]}
                     value={email}
-                    onChangeText={
-                      setEmail
-                    }
+                    onChangeText={setEmail}
                     placeholder="email@gmail.com"
-                    placeholderTextColor={
-                      colors.secondaryText
-                    }
+                    placeholderTextColor={colors.secondaryText}
                     keyboardType="email-address"
                     autoCapitalize="none"
                   />
@@ -1099,45 +720,27 @@ export default function App() {
                     style={[
                       styles.updateButton,
                       {
-                        height:
-                          48 * scale,
-                        borderRadius:
-                          24 * scale,
-                        backgroundColor:
-                          isDarkTheme
-                            ? COLORS.cyan
-                            : colors.header,
+                        height: 48 * scale,
+                        borderRadius: 24 * scale,
+                        backgroundColor: isDarkTheme
+                          ? COLORS.cyan
+                          : colors.header,
                       },
-                      saving &&
-                        styles.updateButtonDisabled,
+                      saving && styles.updateButtonDisabled,
                     ]}
-                    onPress={
-                      updateProfile
-                    }
+                    onPress={updateProfile}
                     disabled={saving}
                   >
                     {saving ? (
-                      <ActivityIndicator
-                        size="small"
-                        color={
-                          COLORS.white
-                        }
-                      />
+                      <ActivityIndicator size="small" color={COLORS.white} />
                     ) : (
                       <Text
                         style={[
                           styles.updateText,
-                          {
-                            fontSize:
-                              14 * scale,
-                            color:
-                              COLORS.white,
-                          },
+                          { fontSize: 14 * scale, color: COLORS.white },
                         ]}
                       >
-                        {
-                          t.updateProfile
-                        }
+                        {t.updateProfile}
                       </Text>
                     )}
                   </TouchableOpacity>
@@ -1151,64 +754,26 @@ export default function App() {
           style={[
             styles.bottomBar,
             {
-              height:
-                65 *
-                (isSmall
-                  ? 0.85
-                  : isTablet
-                  ? 1.15
-                  : 1),
-
-              borderTopLeftRadius:
-                78 *
-                (isSmall
-                  ? 0.85
-                  : isTablet
-                  ? 1.15
-                  : 1),
-
-              backgroundColor:
-                colors.nav,
+              height: 65 * scale,
+              borderTopLeftRadius: 78 * scale,
+              backgroundColor: colors.nav,
             },
           ]}
         >
-          {NAV.map(
-            (item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.navItem}
-                activeOpacity={0.7}
-                onPress={() =>
-                  router.push(
-                    item.route
-                  )
-                }
-              >
-                <MaterialCommunityIcons
-                  name={item.icon}
-                  size={
-                    item.icon ===
-                    "swap-horizontal"
-                      ? 37 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1)
-                      : 35 *
-                        (isSmall
-                          ? 0.85
-                          : isTablet
-                          ? 1.15
-                          : 1)
-                  }
-                  color={
-                    colors.white
-                  }
-                />
-              </TouchableOpacity>
-            )
-          )}
+          {NAV.map((item, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.navItem}
+              activeOpacity={0.7}
+              onPress={() => router.push(item.route)}
+            >
+              <MaterialCommunityIcons
+                name={item.icon}
+                size={(item.icon === "swap-horizontal" ? 37 : 35) * scale}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
     </SafeAreaView>

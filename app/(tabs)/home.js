@@ -1,14 +1,10 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import {
-  collection,
-  doc,
-  onSnapshot
-} from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { collection, doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -17,9 +13,10 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { usePeriods } from "../../context/PeriodContext.js";
 import { useAppSettings } from "../../context/Appsettings";
+import { usePeriods } from "../../context/PeriodContext.js";
 import { auth, db } from "../../firebaseConfig";
 
 const COLORS = {
@@ -40,19 +37,15 @@ const ACTIONS = [
 
 const NAV = [
   ["home-outline", "/home"],
-  ["chart-box-outline", "/historial"],
-  ["swap-horizontal", "/expensesManagement"],
+  ["chart-box-outline", "/historial"],,
+  ["swap-horizontal", "/expensesmanagement"],
   ["layers-outline", "/currentgoal"],
   ["account-outline", "/profile"],
 ];
 
 const getField = (item, fields) => {
   for (const field of fields) {
-    if (
-      item &&
-      item[field] !== undefined &&
-      item[field] !== null
-    ) {
+    if (item && item[field] !== undefined && item[field] !== null) {
       return item[field];
     }
   }
@@ -82,9 +75,7 @@ const convertDate = (value) => {
   if (typeof value === "string") {
     const cleanValue = value.trim();
 
-    const match = cleanValue.match(
-      /^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/
-    );
+    const match = cleanValue.match(/^([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
 
     if (match) {
       const months = {
@@ -105,11 +96,7 @@ const convertDate = (value) => {
       const month = months[match[1].toLowerCase()];
 
       if (month !== undefined) {
-        const date = new Date(
-          Number(match[3]),
-          month,
-          Number(match[2])
-        );
+        const date = new Date(Number(match[3]), month, Number(match[2]));
 
         return isNaN(date.getTime()) ? null : date;
       }
@@ -166,15 +153,11 @@ const getRecordsFromDocument = (data) => {
   ];
 
   const hasCategory = possibleCategoryFields.some(
-    (field) =>
-      data[field] !== undefined &&
-      data[field] !== null
+    (field) => data[field] !== undefined && data[field] !== null
   );
 
   const hasAmount = possibleAmountFields.some(
-    (field) =>
-      data[field] !== undefined &&
-      data[field] !== null
+    (field) => data[field] !== undefined && data[field] !== null
   );
 
   if (hasCategory || hasAmount) {
@@ -205,21 +188,11 @@ const normalizeRecord = (item, type) => {
       "valor",
     ]) ?? 0;
 
-  const dateValue = getField(item, [
-    "date",
-    "fecha",
-    "Date",
-    "Fecha",
-  ]);
+  const dateValue = getField(item, ["date", "fecha", "Date", "Fecha"]);
 
-  const createdAtValue = getField(item, [
-    "createdAt",
-    "timestamp",
-  ]);
+  const createdAtValue = getField(item, ["createdAt", "timestamp"]);
 
-  const date =
-    convertDate(dateValue) ||
-    convertDate(createdAtValue);
+  const date = convertDate(dateValue) || convertDate(createdAtValue);
 
   let dateText = "No date";
 
@@ -251,60 +224,33 @@ const isInPeriod = (record, period) => {
   if (period === "Daily") {
     const endOfToday = new Date(startOfToday);
 
-    endOfToday.setDate(
-      endOfToday.getDate() + 1
-    );
+    endOfToday.setDate(endOfToday.getDate() + 1);
 
-    return (
-      record.date >= startOfToday &&
-      record.date < endOfToday
-    );
+    return record.date >= startOfToday && record.date < endOfToday;
   }
 
   if (period === "Weekly") {
     const startOfWeek = new Date(startOfToday);
 
-    const currentDay =
-      startOfWeek.getDay();
+    const currentDay = startOfWeek.getDay();
 
-    const difference =
-      currentDay === 0
-        ? 6
-        : currentDay - 1;
+    const difference = currentDay === 0 ? 6 : currentDay - 1;
 
-    startOfWeek.setDate(
-      startOfWeek.getDate() - difference
-    );
+    startOfWeek.setDate(startOfWeek.getDate() - difference);
 
     const endOfWeek = new Date(startOfWeek);
 
-    endOfWeek.setDate(
-      endOfWeek.getDate() + 7
-    );
+    endOfWeek.setDate(endOfWeek.getDate() + 7);
 
-    return (
-      record.date >= startOfWeek &&
-      record.date < endOfWeek
-    );
+    return record.date >= startOfWeek && record.date < endOfWeek;
   }
 
   if (period === "Monthly") {
-    const startOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1
-    );
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const startOfNextMonth = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      1
-    );
+    const startOfNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    return (
-      record.date >= startOfMonth &&
-      record.date < startOfNextMonth
-    );
+    return record.date >= startOfMonth && record.date < startOfNextMonth;
   }
 
   return false;
@@ -317,9 +263,7 @@ const formatMoney = (amount) => {
 };
 
 const getIcon = (category, type) => {
-  const value = String(
-    category || ""
-  ).toLowerCase();
+  const value = String(category || "").toLowerCase();
 
   if (type === "Savings") {
     return "wallet-outline";
@@ -372,44 +316,27 @@ const getIcon = (category, type) => {
 };
 
 export default function App() {
-  const { selectedPeriods } =
-    usePeriods();
+  const { selectedPeriods } = usePeriods();
 
   const { t } = useAppSettings();
 
-  const [period, setPeriod] =
-    useState("Monthly");
+  const [period, setPeriod] = useState("Monthly");
 
-  const [hasNotification, setHasNotification] =
-    useState(false);
+  const [hasNotification, setHasNotification] = useState(false);
 
-  const [username, setUsername] =
-    useState("User");
+  const [username, setUsername] = useState("User");
 
-  const [profilePhoto, setProfilePhoto] =
-    useState(null);
+  const [profilePhoto, setProfilePhoto] = useState(null);
 
-  const [records, setRecords] =
-    useState([]);
+  const [records, setRecords] = useState([]);
 
-  const { width } =
-    useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
-  const isMediumScreen =
-    width >= 360 && width < 600;
+  const isMediumScreen = width >= 360 && width < 600;
   const isTablet = width >= 600;
-  const isLargeScreen = width >= 900;
 
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-    ? 1
-    : isTablet
-    ? 1.15
-    : isLargeScreen
-    ? 1.25
-    : 1;
+  const scale = isSmallScreen ? 0.85 : isMediumScreen ? 1 : isTablet ? 1.15 : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
@@ -419,355 +346,194 @@ export default function App() {
     ? 45
     : 60;
 
-  const s = (size) =>
-    Math.round(size * scale);
+  const s = (size) => Math.round(size * scale);
 
-  const availablePeriods =
-    selectedPeriods.map(
-      (item) =>
-        item.charAt(0).toUpperCase() +
-        item.slice(1)
-    );
+  const availablePeriods = selectedPeriods.map(
+    (item) => item.charAt(0).toUpperCase() + item.slice(1)
+  );
 
   useEffect(() => {
-    if (
-      availablePeriods.length > 0 &&
-      !availablePeriods.includes(period)
-    ) {
-      setPeriod(
-        availablePeriods[0]
-      );
+    if (availablePeriods.length > 0 && !availablePeriods.includes(period)) {
+      setPeriod(availablePeriods[0]);
     }
   }, [selectedPeriods]);
 
+  // Un solo efecto que espera a que Firebase restaure la sesión
+  // y entonces abre los listeners de usuario, gastos, ahorros y alertas.
   useEffect(() => {
-    const user =
-      auth.currentUser;
+    let listeners = [];
 
-    if (!user) {
-      setUsername("User");
-      setProfilePhoto(null);
-      return;
-    }
+    const clearListeners = () => {
+      listeners.forEach((unsubscribe) => unsubscribe());
+      listeners = [];
+    };
 
-    const userRef = doc(
-      db,
-      "Users",
-      user.uid
-    );
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      clearListeners();
 
-    const unsubscribe =
-      onSnapshot(
-        userRef,
-        (userSnap) => {
-          if (
-            userSnap.exists()
-          ) {
-            const userData =
-              userSnap.data();
+      if (!user) {
+        setUsername("User");
+        setProfilePhoto(null);
+        setRecords([]);
+        setHasNotification(false);
+        return;
+      }
 
-            setUsername(
-              userData.username ||
-                "User"
-            );
+      // ---- Datos del usuario ----
+      const userRef = doc(db, "Users", user.uid);
 
-            setProfilePhoto(
-              userData.photoURL ||
-                null
-            );
-          } else {
-            setUsername("User");
-            setProfilePhoto(null);
+      listeners.push(
+        onSnapshot(
+          userRef,
+          (userSnap) => {
+            if (userSnap.exists()) {
+              const userData = userSnap.data();
+
+              setUsername(userData.username || "User");
+              setProfilePhoto(userData.photoURL || null);
+            } else {
+              setUsername("User");
+              setProfilePhoto(null);
+            }
+          },
+          (error) => {
+            console.log("Error loading user data:", error);
           }
-        },
-        (error) => {
-          console.log(
-            "Error loading user data:",
-            error
-          );
-        }
+        )
       );
 
-    return unsubscribe;
-  }, []);
+      // ---- Gastos y ahorros ----
+      let expensesRecords = [];
+      let savingsRecords = [];
 
-  useEffect(() => {
-    const user =
-      auth.currentUser;
+      const updateRecords = () => {
+        const allRecords = [...expensesRecords, ...savingsRecords].sort(
+          (a, b) => {
+            if (!a.date && !b.date) return 0;
+            if (!a.date) return 1;
+            if (!b.date) return -1;
 
-    if (!user) {
-      setRecords([]);
-      return;
-    }
-
-    const expensesRef =
-      collection(
-        db,
-        "Registro de gastos"
-      );
-
-    const savingsRef =
-      collection(
-        db,
-        "Ahorros"
-      );
-
-    let expensesRecords = [];
-    let savingsRecords = [];
-
-    const updateRecords =
-      () => {
-        const allRecords = [
-          ...expensesRecords,
-          ...savingsRecords,
-        ].sort((a, b) => {
-          if (
-            !a.date &&
-            !b.date
-          ) {
-            return 0;
+            return b.date.getTime() - a.date.getTime();
           }
-
-          if (!a.date) {
-            return 1;
-          }
-
-          if (!b.date) {
-            return -1;
-          }
-
-          return (
-            b.date.getTime() -
-            a.date.getTime()
-          );
-        });
-
-        setRecords(
-          allRecords
         );
+
+        setRecords(allRecords);
       };
 
-    const unsubscribeExpenses =
-      onSnapshot(
-        expensesRef,
-        (snapshot) => {
-          expensesRecords = [];
+      listeners.push(
+        onSnapshot(
+          collection(db, "Registro de gastos"),
+          (snapshot) => {
+            expensesRecords = [];
 
-          snapshot.docs.forEach(
-            (document) => {
-              const documentData =
-                document.data();
+            snapshot.docs.forEach((document) => {
+              const documentData = document.data();
 
-              if (
-                documentData.uid !==
-                user.uid
-              ) {
+              if (documentData.uid !== user.uid) {
                 return;
               }
 
-              const expenseDate =
-                documentData.createdAt?.toDate
-                  ? documentData.createdAt.toDate()
-                  : convertDate(
-                      documentData.date
-                    );
+              const expenseDate = documentData.createdAt?.toDate
+                ? documentData.createdAt.toDate()
+                : convertDate(documentData.date);
 
               expensesRecords.push({
-                category:
-                  documentData.category ||
-                  "Other",
-                amount:
-                  Number(
-                    documentData.amount
-                  ) || 0,
-                date:
-                  expenseDate,
-                dateText:
-                  documentData.date ||
-                  "No date",
-                type:
-                  "Expense",
+                category: documentData.category || "Other",
+                amount: Number(documentData.amount) || 0,
+                date: expenseDate,
+                dateText: documentData.date || "No date",
+                type: "Expense",
               });
-            }
-          );
+            });
 
-          updateRecords();
-        },
-        (error) => {
-          console.log(
-            "Error loading expenses:",
-            error
-          );
-        }
+            updateRecords();
+          },
+          (error) => {
+            console.log("Error loading expenses:", error);
+          }
+        )
       );
 
-    const unsubscribeSavings =
-      onSnapshot(
-        savingsRef,
-        (snapshot) => {
-          savingsRecords = [];
+      listeners.push(
+        onSnapshot(
+          collection(db, "Ahorros"),
+          (snapshot) => {
+            savingsRecords = [];
 
-          snapshot.docs.forEach(
-            (document) => {
-              const documentData =
-                document.data();
+            snapshot.docs.forEach((document) => {
+              const documentData = document.data();
 
-              if (
-                documentData.uid !==
-                user.uid
-              ) {
+              if (documentData.uid !== user.uid) {
                 return;
               }
 
-              const items =
-                getRecordsFromDocument(
-                  documentData
-                );
+              const items = getRecordsFromDocument(documentData);
 
-              items.forEach(
-                (item) => {
-                  savingsRecords.push(
-                    normalizeRecord(
-                      item,
-                      "Savings"
-                    )
-                  );
-                }
-              );
-            }
-          );
+              items.forEach((item) => {
+                savingsRecords.push(normalizeRecord(item, "Savings"));
+              });
+            });
 
-          updateRecords();
-        },
-        (error) => {
-          console.log(
-            "Error loading savings:",
-            error
-          );
-        }
+            updateRecords();
+          },
+          (error) => {
+            console.log("Error loading savings:", error);
+          }
+        )
       );
 
+      // ---- Alertas de seguridad (notificaciones) ----
+      listeners.push(
+        onSnapshot(
+          collection(db, "Users", user.uid, "securityAlerts"),
+          (snapshot) => {
+            const hasUnread = snapshot.docs.some(
+              (item) => item.data().read !== true
+            );
+
+            setHasNotification(hasUnread);
+          },
+          () => {
+            setHasNotification(false);
+          }
+        )
+      );
+    });
+
     return () => {
-      unsubscribeExpenses();
-      unsubscribeSavings();
+      clearListeners();
+      unsubscribeAuth();
     };
   }, []);
 
-  useEffect(() => {
-    const user =
-      auth.currentUser;
+  const filteredRecords = records.filter((record) =>
+    isInPeriod(record, period)
+  );
 
-    if (!user) {
-      setHasNotification(false);
-      return;
-    }
+  const totalSavings = filteredRecords
+    .filter((record) => record.type === "Savings")
+    .reduce((total, record) => total + Math.abs(record.amount), 0);
 
-    const alertsRef =
-      collection(
-        db,
-        "Users",
-        user.uid,
-        "securityAlerts"
-      );
+  const totalExpenses = filteredRecords
+    .filter((record) => record.type === "Expense")
+    .reduce((total, record) => total + Math.abs(record.amount), 0);
 
-    const unsubscribe =
-      onSnapshot(
-        alertsRef,
-        (snapshot) => {
-          const hasUnread =
-            snapshot.docs.some(
-              (item) =>
-                item.data()
-                  .read !== true
-            );
-
-          setHasNotification(
-            hasUnread
-          );
-        },
-        () => {
-          setHasNotification(false);
-        }
-      );
-
-    return unsubscribe;
-  }, []);
-
-  const filteredRecords =
-    records.filter(
-      (record) =>
-        isInPeriod(
-          record,
-          period
-        )
-    );
-
-  const totalSavings =
-    filteredRecords
-      .filter(
-        (record) =>
-          record.type ===
-          "Savings"
-      )
-      .reduce(
-        (total, record) =>
-          total +
-          Math.abs(
-            record.amount
-          ),
-        0
-      );
-
-  const totalExpenses =
-    filteredRecords
-      .filter(
-        (record) =>
-          record.type ===
-          "Expense"
-      )
-      .reduce(
-        (total, record) =>
-          total +
-          Math.abs(
-            record.amount
-          ),
-        0
-      );
-
-  const totalMoney =
-    totalSavings +
-    totalExpenses;
+  const totalMoney = totalSavings + totalExpenses;
 
   const savingsPercentage =
-    totalMoney > 0
-      ? Math.round(
-          (totalSavings /
-            totalMoney) *
-            100
-        )
-      : 0;
+    totalMoney > 0 ? Math.round((totalSavings / totalMoney) * 100) : 0;
 
   return (
-    <SafeAreaView
-      style={styles.safe}
-    >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={
-          COLORS.dark
-        }
-      />
+    <SafeAreaView style={styles.safe}>
+      <StatusBar barStyle="light-content" backgroundColor={COLORS.dark} />
 
       <View style={styles.app}>
         <ScrollView
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={[
             styles.content,
             {
-              paddingHorizontal:
-                horizontalPadding,
+              paddingHorizontal: horizontalPadding,
               paddingTop: s(24),
               paddingBottom: s(125),
             },
@@ -777,23 +543,15 @@ export default function App() {
             small={isSmallScreen}
             scale={scale}
             s={s}
-            hasNotification={
-              hasNotification
-            }
+            hasNotification={hasNotification}
             username={username}
-            profilePhoto={
-              profilePhoto
-            }
+            profilePhoto={profilePhoto}
             t={t}
           />
 
           <Balance
-            savings={
-              totalSavings
-            }
-            expenses={
-              totalExpenses
-            }
+            savings={totalSavings}
+            expenses={totalExpenses}
             small={isSmallScreen}
             scale={scale}
             s={s}
@@ -801,22 +559,14 @@ export default function App() {
           />
 
           <Savings
-            savings={
-              totalSavings
-            }
-            percentage={
-              savingsPercentage
-            }
+            savings={totalSavings}
+            percentage={savingsPercentage}
             scale={scale}
             s={s}
             t={t}
           />
 
-          <Actions
-            scale={scale}
-            s={s}
-            t={t}
-          />
+          <Actions scale={scale} s={s} t={t} />
 
           <View
             style={[
@@ -829,89 +579,54 @@ export default function App() {
               },
             ]}
           >
-            {availablePeriods.map(
-              (item) => (
-                <TouchableOpacity
-                  key={item}
-                  onPress={() =>
-                    setPeriod(
-                      item
-                    )
-                  }
+            {availablePeriods.map((item) => (
+              <TouchableOpacity
+                key={item}
+                onPress={() => setPeriod(item)}
+                style={[
+                  styles.filter,
+                  {
+                    borderRadius: s(25),
+                    minHeight: s(45),
+                  },
+                  period === item && styles.activeFilter,
+                ]}
+              >
+                <Text
                   style={[
-                    styles.filter,
-                    {
-                      borderRadius:
-                        s(25),
-                      minHeight:
-                        s(45),
-                    },
-                    period ===
-                      item &&
-                      styles.activeFilter,
+                    styles.filterText,
+                    { fontSize: s(15) },
+                    period === item && styles.activeFilterText,
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.filterText,
-                      {
-                        fontSize:
-                          s(15),
-                      },
-                      period ===
-                        item &&
-                        styles.activeFilterText,
-                    ]}
-                  >
-                    {getPeriodLabel(
-                      item,
-                      t
-                    )}
-                  </Text>
-                </TouchableOpacity>
-              )
-            )}
+                  {getPeriodLabel(item, t)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
-          {filteredRecords.length >
-          0 ? (
-            filteredRecords.map(
-              (item, index) => (
-                <Transaction
-                  key={`${item.type}-${index}`}
-                  data={item}
-                  small={isSmallScreen}
-                  s={s}
-                  t={t}
-                />
-              )
-            )
+          {filteredRecords.length > 0 ? (
+            filteredRecords.map((item, index) => (
+              <Transaction
+                key={`${item.type}-${index}`}
+                data={item}
+                small={isSmallScreen}
+                s={s}
+                t={t}
+              />
+            ))
           ) : (
             <View
-              style={[
-                styles.emptyContainer,
-                {
-                  paddingVertical:
-                    s(40),
-                },
-              ]}
+              style={[styles.emptyContainer, { paddingVertical: s(40) }]}
             >
-              <Ionicons
-                name="receipt-outline"
-                size={s(42)}
-                color={
-                  COLORS.gray
-                }
-              />
+              <Ionicons name="receipt-outline" size={s(42)} color={COLORS.gray} />
 
               <Text
                 style={[
                   styles.emptyText,
                   {
-                    fontSize:
-                      s(15),
-                    marginTop:
-                      s(10),
+                    fontSize: s(15),
+                    marginTop: s(10),
                   },
                 ]}
               >
@@ -921,11 +636,7 @@ export default function App() {
           )}
         </ScrollView>
 
-        <BottomNav
-          small={isSmallScreen}
-          scale={scale}
-          s={s}
-        />
+        <BottomNav small={isSmallScreen} scale={scale} s={s} />
       </View>
     </SafeAreaView>
   );
@@ -951,55 +662,39 @@ function Header({
   const size = s(68);
 
   return (
-    <View
-      style={[
-        styles.header,
-        {
-          marginBottom: s(34),
-        },
-      ]}
-    >
+    <View style={[styles.header, { marginBottom: s(34) }]}>
       <TouchableOpacity
         style={[
           styles.profile,
           {
             width: size,
             height: size,
-            borderRadius:
-              size / 2,
+            borderRadius: size / 2,
             marginRight: s(14),
           },
         ]}
-        onPress={() =>
-          router.push(
-            "/profile"
-          )
-        }
+        onPress={() => router.push("/profile")}
       >
         {profilePhoto ? (
           <Image
-            source={{
-              uri: profilePhoto,
-            }}
-            style={
-              styles.profileImage
-            }
+            source={{ uri: profilePhoto }}
+            style={styles.profileImage}
             resizeMode="cover"
           />
-        ) : null}
+        ) : (
+          <View style={styles.profilePlaceholder}>
+            <MaterialCommunityIcons
+              name="account"
+              size={s(36)}
+              color={COLORS.gray}
+            />
+          </View>
+        )}
       </TouchableOpacity>
 
-      <View
-        style={styles.welcome}
-      >
+      <View style={styles.welcome}>
         <Text
-          style={[
-            styles.hello,
-            {
-              fontSize:
-                s(24),
-            },
-          ]}
+          style={[styles.hello, { fontSize: s(24) }]}
           numberOfLines={1}
           adjustsFontSizeToFit
         >
@@ -1022,19 +717,15 @@ function Header({
       <TouchableOpacity
         style={[
           styles.notification,
-          {
-            transform: [
-              {
-                translateY:
-                  4 * scale,
-              },
-            ],
-          },
+          { transform: [{ translateY: 4 * scale }] },
         ]}
         onPress={() =>
-          router.push(
-            "/notifications"
-          )
+          router.push({
+            pathname: "/notifications",
+            params: {
+              from: "/home",
+            },
+          })
         }
         activeOpacity={0.7}
       >
@@ -1053,10 +744,8 @@ function Header({
                 right: s(6),
                 width: s(10),
                 height: s(10),
-                borderRadius:
-                  s(5),
-                borderWidth:
-                  s(2),
+                borderRadius: s(5),
+                borderWidth: s(2),
               },
             ]}
           />
@@ -1066,29 +755,13 @@ function Header({
   );
 }
 
-function Balance({
-  savings,
-  expenses,
-  small,
-  scale,
-  s,
-  t,
-}) {
+function Balance({ savings, expenses, small, scale, s, t }) {
   return (
-    <View
-      style={[
-        styles.balance,
-        {
-          marginBottom: s(28),
-        },
-      ]}
-    >
+    <View style={[styles.balance, { marginBottom: s(28) }]}>
       <BalanceItem
         icon="wallet-outline"
         title={t.availableBalance}
-        value={formatMoney(
-          savings
-        )}
+        value={formatMoney(savings)}
         size={29 * scale}
         small={small}
         s={s}
@@ -1108,9 +781,7 @@ function Balance({
       <BalanceItem
         icon="receipt-outline"
         title={t.expenses}
-        value={`-${formatMoney(
-          expenses
-        )}`}
+        value={`-${formatMoney(expenses)}`}
         size={28 * scale}
         expense
         small={small}
@@ -1120,36 +791,11 @@ function Balance({
   );
 }
 
-function BalanceItem({
-  icon,
-  title,
-  value,
-  size,
-  expense,
-  small,
-  s,
-}) {
+function BalanceItem({ icon, title, value, size, expense, small, s }) {
   return (
-    <View
-      style={
-        styles.balanceItem
-      }
-    >
-      <View
-        style={[
-          styles.titleRow,
-          {
-            marginBottom: s(5),
-          },
-        ]}
-      >
-        <Ionicons
-          name={icon}
-          size={s(18)}
-          color={
-            COLORS.white
-          }
-        />
+    <View style={styles.balanceItem}>
+      <View style={[styles.titleRow, { marginBottom: s(5) }]}>
+        <Ionicons name={icon} size={s(18)} color={COLORS.white} />
 
         <Text
           style={[
@@ -1165,14 +811,7 @@ function BalanceItem({
       </View>
 
       <Text
-        style={[
-          expense
-            ? styles.expense
-            : styles.balanceValue,
-          {
-            fontSize: size,
-          },
-        ]}
+        style={[expense ? styles.expense : styles.balanceValue, { fontSize: size }]}
         numberOfLines={1}
         adjustsFontSizeToFit
       >
@@ -1182,22 +821,9 @@ function BalanceItem({
   );
 }
 
-function Savings({
-  savings,
-  percentage,
-  scale,
-  s,
-  t,
-}) {
+function Savings({ savings, percentage, scale, s, t }) {
   return (
-    <View
-      style={[
-        styles.savings,
-        {
-          marginBottom: s(34),
-        },
-      ]}
-    >
+    <View style={[styles.savings, { marginBottom: s(34) }]}>
       <View
         style={[
           styles.progress,
@@ -1217,15 +843,7 @@ function Savings({
             },
           ]}
         >
-          <Text
-            style={[
-              styles.progressText,
-              {
-                fontSize:
-                  s(15),
-              },
-            ]}
-          >
+          <Text style={[styles.progressText, { fontSize: s(15) }]}>
             {percentage}% {t.savedPercentage}
           </Text>
         </View>
@@ -1234,15 +852,12 @@ function Savings({
           style={[
             styles.goalAmount,
             {
-              fontSize:
-                s(15),
+              fontSize: s(15),
               right: s(28),
             },
           ]}
         >
-          {formatMoney(
-            savings
-          )}
+          {formatMoney(savings)}
         </Text>
       </View>
 
@@ -1250,8 +865,7 @@ function Savings({
         style={[
           styles.goalText,
           {
-            fontSize:
-              s(17),
+            fontSize: s(17),
             marginTop: s(9),
           },
         ]}
@@ -1262,11 +876,7 @@ function Savings({
   );
 }
 
-function Actions({
-  scale,
-  s,
-  t,
-}) {
+function Actions({ scale, s, t }) {
   return (
     <View
       style={[
@@ -1278,122 +888,60 @@ function Actions({
         },
       ]}
     >
-      {ACTIONS.map(
-        ([
-          icon,
-          translationKey,
-          type,
-          route,
-        ]) => (
-          <TouchableOpacity
-            key={translationKey}
+      {ACTIONS.map(([icon, translationKey, type, route]) => (
+        <TouchableOpacity
+          key={translationKey}
+          style={[
+            styles.action,
+            {
+              height: s(84),
+              borderRadius: s(24),
+              marginBottom: s(12),
+            },
+          ]}
+          onPress={() => router.push(route)}
+        >
+          <View
             style={[
-              styles.action,
+              styles.actionIcon,
               {
-                height:
-                  s(84),
-                borderRadius:
-                  s(24),
-                marginBottom:
-                  s(12),
+                width: s(38),
+                height: s(38),
+                borderRadius: s(19),
+                marginBottom: s(5),
               },
             ]}
-            onPress={() =>
-              router.push(
-                route
-              )
-            }
           >
-            <View
-              style={[
-                styles.actionIcon,
-                {
-                  width:
-                    s(38),
-                  height:
-                    s(38),
-                  borderRadius:
-                    s(19),
-                  marginBottom:
-                    s(5),
-                },
-              ]}
-            >
-              {type ===
-              "ion" ? (
-                <Ionicons
-                  name={icon}
-                  size={
-                    s(27)
-                  }
-                  color={
-                    COLORS.cyan
-                  }
-                />
-              ) : (
-                <MaterialCommunityIcons
-                  name={icon}
-                  size={
-                    s(29)
-                  }
-                  color={
-                    COLORS.cyan
-                  }
-                />
-              )}
-            </View>
+            {type === "ion" ? (
+              <Ionicons name={icon} size={s(27)} color={COLORS.cyan} />
+            ) : (
+              <MaterialCommunityIcons
+                name={icon}
+                size={s(29)}
+                color={COLORS.cyan}
+              />
+            )}
+          </View>
 
-            <Text
-              style={[
-                styles.actionText,
-                {
-                  fontSize:
-                    s(14),
-                },
-              ]}
-            >
-              {t[translationKey]}
-            </Text>
-          </TouchableOpacity>
-        )
-      )}
+          <Text style={[styles.actionText, { fontSize: s(14) }]}>
+            {t[translationKey]}
+          </Text>
+        </TouchableOpacity>
+      ))}
     </View>
   );
 }
 
-function Transaction({
-  data,
-  small,
-  s,
-  t,
-}) {
-  const icon = getIcon(
-    data.category,
-    data.type
-  );
+function Transaction({ data, small, s, t }) {
+  const icon = getIcon(data.category, data.type);
 
   const amount =
     data.type === "Expense"
-      ? `-${formatMoney(
-          Math.abs(
-            data.amount
-          )
-        )}`
-      : `+${formatMoney(
-          Math.abs(
-            data.amount
-          )
-        )}`;
+      ? `-${formatMoney(Math.abs(data.amount))}`
+      : `+${formatMoney(Math.abs(data.amount))}`;
 
   return (
-    <View
-      style={[
-        styles.transaction,
-        {
-          marginBottom: s(22),
-        },
-      ]}
-    >
+    <View style={[styles.transaction, { marginBottom: s(22) }]}>
       <View
         style={[
           styles.transactionIcon,
@@ -1408,27 +956,12 @@ function Transaction({
         <Ionicons
           name={icon}
           size={s(27)}
-          color={
-            COLORS.white
-          }
-          style={{
-            transform: [
-              {
-                translateY: 1,
-              },
-            ],
-          }}
+          color={COLORS.white}
+          style={{ transform: [{ translateY: 1 }] }}
         />
       </View>
 
-      <View
-        style={[
-          styles.transactionInfo,
-          {
-            width: s(112),
-          },
-        ]}
-      >
+      <View style={[styles.transactionInfo, { width: s(112) }]}>
         <Text
           style={[
             styles.transactionTitle,
@@ -1443,17 +976,10 @@ function Transaction({
         </Text>
 
         <Text
-          style={[
-            styles.transactionDate,
-            {
-              fontSize: s(11),
-            },
-          ]}
+          style={[styles.transactionDate, { fontSize: s(11) }]}
           numberOfLines={1}
         >
-          {data.dateText === "No date"
-            ? t.noDate
-            : data.dateText}
+          {data.dateText === "No date" ? t.noDate : data.dateText}
         </Text>
       </View>
 
@@ -1478,9 +1004,7 @@ function Transaction({
         ]}
         numberOfLines={1}
       >
-        {data.type === "Expense"
-          ? t.expense
-          : t.savings}
+        {data.type === "Expense" ? t.expense : t.savings}
       </Text>
 
       <View
@@ -1497,15 +1021,9 @@ function Transaction({
       <Text
         style={[
           styles.amount,
-          data.type ===
-            "Expense" &&
-            styles.negative,
-          data.type ===
-            "Savings" &&
-            styles.positive,
-          {
-            fontSize: s(14),
-          },
+          data.type === "Expense" && styles.negative,
+          data.type === "Savings" && styles.positive,
+          { fontSize: s(14) },
         ]}
         numberOfLines={1}
         adjustsFontSizeToFit
@@ -1516,44 +1034,36 @@ function Transaction({
   );
 }
 
-function BottomNav({
-  small,
-  scale,
-  s,
-}) {
+function BottomNav({ small, scale, s }) {
   return (
     <View
       style={[
         styles.bottomBar,
         {
           height: 65 * scale,
-          borderTopLeftRadius:
-            78 * scale,
+          borderTopLeftRadius: 78 * scale,
         },
       ]}
     >
-      {NAV.map(
-        ([icon, route], index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.navItem}
-            onPress={() =>
-              router.push(route)
+      {NAV.map(([icon, route], index) => (
+        <TouchableOpacity
+          key={index}
+          style={styles.navItem}
+          onPress={() => {
+            // Ya estás en Home: no apilar la misma pantalla
+            if (route !== "/home") {
+              router.push(route);
             }
-            activeOpacity={0.7}
-          >
-            <MaterialCommunityIcons
-              name={icon}
-              size={
-                icon === "swap-horizontal"
-                  ? 37 * scale
-                  : 35 * scale
-              }
-              color={COLORS.white}
-            />
-          </TouchableOpacity>
-        )
-      )}
+          }}
+          activeOpacity={0.7}
+        >
+          <MaterialCommunityIcons
+            name={icon}
+            size={icon === "swap-horizontal" ? 37 * scale : 35 * scale}
+            color={COLORS.white}
+          />
+        </TouchableOpacity>
+      ))}
     </View>
   );
 }
@@ -1561,14 +1071,12 @@ function BottomNav({
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor:
-      COLORS.dark,
+    backgroundColor: COLORS.dark,
   },
 
   app: {
     flex: 1,
-    backgroundColor:
-      COLORS.dark,
+    backgroundColor: COLORS.dark,
   },
 
   content: {
@@ -1581,14 +1089,20 @@ const styles = StyleSheet.create({
   },
 
   profile: {
-    backgroundColor:
-      "#172037",
+    backgroundColor: "#172037",
     overflow: "hidden",
   },
 
   profileImage: {
     width: "100%",
     height: "100%",
+  },
+
+  profilePlaceholder: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   welcome: {
@@ -1607,17 +1121,14 @@ const styles = StyleSheet.create({
 
   notification: {
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
     position: "relative",
   },
 
   notificationDot: {
     position: "absolute",
-    backgroundColor:
-      "#FF3B30",
-    borderColor:
-      COLORS.cyan,
+    backgroundColor: "#FF3B30",
+    borderColor: COLORS.cyan,
   },
 
   balance: {
@@ -1650,8 +1161,7 @@ const styles = StyleSheet.create({
   },
 
   divider: {
-    backgroundColor:
-      COLORS.gray,
+    backgroundColor: COLORS.gray,
   },
 
   savings: {
@@ -1659,11 +1169,9 @@ const styles = StyleSheet.create({
   },
 
   progress: {
-    backgroundColor:
-      COLORS.darkCyan,
+    backgroundColor: COLORS.darkCyan,
     overflow: "hidden",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   progressFill: {
@@ -1671,10 +1179,8 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     bottom: 0,
-    backgroundColor:
-      COLORS.cyan,
-    justifyContent:
-      "center",
+    backgroundColor: COLORS.cyan,
+    justifyContent: "center",
     minWidth: 0,
   },
 
@@ -1693,21 +1199,17 @@ const styles = StyleSheet.create({
   },
 
   actions: {
-    backgroundColor:
-      COLORS.cyan,
+    backgroundColor: COLORS.cyan,
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent:
-      "space-between",
+    justifyContent: "space-between",
   },
 
   action: {
     width: "48%",
-    backgroundColor:
-      COLORS.white,
+    backgroundColor: COLORS.white,
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
     elevation: 4,
     shadowColor: "#000",
     shadowOpacity: 0.12,
@@ -1715,11 +1217,9 @@ const styles = StyleSheet.create({
   },
 
   actionIcon: {
-    backgroundColor:
-      COLORS.lightCyan,
+    backgroundColor: COLORS.lightCyan,
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   actionText: {
@@ -1729,21 +1229,18 @@ const styles = StyleSheet.create({
   },
 
   filters: {
-    backgroundColor:
-      COLORS.white,
+    backgroundColor: COLORS.white,
     flexDirection: "row",
   },
 
   filter: {
     flex: 1,
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   activeFilter: {
-    backgroundColor:
-      COLORS.cyan,
+    backgroundColor: COLORS.cyan,
   },
 
   filterText: {
@@ -1760,11 +1257,9 @@ const styles = StyleSheet.create({
   },
 
   transactionIcon: {
-    backgroundColor:
-      COLORS.cyan,
+    backgroundColor: COLORS.cyan,
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   transactionInfo: {
@@ -1781,8 +1276,7 @@ const styles = StyleSheet.create({
   },
 
   transactionDivider: {
-    backgroundColor:
-      COLORS.darkCyan,
+    backgroundColor: COLORS.darkCyan,
   },
 
   transactionType: {
@@ -1806,8 +1300,7 @@ const styles = StyleSheet.create({
 
   emptyContainer: {
     alignItems: "center",
-    justifyContent:
-      "center",
+    justifyContent: "center",
   },
 
   emptyText: {

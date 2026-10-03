@@ -23,7 +23,7 @@ import { auth, db } from "../../firebaseConfig.js";
 const NAV = [
   ["home-outline", "ion", "/home"],
   ["bar-chart-outline", "ion", "/historial"],
-  ["swap-horizontal", "material", "/expensesManagement"],
+  ["swap-horizontal", "material", "/expensesmanagement"],
   ["layers-outline", "material", "/currentgoal"],
   ["person-outline", "ion", "/profile"],
 ];
@@ -259,8 +259,7 @@ export default function HistorialScreen() {
           styles.header,
           {
             height: s(145),
-            paddingHorizontal:
-              horizontalPadding,
+            paddingHorizontal: horizontalPadding,
             backgroundColor: colors.header,
           },
         ]}
@@ -273,7 +272,7 @@ export default function HistorialScreen() {
               top: 50 * scale,
             },
           ]}
-          onPress={() => router.back()}
+          onPress={() => router.replace("/home")}
           activeOpacity={0.7}
         >
           <Ionicons
@@ -321,8 +320,7 @@ export default function HistorialScreen() {
           {
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
-            paddingHorizontal:
-              horizontalPadding,
+            paddingHorizontal: horizontalPadding,
             paddingTop: s(28),
             backgroundColor: colors.background,
           },

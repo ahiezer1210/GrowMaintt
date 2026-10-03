@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -15,6 +15,7 @@ import { usePeriods } from "../../context/PeriodContext.js";
 export default function Expensescreen() {
   const { width } = useWindowDimensions();
   const { t, colors } = useAppSettings();
+  const { from } = useLocalSearchParams();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -23,18 +24,21 @@ export default function Expensescreen() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
+
+  // Escala del header
+  const hs = isSmallScreen ? 0.85 : isTablet ? 1.15 : 1;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (value) => Math.round(value * scale);
 
@@ -90,60 +94,41 @@ export default function Expensescreen() {
 
   const allSelected = tempSelected.length === periods.length;
 
+  const goBackToSettings = () => {
+    if (from) {
+      const destination = Array.isArray(from) ? from[0] : from;
+      router.replace(destination);
+    } else {
+      router.replace("/settings");
+    }
+  };
+
   const savePeriod = () => {
     setSelectedPeriods(tempSelected);
-    router.back();
+    goBackToSettings();
+  };
+
+  const goHome = () => {
+    router.replace("/home");
   };
 
   const navItems = [
-    {
-      icon: "home-outline",
-      route: "/home",
-    },
-    {
-      icon: "chart-box-outline",
-      route: "/historial",
-    },
-    {
-      icon: "swap-horizontal",
-      route: "/expensesManagement",
-    },
-    {
-      icon: "layers-outline",
-      route: "/currentgoal",
-    },
-    {
-      icon: "account-outline",
-      route: "/profile",
-    },
+    { icon: "home-outline", route: "/home" },
+    { icon: "chart-box-outline", route: "/historial" },
+    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "layers-outline", route: "/currentgoal" },
+    { icon: "account-outline", route: "/profile" },
   ];
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.header,
-        },
-      ]}
-    >
-      {/* HEADER IGUAL AL LOGOUT */}
+    <View style={[styles.container, { backgroundColor: colors.header }]}>
+      {/* HEADER */}
       <View
         style={[
           styles.header,
           {
-            height:
-              118 *
-              (isSmallScreen
-                ? 0.85
-                : isTablet
-                  ? 1.15
-                  : 1),
-            paddingHorizontal: isSmallScreen
-              ? 18
-              : isTablet
-                ? 45
-                : 25,
+            height: 118 * hs,
+            paddingHorizontal: isSmallScreen ? 18 : isTablet ? 45 : 25,
             backgroundColor: colors.header,
           },
         ]}
@@ -151,68 +136,26 @@ export default function Expensescreen() {
         <TouchableOpacity
           style={[
             styles.back,
-            {
-              transform: [
-                {
-                  translateY:
-                    4 *
-                    (isSmallScreen
-                      ? 0.85
-                      : isTablet
-                        ? 1.15
-                        : 1),
-                },
-              ],
-            },
+            { transform: [{ translateY: 4 * hs }] },
           ]}
-          onPress={() => router.back()}
+          onPress={goBackToSettings}
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={
-              35 *
-              (isSmallScreen
-                ? 0.85
-                : isTablet
-                  ? 1.15
-                  : 1)
-            }
+            size={35 * hs}
             color={colors.white}
           />
         </TouchableOpacity>
 
         <Text
+          pointerEvents="none"
           style={[
             styles.headerTitle,
             {
-              fontSize:
-                25 *
-                (isSmallScreen
-                  ? 0.85
-                  : isTablet
-                    ? 1.15
-                    : 1),
-              transform: [
-                {
-                  translateX:
-                    4 *
-                    (isSmallScreen
-                      ? 0.85
-                      : isTablet
-                        ? 1.15
-                        : 1),
-                },
-                {
-                  translateY:
-                    1 *
-                    (isSmallScreen
-                      ? 0.85
-                      : isTablet
-                        ? 1.15
-                        : 1),
-                },
-              ],
+              fontSize: 25 * hs,
+              transform: [{ translateX: 4 * hs }, { translateY: 1 * hs }],
               color: colors.white,
             },
           ]}
@@ -223,19 +166,7 @@ export default function Expensescreen() {
         <TouchableOpacity
           style={[
             styles.headerBell,
-            {
-              transform: [
-                {
-                  translateY:
-                    4 *
-                    (isSmallScreen
-                      ? 0.85
-                      : isTablet
-                        ? 1.15
-                        : 1),
-                },
-              ],
-            },
+            { transform: [{ translateY: 4 * hs }] },
           ]}
           onPress={() =>
             router.push({
@@ -249,43 +180,19 @@ export default function Expensescreen() {
         >
           <MaterialCommunityIcons
             name="bell-circle-outline"
-            size={
-              35 *
-              (isSmallScreen
-                ? 0.85
-                : isTablet
-                  ? 1.15
-                  : 1)
-            }
+            size={35 * hs}
             color={colors.white}
           />
         </TouchableOpacity>
       </View>
 
-      {/* ESTE CONTENEDOR ES EL QUE HACE VISIBLE LA CURVA */}
-      <View
-        style={[
-          styles.mainWrapper,
-          {
-            backgroundColor: colors.header,
-          },
-        ]}
-      >
-        {/* CARD */}
+      <View style={[styles.mainWrapper, { backgroundColor: colors.header }]}>
         <View
           style={[
             styles.card,
             {
-              borderTopLeftRadius: isTablet
-                ? 55
-                : isSmallScreen
-                  ? 35
-                  : 45,
-              borderTopRightRadius: isTablet
-                ? 55
-                : isSmallScreen
-                  ? 35
-                  : 45,
+              borderTopLeftRadius: isTablet ? 55 : isSmallScreen ? 35 : 45,
+              borderTopRightRadius: isTablet ? 55 : isSmallScreen ? 35 : 45,
               paddingHorizontal: horizontalPadding,
               paddingTop: s(50),
               backgroundColor: colors.background,
@@ -298,36 +205,15 @@ export default function Expensescreen() {
               paddingBottom: s(100),
             }}
           >
-            <Text
-              style={[
-                styles.instruction,
-                {
-                  color: colors.text,
-                },
-              ]}
-            >
+            <Text style={[styles.instruction, { color: colors.text }]}>
               {t.chooseWhen}
             </Text>
 
-            <Text
-              style={[
-                styles.instruction,
-                {
-                  color: colors.text,
-                },
-              ]}
-            >
+            <Text style={[styles.instruction, { color: colors.text }]}>
               {t.reviewExpenses}
             </Text>
 
-            <Text
-              style={[
-                styles.subtitle,
-                {
-                  color: colors.secondaryText,
-                },
-              ]}
-            >
+            <Text style={[styles.subtitle, { color: colors.secondaryText }]}>
               {t.selectOneOrMore}
             </Text>
 
@@ -355,11 +241,9 @@ export default function Expensescreen() {
                         backgroundColor: selected
                           ? "#25B7D3"
                           : isDarkTheme
-                            ? colors.primaryBackground
-                            : "#FFFFFF",
-                        borderColor: selected
-                          ? "#25B7D3"
-                          : colors.border,
+                          ? colors.primaryBackground
+                          : "#FFFFFF",
+                        borderColor: selected ? "#25B7D3" : colors.border,
                       },
                     ]}
                     onPress={() => togglePeriod(period.id)}
@@ -375,8 +259,8 @@ export default function Expensescreen() {
                           backgroundColor: selected
                             ? "rgba(255,255,255,0.2)"
                             : isDarkTheme
-                              ? "#172037"
-                              : "#E8F9FC",
+                            ? "#172037"
+                            : "#E8F9FC",
                         },
                       ]}
                     >
@@ -387,22 +271,13 @@ export default function Expensescreen() {
                       />
                     </View>
 
-                    <View
-                      style={[
-                        styles.optionInfo,
-                        {
-                          marginLeft: s(14),
-                        },
-                      ]}
-                    >
+                    <View style={[styles.optionInfo, { marginLeft: s(14) }]}>
                       <Text
                         style={[
                           styles.optionTitle,
                           {
                             fontSize: s(16),
-                            color: selected
-                              ? "#FFFFFF"
-                              : colors.text,
+                            color: selected ? "#FFFFFF" : colors.text,
                           },
                         ]}
                       >
@@ -415,9 +290,7 @@ export default function Expensescreen() {
                           {
                             fontSize: s(12),
                             marginTop: s(3),
-                            color: selected
-                              ? "#FFFFFF"
-                              : colors.secondaryText,
+                            color: selected ? "#FFFFFF" : colors.secondaryText,
                           },
                         ]}
                       >
@@ -432,12 +305,8 @@ export default function Expensescreen() {
                           width: s(23),
                           height: s(23),
                           borderRadius: s(7),
-                          borderColor: selected
-                            ? "#081023"
-                            : colors.border,
-                          backgroundColor: selected
-                            ? "#081023"
-                            : "transparent",
+                          borderColor: selected ? "#081023" : colors.border,
+                          backgroundColor: selected ? "#081023" : "transparent",
                         },
                       ]}
                     >
@@ -463,11 +332,9 @@ export default function Expensescreen() {
                     backgroundColor: allSelected
                       ? "#25B7D3"
                       : isDarkTheme
-                        ? colors.primaryBackground
-                        : "#FFFFFF",
-                    borderColor: allSelected
-                      ? "#25B7D3"
-                      : colors.border,
+                      ? colors.primaryBackground
+                      : "#FFFFFF",
+                    borderColor: allSelected ? "#25B7D3" : colors.border,
                   },
                 ]}
                 onPress={selectAll}
@@ -483,8 +350,8 @@ export default function Expensescreen() {
                       backgroundColor: allSelected
                         ? "rgba(255,255,255,0.2)"
                         : isDarkTheme
-                          ? "#172037"
-                          : "#E8F9FC",
+                        ? "#172037"
+                        : "#E8F9FC",
                     },
                   ]}
                 >
@@ -495,22 +362,13 @@ export default function Expensescreen() {
                   />
                 </View>
 
-                <View
-                  style={[
-                    styles.optionInfo,
-                    {
-                      marginLeft: s(14),
-                    },
-                  ]}
-                >
+                <View style={[styles.optionInfo, { marginLeft: s(14) }]}>
                   <Text
                     style={[
                       styles.optionTitle,
                       {
                         fontSize: s(16),
-                        color: allSelected
-                          ? "#FFFFFF"
-                          : colors.text,
+                        color: allSelected ? "#FFFFFF" : colors.text,
                       },
                     ]}
                   >
@@ -523,9 +381,7 @@ export default function Expensescreen() {
                       {
                         fontSize: s(12),
                         marginTop: s(3),
-                        color: allSelected
-                          ? "#FFFFFF"
-                          : colors.secondaryText,
+                        color: allSelected ? "#FFFFFF" : colors.secondaryText,
                       },
                     ]}
                   >
@@ -540,12 +396,8 @@ export default function Expensescreen() {
                       width: s(23),
                       height: s(23),
                       borderRadius: s(7),
-                      borderColor: allSelected
-                        ? "#081023"
-                        : colors.border,
-                      backgroundColor: allSelected
-                        ? "#081023"
-                        : "transparent",
+                      borderColor: allSelected ? "#081023" : colors.border,
+                      backgroundColor: allSelected ? "#081023" : "transparent",
                     },
                   ]}
                 >
@@ -573,14 +425,7 @@ export default function Expensescreen() {
               onPress={savePeriod}
               activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.saveText,
-                  {
-                    fontSize: s(15),
-                  },
-                ]}
-              >
+              <Text style={[styles.saveText, { fontSize: s(15) }]}>
                 {t.savePeriod}
               </Text>
             </TouchableOpacity>
@@ -588,7 +433,6 @@ export default function Expensescreen() {
         </View>
       </View>
 
-      {/* BOTTOM NAVBAR */}
       <View
         style={[
           styles.bottomBar,
@@ -603,14 +447,14 @@ export default function Expensescreen() {
           <TouchableOpacity
             key={index}
             style={styles.navItem}
-            onPress={() => router.push(item.route)}
+            onPress={() =>
+              item.route === "/home" ? goHome() : router.push(item.route)
+            }
             activeOpacity={0.8}
           >
             <MaterialCommunityIcons
               name={item.icon}
-              size={s(
-                item.icon === "swap-horizontal" ? 37 : 35
-              )}
+              size={s(item.icon === "swap-horizontal" ? 37 : 35)}
               color="#FFFFFF"
             />
           </TouchableOpacity>
@@ -691,11 +535,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
 
-  optionSelected: {
-    backgroundColor: "#25B7D3",
-    borderColor: "#25B7D3",
-  },
-
   iconBox: {
     width: 45,
     height: 45,
@@ -703,10 +542,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8F9FC",
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  iconBoxSelected: {
-    backgroundColor: "rgba(255,255,255,0.2)",
   },
 
   optionInfo: {
@@ -720,18 +555,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 
-  optionTitleSelected: {
-    color: "#FFFFFF",
-  },
-
   optionDescription: {
     color: "#6B7280",
     fontSize: 12,
     marginTop: 3,
-  },
-
-  optionDescriptionSelected: {
-    color: "#FFFFFF",
   },
 
   checkbox: {
@@ -742,11 +569,6 @@ const styles = StyleSheet.create({
     borderColor: "#081023",
     justifyContent: "center",
     alignItems: "center",
-  },
-
-  checkboxSelected: {
-    backgroundColor: "#081023",
-    borderColor: "#081023",
   },
 
   saveButton: {

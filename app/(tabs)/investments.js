@@ -14,29 +14,28 @@ import {
 import { useAppSettings } from "../../context/Appsettings";
 
 export default function InversionesScreen() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
   const { colors, t } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
   const isTablet = width >= 600 && width < 900;
-  const isLargeScreen = width >= 900;
 
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const abrirInteractiveBrokers = async () => {
     await Linking.openURL("https://www.interactivebrokers.com/");
@@ -49,6 +48,11 @@ export default function InversionesScreen() {
         from: "/investments",
       },
     });
+  };
+
+  // Vuelve al Home que ya existe en la pila (no apila otro Home)
+  const goHome = () => {
+    router.replace("/home");
   };
 
   const navItems = [
@@ -198,8 +202,9 @@ export default function InversionesScreen() {
               transform: [{ translateY: 4 * scale }],
             },
           ]}
-          onPress={() => router.back()}
+          onPress={goHome}
           activeOpacity={0.7}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialCommunityIcons
             name="arrow-left"
@@ -209,14 +214,12 @@ export default function InversionesScreen() {
         </TouchableOpacity>
 
         <Text
+          pointerEvents="none"
           style={[
             styles.headerTitle,
             {
               fontSize: 25 * scale,
-              transform: [
-                { translateX: 7 * scale },
-                { translateY: 1 * scale },
-              ],
+              transform: [{ translateX: 7 * scale }, { translateY: 1 * scale }],
             },
           ]}
         >
@@ -357,10 +360,10 @@ export default function InversionesScreen() {
                   width: isSmallScreen
                     ? "80%"
                     : isMediumScreen
-                      ? "70%"
-                      : isTablet
-                        ? "60%"
-                        : "55%",
+                    ? "70%"
+                    : isTablet
+                    ? "60%"
+                    : "55%",
                   height: 71 * scale,
                   borderRadius: 25 * scale,
                   paddingHorizontal: 30 * scale,
@@ -400,15 +403,15 @@ export default function InversionesScreen() {
             <TouchableOpacity
               key={index}
               style={styles.navItem}
-              onPress={() => router.push(item.route)}
+              onPress={() =>
+                item.route === "/home" ? goHome() : router.push(item.route)
+              }
               activeOpacity={0.7}
             >
               <MaterialCommunityIcons
                 name={item.icon}
                 size={
-                  item.icon === "swap-horizontal"
-                    ? 37 * scale
-                    : 35 * scale
+                  item.icon === "swap-horizontal" ? 37 * scale : 35 * scale
                 }
                 color={colors.white}
               />
