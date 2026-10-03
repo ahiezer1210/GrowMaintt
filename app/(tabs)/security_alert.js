@@ -871,6 +871,10 @@ const createStyles = (colors) =>
       color: colors.white,
       fontSize: 24,
       fontWeight: "700",
+      transform: [
+        { translateX: 5 },
+        { translateY: -3 },
+      ],
     },
 
     headerSpacer: {
