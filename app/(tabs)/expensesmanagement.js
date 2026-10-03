@@ -217,49 +217,65 @@ export default function ExpenseManagement() {
         style={[
           styles.header,
           {
-            height: s(118),
+            height: 118 * scale,
             paddingHorizontal: horizontalPadding,
             backgroundColor: colors.primaryBackground,
           },
         ]}
       >
-        <TouchableOpacity
-          style={[
-            styles.backButton,
-            {
-              left: s(15),
-              top: s(34),
-            },
-          ]}
-          onPress={() => router.replace("/home")}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={s(30)}
-            color={colors.white}
-          />
-        </TouchableOpacity>
-
         <Text
+          pointerEvents="none"
           style={[
             styles.headerTitle,
             {
-              fontSize: s(25),
-              lineHeight: s(29),
+              fontSize: 25 * scale,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              textAlign: "center",
+              transform: [{ translateY: 1 * scale }],
               color: colors.white,
             },
           ]}
+          numberOfLines={1}
         >
           {t.expenseManagement}
         </Text>
 
         <TouchableOpacity
           style={[
+            styles.backButton,
+            {
+              zIndex: 10,
+              elevation: 10,
+              transform: [{ translateY: 4 * scale }],
+            },
+          ]}
+          onPress={() => router.replace("/home")}
+          activeOpacity={0.7}
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35 * scale}
+            color={colors.white}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
             styles.notification,
             {
-              right: s(15),
-              top: s(34),
+              width: 40 * scale,
+              height: 40 * scale,
+              borderRadius: 20 * scale,
+              zIndex: 10,
+              elevation: 10,
               backgroundColor: colors.input,
             },
           ]}
@@ -275,7 +291,7 @@ export default function ExpenseManagement() {
         >
           <MaterialCommunityIcons
             name="bell-circle-outline"
-            size={s(32)}
+            size={35 * scale}
             color={colors.white}
           />
         </TouchableOpacity>
@@ -340,8 +356,7 @@ export default function ExpenseManagement() {
                   style={[
                     styles.line,
                     {
-                      backgroundColor:
-                        colors.secondaryText,
+                      backgroundColor: colors.secondaryText,
                     },
                   ]}
                 />
@@ -402,8 +417,7 @@ export default function ExpenseManagement() {
                   style={[
                     styles.line,
                     {
-                      backgroundColor:
-                        colors.secondaryText,
+                      backgroundColor: colors.secondaryText,
                     },
                   ]}
                 />
@@ -464,8 +478,7 @@ export default function ExpenseManagement() {
                   style={[
                     styles.line,
                     {
-                      backgroundColor:
-                        colors.secondaryText,
+                      backgroundColor: colors.secondaryText,
                     },
                   ]}
                 />
@@ -944,46 +957,25 @@ const styles = StyleSheet.create({
   },
 
   header: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
+    justifyContent: "space-between",
   },
 
   backButton: {
-    position: "absolute",
-    width: 55,
-    height: 55,
-    borderRadius: 28,
-    alignItems: "center",
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
   },
 
   headerTitle: {
-    flex: 1,
     fontWeight: "700",
-    textAlign: "center",
-    transform: [
-      {
-        translateX: 3,
-      },
-      {
-        translateY: 7,
-      },
-    ],
   },
 
   notification: {
-    position: "absolute",
-    width: 55,
-    height: 55,
-    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
   },
 
   content: {

@@ -238,28 +238,23 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.header,
           {
+            height: 118 * scale,
             paddingHorizontal: horizontalPadding,
             backgroundColor: colors.header,
           },
         ]}
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.replace("/home")}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name="arrow-left"
-            size={35 * scale}
-            color={colors.white}
-          />
-        </TouchableOpacity>
-
         <Text
+          pointerEvents="none"
           style={[
             styles.headerTitle,
             {
               fontSize: 25 * scale,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              textAlign: "center",
+              transform: [{ translateY: 1 * scale }],
               color: colors.white,
             },
           ]}
@@ -269,7 +264,41 @@ export default function SavingsGoalsScreen() {
         </Text>
 
         <TouchableOpacity
-          style={styles.notificationButton}
+          style={[
+            styles.backButton,
+            {
+              zIndex: 10,
+              elevation: 10,
+              transform: [{ translateY: 4 * scale }],
+            },
+          ]}
+          onPress={() => router.replace("/home")}
+          activeOpacity={0.7}
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
+        >
+          <MaterialCommunityIcons
+            name="arrow-left"
+            size={35 * scale}
+            color={colors.white}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.notificationButton,
+            {
+              width: 40 * scale,
+              height: 40 * scale,
+              borderRadius: 20 * scale,
+              zIndex: 10,
+              elevation: 10,
+            },
+          ]}
           onPress={abrirNotificaciones}
           activeOpacity={0.7}
         >
@@ -285,8 +314,16 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.content,
           {
-            borderTopLeftRadius: 35 * scale,
-            borderTopRightRadius: 35 * scale,
+            borderTopLeftRadius: isTablet
+              ? 55
+              : isSmallScreen
+              ? 35
+              : 45,
+            borderTopRightRadius: isTablet
+              ? 55
+              : isSmallScreen
+              ? 35
+              : 45,
             backgroundColor: colors.background,
           },
         ]}
@@ -937,29 +974,23 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 75,
-    paddingHorizontal: 20,
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 
   backButton: {
-    width: 45,
-    height: 45,
-    alignItems: "center",
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
-    flex: 1,
-    textAlign: "center",
     fontWeight: "700",
-    fontSize: 25,
   },
 
   notificationButton: {
-    width: 45,
-    height: 45,
     alignItems: "center",
     justifyContent: "center",
   },
