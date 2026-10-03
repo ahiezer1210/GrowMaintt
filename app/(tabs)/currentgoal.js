@@ -21,12 +21,9 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
 export default function SavingsGoalsScreen() {
-  const { colors, t } = useAppSettings();
-
   const { width, height } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
@@ -148,8 +145,8 @@ export default function SavingsGoalsScreen() {
 
     if (!abono || isNaN(value) || value <= 0) {
       Alert.alert(
-        t.invalidAmount,
-        t.invalidAmountMessage
+        "Invalid amount",
+        "Please enter a valid amount."
       );
       return;
     }
@@ -169,8 +166,8 @@ export default function SavingsGoalsScreen() {
       );
 
       Alert.alert(
-        t.amountTooHigh,
-        `${t.availableToComplete} $${available.toFixed(2)}.`
+        "Amount too high",
+        `You can add up to $${available.toFixed(2)} to complete this goal.`
       );
       return;
     }
@@ -192,15 +189,15 @@ export default function SavingsGoalsScreen() {
       setAbono("");
 
       Alert.alert(
-        t.amountAdded,
-        t.amountAddedMessage
+        "Amount added",
+        "Your savings have been updated successfully."
       );
     } catch (error) {
       console.log("ERROR ADDING MONEY:", error);
 
       Alert.alert(
-        t.settingsError,
-        t.amountAddError
+        "Error",
+        "The amount could not be added."
       );
     } finally {
       setAddingMoney(false);
@@ -217,76 +214,51 @@ export default function SavingsGoalsScreen() {
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: colors.primaryBackground,
-        },
-      ]}
-    >
+    <View style={styles.container}>
       <StatusBar
-        barStyle={
-          colors.primaryBackground === "#FAFAF7"
-            ? "dark-content"
-            : "light-content"
-        }
-        backgroundColor={colors.primaryBackground}
+        translucent
+        backgroundColor="#081023"
+        barStyle="light-content"
       />
 
       <View
         style={[
           styles.header,
           {
-            height: 118 * scale,
+            height: s(145),
             paddingHorizontal: horizontalPadding,
-            backgroundColor: colors.header,
           },
         ]}
       >
-        <Text
-          pointerEvents="none"
-          style={[
-            styles.headerTitle,
-            {
-              fontSize: 25 * scale,
-              position: "absolute",
-              left: 0,
-              right: 0,
-              textAlign: "center",
-              transform: [{ translateY: 1 * scale }],
-              color: colors.white,
-            },
-          ]}
-          numberOfLines={1}
-        >
-          {t.savingsGoals}
-        </Text>
-
         <TouchableOpacity
           style={[
             styles.backButton,
             {
-              zIndex: 10,
-              elevation: 10,
-              transform: [{ translateY: 4 * scale }],
+              left: 18 * scale,
+              top: 50 * scale,
             },
           ]}
           onPress={() => router.replace("/home")}
           activeOpacity={0.7}
-          hitSlop={{
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10,
-          }}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={35 * scale}
-            color={colors.white}
+            size={26 * scale}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
+
+        <Text
+          style={[
+            styles.headerTitle,
+            {
+              fontSize: s(24),
+            },
+          ]}
+          numberOfLines={1}
+        >
+          Savings Goals
+        </Text>
 
         <TouchableOpacity
           style={[
@@ -295,8 +267,6 @@ export default function SavingsGoalsScreen() {
               width: 40 * scale,
               height: 40 * scale,
               borderRadius: 20 * scale,
-              zIndex: 10,
-              elevation: 10,
             },
           ]}
           onPress={abrirNotificaciones}
@@ -305,7 +275,7 @@ export default function SavingsGoalsScreen() {
           <MaterialCommunityIcons
             name="bell-circle-outline"
             size={35 * scale}
-            color={colors.white}
+            color="#FFFFFF"
           />
         </TouchableOpacity>
       </View>
@@ -314,17 +284,8 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.content,
           {
-            borderTopLeftRadius: isTablet
-              ? 55
-              : isSmallScreen
-              ? 35
-              : 45,
-            borderTopRightRadius: isTablet
-              ? 55
-              : isSmallScreen
-              ? 35
-              : 45,
-            backgroundColor: colors.background,
+            borderTopLeftRadius: 35 * scale,
+            borderTopRightRadius: 35 * scale,
           },
         ]}
       >
@@ -336,7 +297,6 @@ export default function SavingsGoalsScreen() {
               paddingHorizontal: horizontalPadding,
               paddingTop: s(20),
               paddingBottom: s(110),
-              backgroundColor: colors.background,
             },
           ]}
         >
@@ -354,11 +314,10 @@ export default function SavingsGoalsScreen() {
                   styles.noGoalsText,
                   {
                     fontSize: s(16),
-                    color: colors.secondaryText,
                   },
                 ]}
               >
-                {t.noGoals}
+                No goals
               </Text>
             </View>
           ) : (
@@ -377,7 +336,6 @@ export default function SavingsGoalsScreen() {
                         borderRadius: s(25),
                         padding: s(22),
                         marginBottom: s(30),
-                        backgroundColor: colors.primary,
                       },
                     ]}
                   >
@@ -397,7 +355,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          {t.mainGoal}
+                          MAIN GOAL
                         </Text>
 
                         <Text
@@ -420,7 +378,7 @@ export default function SavingsGoalsScreen() {
                             : "chevron-down"
                         }
                         size={s(25)}
-                        color={colors.white}
+                        color="#fff"
                       />
                     </View>
 
@@ -441,7 +399,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          {t.saved}
+                          SAVED
                         </Text>
 
                         <Text
@@ -468,7 +426,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          {t.target}
+                          TARGET
                         </Text>
 
                         <Text
@@ -522,7 +480,7 @@ export default function SavingsGoalsScreen() {
                           },
                         ]}
                       >
-                        {progress}% {t.completed}
+                        {progress}% completed
                       </Text>
 
                       <Text
@@ -533,7 +491,7 @@ export default function SavingsGoalsScreen() {
                           },
                         ]}
                       >
-                        ${remaining.toFixed(2)} {t.left}
+                        ${remaining.toFixed(2)} left
                       </Text>
                     </View>
 
@@ -546,8 +504,8 @@ export default function SavingsGoalsScreen() {
                         },
                       ]}
                     >
-                      {t.deadline}:{" "}
-                      {mainGoal.endDate || t.noDeadline}
+                      Deadline:{" "}
+                      {mainGoal.endDate || "No deadline"}
                     </Text>
 
                     {expandedGoal === mainGoal.id && (
@@ -557,7 +515,6 @@ export default function SavingsGoalsScreen() {
                           {
                             marginTop: s(15),
                             paddingTop: s(15),
-                            borderTopColor: "rgba(255,255,255,0.25)",
                           },
                         ]}
                       >
@@ -567,11 +524,10 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(14),
                               marginBottom: s(5),
-                              color: colors.white,
                             },
                           ]}
                         >
-                          {t.description}
+                          Description
                         </Text>
 
                         <Text
@@ -580,12 +536,11 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(13),
                               marginBottom: s(15),
-                              color: "rgba(255,255,255,0.85)",
                             },
                           ]}
                         >
                           {mainGoal.description ||
-                            t.noDescription}
+                            "No description"}
                         </Text>
 
                         <Text
@@ -594,11 +549,10 @@ export default function SavingsGoalsScreen() {
                             {
                               fontSize: s(14),
                               marginBottom: s(8),
-                              color: colors.white,
                             },
                           ]}
                         >
-                          {t.addAmount}
+                          Add amount
                         </Text>
 
                         <TextInput
@@ -609,13 +563,10 @@ export default function SavingsGoalsScreen() {
                               borderRadius: s(12),
                               padding: s(12),
                               marginBottom: s(10),
-                              backgroundColor: colors.background,
-                              borderColor: colors.border,
-                              color: colors.text,
                             },
                           ]}
-                          placeholder={t.enterAmount}
-                          placeholderTextColor={colors.secondaryText}
+                          placeholder="Enter amount"
+                          placeholderTextColor="#999"
                           keyboardType="decimal-pad"
                           value={abono}
                           onChangeText={setAbono}
@@ -627,7 +578,6 @@ export default function SavingsGoalsScreen() {
                             {
                               borderRadius: s(20),
                               height: s(42),
-                              backgroundColor: colors.nav,
                             },
                           ]}
                           onPress={() =>
@@ -640,13 +590,12 @@ export default function SavingsGoalsScreen() {
                               styles.addMoneyButtonText,
                               {
                                 fontSize: s(14),
-                                color: colors.white,
                               },
                             ]}
                           >
                             {addingMoney
-                              ? t.adding
-                              : t.addAmount}
+                              ? "Adding..."
+                              : "Add amount"}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -663,11 +612,10 @@ export default function SavingsGoalsScreen() {
                       {
                         fontSize: s(19),
                         marginBottom: s(15),
-                        color: colors.text,
                       },
                     ]}
                   >
-                    {t.myOtherGoals}
+                    My other goals
                   </Text>
 
                   {savedgoal.map((goal) => {
@@ -704,15 +652,9 @@ export default function SavingsGoalsScreen() {
                               borderRadius: s(18),
                               padding: s(16),
                               marginBottom: s(15),
-                              backgroundColor: colors.background,
                             },
-                            expandedGoal === goal.id && [
+                            expandedGoal === goal.id &&
                               styles.expandedOtherGoal,
-                              {
-                                backgroundColor:
-                                  colors.background,
-                              },
-                            ],
                           ]}
                         >
                           <View
@@ -726,8 +668,6 @@ export default function SavingsGoalsScreen() {
                                   height: s(48),
                                   borderRadius: s(15),
                                   marginRight: s(13),
-                                  backgroundColor:
-                                    colors.nav,
                                 },
                               ]}
                             >
@@ -737,7 +677,7 @@ export default function SavingsGoalsScreen() {
                                   "wallet-outline"
                                 }
                                 size={s(24)}
-                                color={colors.white}
+                                color="#0b1624"
                               />
                             </View>
 
@@ -750,7 +690,6 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(16),
                                     marginBottom: s(4),
-                                    color: colors.text,
                                   },
                                 ]}
                                 numberOfLines={2}
@@ -763,7 +702,6 @@ export default function SavingsGoalsScreen() {
                                   styles.otherGoalAmount,
                                   {
                                     fontSize: s(13),
-                                    color: colors.secondaryText,
                                   },
                                 ]}
                               >
@@ -779,7 +717,7 @@ export default function SavingsGoalsScreen() {
                                   : "chevron-down"
                               }
                               size={s(23)}
-                              color={colors.icon}
+                              color="#0b1624"
                             />
                           </View>
 
@@ -799,8 +737,6 @@ export default function SavingsGoalsScreen() {
                                 {
                                   width: `${goalProgress}%`,
                                   borderRadius: s(10),
-                                  backgroundColor:
-                                    colors.primary,
                                 },
                               ]}
                             />
@@ -813,8 +749,6 @@ export default function SavingsGoalsScreen() {
                                 {
                                   marginTop: s(15),
                                   paddingTop: s(15),
-                                  borderTopColor:
-                                    colors.border,
                                 },
                               ]}
                             >
@@ -824,11 +758,10 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(14),
                                     marginBottom: s(5),
-                                    color: colors.text,
                                   },
                                 ]}
                               >
-                                {t.description}
+                                Description
                               </Text>
 
                               <Text
@@ -837,13 +770,11 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(13),
                                     marginBottom: s(15),
-                                    color:
-                                      colors.secondaryText,
                                   },
                                 ]}
                               >
                                 {goal.description ||
-                                  t.noDescription}
+                                  "No description"}
                               </Text>
 
                               <Text
@@ -852,11 +783,10 @@ export default function SavingsGoalsScreen() {
                                   {
                                     fontSize: s(14),
                                     marginBottom: s(8),
-                                    color: colors.text,
                                   },
                                 ]}
                               >
-                                {t.addAmount}
+                                Add amount
                               </Text>
 
                               <TextInput
@@ -867,17 +797,10 @@ export default function SavingsGoalsScreen() {
                                     borderRadius: s(12),
                                     padding: s(12),
                                     marginBottom: s(10),
-                                    backgroundColor:
-                                      colors.background,
-                                    borderColor:
-                                      colors.border,
-                                    color: colors.text,
                                   },
                                 ]}
-                                placeholder={t.enterAmount}
-                                placeholderTextColor={
-                                  colors.secondaryText
-                                }
+                                placeholder="Enter amount"
+                                placeholderTextColor="#999"
                                 keyboardType="decimal-pad"
                                 value={abono}
                                 onChangeText={setAbono}
@@ -889,8 +812,6 @@ export default function SavingsGoalsScreen() {
                                   {
                                     borderRadius: s(20),
                                     height: s(42),
-                                    backgroundColor:
-                                      colors.nav,
                                   },
                                 ]}
                                 onPress={() =>
@@ -903,13 +824,12 @@ export default function SavingsGoalsScreen() {
                                     styles.addMoneyButtonText,
                                     {
                                       fontSize: s(14),
-                                      color: colors.white,
                                     },
                                   ]}
                                 >
                                   {addingMoney
-                                    ? t.adding
-                                    : t.addAmount}
+                                    ? "Adding..."
+                                    : "Add amount"}
                                 </Text>
                               </TouchableOpacity>
                             </View>
@@ -935,15 +855,14 @@ export default function SavingsGoalsScreen() {
               ? 65 * scale
               : 65,
             borderTopLeftRadius: 78 * scale,
-            backgroundColor: colors.nav,
           },
         ]}
       >
         {[
           ["home-outline", "/home"],
           ["chart-box-outline", "/historial"],
-          ["swap-horizontal", "/expensesmanagement"],
-          ["layers-outline", "/currentgoal"],
+          ["swap-horizontal", "/expensesManagement"],
+          ["layers-outline", "/expensesManagement"],
           ["account-outline", "/profile"],
         ].map(([icon, route], index) => (
           <TouchableOpacity
@@ -959,7 +878,7 @@ export default function SavingsGoalsScreen() {
                   ? 37 * scale
                   : 35 * scale
               }
-              color={colors.white}
+              color="#FFFFFF"
             />
           </TouchableOpacity>
         ))}
@@ -971,40 +890,49 @@ export default function SavingsGoalsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#081023",
   },
 
   header: {
     width: "100%",
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    backgroundColor: "#081023",
   },
 
   backButton: {
-    width: 30,
-    alignItems: "flex-start",
-    justifyContent: "center",
+    position: "absolute",
+    zIndex: 10,
+    padding: 8,
   },
 
   headerTitle: {
-    fontWeight: "700",
+    fontWeight: "600",
+    textAlign: "center",
+    color: "#FFFFFF",
   },
 
   notificationButton: {
+    position: "absolute",
+    right: 18,
+    top: 50,
     alignItems: "center",
     justifyContent: "center",
   },
 
   content: {
     flex: 1,
+    backgroundColor: "#FFFFFF",
     overflow: "hidden",
   },
 
   scrollContent: {
+    backgroundColor: "#FFFFFF",
     minHeight: "100%",
   },
 
   mainGoalCard: {
+    backgroundColor: "#25B7D3",
   },
 
   mainGoalHeader: {
@@ -1072,13 +1000,16 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
+    color: "#0b1624",
     fontWeight: "bold",
   },
 
   otherGoalCard: {
+    backgroundColor: "#f2f2f2",
   },
 
   expandedOtherGoal: {
+    backgroundColor: "#f2f2f2",
   },
 
   otherGoalTop: {
@@ -1087,6 +1018,7 @@ const styles = StyleSheet.create({
   },
 
   goalIconContainer: {
+    backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1096,10 +1028,12 @@ const styles = StyleSheet.create({
   },
 
   otherGoalTitle: {
+    color: "#0b1624",
     fontWeight: "bold",
   },
 
   otherGoalAmount: {
+    color: "#6b7280",
   },
 
   otherProgressBackground: {
@@ -1109,33 +1043,43 @@ const styles = StyleSheet.create({
 
   otherProgressBar: {
     height: "100%",
+    backgroundColor: "#25B7D3",
   },
 
   expandedContent: {
     borderTopWidth: 1,
+    borderTopColor: "rgba(11,24,38,0.15)",
   },
 
   descriptionTitle: {
     fontWeight: "bold",
+    color: "#0b1624",
   },
 
   descriptionText: {
+    color: "#4b5563",
   },
 
   addMoneyTitle: {
     fontWeight: "bold",
+    color: "#0b1624",
   },
 
   addMoneyInput: {
+    backgroundColor: "#fff",
     borderWidth: 1,
+    borderColor: "#ccc",
+    color: "#0b1624",
   },
 
   addMoneyButton: {
+    backgroundColor: "#0b1624",
     alignItems: "center",
     justifyContent: "center",
   },
 
   addMoneyButtonText: {
+    color: "#fff",
     fontWeight: "bold",
   },
 
@@ -1145,6 +1089,7 @@ const styles = StyleSheet.create({
   },
 
   noGoalsText: {
+    color: "#6b7280",
     fontWeight: "bold",
   },
 
@@ -1153,6 +1098,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     width: "100%",
+    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",

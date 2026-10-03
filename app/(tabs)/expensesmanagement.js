@@ -21,7 +21,7 @@ import { auth, db } from "../../firebaseConfig.js";
 
 export default function ExpenseManagement() {
   const { colors, t } = useAppSettings();
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -49,7 +49,6 @@ export default function ExpenseManagement() {
   const s = (value) => Math.round(value * scale);
 
   const [expenses, setExpenses] = useState([]);
-  const [savings, setSavings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedExpense, setSelectedExpense] = useState(null);
 
@@ -84,43 +83,10 @@ export default function ExpenseManagement() {
       }
     );
 
-    const savingsQuery = query(collection(db, "Ahorros"));
-
-    const unsubscribeSavings = onSnapshot(
-      savingsQuery,
-      (snapshot) => {
-        const data = snapshot.docs
-          .map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }))
-          .filter((saving) => saving.uid === user.uid);
-
-        setSavings(data);
-      }
-    );
-
     return () => {
       unsubscribeExpenses();
-      unsubscribeSavings();
     };
   }, []);
-
-  const weeklyExpenses = expenses.filter(
-    (expense) =>
-      String(expense.expenseType || "").toLowerCase() === "weekly"
-  );
-
-  const unnecessaryExpenses = expenses.filter(
-    (expense) =>
-      String(expense.expenseType || "").toLowerCase() === "unnecessary"
-  );
-
-  const scheduledExpenses = expenses.filter(
-    (expense) =>
-      String(expense.expenseType || "").toLowerCase() === "monthly" ||
-      expense.isRecurrent === true
-  );
 
   const formatAmount = (amount) => {
     const numericAmount = Number(amount) || 0;
@@ -173,6 +139,176 @@ export default function ExpenseManagement() {
     return "wallet-outline";
   };
 
+  const convertDate = (value) => {
+    if (!value) return null;
+
+    if (value?.toDate) {
+      const date = value.toDate();
+
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+
+      return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+    }
+
+    if (value instanceof Date) {
+      if (isNaN(value.getTime())) {
+        return null;
+      }
+
+      return new Date(
+        value.getFullYear(),
+        value.getMonth(),
+        value.getDate()
+      );
+    }
+
+    if (typeof value === "number") {
+      const date = new Date(value);
+
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+
+      return new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
+      );
+    }
+
+    if (typeof value === "string") {
+      const cleanValue = value.trim();
+
+      const months = {
+        january: 0,
+        february: 1,
+        march: 2,
+        april: 3,
+        may: 4,
+        june: 5,
+        july: 6,
+        august: 7,
+        september: 8,
+        october: 9,
+        november: 10,
+        december: 11,
+      };
+
+      const monthMatch = cleanValue.match(
+        /^([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})$/
+      );
+
+      if (monthMatch) {
+        const month =
+          months[monthMatch[1].toLowerCase()];
+
+        if (month !== undefined) {
+          const year = Number(monthMatch[3]);
+          const day = Number(monthMatch[2]);
+
+          const date = new Date(
+            year,
+            month,
+            day
+          );
+
+          if (
+            !isNaN(date.getTime()) &&
+            date.getFullYear() === year &&
+            date.getMonth() === month &&
+            date.getDate() === day
+          ) {
+            return date;
+          }
+        }
+      }
+
+      const isoMatch = cleanValue.match(
+        /^(\d{4})-(\d{1,2})-(\d{1,2})/
+      );
+
+      if (isoMatch) {
+        const year = Number(isoMatch[1]);
+        const month = Number(isoMatch[2]) - 1;
+        const day = Number(isoMatch[3]);
+
+        const date = new Date(
+          year,
+          month,
+          day
+        );
+
+        if (
+          !isNaN(date.getTime()) &&
+          date.getFullYear() === year &&
+          date.getMonth() === month &&
+          date.getDate() === day
+        ) {
+          return date;
+        }
+      }
+
+      const slashMatch = cleanValue.match(
+        /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/
+      );
+
+      if (slashMatch) {
+        const first = Number(slashMatch[1]);
+        const second = Number(slashMatch[2]);
+        const year = Number(slashMatch[3]);
+
+        let day;
+        let month;
+
+        if (first > 12) {
+          day = first;
+          month = second - 1;
+        } else if (second > 12) {
+          month = first - 1;
+          day = second;
+        } else {
+          day = first;
+          month = second - 1;
+        }
+
+        const date = new Date(
+          year,
+          month,
+          day
+        );
+
+        if (
+          !isNaN(date.getTime()) &&
+          date.getFullYear() === year &&
+          date.getMonth() === month &&
+          date.getDate() === day
+        ) {
+          return date;
+        }
+
+        return null;
+      }
+
+      const date = new Date(cleanValue);
+
+      if (!isNaN(date.getTime())) {
+        return new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate()
+        );
+      }
+    }
+
+    return null;
+  };
+
   const formatDate = (date) => {
     if (!date) return "";
 
@@ -196,20 +332,167 @@ export default function ExpenseManagement() {
     return "";
   };
 
-  const toggleExpense = (section, id) => {
-    const expenseId = `${section}-${id}`;
-
+  const toggleExpense = (id) => {
     setSelectedExpense((current) =>
-      current === expenseId ? null : expenseId
+      current === id ? null : id
     );
   };
+
+  const getExpenseDate = (expense) => {
+    return convertDate(expense.date);
+  };
+
+  const isInCurrentWeek = (expense) => {
+    const expenseDate =
+      getExpenseDate(expense);
+
+    if (!expenseDate) {
+      return false;
+    }
+
+    const today = new Date();
+
+    const currentDate = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
+
+    const startOfWeek = new Date(
+      currentDate
+    );
+
+    const currentDay =
+      startOfWeek.getDay();
+
+    const difference =
+      currentDay === 0
+        ? 6
+        : currentDay - 1;
+
+    startOfWeek.setDate(
+      startOfWeek.getDate() -
+        difference
+    );
+
+    const endOfWeek = new Date(
+      startOfWeek
+    );
+
+    endOfWeek.setDate(
+      endOfWeek.getDate() + 7
+    );
+
+    return (
+      expenseDate.getTime() >=
+        startOfWeek.getTime() &&
+      expenseDate.getTime() <
+        endOfWeek.getTime()
+    );
+  };
+
+  const isInCurrentMonth = (expense) => {
+    const expenseDate =
+      getExpenseDate(expense);
+
+    if (!expenseDate) {
+      return false;
+    }
+
+    const today = new Date();
+
+    return (
+      expenseDate.getFullYear() ===
+        today.getFullYear() &&
+      expenseDate.getMonth() ===
+        today.getMonth()
+    );
+  };
+
+  const weeklyExpenses = expenses.filter(
+    (expense) =>
+      isInCurrentWeek(expense)
+  );
+
+  const monthlyExpenses = expenses.filter(
+    (expense) =>
+      isInCurrentMonth(expense)
+  );
+
+  const renderSection = (
+    title,
+    icon,
+    sectionExpenses
+  ) => (
+    <View style={styles.section}>
+      <View style={styles.sectionTitleContainer}>
+        <MaterialCommunityIcons
+          name={icon}
+          size={s(26)}
+          color={colors.icon}
+        />
+
+        <Text
+          style={[
+            styles.sectionTitle,
+            {
+              color: colors.text,
+              fontSize: s(20),
+            },
+          ]}
+        >
+          {title}
+        </Text>
+
+        <View
+          style={[
+            styles.line,
+            {
+              backgroundColor:
+                colors.secondaryText,
+            },
+          ]}
+        />
+      </View>
+
+      {sectionExpenses.length === 0 ? (
+        <Text
+          style={[
+            styles.emptyText,
+            {
+              color: colors.secondaryText,
+              fontSize: s(14),
+            },
+          ]}
+        >
+          {t.noExpensesRegistered}
+        </Text>
+      ) : (
+        sectionExpenses.map((expense) => (
+          <ExpenseItem
+            key={expense.id}
+            expense={expense}
+            selectedExpense={selectedExpense}
+            toggleExpense={toggleExpense}
+            formatAmount={formatAmount}
+            formatDate={formatDate}
+            getIcon={getIcon}
+            colors={colors}
+            t={t}
+            s={s}
+          />
+        ))
+      )}
+    </View>
+  );
 
   return (
     <View
       style={[
         styles.container,
         {
-          backgroundColor: colors.primaryBackground,
+          backgroundColor:
+            colors.primaryBackground,
         },
       ]}
     >
@@ -218,8 +501,10 @@ export default function ExpenseManagement() {
           styles.header,
           {
             height: 118 * scale,
-            paddingHorizontal: horizontalPadding,
-            backgroundColor: colors.primaryBackground,
+            paddingHorizontal:
+              horizontalPadding,
+            backgroundColor:
+              colors.primaryBackground,
           },
         ]}
       >
@@ -233,7 +518,9 @@ export default function ExpenseManagement() {
               left: 0,
               right: 0,
               textAlign: "center",
-              transform: [{ translateY: 1 * scale }],
+              transform: [
+                { translateY: 1 * scale },
+              ],
               color: colors.white,
             },
           ]}
@@ -248,10 +535,14 @@ export default function ExpenseManagement() {
             {
               zIndex: 10,
               elevation: 10,
-              transform: [{ translateY: 4 * scale }],
+              transform: [
+                { translateY: 4 * scale },
+              ],
             },
           ]}
-          onPress={() => router.replace("/home")}
+          onPress={() =>
+            router.replace("/home")
+          }
           activeOpacity={0.7}
           hitSlop={{
             top: 10,
@@ -283,7 +574,8 @@ export default function ExpenseManagement() {
             router.push({
               pathname: "/notifications",
               params: {
-                from: "/expensesmanagement",
+                from:
+                  "/expensesmanagement",
               },
             })
           }
@@ -301,18 +593,22 @@ export default function ExpenseManagement() {
         style={[
           styles.content,
           {
-            backgroundColor: colors.background,
+            backgroundColor:
+              colors.background,
           },
         ]}
         contentContainerStyle={{
-          paddingHorizontal: horizontalPadding,
+          paddingHorizontal:
+            horizontalPadding,
           paddingTop: s(20),
           paddingBottom: s(90),
         }}
         showsVerticalScrollIndicator={false}
       >
         {loading ? (
-          <View style={styles.loadingContainer}>
+          <View
+            style={styles.loadingContainer}
+          >
             <ActivityIndicator
               size="large"
               color={colors.icon}
@@ -322,7 +618,8 @@ export default function ExpenseManagement() {
               style={[
                 styles.loadingText,
                 {
-                  color: colors.secondaryText,
+                  color:
+                    colors.secondaryText,
                   fontSize: s(15),
                 },
               ]}
@@ -332,187 +629,23 @@ export default function ExpenseManagement() {
           </View>
         ) : (
           <>
-            <View style={styles.section}>
-              <View style={styles.sectionTitleContainer}>
-                <MaterialCommunityIcons
-                  name="card-outline"
-                  size={s(26)}
-                  color={colors.icon}
-                />
+            {renderSection(
+              t.expenseHistory,
+              "history",
+              expenses
+            )}
 
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      color: colors.text,
-                      fontSize: s(20),
-                    },
-                  ]}
-                >
-                  {t.weeklyExpenses}
-                </Text>
+            {renderSection(
+              t.weeklyExpenses,
+              "calendar-week",
+              weeklyExpenses
+            )}
 
-                <View
-                  style={[
-                    styles.line,
-                    {
-                      backgroundColor: colors.secondaryText,
-                    },
-                  ]}
-                />
-              </View>
-
-              {weeklyExpenses.length === 0 ? (
-                <Text
-                  style={[
-                    styles.emptyText,
-                    {
-                      color: colors.secondaryText,
-                      fontSize: s(14),
-                    },
-                  ]}
-                >
-                  {t.noWeeklyExpenses}
-                </Text>
-              ) : (
-                weeklyExpenses.map((expense) => (
-                  <ExpenseItem
-                    key={expense.id}
-                    expense={expense}
-                    section="weekly"
-                    selectedExpense={selectedExpense}
-                    toggleExpense={toggleExpense}
-                    formatAmount={formatAmount}
-                    formatDate={formatDate}
-                    getIcon={getIcon}
-                    colors={colors}
-                    t={t}
-                    s={s}
-                  />
-                ))
-              )}
-            </View>
-
-            <View style={styles.section}>
-              <View style={styles.sectionTitleContainer}>
-                <MaterialCommunityIcons
-                  name="coins-outline"
-                  size={s(26)}
-                  color={colors.icon}
-                />
-
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      color: colors.text,
-                      fontSize: s(20),
-                    },
-                  ]}
-                >
-                  {t.unnecessaryExpenses}
-                </Text>
-
-                <View
-                  style={[
-                    styles.line,
-                    {
-                      backgroundColor: colors.secondaryText,
-                    },
-                  ]}
-                />
-              </View>
-
-              {unnecessaryExpenses.length === 0 ? (
-                <Text
-                  style={[
-                    styles.emptyText,
-                    {
-                      color: colors.secondaryText,
-                      fontSize: s(14),
-                    },
-                  ]}
-                >
-                  {t.noUnnecessaryExpenses}
-                </Text>
-              ) : (
-                unnecessaryExpenses.map((expense) => (
-                  <ExpenseItem
-                    key={expense.id}
-                    expense={expense}
-                    section="unnecessary"
-                    selectedExpense={selectedExpense}
-                    toggleExpense={toggleExpense}
-                    formatAmount={formatAmount}
-                    formatDate={formatDate}
-                    getIcon={getIcon}
-                    colors={colors}
-                    t={t}
-                    s={s}
-                  />
-                ))
-              )}
-            </View>
-
-            <View style={styles.section}>
-              <View style={styles.sectionTitleContainer}>
-                <MaterialCommunityIcons
-                  name="calendar-outline"
-                  size={s(26)}
-                  color={colors.icon}
-                />
-
-                <Text
-                  style={[
-                    styles.sectionTitle,
-                    {
-                      color: colors.text,
-                      fontSize: s(20),
-                    },
-                  ]}
-                >
-                  {t.scheduledExpenses}
-                </Text>
-
-                <View
-                  style={[
-                    styles.line,
-                    {
-                      backgroundColor: colors.secondaryText,
-                    },
-                  ]}
-                />
-              </View>
-
-              {scheduledExpenses.length === 0 ? (
-                <Text
-                  style={[
-                    styles.emptyText,
-                    {
-                      color: colors.secondaryText,
-                      fontSize: s(14),
-                    },
-                  ]}
-                >
-                  {t.noScheduledExpenses}
-                </Text>
-              ) : (
-                scheduledExpenses.map((expense) => (
-                  <ScheduledExpense
-                    key={expense.id}
-                    expense={expense}
-                    selectedExpense={selectedExpense}
-                    toggleExpense={toggleExpense}
-                    formatAmount={formatAmount}
-                    formatDate={formatDate}
-                    getIcon={getIcon}
-                    colors={colors}
-                    t={t}
-                    s={s}
-                  />
-                ))
-              )}
-            </View>
+            {renderSection(
+              t.monthlyExpenses,
+              "calendar-month",
+              monthlyExpenses
+            )}
           </>
         )}
       </ScrollView>
@@ -541,7 +674,9 @@ export default function ExpenseManagement() {
       >
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/home")}
+          onPress={() =>
+            router.push("/home")
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
@@ -560,7 +695,9 @@ export default function ExpenseManagement() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/historial")}
+          onPress={() =>
+            router.push("/historial")
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
@@ -579,7 +716,11 @@ export default function ExpenseManagement() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/expensesmanagement")}
+          onPress={() =>
+            router.push(
+              "/expensesmanagement"
+            )
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
@@ -598,7 +739,9 @@ export default function ExpenseManagement() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/currentgoal")}
+          onPress={() =>
+            router.push("/currentgoal")
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
@@ -617,7 +760,9 @@ export default function ExpenseManagement() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/profile")}
+          onPress={() =>
+            router.push("/profile")
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons
@@ -640,7 +785,6 @@ export default function ExpenseManagement() {
 
 function ExpenseItem({
   expense,
-  section,
   selectedExpense,
   toggleExpense,
   formatAmount,
@@ -651,109 +795,14 @@ function ExpenseItem({
   s,
 }) {
   const isSelected =
-    selectedExpense === `${section}-${expense.id}`;
-
-  return (
-    <View>
-      <TouchableOpacity
-        style={styles.expenseRow}
-        onPress={() => toggleExpense(section, expense.id)}
-        activeOpacity={0.7}
-      >
-        <View
-          style={[
-            styles.expenseIcon,
-            {
-              width: s(43),
-              height: s(43),
-              borderRadius: s(12),
-              backgroundColor: colors.icon,
-            },
-          ]}
-        >
-          <Ionicons
-            name={getIcon(expense.category)}
-            size={s(23)}
-            color={colors.white}
-          />
-        </View>
-
-        <View style={styles.expenseInfo}>
-          <Text
-            style={[
-              styles.expenseName,
-              {
-                color: colors.text,
-                fontSize: s(15),
-              },
-            ]}
-            numberOfLines={1}
-          >
-            {expense.description ||
-              expense.category ||
-              t.expenseType}
-          </Text>
-
-          <Text
-            style={[
-              styles.date,
-              {
-                color: colors.icon,
-                fontSize: s(12),
-              },
-            ]}
-          >
-            {formatDate(expense.date)}
-          </Text>
-        </View>
-
-        <Text
-          style={[
-            styles.amount,
-            {
-              color: colors.icon,
-              fontSize: s(16),
-            },
-          ]}
-        >
-          {formatAmount(expense.amount)}
-        </Text>
-      </TouchableOpacity>
-
-      {isSelected && (
-        <ExpenseDetails
-          expense={expense}
-          formatAmount={formatAmount}
-          formatDate={formatDate}
-          colors={colors}
-          t={t}
-          s={s}
-        />
-      )}
-    </View>
-  );
-}
-
-function ScheduledExpense({
-  expense,
-  selectedExpense,
-  toggleExpense,
-  formatAmount,
-  formatDate,
-  getIcon,
-  colors,
-  t,
-  s,
-}) {
-  const isSelected =
-    selectedExpense === `scheduled-${expense.id}`;
+    selectedExpense === expense.id;
 
   return (
     <View>
       <TouchableOpacity
         style={styles.expenseRow}
         onPress={() =>
-          toggleExpense("scheduled", expense.id)
+          toggleExpense(expense.id)
         }
         activeOpacity={0.7}
       >
@@ -764,7 +813,8 @@ function ScheduledExpense({
               width: s(43),
               height: s(43),
               borderRadius: s(12),
-              backgroundColor: colors.icon,
+              backgroundColor:
+                colors.icon,
             },
           ]}
         >
@@ -786,8 +836,7 @@ function ScheduledExpense({
             ]}
             numberOfLines={1}
           >
-            {expense.description ||
-              expense.category ||
+            {expense.category ||
               t.expenseType}
           </Text>
 
@@ -839,6 +888,16 @@ function ExpenseDetails({
   t,
   s,
 }) {
+  const amount =
+    Number(expense.amount) || 0;
+
+  const roundedAmount =
+    Number(expense.roundedAmount) ||
+    amount;
+
+  const savings =
+    roundedAmount - amount;
+
   return (
     <View
       style={[
@@ -859,7 +918,10 @@ function ExpenseDetails({
 
       <DetailRow
         label={t.category}
-        value={expense.category || t.notAvailable}
+        value={
+          expense.category ||
+          t.notAvailable
+        }
         colors={colors}
         s={s}
       />
@@ -875,18 +937,15 @@ function ExpenseDetails({
       />
 
       <DetailRow
-        label={t.description}
-        value={
-          expense.description ||
-          t.notAvailable
-        }
+        label={t.roundedAmount}
+        value={formatAmount(roundedAmount)}
         colors={colors}
         s={s}
       />
 
       <DetailRow
-        label={t.roundedAmount}
-        value={formatAmount(expense.roundingAmount)}
+        label={t.savings}
+        value={formatAmount(savings)}
         colors={colors}
         s={s}
       />
@@ -902,11 +961,10 @@ function ExpenseDetails({
       />
 
       <DetailRow
-        label={t.recurring}
+        label={t.frequency}
         value={
-          expense.isRecurrent
-            ? t.yes
-            : t.no
+          expense.frequency ||
+          t.notAvailable
         }
         colors={colors}
         s={s}

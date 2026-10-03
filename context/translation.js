@@ -68,12 +68,16 @@ const translations = {
     profile: "Profile",
 
     expenseManagement: "Expense Management",
+    expenseHistory: "Expenses History",
     weeklyExpenses: "Weekly expenses",
+    monthlyExpenses: "Monthly expenses",
     unnecessaryExpenses: "Unnecessary expenses",
     scheduledExpenses: "Scheduled expenses",
     noWeeklyExpenses: "No weekly expenses",
+    noMonthlyExpenses: "No monthly expenses",
     noUnnecessaryExpenses: "No unnecessary expenses",
     noScheduledExpenses: "No scheduled expenses",
+    noExpensesRegistered: "No expenses registered",
     loadingExpenses: "Loading expenses...",
     amount: "Amount",
     category: "Category",
@@ -82,6 +86,8 @@ const translations = {
     roundedAmount: "Rounded amount",
     expenseType: "Expense type",
     recurring: "Recurring",
+    frequency: "Frequency",
+    savings: "Savings",
     yes: "Yes",
     no: "No",
     notAvailable: "N/A",
@@ -885,12 +891,16 @@ const translations = {
     profile: "Perfil",
 
     expenseManagement: "Gestión de gastos",
+    expenseHistory: "Historial de gastos",
     weeklyExpenses: "Gastos semanales",
+    monthlyExpenses: "Gastos mensuales",
     unnecessaryExpenses: "Gastos innecesarios",
     scheduledExpenses: "Gastos programados",
     noWeeklyExpenses: "No hay gastos semanales",
+    noMonthlyExpenses: "No hay gastos mensuales",
     noUnnecessaryExpenses: "No hay gastos innecesarios",
     noScheduledExpenses: "No hay gastos programados",
+    noExpensesRegistered: "No hay gastos registrados",
     loadingExpenses: "Cargando gastos...",
     amount: "Monto",
     category: "Categoría",
@@ -899,6 +909,8 @@ const translations = {
     roundedAmount: "Monto redondeado",
     expenseType: "Tipo de gasto",
     recurring: "Recurrente",
+    frequency: "Frecuencia",
+    savings: "Ahorros",
     yes: "Sí",
     no: "No",
     notAvailable: "N/D",
@@ -1197,8 +1209,6 @@ const translations = {
     amountAddError:
       "No se pudo agregar la cantidad.",
 
-    deleteAccount:
-      "Eliminar cuenta",
     deleteAccountDescription:
       "Esta acción eliminará todos tus datos y no se puede deshacer.",
     enterYourPassword:

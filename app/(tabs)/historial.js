@@ -150,8 +150,10 @@ export default function HistorialScreen() {
                   ),
 
                   roundingAmount: Number(
-                    expense?.roundingAmount ??
-                      saving.roundingAmount ??
+                    expense?.roundedAmount ??
+                      expense?.roundingAmount ??
+                      saving?.roundedAmount ??
+                      saving?.roundingAmount ??
                       0
                   ),
 

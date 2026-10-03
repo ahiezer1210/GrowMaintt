@@ -41,7 +41,21 @@ export default function Registerexpenses() {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [expenseType, setExpenseType] = useState("");
+  const [frequency, setFrequency] = useState("");
   const [date, setDate] = useState("");
+
+  const numericAmount = parseFloat(amount);
+
+  const validAmount =
+    !isNaN(numericAmount) && numericAmount > 0;
+
+  const roundedAmount = validAmount
+    ? Math.ceil(numericAmount)
+    : 0;
+
+  const savings = validAmount
+    ? roundedAmount - numericAmount
+    : 0;
 
   const navItems = [
     { icon: "home-outline", route: "/home" },
@@ -51,13 +65,18 @@ export default function Registerexpenses() {
     { icon: "account-outline", route: "/profile" },
   ];
 
-  // Vuelve al Home que ya existe en la pila (no apila otro Home)
   const goHome = () => {
     router.replace("/home");
   };
 
   const saveExpense = async () => {
-    if (!amount || !category || !expenseType || !date) {
+    if (
+      !amount ||
+      !category ||
+      !expenseType ||
+      !frequency ||
+      !date
+    ) {
       Alert.alert("Error", "Please complete all fields.");
       return;
     }
@@ -80,7 +99,6 @@ export default function Registerexpenses() {
       const roundedAmount = Math.ceil(numericAmount);
       const savings = roundedAmount - numericAmount;
 
-      // Se guarda "uid" (lo que lee Home) y "userId" (por compatibilidad)
       await addDoc(collection(db, "Registro de gastos"), {
         uid: user.uid,
         userId: user.uid,
@@ -88,6 +106,7 @@ export default function Registerexpenses() {
         roundedAmount,
         category,
         expenseType,
+        frequency,
         date,
         createdAt: serverTimestamp(),
       });
@@ -102,7 +121,11 @@ export default function Registerexpenses() {
         });
       }
 
-      const notificationRef = doc(db, "Notificaciones", `${user.uid}_Savings`);
+      const notificationRef = doc(
+        db,
+        "Notificaciones",
+        `${user.uid}_Savings`
+      );
 
       await setDoc(
         notificationRef,
@@ -124,6 +147,7 @@ export default function Registerexpenses() {
       setAmount("");
       setCategory("");
       setExpenseType("");
+      setFrequency("");
       setDate("");
     } catch (error) {
       console.error("Error saving expense:", error);
@@ -136,6 +160,7 @@ export default function Registerexpenses() {
     setAmount("");
     setCategory("");
     setExpenseType("");
+    setFrequency("");
     setDate("");
 
     goHome();
@@ -152,24 +177,35 @@ export default function Registerexpenses() {
 
   return (
     <View
-      style={[styles.screen, { backgroundColor: colors.primaryBackground }]}
+      style={[
+        styles.screen,
+        { backgroundColor: colors.primaryBackground },
+      ]}
     >
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle={isDarkTheme ? "light-content" : "dark-content"}
+        barStyle={
+          isDarkTheme ? "light-content" : "dark-content"
+        }
       />
 
       <View
-        style={[styles.app, { backgroundColor: colors.primaryBackground }]}
+        style={[
+          styles.app,
+          { backgroundColor: colors.primaryBackground },
+        ]}
       >
-        {/* HEADER */}
         <View
           style={[
             styles.header,
             {
               height: 118 * hs,
-              paddingHorizontal: small ? 18 : tablet ? 45 : 25,
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                ? 45
+                : 25,
               backgroundColor: colors.header,
             },
           ]}
@@ -177,11 +213,20 @@ export default function Registerexpenses() {
           <TouchableOpacity
             style={[
               styles.back,
-              { transform: [{ translateY: 4 * hs }] },
+              {
+                transform: [
+                  { translateY: 4 * hs },
+                ],
+              },
             ]}
             onPress={goHome}
             activeOpacity={0.7}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            hitSlop={{
+              top: 10,
+              bottom: 10,
+              left: 10,
+              right: 10,
+            }}
           >
             <MaterialCommunityIcons
               name="arrow-left"
@@ -196,7 +241,10 @@ export default function Registerexpenses() {
               styles.headerTitle,
               {
                 fontSize: 25 * hs,
-                transform: [{ translateX: 4 * hs }, { translateY: 1 * hs }],
+                transform: [
+                  { translateX: 4 * hs },
+                  { translateY: 1 * hs },
+                ],
                 color: colors.white,
               },
             ]}
@@ -207,7 +255,11 @@ export default function Registerexpenses() {
           <TouchableOpacity
             style={[
               styles.headerBell,
-              { transform: [{ translateY: 4 * hs }] },
+              {
+                transform: [
+                  { translateY: 4 * hs },
+                ],
+              },
             ]}
             onPress={abrirNotificaciones}
             activeOpacity={0.7}
@@ -220,20 +272,31 @@ export default function Registerexpenses() {
           </TouchableOpacity>
         </View>
 
-        {/* MAIN */}
         <View
           style={[
             styles.main,
             {
               backgroundColor: colors.background,
-              borderTopLeftRadius: tablet ? 55 : small ? 35 : 45,
-              borderTopRightRadius: tablet ? 55 : small ? 35 : 45,
+              borderTopLeftRadius: tablet
+                ? 55
+                : small
+                ? 35
+                : 45,
+              borderTopRightRadius: tablet
+                ? 55
+                : small
+                ? 35
+                : 45,
             },
           ]}
         >
           <KeyboardAvoidingView
             style={styles.keyboard}
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior={
+              Platform.OS === "ios"
+                ? "padding"
+                : undefined
+            }
           >
             <ScrollView
               contentContainerStyle={[
@@ -250,7 +313,10 @@ export default function Registerexpenses() {
               <Text
                 style={[
                   styles.label,
-                  { color: colors.text, fontSize: scale(16) },
+                  {
+                    color: colors.text,
+                    fontSize: scale(16),
+                  },
                 ]}
               >
                 Amount
@@ -269,14 +335,88 @@ export default function Registerexpenses() {
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="$0.00"
-                placeholderTextColor={colors.secondaryText}
+                placeholderTextColor={
+                  colors.secondaryText
+                }
                 keyboardType="decimal-pad"
               />
+
+              <View style={styles.roundingGroup}>
+                <Text
+                  style={[
+                    styles.label,
+                    {
+                      color: colors.text,
+                      fontSize: scale(16),
+                    },
+                  ]}
+                >
+                  Automatic Rounding
+                </Text>
+
+                <View
+                  style={[
+                    styles.input,
+                    styles.roundingInput,
+                    {
+                      borderColor: colors.border,
+                      backgroundColor: colors.card,
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="cash-plus"
+                    size={scale(22)}
+                    color="#25B5D1"
+                  />
+
+                  <View style={styles.roundingTextContainer}>
+                    <Text
+                      style={[
+                        styles.roundingValue,
+                        {
+                          color: colors.text,
+                          fontSize: scale(16),
+                        },
+                      ]}
+                    >
+                      $
+                      {validAmount
+                        ? roundedAmount.toFixed(2)
+                        : "0.00"}
+                    </Text>
+
+                    <Text
+                      style={[
+                        styles.roundingSave,
+                        {
+                          color: "#25B5D1",
+                          fontSize: scale(12),
+                        },
+                      ]}
+                    >
+                      Save $
+                      {validAmount
+                        ? savings.toFixed(2)
+                        : "0.00"}
+                    </Text>
+                  </View>
+
+                  <MaterialCommunityIcons
+                    name="arrow-up-right"
+                    size={scale(20)}
+                    color="#25B5D1"
+                  />
+                </View>
+              </View>
 
               <Text
                 style={[
                   styles.label,
-                  { color: colors.text, fontSize: scale(16) },
+                  {
+                    color: colors.text,
+                    fontSize: scale(16),
+                  },
                 ]}
               >
                 Category
@@ -295,13 +435,18 @@ export default function Registerexpenses() {
                 value={category}
                 onChangeText={setCategory}
                 placeholder="E.g. Food"
-                placeholderTextColor={colors.secondaryText}
+                placeholderTextColor={
+                  colors.secondaryText
+                }
               />
 
               <Text
                 style={[
                   styles.label,
-                  { color: colors.text, fontSize: scale(16) },
+                  {
+                    color: colors.text,
+                    fontSize: scale(16),
+                  },
                 ]}
               >
                 Expense Type
@@ -320,13 +465,72 @@ export default function Registerexpenses() {
                 value={expenseType}
                 onChangeText={setExpenseType}
                 placeholder="E.g. Necessary"
-                placeholderTextColor={colors.secondaryText}
+                placeholderTextColor={
+                  colors.secondaryText
+                }
               />
 
               <Text
                 style={[
                   styles.label,
-                  { color: colors.text, fontSize: scale(16) },
+                  {
+                    color: colors.text,
+                    fontSize: scale(16),
+                  },
+                ]}
+              >
+                Frequency
+              </Text>
+
+              <View style={styles.frequencyContainer}>
+                {["Daily", "Weekly", "Monthly"].map(
+                  (item) => (
+                    <TouchableOpacity
+                      key={item}
+                      style={[
+                        styles.frequencyButton,
+                        {
+                          borderColor:
+                            frequency === item
+                              ? "#25B5D1"
+                              : colors.border,
+                          backgroundColor:
+                            frequency === item
+                              ? "#25B5D1"
+                              : colors.card,
+                        },
+                      ]}
+                      onPress={() =>
+                        setFrequency(item)
+                      }
+                      activeOpacity={0.8}
+                    >
+                      <Text
+                        style={[
+                          styles.frequencyText,
+                          {
+                            color:
+                              frequency === item
+                                ? "#FFFFFF"
+                                : colors.text,
+                            fontSize: scale(14),
+                          },
+                        ]}
+                      >
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
+                  )
+                )}
+              </View>
+
+              <Text
+                style={[
+                  styles.label,
+                  {
+                    color: colors.text,
+                    fontSize: scale(16),
+                  },
                 ]}
               >
                 Date
@@ -345,7 +549,9 @@ export default function Registerexpenses() {
                 value={date}
                 onChangeText={setDate}
                 placeholder="DD/MM/YYYY"
-                placeholderTextColor={colors.secondaryText}
+                placeholderTextColor={
+                  colors.secondaryText
+                }
               />
 
               <TouchableOpacity
@@ -362,7 +568,14 @@ export default function Registerexpenses() {
                 onPress={saveExpense}
                 activeOpacity={0.8}
               >
-                <Text style={[styles.saveButtonText, { fontSize: scale(17) }]}>
+                <Text
+                  style={[
+                    styles.saveButtonText,
+                    {
+                      fontSize: scale(17),
+                    },
+                  ]}
+                >
                   Save
                 </Text>
               </TouchableOpacity>
@@ -374,7 +587,9 @@ export default function Registerexpenses() {
                     width: scale(225),
                     height: scale(54),
                     borderRadius: scale(27),
-                    backgroundColor: isDarkTheme ? "#2A2A2A" : "#E5E5E5",
+                    backgroundColor: isDarkTheme
+                      ? "#2A2A2A"
+                      : "#E5E5E5",
                     marginTop: scale(12),
                   },
                 ]}
@@ -384,7 +599,10 @@ export default function Registerexpenses() {
                 <Text
                   style={[
                     styles.cancelButtonText,
-                    { color: colors.text, fontSize: scale(17) },
+                    {
+                      color: colors.text,
+                      fontSize: scale(17),
+                    },
                   ]}
                 >
                   Cancel
@@ -394,7 +612,6 @@ export default function Registerexpenses() {
           </KeyboardAvoidingView>
         </View>
 
-        {/* BOTTOM NAV */}
         <View
           style={[
             styles.bottomBar,
@@ -411,12 +628,18 @@ export default function Registerexpenses() {
               style={styles.navItem}
               activeOpacity={0.8}
               onPress={() =>
-                item.route === "/home" ? goHome() : router.push(item.route)
+                item.route === "/home"
+                  ? goHome()
+                  : router.push(item.route)
               }
             >
               <MaterialCommunityIcons
                 name={item.icon}
-                size={(item.icon === "swap-horizontal" ? 37 : 35) * hs}
+                size={
+                  (item.icon === "swap-horizontal"
+                    ? 37
+                    : 35) * hs
+                }
                 color={colors.white}
               />
             </TouchableOpacity>
@@ -488,6 +711,52 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     marginBottom: 8,
+  },
+
+  roundingGroup: {
+    width: "100%",
+    marginBottom: 0,
+  },
+
+  roundingInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+
+  roundingTextContainer: {
+    flex: 1,
+    marginLeft: 10,
+  },
+
+  roundingValue: {
+    fontWeight: "600",
+  },
+
+  roundingSave: {
+    fontWeight: "600",
+    marginTop: 2,
+  },
+
+  frequencyContainer: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+
+  frequencyButton: {
+    flex: 1,
+    minHeight: 52,
+    borderWidth: 1,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 3,
+  },
+
+  frequencyText: {
+    fontWeight: "600",
   },
 
   saveButton: {
