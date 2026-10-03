@@ -160,7 +160,7 @@ export default function PrivacyScreen() {
                 transform: [
                   {
                     translateX:
-                      7 *
+                      5 *
                       (small
                         ? 0.85
                         : tablet

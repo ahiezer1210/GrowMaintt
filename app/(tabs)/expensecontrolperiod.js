@@ -123,33 +123,62 @@ export default function Expensescreen() {
       style={[
         styles.container,
         {
-          backgroundColor: colors.background,
+          backgroundColor: colors.header,
         },
       ]}
     >
+      {/* HEADER IGUAL AL LOGOUT */}
       <View
         style={[
           styles.header,
           {
-            height: s(118),
+            height:
+              118 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                  ? 1.15
+                  : 1),
             paddingHorizontal: isSmallScreen
-              ? s(18)
+              ? 18
               : isTablet
-                ? s(45)
-                : s(25),
+                ? 45
+                : 25,
             backgroundColor: colors.header,
           },
         ]}
       >
         <TouchableOpacity
-          style={styles.headerButton}
+          style={[
+            styles.back,
+            {
+              transform: [
+                {
+                  translateY:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                        ? 1.15
+                        : 1),
+                },
+              ],
+            },
+          ]}
           onPress={() => router.back()}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={s(35)}
-            color="#FFFFFF"
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                  ? 1.15
+                  : 1)
+            }
+            color={colors.white}
           />
         </TouchableOpacity>
 
@@ -157,8 +186,33 @@ export default function Expensescreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(25),
-              lineHeight: s(29),
+              fontSize:
+                25 *
+                (isSmallScreen
+                  ? 0.85
+                  : isTablet
+                    ? 1.15
+                    : 1),
+              transform: [
+                {
+                  translateX:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                        ? 1.15
+                        : 1),
+                },
+                {
+                  translateY:
+                    1 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                        ? 1.15
+                        : 1),
+                },
+              ],
               color: colors.white,
             },
           ]}
@@ -167,7 +221,22 @@ export default function Expensescreen() {
         </Text>
 
         <TouchableOpacity
-          style={styles.headerButton}
+          style={[
+            styles.headerBell,
+            {
+              transform: [
+                {
+                  translateY:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                        ? 1.15
+                        : 1),
+                },
+              ],
+            },
+          ]}
           onPress={() =>
             router.push({
               pathname: "/notifications",
@@ -180,319 +249,346 @@ export default function Expensescreen() {
         >
           <MaterialCommunityIcons
             name="bell-circle-outline"
-            size={s(35)}
-            color="#FFFFFF"
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                  ? 1.15
+                  : 1)
+            }
+            color={colors.white}
           />
         </TouchableOpacity>
       </View>
 
+      {/* ESTE CONTENEDOR ES EL QUE HACE VISIBLE LA CURVA */}
       <View
         style={[
-          styles.card,
+          styles.mainWrapper,
           {
-            borderTopLeftRadius: s(55),
-            borderTopRightRadius: s(55),
-            paddingHorizontal: horizontalPadding,
-            paddingTop: s(50),
-            backgroundColor: colors.background,
+            backgroundColor: colors.header,
           },
         ]}
       >
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            paddingBottom: s(100),
-          }}
+        {/* CARD */}
+        <View
+          style={[
+            styles.card,
+            {
+              borderTopLeftRadius: isTablet
+                ? 55
+                : isSmallScreen
+                  ? 35
+                  : 45,
+              borderTopRightRadius: isTablet
+                ? 55
+                : isSmallScreen
+                  ? 35
+                  : 45,
+              paddingHorizontal: horizontalPadding,
+              paddingTop: s(50),
+              backgroundColor: colors.background,
+            },
+          ]}
         >
-          <Text
-            style={[
-              styles.instruction,
-              {
-                color: colors.text,
-              },
-            ]}
-          >
-            {t.chooseWhen}
-          </Text>
-
-          <Text
-            style={[
-              styles.instruction,
-              {
-                color: colors.text,
-              },
-            ]}
-          >
-            {t.reviewExpenses}
-          </Text>
-
-          <Text
-            style={[
-              styles.subtitle,
-              {
-                color: colors.secondaryText,
-              },
-            ]}
-          >
-            {t.selectOneOrMore}
-          </Text>
-
-          <View
-            style={[
-              styles.options,
-              {
-                marginTop: s(30),
-                gap: s(12),
-              },
-            ]}
-          >
-            {periods.map((period) => {
-              const selected = tempSelected.includes(period.id);
-
-              return (
-                <TouchableOpacity
-                  key={period.id}
-                  style={[
-                    styles.option,
-                    {
-                      minHeight: s(70),
-                      borderRadius: s(20),
-                      paddingHorizontal: s(15),
-                      backgroundColor: selected
-                        ? "#25B7D3"
-                        : isDarkTheme
-                          ? colors.primaryBackground
-                          : "#FFFFFF",
-                      borderColor: selected
-                        ? "#25B7D3"
-                        : colors.border,
-                    },
-                  ]}
-                  onPress={() => togglePeriod(period.id)}
-                  activeOpacity={0.8}
-                >
-                  <View
-                    style={[
-                      styles.iconBox,
-                      {
-                        width: s(45),
-                        height: s(45),
-                        borderRadius: s(15),
-                        backgroundColor: selected
-                          ? "rgba(255,255,255,0.2)"
-                          : isDarkTheme
-                            ? "#172037"
-                            : "#E8F9FC",
-                      },
-                    ]}
-                  >
-                    <MaterialCommunityIcons
-                      name={period.icon}
-                      size={s(23)}
-                      color={selected ? "#FFFFFF" : "#25B7D3"}
-                    />
-                  </View>
-
-                  <View
-                    style={[
-                      styles.optionInfo,
-                      {
-                        marginLeft: s(14),
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.optionTitle,
-                        {
-                          fontSize: s(16),
-                          color: selected
-                            ? "#FFFFFF"
-                            : colors.text,
-                        },
-                      ]}
-                    >
-                      {period.title}
-                    </Text>
-
-                    <Text
-                      style={[
-                        styles.optionDescription,
-                        {
-                          fontSize: s(12),
-                          marginTop: s(3),
-                          color: selected
-                            ? "#FFFFFF"
-                            : colors.secondaryText,
-                        },
-                      ]}
-                    >
-                      {period.description}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.checkbox,
-                      {
-                        width: s(23),
-                        height: s(23),
-                        borderRadius: s(7),
-                        borderColor: selected
-                          ? "#081023"
-                          : colors.border,
-                        backgroundColor: selected
-                          ? "#081023"
-                          : "transparent",
-                      },
-                    ]}
-                  >
-                    {selected && (
-                      <MaterialCommunityIcons
-                        name="check"
-                        size={s(15)}
-                        color="#FFFFFF"
-                      />
-                    )}
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-
-            <TouchableOpacity
-              style={[
-                styles.option,
-                {
-                  minHeight: s(70),
-                  borderRadius: s(20),
-                  paddingHorizontal: s(15),
-                  backgroundColor: allSelected
-                    ? "#25B7D3"
-                    : isDarkTheme
-                      ? colors.primaryBackground
-                      : "#FFFFFF",
-                  borderColor: allSelected
-                    ? "#25B7D3"
-                    : colors.border,
-                },
-              ]}
-              onPress={selectAll}
-              activeOpacity={0.8}
-            >
-              <View
-                style={[
-                  styles.iconBox,
-                  {
-                    width: s(45),
-                    height: s(45),
-                    borderRadius: s(15),
-                    backgroundColor: allSelected
-                      ? "rgba(255,255,255,0.2)"
-                      : isDarkTheme
-                        ? "#172037"
-                        : "#E8F9FC",
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="layers-outline"
-                  size={s(23)}
-                  color={allSelected ? "#FFFFFF" : "#25B7D3"}
-                />
-              </View>
-
-              <View
-                style={[
-                  styles.optionInfo,
-                  {
-                    marginLeft: s(14),
-                  },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.optionTitle,
-                    {
-                      fontSize: s(16),
-                      color: allSelected
-                        ? "#FFFFFF"
-                        : colors.text,
-                    },
-                  ]}
-                >
-                  {t.allThree}
-                </Text>
-
-                <Text
-                  style={[
-                    styles.optionDescription,
-                    {
-                      fontSize: s(12),
-                      marginTop: s(3),
-                      color: allSelected
-                        ? "#FFFFFF"
-                        : colors.secondaryText,
-                    },
-                  ]}
-                >
-                  {t.dailyWeeklyMonthly}
-                </Text>
-              </View>
-
-              <View
-                style={[
-                  styles.checkbox,
-                  {
-                    width: s(23),
-                    height: s(23),
-                    borderRadius: s(7),
-                    borderColor: allSelected
-                      ? "#081023"
-                      : colors.border,
-                    backgroundColor: allSelected
-                      ? "#081023"
-                      : "transparent",
-                  },
-                ]}
-              >
-                {allSelected && (
-                  <MaterialCommunityIcons
-                    name="check"
-                    size={s(15)}
-                    color="#FFFFFF"
-                  />
-                )}
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              {
-                width: s(150),
-                height: s(40),
-                borderRadius: s(20),
-                marginTop: s(30),
-              },
-            ]}
-            onPress={savePeriod}
-            activeOpacity={0.8}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingBottom: s(100),
+            }}
           >
             <Text
               style={[
-                styles.saveText,
+                styles.instruction,
                 {
-                  fontSize: s(15),
+                  color: colors.text,
                 },
               ]}
             >
-              {t.savePeriod}
+              {t.chooseWhen}
             </Text>
-          </TouchableOpacity>
-        </ScrollView>
+
+            <Text
+              style={[
+                styles.instruction,
+                {
+                  color: colors.text,
+                },
+              ]}
+            >
+              {t.reviewExpenses}
+            </Text>
+
+            <Text
+              style={[
+                styles.subtitle,
+                {
+                  color: colors.secondaryText,
+                },
+              ]}
+            >
+              {t.selectOneOrMore}
+            </Text>
+
+            <View
+              style={[
+                styles.options,
+                {
+                  marginTop: s(30),
+                  gap: s(12),
+                },
+              ]}
+            >
+              {periods.map((period) => {
+                const selected = tempSelected.includes(period.id);
+
+                return (
+                  <TouchableOpacity
+                    key={period.id}
+                    style={[
+                      styles.option,
+                      {
+                        minHeight: s(70),
+                        borderRadius: s(20),
+                        paddingHorizontal: s(15),
+                        backgroundColor: selected
+                          ? "#25B7D3"
+                          : isDarkTheme
+                            ? colors.primaryBackground
+                            : "#FFFFFF",
+                        borderColor: selected
+                          ? "#25B7D3"
+                          : colors.border,
+                      },
+                    ]}
+                    onPress={() => togglePeriod(period.id)}
+                    activeOpacity={0.8}
+                  >
+                    <View
+                      style={[
+                        styles.iconBox,
+                        {
+                          width: s(45),
+                          height: s(45),
+                          borderRadius: s(15),
+                          backgroundColor: selected
+                            ? "rgba(255,255,255,0.2)"
+                            : isDarkTheme
+                              ? "#172037"
+                              : "#E8F9FC",
+                        },
+                      ]}
+                    >
+                      <MaterialCommunityIcons
+                        name={period.icon}
+                        size={s(23)}
+                        color={selected ? "#FFFFFF" : "#25B7D3"}
+                      />
+                    </View>
+
+                    <View
+                      style={[
+                        styles.optionInfo,
+                        {
+                          marginLeft: s(14),
+                        },
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.optionTitle,
+                          {
+                            fontSize: s(16),
+                            color: selected
+                              ? "#FFFFFF"
+                              : colors.text,
+                          },
+                        ]}
+                      >
+                        {period.title}
+                      </Text>
+
+                      <Text
+                        style={[
+                          styles.optionDescription,
+                          {
+                            fontSize: s(12),
+                            marginTop: s(3),
+                            color: selected
+                              ? "#FFFFFF"
+                              : colors.secondaryText,
+                          },
+                        ]}
+                      >
+                        {period.description}
+                      </Text>
+                    </View>
+
+                    <View
+                      style={[
+                        styles.checkbox,
+                        {
+                          width: s(23),
+                          height: s(23),
+                          borderRadius: s(7),
+                          borderColor: selected
+                            ? "#081023"
+                            : colors.border,
+                          backgroundColor: selected
+                            ? "#081023"
+                            : "transparent",
+                        },
+                      ]}
+                    >
+                      {selected && (
+                        <MaterialCommunityIcons
+                          name="check"
+                          size={s(15)}
+                          color="#FFFFFF"
+                        />
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+
+              <TouchableOpacity
+                style={[
+                  styles.option,
+                  {
+                    minHeight: s(70),
+                    borderRadius: s(20),
+                    paddingHorizontal: s(15),
+                    backgroundColor: allSelected
+                      ? "#25B7D3"
+                      : isDarkTheme
+                        ? colors.primaryBackground
+                        : "#FFFFFF",
+                    borderColor: allSelected
+                      ? "#25B7D3"
+                      : colors.border,
+                  },
+                ]}
+                onPress={selectAll}
+                activeOpacity={0.8}
+              >
+                <View
+                  style={[
+                    styles.iconBox,
+                    {
+                      width: s(45),
+                      height: s(45),
+                      borderRadius: s(15),
+                      backgroundColor: allSelected
+                        ? "rgba(255,255,255,0.2)"
+                        : isDarkTheme
+                          ? "#172037"
+                          : "#E8F9FC",
+                    },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="layers-outline"
+                    size={s(23)}
+                    color={allSelected ? "#FFFFFF" : "#25B7D3"}
+                  />
+                </View>
+
+                <View
+                  style={[
+                    styles.optionInfo,
+                    {
+                      marginLeft: s(14),
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.optionTitle,
+                      {
+                        fontSize: s(16),
+                        color: allSelected
+                          ? "#FFFFFF"
+                          : colors.text,
+                      },
+                    ]}
+                  >
+                    {t.allThree}
+                  </Text>
+
+                  <Text
+                    style={[
+                      styles.optionDescription,
+                      {
+                        fontSize: s(12),
+                        marginTop: s(3),
+                        color: allSelected
+                          ? "#FFFFFF"
+                          : colors.secondaryText,
+                      },
+                    ]}
+                  >
+                    {t.dailyWeeklyMonthly}
+                  </Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.checkbox,
+                    {
+                      width: s(23),
+                      height: s(23),
+                      borderRadius: s(7),
+                      borderColor: allSelected
+                        ? "#081023"
+                        : colors.border,
+                      backgroundColor: allSelected
+                        ? "#081023"
+                        : "transparent",
+                    },
+                  ]}
+                >
+                  {allSelected && (
+                    <MaterialCommunityIcons
+                      name="check"
+                      size={s(15)}
+                      color="#FFFFFF"
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                {
+                  width: s(150),
+                  height: s(40),
+                  borderRadius: s(20),
+                  marginTop: s(30),
+                },
+              ]}
+              onPress={savePeriod}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={[
+                  styles.saveText,
+                  {
+                    fontSize: s(15),
+                  },
+                ]}
+              >
+                {t.savePeriod}
+              </Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
       </View>
 
+      {/* BOTTOM NAVBAR */}
       <View
         style={[
           styles.bottomBar,
@@ -527,36 +623,41 @@ export default function Expensescreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#071426",
+    width: "100%",
   },
 
   header: {
-    backgroundColor: "#071426",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
-  headerButton: {
-    width: 35,
-    height: 55,
-    alignItems: "center",
+  back: {
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 
   headerTitle: {
     flex: 1,
-    color: "#FFFFFF",
     fontWeight: "700",
     textAlign: "center",
-    transform: [{ translateY: 7 }],
+  },
+
+  headerBell: {
+    justifyContent: "center",
+  },
+
+  mainWrapper: {
+    flex: 1,
+    width: "100%",
+    overflow: "hidden",
   },
 
   card: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 55,
-    borderTopRightRadius: 55,
+    width: "100%",
     overflow: "hidden",
   },
 
@@ -670,11 +771,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "#25B5D1",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
     paddingHorizontal: 5,
+    overflow: "hidden",
   },
 
   navItem: {

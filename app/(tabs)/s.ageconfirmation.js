@@ -11,7 +11,7 @@ import {
 } from "react-native";
 
 export default function AgeConfirmation() {
-  const { width, height } = useWindowDimensions();
+  const { width } = useWindowDimensions();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -21,18 +21,18 @@ export default function AgeConfirmation() {
   const scale = isSmallScreen
     ? 0.85
     : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
+    ? 1
+    : isTablet
+    ? 1.15
+    : 1.25;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    ? 25
+    : isTablet
+    ? 45
+    : 60;
 
   const s = (value) => Math.round(value * scale);
 
@@ -48,18 +48,28 @@ export default function AgeConfirmation() {
         style={[
           styles.header,
           {
-            height: s(118),
+            height: 118 * scale,
             paddingHorizontal: horizontalPadding,
           },
         ]}
       >
         <TouchableOpacity
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            {
+              transform: [
+                {
+                  translateY: 4 * scale,
+                },
+              ],
+            },
+          ]}
           onPress={() => router.push("/register")}
+          activeOpacity={0.7}
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={s(35)}
+            size={35 * scale}
             color="#FFFFFF"
           />
         </TouchableOpacity>
@@ -68,11 +78,13 @@ export default function AgeConfirmation() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(25),
-              lineHeight: s(29),
+              fontSize: 25 * scale,
               transform: [
                 {
-                  translateY: s(1),
+                  translateX: 5 * scale,
+                },
+                {
+                  translateY: 1 * scale,
                 },
               ],
             },
@@ -85,7 +97,7 @@ export default function AgeConfirmation() {
           style={[
             styles.headerSpace,
             {
-              width: s(35),
+              width: 35 * scale,
             },
           ]}
         />
@@ -145,6 +157,7 @@ export default function AgeConfirmation() {
                   },
                 ]}
                 onPress={() => router.push("/verificationage")}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -170,6 +183,7 @@ export default function AgeConfirmation() {
                   },
                 ]}
                 onPress={() => router.push("/login")}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -200,10 +214,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 
   backButton: {
-    alignItems: "center",
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
   },
 

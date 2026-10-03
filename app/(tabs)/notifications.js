@@ -116,9 +116,9 @@ const formatDate = (timestamp, language) => {
     minute: "2-digit",
   });
 
-  const fullDate = `${date} ${
-    language === "es" ? "a las" : "at"
-  } ${time}`;
+  const fullDate = `${
+    date
+  } ${language === "es" ? "a las" : "at"} ${time}`;
 
   return {
     date,
@@ -133,8 +133,8 @@ export default function NotificationsScreen() {
   const params = useLocalSearchParams();
   const { colors, t, language } = useAppSettings();
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
+  const isSmallScreen = width < 350;
+  const isMediumScreen = width >= 350 && width < 600;
   const isTablet = width >= 600;
   const isLargeScreen = width >= 900;
 
@@ -152,9 +152,11 @@ export default function NotificationsScreen() {
     ? 18
     : isMediumScreen
     ? 25
+    : isLargeScreen
+    ? 60
     : isTablet
     ? 45
-    : 60;
+    : 25;
 
   const s = (value) => Math.round(value * scale);
 
@@ -357,8 +359,7 @@ export default function NotificationsScreen() {
                     notification.read !== true,
                   time: formatted.time,
                   date: formatted.date,
-                  fullDate:
-                    formatted.fullDate,
+                  fullDate: formatted.fullDate,
                   icon:
                     notification.icon ||
                     getGeneralIcon(
@@ -764,19 +765,29 @@ export default function NotificationsScreen() {
       edges={["left", "right"]}
     >
       <StatusBar
-        barStyle="light-content"
+        translucent
         backgroundColor={colors.header}
+        barStyle="light-content"
       />
 
+      {/* HEADER IGUAL AL DE LOGOUT */}
       <View
         style={[
           styles.header,
           {
-            height: s(118),
-            paddingHorizontal:
-              horizontalPadding,
-            backgroundColor:
-              colors.header,
+            height:
+              118 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1),
+            paddingHorizontal: isSmallScreen
+              ? 18
+              : isTablet
+              ? 45
+              : 25,
+            backgroundColor: colors.header,
           },
         ]}
       >
@@ -784,10 +795,17 @@ export default function NotificationsScreen() {
           style={[
             styles.back,
             {
-              left: s(15),
-              top: s(34),
-              width: s(55),
-              height: s(55),
+              transform: [
+                {
+                  translateY:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                },
+              ],
             },
           ]}
           onPress={volver}
@@ -795,7 +813,14 @@ export default function NotificationsScreen() {
         >
           <MaterialCommunityIcons
             name="arrow-left"
-            size={s(35)}
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -804,7 +829,33 @@ export default function NotificationsScreen() {
           style={[
             styles.headerTitle,
             {
-              fontSize: s(25),
+              fontSize:
+                25 *
+                (isSmallScreen
+                  ? 0.85
+                  : isTablet
+                  ? 1.15
+                  : 1),
+              transform: [
+                {
+                  translateX:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                },
+                {
+                  translateY:
+                    1 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                  },
+              ],
               color: colors.white,
             },
           ]}
@@ -817,10 +868,34 @@ export default function NotificationsScreen() {
             style={[
               styles.headerDot,
               {
-                width: s(10),
-                height: s(10),
-                borderRadius: s(5),
-                marginLeft: s(10),
+                width:
+                  10 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                height:
+                  10 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                borderRadius:
+                  5 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
+                marginLeft:
+                  10 *
+                  (isSmallScreen
+                    ? 0.85
+                    : isTablet
+                    ? 1.15
+                    : 1),
                 backgroundColor:
                   colors.icon,
               },
@@ -832,10 +907,17 @@ export default function NotificationsScreen() {
           style={[
             styles.markButton,
             {
-              right: s(12),
-              top: s(34),
-              width: s(42),
-              height: s(55),
+              transform: [
+                {
+                  translateY:
+                    4 *
+                    (isSmallScreen
+                      ? 0.85
+                      : isTablet
+                      ? 1.15
+                      : 1),
+                },
+              ],
             },
           ]}
           onPress={markAllAsRead}
@@ -843,7 +925,14 @@ export default function NotificationsScreen() {
         >
           <MaterialCommunityIcons
             name="check-all"
-            size={s(24)}
+            size={
+              24 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.icon}
           />
         </TouchableOpacity>
@@ -856,8 +945,7 @@ export default function NotificationsScreen() {
             borderTopLeftRadius: s(45),
             borderTopRightRadius: s(45),
             paddingTop: s(28),
-            backgroundColor:
-              colors.background,
+            backgroundColor: colors.background,
           },
         ]}
       >
@@ -880,16 +968,13 @@ export default function NotificationsScreen() {
                   paddingHorizontal: s(10),
                   borderRadius: s(9),
                   backgroundColor:
-                    selectedCategory ===
-                    category
+                    selectedCategory === category
                       ? colors.icon
                       : colors.input,
                 },
               ]}
               onPress={() =>
-                setSelectedCategory(
-                  category
-                )
+                setSelectedCategory(category)
               }
               activeOpacity={0.8}
             >
@@ -899,8 +984,7 @@ export default function NotificationsScreen() {
                   {
                     fontSize: s(10),
                     color:
-                      selectedCategory ===
-                      category
+                      selectedCategory === category
                         ? colors.white
                         : colors.secondaryText,
                   },
@@ -925,9 +1009,7 @@ export default function NotificationsScreen() {
               paddingBottom: s(90),
             },
           ]}
-          showsVerticalScrollIndicator={
-            false
-          }
+          showsVerticalScrollIndicator={false}
         >
           {loading ? (
             <View
@@ -945,8 +1027,7 @@ export default function NotificationsScreen() {
                     width: s(75),
                     height: s(75),
                     borderRadius: s(38),
-                    backgroundColor:
-                      colors.input,
+                    backgroundColor: colors.input,
                   },
                 ]}
               >
@@ -985,8 +1066,7 @@ export default function NotificationsScreen() {
                     width: s(75),
                     height: s(75),
                     borderRadius: s(38),
-                    backgroundColor:
-                      colors.input,
+                    backgroundColor: colors.input,
                   },
                 ]}
               >
@@ -1013,8 +1093,7 @@ export default function NotificationsScreen() {
                 style={[
                   styles.emptyText,
                   {
-                    color:
-                      colors.secondaryText,
+                    color: colors.secondaryText,
                     fontSize: s(11),
                     lineHeight: s(16),
                   },
@@ -1035,8 +1114,7 @@ export default function NotificationsScreen() {
                     borderRadius: s(13),
                     padding: s(11),
                     marginBottom: s(12),
-                    backgroundColor:
-                      colors.card,
+                    backgroundColor: colors.card,
                   },
                 ]}
                 onPress={() =>
@@ -1050,8 +1128,7 @@ export default function NotificationsScreen() {
                     {
                       width: s(35),
                       marginRight: s(7),
-                      backgroundColor:
-                        colors.input,
+                      backgroundColor: colors.input,
                       borderRadius: s(20),
                     },
                   ]}
@@ -1071,11 +1148,7 @@ export default function NotificationsScreen() {
                     },
                   ]}
                 >
-                  <View
-                    style={
-                      styles.titleRow
-                    }
-                  >
+                  <View style={styles.titleRow}>
                     <Text
                       style={[
                         styles.title,
@@ -1115,8 +1188,7 @@ export default function NotificationsScreen() {
                       {
                         fontSize: s(9),
                         lineHeight: s(12),
-                        color:
-                          colors.secondaryText,
+                        color: colors.secondaryText,
                       },
                     ]}
                     numberOfLines={2}
@@ -1138,8 +1210,7 @@ export default function NotificationsScreen() {
                         {
                           fontSize: s(8),
                           marginRight: s(3),
-                          color:
-                            colors.secondaryText,
+                          color: colors.secondaryText,
                         },
                       ]}
                     >
@@ -1151,8 +1222,7 @@ export default function NotificationsScreen() {
                         styles.date,
                         {
                           fontSize: s(8),
-                          color:
-                            colors.secondaryText,
+                          color: colors.secondaryText,
                         },
                       ]}
                     >
@@ -1170,8 +1240,7 @@ export default function NotificationsScreen() {
           style={[
             styles.bottomContainer,
             {
-              backgroundColor:
-                colors.nav,
+              backgroundColor: colors.nav,
             },
           ]}
         >
@@ -1181,24 +1250,13 @@ export default function NotificationsScreen() {
               {
                 height: s(65),
                 borderTopLeftRadius: s(78),
-                backgroundColor:
-                  colors.nav,
+                backgroundColor: colors.nav,
               },
             ]}
           >
             {[
-              [
-                "home",
-                "/home",
-                "home-outline",
-                35,
-              ],
-              [
-                "reports",
-                "/historial",
-                "chart-box-outline",
-                35,
-              ],
+              ["home", "/home", "home-outline", 35],
+              ["reports", "/historial", "chart-box-outline", 35],
               [
                 "swap",
                 "/expensesManagement",
@@ -1218,17 +1276,10 @@ export default function NotificationsScreen() {
                 35,
               ],
             ].map(
-              ([
-                tab,
-                route,
-                icon,
-                size,
-              ]) => (
+              ([tab, route, icon, size]) => (
                 <TouchableOpacity
                   key={tab}
-                  style={
-                    styles.navItem
-                  }
+                  style={styles.navItem}
                   onPress={() =>
                     nav(tab, route)
                   }
@@ -1255,41 +1306,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
   },
 
+  /* HEADER IGUAL AL LOGOUT */
   header: {
-    height: 118,
-    backgroundColor: "#071426",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 25,
   },
 
   back: {
-    position: "absolute",
-    left: 15,
-    top: 34,
-    width: 55,
-    height: 55,
-    alignItems: "center",
+    width: 30,
+    alignItems: "flex-start",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
   },
 
   headerTitle: {
-    flex: 1,
-    textAlign: "center",
+    position: "absolute",
+    left: 0,
+    right: 0,
     color: "#FFFFFF",
-    fontSize: 25,
     fontWeight: "700",
-    transform: [
-      {
-        translateX: 10,
-      },
-      {
-        translateY: 1,
-      },
-    ],
+    textAlign: "center",
   },
 
   headerDot: {
@@ -1301,11 +1338,8 @@ const styles = StyleSheet.create({
   },
 
   markButton: {
-    position: "absolute",
-    alignItems: "center",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
+    alignItems: "center",
   },
 
   content: {

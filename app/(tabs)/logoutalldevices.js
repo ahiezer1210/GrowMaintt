@@ -24,6 +24,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+
 import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig.js";
 
@@ -31,6 +32,22 @@ export default function LogoutDevices() {
   const { t, colors } = useAppSettings();
 
   const { width } = useWindowDimensions();
+
+  const small = width < 350;
+  const tablet = width >= 600;
+
+  const titleScale = small
+    ? 0.72
+    : tablet
+    ? 1.02
+    : 0.82;
+
+  const headerScale = small
+    ? 0.85
+    : tablet
+    ? 1.15
+    : 1;
+
   const [loading, setLoading] = useState(false);
 
   const isDarkTheme =
@@ -40,27 +57,20 @@ export default function LogoutDevices() {
     colors.background?.toLowerCase() !== "#f4f4f4" &&
     colors.background?.toLowerCase() !== "#f3f4f5";
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600 && width < 900;
-
-  const scale = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
-
-  const horizontalPadding = isSmallScreen
+  const horizontalPadding = small
     ? 18
-    : isMediumScreen
-      ? 25
-      : isTablet
-        ? 45
-        : 60;
+    : tablet
+    ? 45
+    : 25;
 
-  const s = (value) => Math.round(value * scale);
+  const contentScale = small
+    ? 0.85
+    : tablet
+    ? 1.15
+    : 1;
+
+  const s = (value) =>
+    Math.round(value * contentScale);
 
   const navItems = [
     {
@@ -102,7 +112,8 @@ export default function LogoutDevices() {
     if (!user) {
       Alert.alert(
         t.error,
-        t.noActiveSession || "There is no active session."
+        t.noActiveSession ||
+          "There is no active session."
       );
       return;
     }
@@ -114,7 +125,7 @@ export default function LogoutDevices() {
 
       const usersQuery = query(
         collection(db, "users"),
-        where("uid", "==", uid),
+        where("uid", "==", uid)
       );
 
       const snapshot = await getDocs(usersQuery);
@@ -122,7 +133,8 @@ export default function LogoutDevices() {
       if (snapshot.empty) {
         Alert.alert(
           t.error,
-          t.noUserFound || "No user found in the database.",
+          t.noUserFound ||
+            "No user found in the database."
         );
         setLoading(false);
         return;
@@ -140,13 +152,13 @@ export default function LogoutDevices() {
     } catch (error) {
       console.log(
         "Error signing out of all devices:",
-        error,
+        error
       );
 
       Alert.alert(
         t.error,
         t.logoutAllDevicesError ||
-          "Failed to sign out of all devices. Please try again.",
+          "Failed to sign out of all devices. Please try again."
       );
 
       setLoading(false);
@@ -158,7 +170,8 @@ export default function LogoutDevices() {
       style={[
         styles.screen,
         {
-          backgroundColor: colors.background,
+          backgroundColor:
+            colors.primaryBackground,
         },
       ]}
     >
@@ -170,55 +183,97 @@ export default function LogoutDevices() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
       >
+       
         <View
           style={[
             styles.header,
             {
-              height: s(115),
-              paddingHorizontal: horizontalPadding,
+              height: 118 * headerScale,
+              paddingHorizontal: small
+                ? 18
+                : tablet
+                ? 45
+                : 25,
               backgroundColor: colors.header,
             },
           ]}
         >
           <TouchableOpacity
             style={[
-              styles.backButton,
+              styles.back,
               {
                 transform: [
-                  { translateY: 4 * scale },
-                  { translateX: -4 * scale },
+                  {
+                    translateY:
+                      4 * headerScale,
+                  },
                 ],
               },
             ]}
-            onPress={() => router.push("/signout")}
+            onPress={() =>
+              router.push("/signout")
+            }
+            activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name="arrow-left"
-              size={s(35)}
+              size={35 * headerScale}
               color={colors.white}
             />
           </TouchableOpacity>
 
-          <Text
-            style={[
-              styles.headerTitle,
-              {
-                fontSize: s(19),
-                lineHeight: s(23),
-                color: colors.white,
-              },
-            ]}
+          <View
+            style={styles.titleContainer}
+            pointerEvents="none"
           >
-            {t.logoutAllDevicesTitle}
-          </Text>
+            <Text
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.68}
+              style={[
+                styles.headerTitle,
+                {
+                  fontSize: 25 * titleScale,
+                  lineHeight:
+                    28 * titleScale,
+                  color: colors.white,
+                  transform: [
+                    {
+                      translateX:
+                        5 * headerScale,
+                    },
+                    {
+                      translateY:
+                        8 * headerScale,
+                    },
+                  ],
+                },
+              ]}
+            >
+              {t.logoutAllDevicesTitle}
+            </Text>
+          </View>
 
           <TouchableOpacity
             style={[
               styles.headerBell,
               {
-                transform: [{ translateY: 3 * scale }],
+                transform: [
+                  {
+                    translateY:
+                      4 * headerScale,
+                  },
+                  {
+                    translateX:
+                      7 * headerScale,
+                  },
+                ],
               },
             ]}
             onPress={abrirNotificaciones}
@@ -226,7 +281,7 @@ export default function LogoutDevices() {
           >
             <MaterialCommunityIcons
               name="bell-circle-outline"
-              size={35 * scale}
+              size={35 * headerScale}
               color={colors.white}
             />
           </TouchableOpacity>
@@ -236,9 +291,17 @@ export default function LogoutDevices() {
           style={[
             styles.main,
             {
-              borderTopLeftRadius: s(36),
-              borderTopRightRadius: s(36),
               backgroundColor: colors.background,
+              borderTopLeftRadius: small
+                ? 35
+                : tablet
+                ? 55
+                : 45,
+              borderTopRightRadius: small
+                ? 35
+                : tablet
+                ? 55
+                : 45,
             },
           ]}
         >
@@ -248,8 +311,9 @@ export default function LogoutDevices() {
               styles.content,
               {
                 paddingTop: s(10),
-                paddingHorizontal: horizontalPadding,
-                paddingBottom: s(150),
+                paddingHorizontal:
+                  horizontalPadding,
+                paddingBottom: s(100),
               },
             ]}
             showsVerticalScrollIndicator={false}
@@ -258,13 +322,18 @@ export default function LogoutDevices() {
           >
             <Image
               source={require(
-                "../../assets/images/Screenshot 2026-08-28 21253461.png",
+                "../../assets/images/Screenshot 2026-08-28 21253461.png"
               )}
               style={{
                 width: s(210),
                 height: s(210),
                 marginTop: s(-17),
-                transform: [{ translateX: -5 * scale }],
+                transform: [
+                  {
+                    translateX:
+                      -5 * contentScale,
+                  },
+                ],
               }}
               resizeMode="contain"
             />
@@ -276,7 +345,12 @@ export default function LogoutDevices() {
                   fontSize: s(14),
                   lineHeight: s(20),
                   marginTop: s(20),
-                  transform: [{ translateY: -23 * scale }],
+                  transform: [
+                    {
+                      translateY:
+                        -23 * contentScale,
+                    },
+                  ],
                   color: colors.text,
                 },
               ]}
@@ -290,7 +364,12 @@ export default function LogoutDevices() {
                 {
                   fontSize: s(25),
                   marginTop: s(25),
-                  transform: [{ translateY: -29 * scale }],
+                  transform: [
+                    {
+                      translateY:
+                        -29 * contentScale,
+                    },
+                  ],
                   color: colors.text,
                 },
               ]}
@@ -303,7 +382,12 @@ export default function LogoutDevices() {
                 styles.buttonsContainer,
                 {
                   marginTop: s(40),
-                  transform: [{ translateY: -45 * scale }],
+                  transform: [
+                    {
+                      translateY:
+                        -45 * contentScale,
+                    },
+                  ],
                 },
               ]}
             >
@@ -315,9 +399,10 @@ export default function LogoutDevices() {
                     height: s(44),
                     borderRadius: s(22),
                     opacity: loading ? 0.6 : 1,
-                    backgroundColor: isDarkTheme
-                      ? "#25B5D1"
-                      : "#071426",
+                    backgroundColor:
+                      isDarkTheme
+                        ? "#25B5D1"
+                        : "#071426",
                   },
                 ]}
                 onPress={logoutEverywhere}
@@ -332,7 +417,9 @@ export default function LogoutDevices() {
                     },
                   ]}
                 >
-                  {loading ? t.loggingOut : t.continueAction}
+                  {loading
+                    ? t.loggingOut
+                    : t.continueAction}
                 </Text>
               </TouchableOpacity>
 
@@ -344,13 +431,15 @@ export default function LogoutDevices() {
                     height: s(44),
                     borderRadius: s(22),
                     marginTop: s(12),
-                    backgroundColor: isDarkTheme
-                      ? "#25B5D1"
-                      : "#071426",
+                    backgroundColor:
+                      isDarkTheme
+                        ? "#25B5D1"
+                        : "#071426",
                   },
                 ]}
                 onPress={() => router.back()}
                 disabled={loading}
+                activeOpacity={0.8}
               >
                 <Text
                   style={[
@@ -370,22 +459,31 @@ export default function LogoutDevices() {
             style={[
               styles.bottomBar,
               {
-                height: 65 * scale,
-                borderTopLeftRadius: 78 * scale,
+                height:
+                  65 * headerScale,
+                borderTopLeftRadius:
+                  78 * headerScale,
                 backgroundColor: colors.nav,
               },
             ]}
           >
             {navItems.map((item) => (
               <TouchableOpacity
-                key={item.icon}
+                key={item.route}
                 style={styles.navButton}
-                onPress={() => router.push(item.route)}
+                onPress={() =>
+                  router.push(item.route)
+                }
                 activeOpacity={0.7}
               >
                 <MaterialCommunityIcons
                   name={item.icon}
-                  size={35 * scale}
+                  size={
+                    item.icon ===
+                    "swap-horizontal"
+                      ? 37 * headerScale
+                      : 35 * headerScale
+                  }
                   color={colors.white}
                 />
               </TouchableOpacity>
@@ -406,22 +504,36 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
 
-  backButton: {
-    justifyContent: "center",
+  back: {
+    width: 30,
     alignItems: "flex-start",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+
+  titleContainer: {
+    position: "absolute",
+    left: 40,
+    right: 40,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1,
   },
 
   headerTitle: {
-    flex: 1,
+    width: "100%",
     fontWeight: "700",
     textAlign: "center",
-    transform: [{ translateY: 9 }],
   },
 
   headerBell: {
     justifyContent: "center",
+    zIndex: 2,
   },
 
   main: {

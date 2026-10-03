@@ -71,7 +71,10 @@ export default function RegisterInvestment() {
             amount.replace(",", ".")
         );
 
-        if (isNaN(investmentAmount) || investmentAmount <= 0) {
+        if (
+            isNaN(investmentAmount) ||
+            investmentAmount <= 0
+        ) {
             alert(t.validAmount);
             return;
         }
@@ -86,9 +89,19 @@ export default function RegisterInvestment() {
                 return;
             }
 
-            const userRef = doc(db, "Users", user.uid);
-            const investmentRef = doc(collection(db, "investments"));
-            const pointsRef = doc(collection(db, "Points"));
+            const userRef = doc(
+                db,
+                "Users",
+                user.uid
+            );
+
+            const investmentRef = doc(
+                collection(db, "investments")
+            );
+
+            const pointsRef = doc(
+                collection(db, "Points")
+            );
 
             const batch = writeBatch(db);
 
@@ -114,7 +127,9 @@ export default function RegisterInvestment() {
                 {
                     points: increment(points),
                 },
-                { merge: true }
+                {
+                    merge: true,
+                }
             );
 
             await batch.commit();
@@ -138,41 +153,74 @@ export default function RegisterInvestment() {
             style={[
                 styles.container,
                 {
-                    backgroundColor: colors.background,
+                    backgroundColor: colors.header,
                 },
             ]}
         >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={
+                    Platform.OS === "ios"
+                        ? "padding"
+                        : "height"
+                }
             >
+                {/* HEADER IGUAL AL LOGOUT */}
                 <View
                     style={[
                         styles.header,
                         {
-                            height: s(118),
-                            paddingHorizontal: horizontalPadding,
-                            backgroundColor: colors.header,
+                            height:
+                                118 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1),
+                            paddingHorizontal:
+                                isSmallScreen
+                                    ? 18
+                                    : isTablet
+                                        ? 45
+                                        : 25,
+                            backgroundColor:
+                                colors.header,
                         },
                     ]}
                 >
                     <TouchableOpacity
                         style={[
-                            styles.headerButton,
+                            styles.back,
                             {
-                                left: s(15),
-                                top: s(34),
-                                width: s(55),
-                                height: s(55),
+                                transform: [
+                                    {
+                                        translateY:
+                                            4 *
+                                            (isSmallScreen
+                                                ? 0.85
+                                                : isTablet
+                                                    ? 1.15
+                                                    : 1),
+                                    },
+                                ],
                             },
                         ]}
-                        onPress={() => router.push("/settings")}
+                        onPress={() =>
+                            router.push("/settings")
+                        }
                         activeOpacity={0.7}
                     >
                         <MaterialCommunityIcons
                             name="arrow-left"
-                            size={s(35)}
-                            color="#FFFFFF"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
 
@@ -180,8 +228,33 @@ export default function RegisterInvestment() {
                         style={[
                             styles.headerTitle,
                             {
-                                fontSize: s(25),
-                                lineHeight: s(29),
+                                fontSize:
+                                    25 *
+                                    (isSmallScreen
+                                        ? 0.85
+                                        : isTablet
+                                            ? 1.15
+                                            : 1),
+                                transform: [
+                                    {
+                                        translateX:
+                                            4 *
+                                            (isSmallScreen
+                                                ? 0.85
+                                                : isTablet
+                                                    ? 1.15
+                                                    : 1),
+                                    },
+                                    {
+                                        translateY:
+                                            1 *
+                                            (isSmallScreen
+                                                ? 0.85
+                                                : isTablet
+                                                    ? 1.15
+                                                    : 1),
+                                    },
+                                ],
                                 color: colors.white,
                             },
                         ]}
@@ -191,17 +264,25 @@ export default function RegisterInvestment() {
 
                     <TouchableOpacity
                         style={[
-                            styles.headerButton,
+                            styles.headerBell,
                             {
-                                right: s(15),
-                                top: s(34),
-                                width: s(55),
-                                height: s(55),
+                                transform: [
+                                    {
+                                        translateY:
+                                            4 *
+                                            (isSmallScreen
+                                                ? 0.85
+                                                : isTablet
+                                                    ? 1.15
+                                                    : 1),
+                                    },
+                                ],
                             },
                         ]}
                         onPress={() =>
                             router.push({
-                                pathname: "/notifications",
+                                pathname:
+                                    "/notifications",
                                 params: {
                                     from: "/registerinvestments",
                                 },
@@ -211,265 +292,349 @@ export default function RegisterInvestment() {
                     >
                         <MaterialCommunityIcons
                             name="bell-circle-outline"
-                            size={s(35)}
-                            color="#FFFFFF"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
                 </View>
 
+                {/* CONTENEDOR EXTERIOR */}
                 <View
                     style={[
-                        styles.main,
+                        styles.mainWrapper,
                         {
-                            backgroundColor: colors.background,
-                            borderTopLeftRadius: s(
-                                isTablet
-                                    ? 55
-                                    : isSmallScreen
-                                        ? 35
-                                        : 45
-                            ),
-                            borderTopRightRadius: s(
-                                isTablet
-                                    ? 55
-                                    : isSmallScreen
-                                        ? 35
-                                        : 45
-                            ),
+                            backgroundColor:
+                                colors.header,
                         },
                     ]}
                 >
-                    <ScrollView
-                        showsVerticalScrollIndicator={false}
-                        contentContainerStyle={[
-                            styles.scrollContent,
+                    {/* CARD BLANCA CON CURVA */}
+                    <View
+                        style={[
+                            styles.main,
                             {
-                                paddingHorizontal: horizontalPadding,
-                                paddingBottom: s(100),
+                                backgroundColor:
+                                    colors.background,
+                                borderTopLeftRadius:
+                                    isTablet
+                                        ? 55
+                                        : isSmallScreen
+                                            ? 35
+                                            : 45,
+                                borderTopRightRadius:
+                                    isTablet
+                                        ? 55
+                                        : isSmallScreen
+                                            ? 35
+                                            : 45,
                             },
                         ]}
-                        keyboardShouldPersistTaps="handled"
                     >
-                        <View style={styles.titleContainer}>
-                            <Text
-                                style={[
-                                    styles.title,
-                                    {
-                                        fontSize: s(23),
-                                        color: colors.text,
-                                    },
-                                ]}
-                            >
-                                {t.registerYourInvestment}
-                            </Text>
-
-                            <Text
-                                style={[
-                                    styles.subtitle,
-                                    {
-                                        fontSize: s(14),
-                                        color: colors.secondaryText,
-                                    },
-                                ]}
-                            >
-                                {t.investmentInformation}
-                            </Text>
-                        </View>
-
-                        <View
-                            style={[
-                                styles.form,
+                        <ScrollView
+                            showsVerticalScrollIndicator={
+                                false
+                            }
+                            contentContainerStyle={[
+                                styles.scrollContent,
                                 {
-                                    backgroundColor: colors.background,
+                                    paddingHorizontal:
+                                        horizontalPadding,
+                                    paddingBottom: s(100),
                                 },
                             ]}
+                            keyboardShouldPersistTaps="handled"
                         >
-                            <Text
-                                style={[
-                                    styles.label,
-                                    {
-                                        color: colors.text,
-                                    },
-                                ]}
+                            <View
+                                style={
+                                    styles.titleContainer
+                                }
                             >
-                                {t.investmentName}
-                            </Text>
-
-                            <TextInput
-                                style={[
-                                    styles.input,
+                                <Text
+                                    style={[
+                                        styles.title,
+                                        {
+                                            fontSize: s(23),
+                                            color:
+                                                colors.text,
+                                        },
+                                    ]}
+                                >
                                     {
-                                        borderColor: colors.border,
-                                        color: colors.text,
-                                        backgroundColor: isDarkTheme
-                                            ? colors.primaryBackground
-                                            : "#FAFAFA",
-                                    },
-                                ]}
-                                placeholder={t.investmentNamePlaceholder}
-                                placeholderTextColor="#999"
-                                value={investmentName}
-                                onChangeText={setInvestmentName}
-                            />
+                                        t.registerYourInvestment
+                                    }
+                                </Text>
 
-                            <Text
-                                style={[
-                                    styles.label,
+                                <Text
+                                    style={[
+                                        styles.subtitle,
+                                        {
+                                            fontSize: s(14),
+                                            color:
+                                                colors.secondaryText,
+                                        },
+                                    ]}
+                                >
                                     {
-                                        color: colors.text,
-                                    },
-                                ]}
-                            >
-                                {t.amount}
-                            </Text>
+                                        t.investmentInformation
+                                    }
+                                </Text>
+                            </View>
 
                             <View
                                 style={[
-                                    styles.amountContainer,
+                                    styles.form,
                                     {
-                                        borderColor: colors.border,
-                                        backgroundColor: isDarkTheme
-                                            ? colors.primaryBackground
-                                            : "#FAFAFA",
+                                        backgroundColor:
+                                            colors.background,
                                     },
                                 ]}
                             >
-                                <Text style={styles.dollar}>$</Text>
+                                <Text
+                                    style={[
+                                        styles.label,
+                                        {
+                                            color:
+                                                colors.text,
+                                        },
+                                    ]}
+                                >
+                                    {t.investmentName}
+                                </Text>
 
                                 <TextInput
                                     style={[
-                                        styles.amountInput,
+                                        styles.input,
                                         {
-                                            color: colors.text,
+                                            borderColor:
+                                                colors.border,
+                                            color:
+                                                colors.text,
+                                            backgroundColor:
+                                                isDarkTheme
+                                                    ? colors.primaryBackground
+                                                    : "#FAFAFA",
                                         },
                                     ]}
-                                    placeholder="0.00"
+                                    placeholder={
+                                        t.investmentNamePlaceholder
+                                    }
                                     placeholderTextColor="#999"
-                                    keyboardType="decimal-pad"
-                                    value={amount}
-                                    onChangeText={setAmount}
-                                />
-                            </View>
-
-                            <Text
-                                style={[
-                                    styles.label,
-                                    {
-                                        color: colors.text,
-                                    },
-                                ]}
-                            >
-                                {t.investmentType}
-                            </Text>
-
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        borderColor: colors.border,
-                                        color: colors.text,
-                                        backgroundColor: isDarkTheme
-                                            ? colors.primaryBackground
-                                            : "#FAFAFA",
-                                    },
-                                ]}
-                                placeholder={t.investmentTypePlaceholder}
-                                placeholderTextColor="#999"
-                                value={type}
-                                onChangeText={setType}
-                            />
-
-                            <Text
-                                style={[
-                                    styles.label,
-                                    {
-                                        color: colors.text,
-                                    },
-                                ]}
-                            >
-                                {t.date}
-                            </Text>
-
-                            <TextInput
-                                style={[
-                                    styles.input,
-                                    {
-                                        borderColor: colors.border,
-                                        color: colors.text,
-                                        backgroundColor: isDarkTheme
-                                            ? colors.primaryBackground
-                                            : "#FAFAFA",
-                                    },
-                                ]}
-                                placeholder={t.datePlaceholder}
-                                placeholderTextColor="#999"
-                                value={date}
-                                onChangeText={setDate}
-                            />
-
-                            <TouchableOpacity
-                                style={[
-                                    styles.button,
-                                    {
-                                        height: s(52),
-                                        borderRadius: s(15),
-                                        marginTop: s(25),
-                                    },
-                                ]}
-                                onPress={registrarInversion}
-                            >
-                                <MaterialCommunityIcons
-                                    name="check-circle-outline"
-                                    size={s(23)}
-                                    color="white"
+                                    value={
+                                        investmentName
+                                    }
+                                    onChangeText={
+                                        setInvestmentName
+                                    }
                                 />
 
                                 <Text
                                     style={[
-                                        styles.buttonText,
+                                        styles.label,
                                         {
-                                            fontSize: s(16),
+                                            color:
+                                                colors.text,
                                         },
                                     ]}
                                 >
-                                    {t.registerInvestmentButton}
+                                    {t.amount}
                                 </Text>
-                            </TouchableOpacity>
-                        </View>
-                    </ScrollView>
+
+                                <View
+                                    style={[
+                                        styles.amountContainer,
+                                        {
+                                            borderColor:
+                                                colors.border,
+                                            backgroundColor:
+                                                isDarkTheme
+                                                    ? colors.primaryBackground
+                                                    : "#FAFAFA",
+                                        },
+                                    ]}
+                                >
+                                    <Text
+                                        style={
+                                            styles.dollar
+                                        }
+                                    >
+                                        $
+                                    </Text>
+
+                                    <TextInput
+                                        style={[
+                                            styles.amountInput,
+                                            {
+                                                color:
+                                                    colors.text,
+                                            },
+                                        ]}
+                                        placeholder="0.00"
+                                        placeholderTextColor="#999"
+                                        keyboardType="decimal-pad"
+                                        value={amount}
+                                        onChangeText={
+                                            setAmount
+                                        }
+                                    />
+                                </View>
+
+                                <Text
+                                    style={[
+                                        styles.label,
+                                        {
+                                            color:
+                                                colors.text,
+                                        },
+                                    ]}
+                                >
+                                    {t.investmentType}
+                                </Text>
+
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            borderColor:
+                                                colors.border,
+                                            color:
+                                                colors.text,
+                                            backgroundColor:
+                                                isDarkTheme
+                                                    ? colors.primaryBackground
+                                                    : "#FAFAFA",
+                                        },
+                                    ]}
+                                    placeholder={
+                                        t.investmentTypePlaceholder
+                                    }
+                                    placeholderTextColor="#999"
+                                    value={type}
+                                    onChangeText={setType}
+                                />
+
+                                <Text
+                                    style={[
+                                        styles.label,
+                                        {
+                                            color:
+                                                colors.text,
+                                        },
+                                    ]}
+                                >
+                                    {t.date}
+                                </Text>
+
+                                <TextInput
+                                    style={[
+                                        styles.input,
+                                        {
+                                            borderColor:
+                                                colors.border,
+                                            color:
+                                                colors.text,
+                                            backgroundColor:
+                                                isDarkTheme
+                                                    ? colors.primaryBackground
+                                                    : "#FAFAFA",
+                                        },
+                                    ]}
+                                    placeholder={
+                                        t.datePlaceholder
+                                    }
+                                    placeholderTextColor="#999"
+                                    value={date}
+                                    onChangeText={setDate}
+                                />
+
+                                <TouchableOpacity
+                                    style={[
+                                        styles.button,
+                                        {
+                                            height: s(52),
+                                            borderRadius:
+                                                s(15),
+                                            marginTop:
+                                                s(25),
+                                        },
+                                    ]}
+                                    onPress={
+                                        registrarInversion
+                                    }
+                                >
+                                    <MaterialCommunityIcons
+                                        name="check-circle-outline"
+                                        size={s(23)}
+                                        color="white"
+                                    />
+
+                                    <Text
+                                        style={[
+                                            styles.buttonText,
+                                            {
+                                                fontSize:
+                                                    s(16),
+                                            },
+                                        ]}
+                                    >
+                                        {
+                                            t.registerInvestmentButton
+                                        }
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+                        </ScrollView>
+                    </View>
                 </View>
 
+                {/* NAVBAR IGUAL AL LOGOUT */}
                 <View
                     style={[
                         styles.bottomBar,
                         {
-                            height: s(65),
-                            borderTopLeftRadius: s(78),
-                            backgroundColor: colors.nav,
+                            height:
+                                65 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1),
+                            borderTopLeftRadius:
+                                78 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1),
+                            backgroundColor:
+                                colors.nav,
                         },
                     ]}
                 >
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() => router.push("/home")}
+                        onPress={() =>
+                            router.push("/home")
+                        }
                     >
                         <MaterialCommunityIcons
                             name="home-outline"
-                            size={s(35)}
-                            color="#FFFFFF"
-                        />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.navItem}
-                        activeOpacity={0.8}
-                        onPress={() => router.push("/historial")}
-                    >
-                        <MaterialCommunityIcons
-                            name="chart-box-outline"
-                            size={s(35)}
-                            color="#FFFFFF"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
 
@@ -477,37 +642,87 @@ export default function RegisterInvestment() {
                         style={styles.navItem}
                         activeOpacity={0.8}
                         onPress={() =>
-                            router.push("/expensesManagement")
+                            router.push("/historial")
+                        }
+                    >
+                        <MaterialCommunityIcons
+                            name="chart-box-outline"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.navItem}
+                        activeOpacity={0.8}
+                        onPress={() =>
+                            router.push(
+                                "/expensesManagement"
+                            )
                         }
                     >
                         <MaterialCommunityIcons
                             name="swap-horizontal"
-                            size={s(37)}
-                            color="#FFFFFF"
+                            size={
+                                37 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() => router.push("/currentgoal")}
+                        onPress={() =>
+                            router.push(
+                                "/currentgoal"
+                            )
+                        }
                     >
                         <MaterialCommunityIcons
                             name="layers-outline"
-                            size={s(35)}
-                            color="#FFFFFF"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
 
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() => router.push("/profile")}
+                        onPress={() =>
+                            router.push("/profile")
+                        }
                     >
                         <MaterialCommunityIcons
                             name="account-outline"
-                            size={s(35)}
-                            color="#FFFFFF"
+                            size={
+                                35 *
+                                (isSmallScreen
+                                    ? 0.85
+                                    : isTablet
+                                        ? 1.15
+                                        : 1)
+                            }
+                            color={colors.white}
                         />
                     </TouchableOpacity>
                 </View>
@@ -519,45 +734,43 @@ export default function RegisterInvestment() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#071426",
     },
 
     header: {
         width: "100%",
-        backgroundColor: "#071426",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
     },
 
-    headerButton: {
-        position: "absolute",
-        alignItems: "center",
+    back: {
+        width: 30,
+        alignItems: "flex-start",
         justifyContent: "center",
-        zIndex: 999,
-        elevation: 10,
     },
 
     headerTitle: {
         flex: 1,
-        color: "#FFFFFF",
         fontWeight: "700",
         textAlign: "center",
-        lineHeight: 29,
-        transform: [
-            {
-                translateX: 10,
-            },
-            {
-                translateY: 1,
-            },
-        ],
+    },
+
+    headerBell: {
+        justifyContent: "center",
+    },
+
+    mainWrapper: {
+        flex: 1,
+        width: "100%",
+        overflow: "hidden",
     },
 
     main: {
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        width: "100%",
         overflow: "hidden",
+        borderTopLeftRadius: 45,
+        borderTopRightRadius: 45,
     },
 
     scrollContent: {
@@ -581,7 +794,6 @@ const styles = StyleSheet.create({
     },
 
     form: {
-        backgroundColor: "#FFFFFF",
         borderRadius: 25,
         padding: 20,
         marginBottom: 20,
@@ -653,7 +865,6 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         width: "100%",
-        backgroundColor: "#25B5D1",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",

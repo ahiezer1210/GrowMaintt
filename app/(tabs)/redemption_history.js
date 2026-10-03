@@ -31,25 +31,20 @@ export default function Redemptionhistory() {
 
     const { width } = useWindowDimensions();
 
-    const isSmallScreen = width < 360;
-    const isMediumScreen = width >= 360 && width < 600;
-    const isTablet = width >= 600;
+    const small = width < 350;
+    const tablet = width >= 600;
 
-    const scale = isSmallScreen
+    const scale = small
         ? 0.85
-        : isMediumScreen
-            ? 1
-            : isTablet
-                ? 1.15
-                : 1.25;
+        : tablet
+            ? 1.15
+            : 1;
 
-    const horizontalPadding = isSmallScreen
+    const horizontalPadding = small
         ? 10
-        : isMediumScreen
-            ? 14
-            : isTablet
-                ? 30
-                : 45;
+        : tablet
+            ? 30
+            : 14;
 
     const s = (value) => Math.round(value * scale);
 
@@ -88,9 +83,10 @@ export default function Redemptionhistory() {
                         rewardId: data.rewardId || "",
                         store: data.store || "",
                         title: data.title || "",
-                        points: typeof data.points === "number"
-                            ? data.points
-                            : 0,
+                        points:
+                            typeof data.points === "number"
+                                ? data.points
+                                : 0,
                         code: data.code || "",
                         date: redeemedDate,
                         state: "Complete",
@@ -101,7 +97,11 @@ export default function Redemptionhistory() {
                 redeemed.sort((a, b) => {
                     if (!a.date) return 1;
                     if (!b.date) return -1;
-                    return b.date.getTime() - a.date.getTime();
+
+                    return (
+                        b.date.getTime() -
+                        a.date.getTime()
+                    );
                 });
 
                 setCanjes(redeemed);
@@ -111,6 +111,7 @@ export default function Redemptionhistory() {
                     "Error getting redemption history:",
                     error
                 );
+
                 setCanjes([]);
             }
         );
@@ -161,17 +162,13 @@ export default function Redemptionhistory() {
 
         switch (canje.rewardId) {
             case "hilasal":
-                return `${canje.store} ${title}`;
             case "dollarcity":
-                return `${canje.store} ${title}`;
             case "groupq":
-                return `${canje.store} ${title}`;
             case "microsoft":
-                return `${canje.store} ${title}`;
             case "neveria":
-                return `${canje.store} ${title}`;
             case "donli":
                 return `${canje.store} ${title}`;
+
             default:
                 return canje.store || title;
         }
@@ -183,7 +180,9 @@ export default function Redemptionhistory() {
         }
 
         return date.toLocaleDateString(
-            t.language === "es" ? "es-SV" : "en-US",
+            t.language === "es"
+                ? "es-SV"
+                : "en-US",
             {
                 month: "long",
                 day: "numeric",
@@ -196,33 +195,41 @@ export default function Redemptionhistory() {
         filter === "Todos"
             ? canjes
             : canjes.filter(
-                (canje) => canje.state === filter
+                (canje) =>
+                    canje.state === filter
             );
 
     const getStateLabel = (state) => {
         switch (state) {
             case "Complete":
                 return t.complete;
+
             case "In process":
                 return t.inProcess;
+
             case "Canceled":
                 return t.canceled;
+
             default:
                 return state;
         }
     };
 
     const showDetail = (canje) => {
-        const rewardTitle = getRewardTitle(canje);
+        const rewardTitle =
+            getRewardTitle(canje);
+
         const date = formatDate(canje.date);
 
         Alert.alert(
             getTypeLabel(canje),
             `${t.date}: ${date}\n\n` +
-            `${t.reward}: ${rewardTitle}\n\n` +
-            `${t.pointsUsed}: ${canje.points}\n\n` +
-            `${t.state}: ${getStateLabel(canje.state)}\n\n` +
-            `${t.code}: ${canje.code}`,
+                `${t.reward}: ${rewardTitle}\n\n` +
+                `${t.pointsUsed}: ${canje.points}\n\n` +
+                `${t.state}: ${getStateLabel(
+                    canje.state
+                )}\n\n` +
+                `${t.code}: ${canje.code}`,
             [
                 {
                     text: t.close,
@@ -259,36 +266,73 @@ export default function Redemptionhistory() {
             style={[
                 styles.container,
                 {
-                    backgroundColor: colors.background,
+                    backgroundColor:
+                        colors.primaryBackground,
                 },
             ]}
         >
             <StatusBar
+                translucent
                 barStyle="light-content"
                 backgroundColor={colors.header}
             />
 
+            {/* HEADER */}
             <View
                 style={[
                     styles.header,
                     {
-                        backgroundColor: colors.header,
-                        height: s(118),
-                        paddingHorizontal: isSmallScreen
-                            ? s(18)
-                            : isTablet
-                                ? s(45)
-                                : s(25),
+                        height:
+                            118 *
+                            (small
+                                ? 0.85
+                                : tablet
+                                    ? 1.15
+                                    : 1),
+                        paddingHorizontal: small
+                            ? 18
+                            : tablet
+                                ? 45
+                                : 25,
+                        backgroundColor:
+                            colors.header,
                     },
                 ]}
             >
                 <TouchableOpacity
-                    style={styles.headerButton}
-                    onPress={() => router.push("/pointsExchange")}
+                    style={[
+                        styles.back,
+                        {
+                            transform: [
+                                {
+                                    translateY:
+                                        4 *
+                                        (small
+                                            ? 0.85
+                                            : tablet
+                                                ? 1.15
+                                                : 1),
+                                },
+                            ],
+                        },
+                    ]}
+                    onPress={() =>
+                        router.push(
+                            "/pointsExchange"
+                        )
+                    }
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="arrow-left"
-                        size={s(35)}
+                        size={
+                            35 *
+                            (small
+                                ? 0.85
+                                : tablet
+                                    ? 1.15
+                                    : 1)
+                        }
                         color={colors.white}
                     />
                 </TouchableOpacity>
@@ -297,14 +341,34 @@ export default function Redemptionhistory() {
                     style={[
                         styles.headerTitle,
                         {
-                            color: colors.white,
-                            fontSize: s(25),
-                            lineHeight: s(29),
+                            fontSize:
+                                25 *
+                                (small
+                                    ? 0.85
+                                    : tablet
+                                        ? 1.15
+                                        : 1),
                             transform: [
                                 {
-                                    translateY: s(7),
+                                    translateX:
+                                        4 *
+                                        (small
+                                            ? 0.85
+                                            : tablet
+                                                ? 1.15
+                                                : 1),
+                                },
+                                {
+                                    translateY:
+                                        1 *
+                                        (small
+                                            ? 0.85
+                                            : tablet
+                                                ? 1.15
+                                                : 1),
                                 },
                             ],
+                            color: colors.white,
                         },
                     ]}
                 >
@@ -312,31 +376,68 @@ export default function Redemptionhistory() {
                 </Text>
 
                 <TouchableOpacity
-                    style={styles.headerButton}
+                    style={[
+                        styles.headerBell,
+                        {
+                            transform: [
+                                {
+                                    translateY:
+                                        4 *
+                                        (small
+                                            ? 0.85
+                                            : tablet
+                                                ? 1.15
+                                                : 1),
+                                },
+                            ],
+                        },
+                    ]}
                     onPress={() =>
                         router.push({
-                            pathname: "/notifications",
+                            pathname:
+                                "/notifications",
                             params: {
-                                from: "/redemption_history",
+                                from:
+                                    "/redemption_history",
                             },
                         })
                     }
+                    activeOpacity={0.7}
                 >
                     <MaterialCommunityIcons
                         name="bell-circle-outline"
-                        size={s(35)}
+                        size={
+                            35 *
+                            (small
+                                ? 0.85
+                                : tablet
+                                    ? 1.15
+                                    : 1)
+                        }
                         color={colors.white}
                     />
                 </TouchableOpacity>
             </View>
 
+            {/* MAIN */}
             <View
                 style={[
                     styles.card,
                     {
-                        backgroundColor: colors.background,
-                        borderTopLeftRadius: s(45),
-                        borderTopRightRadius: s(45),
+                        backgroundColor:
+                            colors.background,
+                        borderTopLeftRadius:
+                            tablet
+                                ? 55
+                                : small
+                                    ? 35
+                                    : 45,
+                        borderTopRightRadius:
+                            tablet
+                                ? 55
+                                : small
+                                    ? 35
+                                    : 45,
                     },
                 ]}
             >
@@ -345,20 +446,22 @@ export default function Redemptionhistory() {
                     contentContainerStyle={[
                         styles.scrollContent,
                         {
-                            paddingHorizontal: horizontalPadding,
+                            paddingHorizontal:
+                                horizontalPadding,
                             paddingTop: s(30),
                             paddingBottom: s(100),
                         },
                     ]}
                 >
+                    {/* CARD RESUMEN */}
                     <View
                         style={[
                             styles.resumen,
                             {
                                 height: s(105),
-                                borderRadius: s(7),
+                                borderRadius: s(20),
                                 marginBottom: s(25),
-                                paddingTop: s(5),
+                                paddingTop: s(-2),
                                 marginTop: -s(20),
                             },
                         ]}
@@ -372,38 +475,52 @@ export default function Redemptionhistory() {
                                     marginBottom: s(3),
                                 },
                             ]}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
                         >
-                            {t.summaryOfYourExchanges}
+                            {
+                                t.summaryOfYourExchanges
+                            }
                         </Text>
 
                         <View
                             style={[
                                 styles.resumenContent,
                                 {
-                                    marginTop: -s(5),
+                                    marginTop:
+                                        -s(5),
                                 },
                             ]}
                         >
+                            {/* GIFT */}
                             <View
                                 style={[
                                     styles.giftContainer,
                                     {
-                                        width: s(90),
-                                        marginTop: -s(10),
+                                        width:
+                                            s(65),
+                                        marginTop:
+                                            -s(5),
                                     },
                                 ]}
                             >
                                 <Ionicons
                                     name="gift-outline"
-                                    size={s(80)}
+                                    size={s(55)}
                                     color="#081023"
                                 />
                             </View>
 
-                            <View style={styles.resumenItem}>
+                            {/* BENEFITS */}
+                            <View
+                                style={
+                                    styles.resumenItem
+                                }
+                            >
                                 <Ionicons
                                     name="star-outline"
-                                    size={s(25)}
+                                    size={s(22)}
                                     color="#081023"
                                 />
 
@@ -411,11 +528,25 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(11),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    10
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
+                                    numberOfLines={
+                                        2
+                                    }
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={
+                                        0.75
+                                    }
                                 >
                                     {t.benefits}
                                 </Text>
@@ -424,20 +555,34 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenValor,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(15),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    14
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
                                 >
-                                    {canjes.length}
+                                    {
+                                        canjes.length
+                                    }
                                 </Text>
                             </View>
 
-                            <View style={styles.resumenItem}>
+                            {/* TOTAL REDEEMED */}
+                            <View
+                                style={
+                                    styles.resumenItem
+                                }
+                            >
                                 <Ionicons
                                     name="wallet-outline"
-                                    size={s(25)}
+                                    size={s(22)}
                                     color="#081023"
                                 />
 
@@ -445,40 +590,73 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(11),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    10
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
+                                    numberOfLines={
+                                        2
+                                    }
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={
+                                        0.75
+                                    }
                                 >
-                                    {t.totalRedeemed}
+                                    {
+                                        t.totalRedeemed
+                                    }
                                 </Text>
 
                                 <Text
                                     style={[
                                         styles.resumenValor,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(15),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    14
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
                                 >
                                     {canjes
                                         .reduce(
-                                            (total, canje) =>
+                                            (
+                                                total,
+                                                canje
+                                            ) =>
                                                 total +
                                                 canje.points,
                                             0
                                         )
-                                        .toFixed(1)}
+                                        .toFixed(
+                                            1
+                                        )}
                                 </Text>
                             </View>
 
-                            <View style={styles.resumenItem}>
+                            {/* EXCHANGES */}
+                            <View
+                                style={
+                                    styles.resumenItem
+                                }
+                            >
                                 <Ionicons
                                     name="pricetag-outline"
-                                    size={s(25)}
+                                    size={s(22)}
                                     color="#081023"
                                 />
 
@@ -486,11 +664,25 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenTitle,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(11),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    10
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
+                                    numberOfLines={
+                                        2
+                                    }
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={
+                                        0.75
+                                    }
                                 >
                                     {t.exchanges}
                                 </Text>
@@ -499,73 +691,123 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.resumenValor,
                                         {
-                                            color: "#081023",
-                                            fontSize: s(15),
-                                            marginTop: s(2),
+                                            color:
+                                                "#081023",
+                                            fontSize:
+                                                s(
+                                                    14
+                                                ),
+                                            marginTop:
+                                                s(
+                                                    1
+                                                ),
                                         },
                                     ]}
                                 >
-                                    {canjes.length}
+                                    {
+                                        canjes.length
+                                    }
                                 </Text>
                             </View>
                         </View>
                     </View>
 
+                    {/* FILTERS */}
                     <View
                         style={[
                             styles.filters,
                             {
-                                backgroundColor: isDarkTheme
-                                    ? colors.primaryBackground
-                                    : colors.background,
-                                borderColor: colors.border,
+                                backgroundColor:
+                                    isDarkTheme
+                                        ? colors.primaryBackground
+                                        : colors.background,
+                                borderColor:
+                                    colors.border,
                                 height: s(55),
                                 borderRadius: s(7),
-                                marginBottom: s(20),
+                                marginBottom:
+                                    s(20),
                             },
                         ]}
                     >
                         <Filter
                             text={t.all}
                             icon="list-outline"
-                            active={filter === "Todos"}
-                            onPress={() => setfilter("Todos")}
+                            active={
+                                filter ===
+                                "Todos"
+                            }
+                            onPress={() =>
+                                setfilter(
+                                    "Todos"
+                                )
+                            }
                             scale={scale}
                             colors={colors}
-                            isDarkTheme={isDarkTheme}
+                            isDarkTheme={
+                                isDarkTheme
+                            }
                         />
 
                         <Filter
                             text={t.complete}
                             icon="time-outline"
-                            active={filter === "Complete"}
-                            onPress={() => setfilter("Complete")}
+                            active={
+                                filter ===
+                                "Complete"
+                            }
+                            onPress={() =>
+                                setfilter(
+                                    "Complete"
+                                )
+                            }
                             scale={scale}
                             colors={colors}
-                            isDarkTheme={isDarkTheme}
+                            isDarkTheme={
+                                isDarkTheme
+                            }
                         />
 
                         <Filter
                             text={t.inProcess}
                             icon="checkmark-circle-outline"
-                            active={filter === "In process"}
-                            onPress={() => setfilter("In process")}
+                            active={
+                                filter ===
+                                "In process"
+                            }
+                            onPress={() =>
+                                setfilter(
+                                    "In process"
+                                )
+                            }
                             scale={scale}
                             colors={colors}
-                            isDarkTheme={isDarkTheme}
+                            isDarkTheme={
+                                isDarkTheme
+                            }
                         />
 
                         <Filter
                             text={t.canceled}
                             icon="close-circle-outline"
-                            active={filter === "Canceled"}
-                            onPress={() => setfilter("Canceled")}
+                            active={
+                                filter ===
+                                "Canceled"
+                            }
+                            onPress={() =>
+                                setfilter(
+                                    "Canceled"
+                                )
+                            }
                             scale={scale}
                             colors={colors}
-                            isDarkTheme={isDarkTheme}
+                            isDarkTheme={
+                                isDarkTheme
+                            }
                         />
                     </View>
 
+                    {/* LIST */}
                     <View
                         style={[
                             styles.list,
@@ -574,8 +816,13 @@ export default function Redemptionhistory() {
                             },
                         ]}
                     >
-                        {canjesFiltrados.length === 0 ? (
-                            <View style={styles.sinCanjes}>
+                        {canjesFiltrados.length ===
+                        0 ? (
+                            <View
+                                style={
+                                    styles.sinCanjes
+                                }
+                            >
                                 <Ionicons
                                     name="document-text-outline"
                                     size={45}
@@ -586,150 +833,269 @@ export default function Redemptionhistory() {
                                     style={[
                                         styles.sinCanjesText,
                                         {
-                                            color: colors.secondaryText,
+                                            color:
+                                                colors.secondaryText,
                                         },
                                     ]}
                                 >
-                                    {t.noRedemptionsInCategory}
+                                    {
+                                        t.noRedemptionsInCategory
+                                    }
                                 </Text>
                             </View>
                         ) : (
-                            canjesFiltrados.map((canje) => (
-                                <TouchableOpacity
-                                    key={canje.id}
-                                    style={[
-                                        styles.canje,
-                                        {
-                                            backgroundColor:
-                                                isDarkTheme
-                                                    ? colors.primaryBackground
-                                                    : colors.background,
-                                            borderColor: colors.border,
-                                            minHeight: s(75),
-                                            borderRadius: s(10),
-                                            paddingHorizontal: s(7),
-                                            paddingVertical: s(8),
-                                        },
-                                    ]}
-                                    onPress={() =>
-                                        showDetail(canje)
-                                    }
-                                    activeOpacity={0.7}
-                                >
-                                    <View
+                            canjesFiltrados.map(
+                                (canje) => (
+                                    <TouchableOpacity
+                                        key={
+                                            canje.id
+                                        }
                                         style={[
-                                            styles.canjeIcon,
+                                            styles.canje,
                                             {
-                                                width: s(45),
-                                                height: s(45),
-                                                marginRight: s(4),
+                                                backgroundColor:
+                                                    isDarkTheme
+                                                        ? colors.primaryBackground
+                                                        : colors.background,
+                                                borderColor:
+                                                    colors.border,
+                                                minHeight:
+                                                    s(
+                                                        75
+                                                    ),
+                                                borderRadius:
+                                                    s(
+                                                        10
+                                                    ),
+                                                paddingHorizontal:
+                                                    s(
+                                                        7
+                                                    ),
+                                                paddingVertical:
+                                                    s(
+                                                        8
+                                                    ),
                                             },
                                         ]}
+                                        onPress={() =>
+                                            showDetail(
+                                                canje
+                                            )
+                                        }
+                                        activeOpacity={
+                                            0.7
+                                        }
                                     >
-                                        <Ionicons
-                                            name={canje.icon}
-                                            size={s(27)}
-                                            color={colors.icon}
-                                        />
-                                    </View>
-
-                                    <View style={styles.canjeInfo}>
                                         <View
                                             style={[
-                                                styles.tipoContainer,
+                                                styles.canjeIcon,
                                                 {
-                                                    borderRadius: s(12),
-                                                    paddingHorizontal: s(10),
-                                                    paddingVertical: s(3),
-                                                    marginBottom: s(5),
+                                                    width:
+                                                        s(
+                                                            45
+                                                        ),
+                                                    height:
+                                                        s(
+                                                            45
+                                                        ),
+                                                    marginRight:
+                                                        s(
+                                                            4
+                                                        ),
+                                                },
+                                            ]}
+                                        >
+                                            <Ionicons
+                                                name={
+                                                    canje.icon
+                                                }
+                                                size={s(
+                                                    27
+                                                )}
+                                                color={
+                                                    colors.icon
+                                                }
+                                            />
+                                        </View>
+
+                                        <View
+                                            style={
+                                                styles.canjeInfo
+                                            }
+                                        >
+                                            <View
+                                                style={[
+                                                    styles.tipoContainer,
+                                                    {
+                                                        borderRadius:
+                                                            s(
+                                                                12
+                                                            ),
+                                                        paddingHorizontal:
+                                                            s(
+                                                                10
+                                                            ),
+                                                        paddingVertical:
+                                                            s(
+                                                                3
+                                                            ),
+                                                        marginBottom:
+                                                            s(
+                                                                5
+                                                            ),
+                                                    },
+                                                ]}
+                                            >
+                                                <Text
+                                                    style={[
+                                                        styles.tipo,
+                                                        {
+                                                            color:
+                                                                "#081023",
+                                                            fontSize:
+                                                                s(
+                                                                    12
+                                                                ),
+                                                        },
+                                                    ]}
+                                                >
+                                                    {getTypeLabel(
+                                                        canje
+                                                    )}
+                                                </Text>
+                                            </View>
+
+                                            <Text
+                                                style={[
+                                                    styles.date,
+                                                    {
+                                                        color:
+                                                            colors.text,
+                                                        fontSize:
+                                                            s(
+                                                                12
+                                                            ),
+                                                    },
+                                                ]}
+                                            >
+                                                {
+                                                    t.redeemedOn
+                                                }{" "}
+                                                {formatDate(
+                                                    canje.date
+                                                )}
+                                                .
+                                            </Text>
+                                        </View>
+
+                                        <View
+                                            style={[
+                                                styles.canjeRight,
+                                                {
+                                                    marginLeft:
+                                                        s(
+                                                            5
+                                                        ),
                                                 },
                                             ]}
                                         >
                                             <Text
                                                 style={[
-                                                    styles.tipo,
+                                                    styles.discount,
                                                     {
-                                                        color: "#081023",
-                                                        fontSize: s(12),
+                                                        color:
+                                                            colors.text,
+                                                        fontSize:
+                                                            s(
+                                                                9
+                                                            ),
+                                                        marginBottom:
+                                                            s(
+                                                                2
+                                                            ),
                                                     },
                                                 ]}
                                             >
-                                                {getTypeLabel(canje)}
+                                                {
+                                                    canje.points
+                                                }{" "}
+                                                pts
                                             </Text>
+
+                                            <Ionicons
+                                                name="chevron-forward"
+                                                size={s(
+                                                    20
+                                                )}
+                                                color={
+                                                    colors.icon
+                                                }
+                                            />
                                         </View>
-
-                                        <Text
-                                            style={[
-                                                styles.date,
-                                                {
-                                                    color: colors.text,
-                                                    fontSize: s(12),
-                                                },
-                                            ]}
-                                        >
-                                            {t.redeemedOn}{" "}
-                                            {formatDate(canje.date)}.
-                                        </Text>
-                                    </View>
-
-                                    <View
-                                        style={[
-                                            styles.canjeRight,
-                                            {
-                                                marginLeft: s(5),
-                                            },
-                                        ]}
-                                    >
-                                        <Text
-                                            style={[
-                                                styles.discount,
-                                                {
-                                                    color: colors.text,
-                                                    fontSize: s(9),
-                                                    marginBottom: s(2),
-                                                },
-                                            ]}
-                                        >
-                                            {canje.points} pts
-                                        </Text>
-
-                                        <Ionicons
-                                            name="chevron-forward"
-                                            size={s(20)}
-                                            color={colors.icon}
-                                        />
-                                    </View>
-                                </TouchableOpacity>
-                            ))
+                                    </TouchableOpacity>
+                                )
+                            )
                         )}
                     </View>
                 </ScrollView>
             </View>
 
+            {/* BOTTOM NAV */}
             <View
                 style={[
                     styles.bottomBar,
                     {
-                        backgroundColor: colors.nav,
-                        height: s(65),
-                        borderTopLeftRadius: s(78),
+                        height:
+                            65 *
+                            (small
+                                ? 0.85
+                                : tablet
+                                    ? 1.15
+                                    : 1),
+                        borderTopLeftRadius:
+                            78 *
+                            (small
+                                ? 0.85
+                                : tablet
+                                    ? 1.15
+                                    : 1),
+                        backgroundColor:
+                            colors.nav,
                     },
                 ]}
             >
-                {navItems.map((item, index) => (
+                {navItems.map((item) => (
                     <TouchableOpacity
-                        key={index}
+                        key={item.route}
                         style={styles.navItem}
-                        onPress={() => router.push(item.route)}
+                        activeOpacity={0.8}
+                        onPress={() =>
+                            router.push(
+                                item.route
+                            )
+                        }
                     >
                         <MaterialCommunityIcons
                             name={item.icon}
-                            size={s(
-                                item.icon === "swap-horizontal"
-                                    ? 37
-                                    : 35
-                            )}
-                            color={colors.white}
+                            size={
+                                item.icon ===
+                                    "swap-horizontal"
+                                    ? 37 *
+                                      (small
+                                          ? 0.85
+                                          : tablet
+                                              ? 1.15
+                                              : 1)
+                                    : 35 *
+                                      (small
+                                          ? 0.85
+                                          : tablet
+                                              ? 1.15
+                                              : 1)
+                            }
+                            color={
+                                colors.white
+                            }
                         />
                     </TouchableOpacity>
                 ))}
@@ -745,19 +1111,16 @@ function Filter({
     onPress,
     scale,
     colors,
-    isDarkTheme,
 }) {
-    const s = (value) => Math.round(value * scale);
+    const s = (value) =>
+        Math.round(value * scale);
 
     return (
         <TouchableOpacity
             style={[
                 styles.filter,
-                active && styles.filterActive,
-                active && {
-                    backgroundColor: "#BCE8EF",
-                    borderColor: "#081023",
-                },
+                active &&
+                    styles.filterActive,
             ]}
             onPress={onPress}
             activeOpacity={0.7}
@@ -765,14 +1128,20 @@ function Filter({
             <Ionicons
                 name={icon}
                 size={s(14)}
-                color={active ? "#081823" : colors.icon}
+                color={
+                    active
+                        ? "#081823"
+                        : colors.icon
+                }
             />
 
             <Text
                 style={[
                     styles.filterText,
                     {
-                        color: active ? "#081823" : colors.text,
+                        color: active
+                            ? "#081823"
+                            : colors.text,
                     },
                 ]}
             >
@@ -789,31 +1158,35 @@ const styles = StyleSheet.create({
     },
 
     header: {
-        backgroundColor: "#071426",
+        width: "100%",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
     },
 
-    headerButton: {
-        width: 35,
-        alignItems: "center",
+    back: {
+        width: 30,
+        alignItems: "flex-start",
         justifyContent: "center",
     },
 
     headerTitle: {
         flex: 1,
-        color: "#FFFFFF",
         fontWeight: "700",
         textAlign: "center",
     },
 
+    headerBell: {
+        justifyContent: "center",
+    },
+
     card: {
         flex: 1,
+        width: "100%",
         backgroundColor: "#FFFFFF",
+        overflow: "hidden",
         borderTopLeftRadius: 45,
         borderTopRightRadius: 45,
-        overflow: "hidden",
     },
 
     scrollContent: {
@@ -824,20 +1197,11 @@ const styles = StyleSheet.create({
 
     resumen: {
         height: 105,
-        backgroundColor: "#25B7d3",
-        borderRadius: 7,
+        backgroundColor: "#25B7D3",
+        borderRadius: 20,
         marginBottom: 25,
         paddingTop: 5,
         marginTop: -20,
-    },
-
-    resumenContent: {
-        flex: 1,
-        width: "100%",
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-around",
-        marginTop: -5,
     },
 
     resumenTitleGeneral: {
@@ -848,32 +1212,44 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
 
+    resumenContent: {
+        flex: 1,
+        width: "100%",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 8,
+        marginTop: -5,
+    },
+
     resumenItem: {
         flex: 1,
+        minWidth: 0,
         alignItems: "center",
         justifyContent: "center",
     },
 
     giftContainer: {
-        width: 90,
+        width: 65,
         alignItems: "center",
-        justifyContent: "flex-start",
-        marginTop: -10,
+        justifyContent: "center",
+        marginTop: -5,
     },
 
     resumenTitle: {
-        fontSize: 11,
+        fontSize: 10,
         color: "#081023",
         fontWeight: "600",
-        marginTop: 2,
+        marginTop: 1,
         textAlign: "center",
+        maxWidth: "100%",
     },
 
     resumenValor: {
-        fontSize: 15,
+        fontSize: 14,
         color: "#081023",
         fontWeight: "700",
-        marginTop: 2,
+        marginTop: 1,
     },
 
     filters: {
@@ -985,12 +1361,11 @@ const styles = StyleSheet.create({
         position: "absolute",
         bottom: 0,
         left: 0,
-        right: 0,
-        backgroundColor: "#25B5D1",
+        width: "100%",
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-around",
-        paddingHorizontal: 5,
+        overflow: "hidden",
     },
 
     navItem: {
