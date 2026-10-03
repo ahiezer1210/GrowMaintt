@@ -471,6 +471,8 @@ const translations = {
       "Create\ngoals",
     pointsExchange:
       "Points\nExchange",
+    registerInvestments:
+      "Register investments",
     noRecordsForPeriod:
       "No records for this period",
     other: "Other",
@@ -1377,6 +1379,8 @@ const translations = {
       "Crear\nmetas",
     pointsExchange:
       "Canje de\npuntos",
+    registerInvestments:
+      "Registrar inversiones",
     noRecordsForPeriod:
       "No hay registros para este período",
     other:

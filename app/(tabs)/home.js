@@ -33,11 +33,13 @@ const ACTIONS = [
   ["book-outline", "createGoals", "ion", "/registergoals"],
   ["trending-up-outline", "investments", "ion", "/investments"],
   ["hand-coin-outline", "pointsExchange", "material", "/pointsExchange"],
+  ["cash-outline", "registerInvestments", "ion", "/registerinvestments"],
+  ["history", "redemptionHistory", "material", "/redemption_history"],
 ];
 
 const NAV = [
   ["home-outline", "/home"],
-  ["chart-box-outline", "/historial"],,
+  ["chart-box-outline", "/historial"],
   ["swap-horizontal", "/expensesmanagement"],
   ["layers-outline", "/currentgoal"],
   ["account-outline", "/profile"],
@@ -358,8 +360,6 @@ export default function App() {
     }
   }, [selectedPeriods]);
 
-  // Un solo efecto que espera a que Firebase restaure la sesión
-  // y entonces abre los listeners de usuario, gastos, ahorros y alertas.
   useEffect(() => {
     let listeners = [];
 
@@ -379,7 +379,6 @@ export default function App() {
         return;
       }
 
-      // ---- Datos del usuario ----
       const userRef = doc(db, "Users", user.uid);
 
       listeners.push(
@@ -402,7 +401,6 @@ export default function App() {
         )
       );
 
-      // ---- Gastos y ahorros ----
       let expensesRecords = [];
       let savingsRecords = [];
 
@@ -482,7 +480,6 @@ export default function App() {
         )
       );
 
-      // ---- Alertas de seguridad (notificaciones) ----
       listeners.push(
         onSnapshot(
           collection(db, "Users", user.uid, "securityAlerts"),
@@ -619,7 +616,11 @@ export default function App() {
             <View
               style={[styles.emptyContainer, { paddingVertical: s(40) }]}
             >
-              <Ionicons name="receipt-outline" size={s(42)} color={COLORS.gray} />
+              <Ionicons
+                name="receipt-outline"
+                size={s(42)}
+                color={COLORS.gray}
+              />
 
               <Text
                 style={[
@@ -811,7 +812,10 @@ function BalanceItem({ icon, title, value, size, expense, small, s }) {
       </View>
 
       <Text
-        style={[expense ? styles.expense : styles.balanceValue, { fontSize: size }]}
+        style={[
+          expense ? styles.expense : styles.balanceValue,
+          { fontSize: size },
+        ]}
         numberOfLines={1}
         adjustsFontSizeToFit
       >
@@ -882,8 +886,8 @@ function Actions({ scale, s, t }) {
       style={[
         styles.actions,
         {
-          borderRadius: s(38),
-          padding: s(20),
+          borderRadius: s(30),
+          padding: s(12),
           marginBottom: s(34),
         },
       ]}
@@ -894,9 +898,9 @@ function Actions({ scale, s, t }) {
           style={[
             styles.action,
             {
-              height: s(84),
-              borderRadius: s(24),
-              marginBottom: s(12),
+              height: s(70),
+              borderRadius: s(20),
+              marginBottom: s(8),
             },
           ]}
           onPress={() => router.push(route)}
@@ -905,19 +909,19 @@ function Actions({ scale, s, t }) {
             style={[
               styles.actionIcon,
               {
-                width: s(38),
-                height: s(38),
-                borderRadius: s(19),
-                marginBottom: s(5),
+                width: s(30),
+                height: s(30),
+                borderRadius: s(15),
+                marginBottom: s(3),
               },
             ]}
           >
             {type === "ion" ? (
-              <Ionicons name={icon} size={s(27)} color={COLORS.cyan} />
+              <Ionicons name={icon} size={s(21)} color={COLORS.cyan} />
             ) : (
               <MaterialCommunityIcons
                 name={icon}
-                size={s(29)}
+                size={s(22)}
                 color={COLORS.cyan}
               />
             )}
@@ -1050,7 +1054,6 @@ function BottomNav({ small, scale, s }) {
           key={index}
           style={styles.navItem}
           onPress={() => {
-            // Ya estás en Home: no apilar la misma pantalla
             if (route !== "/home") {
               router.push(route);
             }

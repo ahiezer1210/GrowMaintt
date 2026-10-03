@@ -165,7 +165,6 @@ export default function RegisterInvestment() {
                         : "height"
                 }
             >
-                {/* HEADER IGUAL AL LOGOUT */}
                 <View
                     style={[
                         styles.header,
@@ -206,7 +205,7 @@ export default function RegisterInvestment() {
                             },
                         ]}
                         onPress={() =>
-                            router.push("/settings")
+                            router.push("/home")
                         }
                         activeOpacity={0.7}
                     >
@@ -305,7 +304,6 @@ export default function RegisterInvestment() {
                     </TouchableOpacity>
                 </View>
 
-                {/* CONTENEDOR EXTERIOR */}
                 <View
                     style={[
                         styles.mainWrapper,
@@ -315,7 +313,6 @@ export default function RegisterInvestment() {
                         },
                     ]}
                 >
-                    {/* CARD BLANCA CON CURVA */}
                     <View
                         style={[
                             styles.main,
@@ -593,7 +590,6 @@ export default function RegisterInvestment() {
                     </View>
                 </View>
 
-                {/* NAVBAR IGUAL AL LOGOUT */}
                 <View
                     style={[
                         styles.bottomBar,

@@ -266,7 +266,7 @@ export default function InversionesScreen() {
         >
           <View style={styles.investmentContent}>
             <Image
-              source={require("../../assets/images/investment-circle.png")}
+              source={require("../../assets/images/investment.png")}
               style={[
                 styles.investmentImage,
                 {

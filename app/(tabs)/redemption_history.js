@@ -318,7 +318,7 @@ export default function Redemptionhistory() {
                     ]}
                     onPress={() =>
                         router.push(
-                            "/pointsExchange"
+                            "/home"
                         )
                     }
                     activeOpacity={0.7}

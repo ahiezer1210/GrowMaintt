@@ -217,7 +217,7 @@ export default function LogoutDevices() {
               },
             ]}
             onPress={() =>
-              router.push("/signout")
+              router.push("/logout")
             }
             activeOpacity={0.7}
           >
@@ -322,7 +322,7 @@ export default function LogoutDevices() {
           >
             <Image
               source={require(
-                "../../assets/images/Screenshot 2026-08-28 21253461.png"
+                "../../assets/images/logoutt.png"
               )}
               style={{
                 width: s(210),
@@ -330,8 +330,7 @@ export default function LogoutDevices() {
                 marginTop: s(-17),
                 transform: [
                   {
-                    translateX:
-                      -5 * contentScale,
+                    translateX: 0,
                   },
                 ],
               }}

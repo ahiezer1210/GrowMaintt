@@ -1,20 +1,20 @@
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
-    collection,
-    onSnapshot,
-    orderBy,
-    query,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig.js";
@@ -508,7 +508,20 @@ export default function ExpenseManagement() {
         style={[
           styles.bottomBar,
           {
-            height: s(65),
+            height:
+              65 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1),
+            borderTopLeftRadius:
+              78 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1),
             backgroundColor: colors.nav,
           },
         ]}
@@ -516,11 +529,18 @@ export default function ExpenseManagement() {
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/home")}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="home-outline"
-            size={s(27)}
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -528,11 +548,18 @@ export default function ExpenseManagement() {
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/historial")}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="chart-box-outline"
-            size={s(27)}
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -540,11 +567,18 @@ export default function ExpenseManagement() {
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/expensesmanagement")}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="swap-horizontal"
-            size={s(29)}
+            size={
+              37 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -552,11 +586,18 @@ export default function ExpenseManagement() {
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/currentgoal")}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="layers-outline"
-            size={s(27)}
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -564,11 +605,18 @@ export default function ExpenseManagement() {
         <TouchableOpacity
           style={styles.navButton}
           onPress={() => router.push("/profile")}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <MaterialCommunityIcons
             name="account-outline"
-            size={s(27)}
+            size={
+              35 *
+              (isSmallScreen
+                ? 0.85
+                : isTablet
+                ? 1.15
+                : 1)
+            }
             color={colors.white}
           />
         </TouchableOpacity>
@@ -1043,14 +1091,13 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    borderTopLeftRadius: 78,
-    elevation: 15,
-    zIndex: 100,
+    justifyContent: "space-around",
+    overflow: "hidden",
   },
 
   navButton: {
     flex: 1,
-    height: 65,
+    height: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
