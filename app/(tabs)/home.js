@@ -286,122 +286,24 @@ const normalizeRecord = (item, type) => {
     dateText = date.toLocaleDateString();
   }
 
+  const frequency = getField(item, [
+    "frequency",
+    "Frequency",
+    "FREQUENCY",
+    "period",
+    "periodo",
+  ]);
+
   return {
     category: String(category),
     amount: Number(amount) || 0,
     date,
     dateText,
     type,
+    frequency: frequency
+      ? String(frequency)
+      : null,
   };
-};
-
-const getDateKey = (date) => {
-  if (!date || isNaN(date.getTime())) {
-    return null;
-  }
-
-  return `${date.getFullYear()}-${String(
-    date.getMonth() + 1
-  ).padStart(2, "0")}-${String(
-    date.getDate()
-  ).padStart(2, "0")}`;
-};
-
-const getStartOfDay = (date) => {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate(),
-    0,
-    0,
-    0,
-    0
-  );
-};
-
-const getStartOfWeek = (date) => {
-  const result = getStartOfDay(date);
-
-  const day = result.getDay();
-
-  const difference = day === 0 ? 6 : day - 1;
-
-  result.setDate(result.getDate() - difference);
-
-  return result;
-};
-
-const getStartOfMonth = (date) => {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    1,
-    0,
-    0,
-    0,
-    0
-  );
-};
-
-const isInPeriod = (record, period) => {
-  if (!record?.date) {
-    return false;
-  }
-
-  const recordDate = convertDate(record.date);
-
-  if (!recordDate) {
-    return false;
-  }
-
-  const now = new Date();
-
-  const normalizedPeriod = String(period || "")
-    .trim()
-    .toLowerCase();
-
-  const recordKey = getDateKey(recordDate);
-  const todayKey = getDateKey(now);
-
-  if (!recordKey) {
-    return false;
-  }
-
-  if (normalizedPeriod === "daily") {
-    return recordKey === todayKey;
-  }
-
-  if (normalizedPeriod === "weekly") {
-    const startOfCurrentWeek = getStartOfWeek(now);
-
-    const startOfNextWeek = new Date(
-      startOfCurrentWeek
-    );
-
-    startOfNextWeek.setDate(
-      startOfNextWeek.getDate() + 7
-    );
-
-    const recordDay = getStartOfDay(recordDate);
-
-    return (
-      recordDay.getTime() >=
-        startOfCurrentWeek.getTime() &&
-      recordDay.getTime() <
-        startOfNextWeek.getTime()
-    );
-  }
-
-  if (normalizedPeriod === "monthly") {
-    return (
-      recordDate.getFullYear() ===
-        now.getFullYear() &&
-      recordDate.getMonth() ===
-        now.getMonth()
-    );
-  }
-
-  return false;
 };
 
 const formatMoney = (amount) => {
@@ -658,6 +560,10 @@ export default function App() {
                         : "No date"),
 
                     type: "Expense",
+
+                    frequency:
+                      documentData.frequency ||
+                      null,
                   });
                 }
               );
@@ -751,10 +657,21 @@ export default function App() {
     };
   }, []);
 
+  const selectedPeriod = String(period || "")
+    .trim()
+    .toLowerCase();
+
   const filteredRecords = records
-    .filter((record) =>
-      isInPeriod(record, period)
-    )
+    .filter((record) => {
+      const recordPeriod = String(
+        record.frequency || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      return recordPeriod === selectedPeriod;
+
+    })
     .sort((a, b) => {
       if (!a.date && !b.date)
         return 0;
