@@ -2,14 +2,14 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
 import {
-    ActivityIndicator,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -35,7 +35,6 @@ export default function Profile() {
     let unsubscribeUser = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      // Si cambia el usuario, cancelamos el listener anterior
       if (unsubscribeUser) {
         unsubscribeUser();
         unsubscribeUser = null;
@@ -101,12 +100,6 @@ export default function Profile() {
       route: "/settings",
     },
     {
-      title: t.termsAndConditions,
-      icon: "help-circle-outline",
-      color: "#27b6d1",
-      route: "/terms",
-    },
-    {
       title: t.logOut,
       icon: "log-out-outline",
       color: "#27b6d1",
@@ -123,7 +116,6 @@ export default function Profile() {
     });
   };
 
-  // Va a Home reemplazando la pantalla actual.
   const goHome = () => {
     router.replace("/home");
   };
@@ -404,7 +396,6 @@ export default function Profile() {
           />
         </TouchableOpacity>
 
-        {/* Ya estás en Perfil: no hace nada para no apilar la misma pantalla */}
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => {}}

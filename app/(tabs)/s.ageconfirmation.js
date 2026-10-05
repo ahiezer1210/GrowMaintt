@@ -156,7 +156,7 @@ export default function AgeConfirmation() {
                     borderRadius: s(22),
                   },
                 ]}
-                onPress={() => router.push("/verificationage")}
+                onPress={() => router.push("/identityverification")}
                 activeOpacity={0.8}
               >
                 <Text
