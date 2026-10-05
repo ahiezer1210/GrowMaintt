@@ -13,8 +13,8 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { auth, db } from "../../firebaseConfig";
 import { useAppSettings } from "../../context/Appsettings";
+import { auth, db } from "../../firebaseConfig";
 
 export default function VerifyAge() {
   const { t } = useAppSettings();
@@ -171,7 +171,7 @@ export default function VerifyAge() {
               height: s(46),
             },
           ]}
-          onPress={() => router.push("/S.Ageconfirmation")}
+          onPress={() => router.push("/s.ageconfirmation")}
         >
           <MaterialCommunityIcons
             name="arrow-left"

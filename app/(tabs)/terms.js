@@ -95,7 +95,7 @@ export default function TermsScreen() {
               },
             ]}
             activeOpacity={0.7}
-            onPress={() => router.push("/profile")}
+            onPress={() => router.push("/register")}
           >
             <MaterialCommunityIcons
               name="arrow-left"
@@ -116,33 +116,6 @@ export default function TermsScreen() {
           >
             {t.termsAndConditions}
           </Text>
-
-          <TouchableOpacity
-            style={[
-              styles.headerBell,
-              {
-                right: s(15),
-                top: s(34),
-                width: s(55),
-                height: s(55),
-              },
-            ]}
-            activeOpacity={0.7}
-            onPress={() =>
-              router.push({
-                pathname: "/notifications",
-                params: {
-                  from: "/terms",
-                },
-              })
-            }
-          >
-            <MaterialCommunityIcons
-              name="bell-circle-outline"
-              size={s(35)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
         </View>
 
         <View
@@ -372,7 +345,10 @@ export default function TermsScreen() {
                     backgroundColor: COLORS.cyan,
                   },
                 ]}
-                onPress={() => setAccepted(true)}
+                onPress={() => {
+                  setAccepted(true);
+                  router.push("/s.ageconfirmation");
+                }}
                 activeOpacity={0.8}
               >
                 <Text
@@ -388,6 +364,7 @@ export default function TermsScreen() {
                 </Text>
               </TouchableOpacity>
 
+              {/* REJECT */}
               <TouchableOpacity
                 style={[
                   styles.actionButton,
@@ -504,7 +481,7 @@ const styles = StyleSheet.create({
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
   },
 
   backButton: {
@@ -516,7 +493,6 @@ const styles = StyleSheet.create({
   },
 
   headerTitle: {
-    flex: 1,
     fontWeight: "700",
     textAlign: "center",
     transform: [
@@ -527,14 +503,6 @@ const styles = StyleSheet.create({
         translateY: 7,
       },
     ],
-  },
-
-  headerBell: {
-    position: "absolute",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
   },
 
   cardContainer: {

@@ -662,8 +662,6 @@ export default function NotificationsScreen() {
       router.push("/backup");
     } else if (from === "/privacypolicy") {
       router.push("/privacypolicy");
-    } else if (from === "/terms") {
-      router.push("/terms");
     } else if (from === "/expensesmanagement") {
       router.push("/expensesmanagement");
     } else if (from === "/registerexpenses") {

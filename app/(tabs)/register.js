@@ -39,10 +39,19 @@ export default function SignupScreen() {
   const buttonFontSize = tablet ? 19 : 17;
 
   const registerusers = async () => {
-    if (!username.trim() || !email.trim() || !password || !confirmpassword) {
-      Alert.alert("Incomplete fields", "Please fill in all the required fields.");
+    if (
+      !username.trim() ||
+      !email.trim() ||
+      !password ||
+      !confirmpassword
+    ) {
+      Alert.alert(
+        "Incomplete fields",
+        "Please fill in all the required fields."
+      );
       return;
     }
+
     if (password !== confirmpassword) {
       Alert.alert("Passwords don't match");
       return;
@@ -51,15 +60,18 @@ export default function SignupScreen() {
     if (password.length < 8) {
       Alert.alert(
         "Invalid password",
-        "The password must have at least 8 characters",
+        "The password must have at least 8 characters"
       );
       return;
     }
 
-    if (!/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    if (
+      !/[A-Z]/.test(password) ||
+      !/[!@#$%^&*(),.?":{}|<>]/.test(password)
+    ) {
       Alert.alert(
         "Invalid password",
-        "The password must have at least one capital letter or special character",
+        "The password must have at least one capital letter or special character"
       );
       return;
     }
@@ -67,12 +79,15 @@ export default function SignupScreen() {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password,
-      );
+      const userCredential =
+        await createUserWithEmailAndPassword(
+          auth,
+          email.trim(),
+          password
+        );
+
       const user = userCredential.user;
+
       await setDoc(doc(db, "Users", user.uid), {
         username: username.trim(),
         email: email.trim(),
@@ -82,18 +97,22 @@ export default function SignupScreen() {
       Alert.alert("Registration successfully", "", [
         {
           text: "Ok",
-          onPress: () => router.push("/identityverification"),
+          onPress: () => router.push("/terms"),
         },
       ]);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         Alert.alert("Email already exists");
-      } else if (error.code === "auth/username-already-in-use") {
+      } else if (
+        error.code === "auth/username-already-in-use"
+      ) {
         Alert.alert("Username already exists");
       } else if (error.code === "auth/invalid-email") {
         Alert.alert("Invalid Email");
       } else if (error.code === "auth/weak-password") {
-        Alert.alert("The password must have at least 6 characters");
+        Alert.alert(
+          "The password must have at least 6 characters"
+        );
       } else {
         console.log(error.code, error.message);
         Alert.alert("Error", error.message);
@@ -107,11 +126,20 @@ export default function SignupScreen() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={
+          Platform.OS === "ios"
+            ? "padding"
+            : "height"
+        }
       >
         <View style={styles.topContent}>
           <View style={styles.header}>
-            <Text style={[styles.title, { fontSize: titleFontSize }]}>
+            <Text
+              style={[
+                styles.title,
+                { fontSize: titleFontSize },
+              ]}
+            >
               Register
             </Text>
           </View>
@@ -130,11 +158,20 @@ export default function SignupScreen() {
             keyboardShouldPersistTaps="handled"
           >
             <View style={styles.card}>
-              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { fontSize: labelFontSize },
+                ]}
+              >
                 Username
               </Text>
+
               <TextInput
-                style={[styles.input, { height: inputHeight }]}
+                style={[
+                  styles.input,
+                  { height: inputHeight },
+                ]}
                 placeholder="Enter your username"
                 value={username}
                 onChangeText={setUsername}
@@ -142,11 +179,20 @@ export default function SignupScreen() {
                 autoCapitalize="none"
               />
 
-              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { fontSize: labelFontSize },
+                ]}
+              >
                 E-mail
               </Text>
+
               <TextInput
-                style={[styles.input, { height: inputHeight }]}
+                style={[
+                  styles.input,
+                  { height: inputHeight },
+                ]}
                 placeholder="Enter your E-mail"
                 value={email}
                 onChangeText={setEmail}
@@ -156,10 +202,21 @@ export default function SignupScreen() {
                 autoCorrect={false}
               />
 
-              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { fontSize: labelFontSize },
+                ]}
+              >
                 Password
               </Text>
-              <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+
+              <View
+                style={[
+                  styles.passwordBox,
+                  { height: passwordBoxHeight },
+                ]}
+              >
                 <TextInput
                   style={styles.password}
                   placeholder="Enter your password"
@@ -170,15 +227,33 @@ export default function SignupScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    setShowPassword(!showPassword)
+                  }
+                >
+                  <Text style={styles.show}>
+                    {showPassword ? "Hide" : "Show"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
-              <Text style={[styles.label, { fontSize: labelFontSize }]}>
+              <Text
+                style={[
+                  styles.label,
+                  { fontSize: labelFontSize },
+                ]}
+              >
                 Confirm Password
               </Text>
-              <View style={[styles.passwordBox, { height: passwordBoxHeight }]}>
+
+              <View
+                style={[
+                  styles.passwordBox,
+                  { height: passwordBoxHeight },
+                ]}
+              >
                 <TextInput
                   style={styles.password}
                   placeholder="Confirm your password"
@@ -189,8 +264,15 @@ export default function SignupScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Text style={styles.show}>{showPassword ? "Hide" : "Show"}</Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    setShowPassword(!showPassword)
+                  }
+                >
+                  <Text style={styles.show}>
+                    {showPassword ? "Hide" : "Show"}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -206,16 +288,30 @@ export default function SignupScreen() {
                 {loading ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={[styles.buttonText, { fontSize: buttonFontSize }]}>
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      { fontSize: buttonFontSize },
+                    ]}
+                  >
                     Next
                   </Text>
                 )}
               </TouchableOpacity>
 
               <View style={styles.loginRow}>
-                <Text style={styles.accountText}>Already have an account?</Text>
-                <TouchableOpacity onPress={() => router.push("/login")}>
-                  <Text style={styles.loginText}>Sign In</Text>
+                <Text style={styles.accountText}>
+                  Already have an account?
+                </Text>
+
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push("/login")
+                  }
+                >
+                  <Text style={styles.loginText}>
+                    Sign In
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -250,7 +346,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#FFFFFF",
     fontWeight: "700",
-    transform: [{ translateX: 4}],
+    transform: [{ translateX: 4 }],
   },
 
   whiteContainer: {

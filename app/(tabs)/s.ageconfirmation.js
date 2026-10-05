@@ -64,7 +64,7 @@ export default function AgeConfirmation() {
               ],
             },
           ]}
-          onPress={() => router.push("/register")}
+          onPress={() => router.push("/terms")}
           activeOpacity={0.7}
         >
           <MaterialCommunityIcons
