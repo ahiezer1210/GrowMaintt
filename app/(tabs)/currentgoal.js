@@ -21,10 +21,12 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
+import { useAppSettings } from "../../context/Appsettings";
 import { auth, db } from "../../firebaseConfig";
 
 export default function SavingsGoalsScreen() {
   const { width, height } = useWindowDimensions();
+  const { t, colors } = useAppSettings();
 
   const isSmallScreen = width < 360;
   const isMediumScreen = width >= 360 && width < 600;
@@ -145,8 +147,8 @@ export default function SavingsGoalsScreen() {
 
     if (!abono || isNaN(value) || value <= 0) {
       Alert.alert(
-        "Invalid amount",
-        "Please enter a valid amount."
+        t.error || "Error",
+        t.validAmount || "Please enter a valid amount."
       );
       return;
     }
@@ -166,8 +168,10 @@ export default function SavingsGoalsScreen() {
       );
 
       Alert.alert(
-        "Amount too high",
-        `You can add up to $${available.toFixed(2)} to complete this goal.`
+        t.amountTooHigh || "Amount too high",
+        `${t.canAddUpTo || "You can add up to"} $${available.toFixed(
+          2
+        )} ${t.toCompleteGoal || "to complete this goal."}`
       );
       return;
     }
@@ -189,15 +193,17 @@ export default function SavingsGoalsScreen() {
       setAbono("");
 
       Alert.alert(
-        "Amount added",
-        "Your savings have been updated successfully."
+        t.amountAdded || "Amount added",
+        t.savingsUpdated ||
+          "Your savings have been updated successfully."
       );
     } catch (error) {
       console.log("ERROR ADDING MONEY:", error);
 
       Alert.alert(
-        "Error",
-        "The amount could not be added."
+        t.error || "Error",
+        t.amountCouldNotBeAdded ||
+          "The amount could not be added."
       );
     } finally {
       setAddingMoney(false);
@@ -214,10 +220,17 @@ export default function SavingsGoalsScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background || "#081023",
+        },
+      ]}
+    >
       <StatusBar
         translucent
-        backgroundColor="#081023"
+        backgroundColor={colors.header || "#081023"}
         barStyle="light-content"
       />
 
@@ -227,6 +240,7 @@ export default function SavingsGoalsScreen() {
           {
             height: s(145),
             paddingHorizontal: horizontalPadding,
+            backgroundColor: colors.header || "#081023",
           },
         ]}
       >
@@ -257,7 +271,7 @@ export default function SavingsGoalsScreen() {
           ]}
           numberOfLines={1}
         >
-          Savings Goals
+          {t.savingsGoals || "Savings Goals"}
         </Text>
 
         <TouchableOpacity
@@ -284,6 +298,7 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.content,
           {
+            backgroundColor: colors.background || "#FFFFFF",
             borderTopLeftRadius: 35 * scale,
             borderTopRightRadius: 35 * scale,
           },
@@ -294,6 +309,8 @@ export default function SavingsGoalsScreen() {
           contentContainerStyle={[
             styles.scrollContent,
             {
+              backgroundColor:
+                colors.background || "#FFFFFF",
               paddingHorizontal: horizontalPadding,
               paddingTop: s(20),
               paddingBottom: s(110),
@@ -313,11 +330,14 @@ export default function SavingsGoalsScreen() {
                 style={[
                   styles.noGoalsText,
                   {
+                    color:
+                      colors.secondaryText ||
+                      "#6b7280",
                     fontSize: s(16),
                   },
                 ]}
               >
-                No goals
+                {t.noGoals || "No goals"}
               </Text>
             </View>
           ) : (
@@ -355,7 +375,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          MAIN GOAL
+                          {t.mainGoal || "MAIN GOAL"}
                         </Text>
 
                         <Text
@@ -399,7 +419,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          SAVED
+                          {t.saved || "SAVED"}
                         </Text>
 
                         <Text
@@ -426,7 +446,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          TARGET
+                          {t.target || "TARGET"}
                         </Text>
 
                         <Text
@@ -480,7 +500,8 @@ export default function SavingsGoalsScreen() {
                           },
                         ]}
                       >
-                        {progress}% completed
+                        {progress}%{" "}
+                        {t.completed || "completed"}
                       </Text>
 
                       <Text
@@ -491,7 +512,8 @@ export default function SavingsGoalsScreen() {
                           },
                         ]}
                       >
-                        ${remaining.toFixed(2)} left
+                        ${remaining.toFixed(2)}{" "}
+                        {t.left || "left"}
                       </Text>
                     </View>
 
@@ -504,8 +526,10 @@ export default function SavingsGoalsScreen() {
                         },
                       ]}
                     >
-                      Deadline:{" "}
-                      {mainGoal.endDate || "No deadline"}
+                      {t.deadline || "Deadline"}:{" "}
+                      {mainGoal.endDate ||
+                        t.noDeadline ||
+                        "No deadline"}
                     </Text>
 
                     {expandedGoal === mainGoal.id && (
@@ -527,7 +551,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          Description
+                          {t.description || "Description"}
                         </Text>
 
                         <Text
@@ -540,6 +564,7 @@ export default function SavingsGoalsScreen() {
                           ]}
                         >
                           {mainGoal.description ||
+                            t.noDescription ||
                             "No description"}
                         </Text>
 
@@ -552,7 +577,7 @@ export default function SavingsGoalsScreen() {
                             },
                           ]}
                         >
-                          Add amount
+                          {t.addAmount || "Add amount"}
                         </Text>
 
                         <TextInput
@@ -563,9 +588,18 @@ export default function SavingsGoalsScreen() {
                               borderRadius: s(12),
                               padding: s(12),
                               marginBottom: s(10),
+                              color:
+                                colors.text ||
+                                "#0b1624",
+                              backgroundColor:
+                                colors.card ||
+                                "#fff",
                             },
                           ]}
-                          placeholder="Enter amount"
+                          placeholder={
+                            t.enterAmount ||
+                            "Enter amount"
+                          }
                           placeholderTextColor="#999"
                           keyboardType="decimal-pad"
                           value={abono}
@@ -594,8 +628,9 @@ export default function SavingsGoalsScreen() {
                             ]}
                           >
                             {addingMoney
-                              ? "Adding..."
-                              : "Add amount"}
+                              ? t.adding || "Adding..."
+                              : t.addAmount ||
+                                "Add amount"}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -610,12 +645,16 @@ export default function SavingsGoalsScreen() {
                     style={[
                       styles.sectionTitle,
                       {
+                        color:
+                          colors.text ||
+                          "#0b1624",
                         fontSize: s(19),
                         marginBottom: s(15),
                       },
                     ]}
                   >
-                    My other goals
+                    {t.myOtherGoals ||
+                      "My other goals"}
                   </Text>
 
                   {savedgoal.map((goal) => {
@@ -649,6 +688,10 @@ export default function SavingsGoalsScreen() {
                           style={[
                             styles.otherGoalCard,
                             {
+                              backgroundColor:
+                                colors.card ||
+                                colors.surface ||
+                                "#f2f2f2",
                               borderRadius: s(18),
                               padding: s(16),
                               marginBottom: s(15),
@@ -688,6 +731,9 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.otherGoalTitle,
                                   {
+                                    color:
+                                      colors.text ||
+                                      "#0b1624",
                                     fontSize: s(16),
                                     marginBottom: s(4),
                                   },
@@ -701,6 +747,9 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.otherGoalAmount,
                                   {
+                                    color:
+                                      colors.secondaryText ||
+                                      "#6b7280",
                                     fontSize: s(13),
                                   },
                                 ]}
@@ -756,24 +805,32 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.descriptionTitle,
                                   {
+                                    color:
+                                      colors.text ||
+                                      "#0b1624",
                                     fontSize: s(14),
                                     marginBottom: s(5),
                                   },
                                 ]}
                               >
-                                Description
+                                {t.description ||
+                                  "Description"}
                               </Text>
 
                               <Text
                                 style={[
                                   styles.descriptionText,
                                   {
+                                    color:
+                                      colors.secondaryText ||
+                                      "#4b5563",
                                     fontSize: s(13),
                                     marginBottom: s(15),
                                   },
                                 ]}
                               >
                                 {goal.description ||
+                                  t.noDescription ||
                                   "No description"}
                               </Text>
 
@@ -781,12 +838,16 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.addMoneyTitle,
                                   {
+                                    color:
+                                      colors.text ||
+                                      "#0b1624",
                                     fontSize: s(14),
                                     marginBottom: s(8),
                                   },
                                 ]}
                               >
-                                Add amount
+                                {t.addAmount ||
+                                  "Add amount"}
                               </Text>
 
                               <TextInput
@@ -797,9 +858,18 @@ export default function SavingsGoalsScreen() {
                                     borderRadius: s(12),
                                     padding: s(12),
                                     marginBottom: s(10),
+                                    color:
+                                      colors.text ||
+                                      "#0b1624",
+                                    backgroundColor:
+                                      colors.card ||
+                                      "#fff",
                                   },
                                 ]}
-                                placeholder="Enter amount"
+                                placeholder={
+                                  t.enterAmount ||
+                                  "Enter amount"
+                                }
                                 placeholderTextColor="#999"
                                 keyboardType="decimal-pad"
                                 value={abono}
@@ -828,8 +898,10 @@ export default function SavingsGoalsScreen() {
                                   ]}
                                 >
                                   {addingMoney
-                                    ? "Adding..."
-                                    : "Add amount"}
+                                    ? t.adding ||
+                                      "Adding..."
+                                    : t.addAmount ||
+                                      "Add amount"}
                                 </Text>
                               </TouchableOpacity>
                             </View>

@@ -173,6 +173,10 @@ const translations = {
     loadingNotifications:
       "Loading notifications...",
     noNotifications: "No notifications",
+    noNotificationsDescription:
+      "You don't have any new notifications.",
+    read: "Read",
+    unread: "Unread",
 
     newLoginDetected:
       "New login detected",
@@ -1025,6 +1029,12 @@ const translations = {
       "Cargando notificaciones...",
     noNotifications:
       "No hay notificaciones",
+    noNotificationsDescription:
+      "No tienes nuevas notificaciones.",
+    read:
+      "Leída",
+    unread:
+      "No leída",
 
     newLoginDetected:
       "Nuevo inicio de sesión detectado",

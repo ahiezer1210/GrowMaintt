@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import {
   addDoc,
@@ -72,7 +73,6 @@ export default function SavingsGoal() {
     ? 1.15
     : 1;
 
-  // Escala del header (igual que en logout / notifications)
   const hs = isSmallScreen ? 0.85 : isTablet ? 1.15 : 1;
 
   const horizontalPadding = isSmallScreen
@@ -98,8 +98,9 @@ export default function SavingsGoal() {
   const [endDate, setEndDate] = useState("");
   const [isMainGoal, setIsMainGoal] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
 
-  // Vuelve al Home que ya existe en la pila (no apila otro Home)
   const goHome = () => {
     router.replace("/home");
   };
@@ -126,6 +127,34 @@ export default function SavingsGoal() {
         from: "/registergoals",
       },
     });
+  };
+
+  const formatDate = (date) => {
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
+  const handleStartDateChange = (event, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowStartDatePicker(false);
+    }
+
+    if (selectedDate) {
+      setStartDate(formatDate(selectedDate));
+    }
+  };
+
+  const handleEndDateChange = (event, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowEndDatePicker(false);
+    }
+
+    if (selectedDate) {
+      setEndDate(formatDate(selectedDate));
+    }
   };
 
   const parseDate = (value) => {
@@ -193,7 +222,9 @@ export default function SavingsGoal() {
       return date;
     }
 
-    const numericDate = text.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+    const numericDate = text.match(
+      /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/
+    );
 
     if (numericDate) {
       const month = Number(numericDate[1]) - 1;
@@ -471,7 +502,6 @@ export default function SavingsGoal() {
             },
           ]}
         >
-          {/* Título primero y con pointerEvents="none": no tapa los botones */}
           <Text
             pointerEvents="none"
             style={[
@@ -693,7 +723,8 @@ export default function SavingsGoal() {
                   style={[
                     styles.typeText,
                     {
-                      color: frequency === "monthly" ? "#FFFFFF" : colors.text,
+                      color:
+                        frequency === "monthly" ? "#FFFFFF" : colors.text,
                       fontSize: s(12),
                     },
                   ]}
@@ -781,7 +812,7 @@ export default function SavingsGoal() {
               {t.startDate}
             </Text>
 
-            <TextInput
+            <TouchableOpacity
               style={[
                 styles.date,
                 {
@@ -791,14 +822,35 @@ export default function SavingsGoal() {
                   marginBottom: s(22),
                   backgroundColor: inputBackground,
                   borderColor: colors.border,
-                  color: colors.text,
                 },
               ]}
-              placeholder={placeholderStartDate}
-              value={startDate}
-              onChangeText={setStartDate}
-              placeholderTextColor="#ACADAD"
-            />
+              onPress={() => setShowStartDatePicker(true)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={{
+                  color: startDate ? colors.text : "#ACADAD",
+                  fontSize: s(14),
+                }}
+              >
+                {startDate || placeholderStartDate}
+              </Text>
+
+              <MaterialCommunityIcons
+                name="calendar-month-outline"
+                size={s(22)}
+                color="#999"
+              />
+            </TouchableOpacity>
+
+            {showStartDatePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={handleStartDateChange}
+              />
+            )}
 
             <Text
               style={[
@@ -813,7 +865,7 @@ export default function SavingsGoal() {
               {t.endDate}
             </Text>
 
-            <TextInput
+            <TouchableOpacity
               style={[
                 styles.date,
                 {
@@ -823,14 +875,35 @@ export default function SavingsGoal() {
                   marginBottom: s(22),
                   backgroundColor: inputBackground,
                   borderColor: colors.border,
-                  color: colors.text,
                 },
               ]}
-              placeholder={placeholderEndDate}
-              value={endDate}
-              onChangeText={setEndDate}
-              placeholderTextColor="#ACADAD"
-            />
+              onPress={() => setShowEndDatePicker(true)}
+              activeOpacity={0.8}
+            >
+              <Text
+                style={{
+                  color: endDate ? colors.text : "#ACADAD",
+                  fontSize: s(14),
+                }}
+              >
+                {endDate || placeholderEndDate}
+              </Text>
+
+              <MaterialCommunityIcons
+                name="calendar-month-outline"
+                size={s(22)}
+                color="#999"
+              />
+            </TouchableOpacity>
+
+            {showEndDatePicker && (
+              <DateTimePicker
+                value={new Date()}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={handleEndDateChange}
+              />
+            )}
 
             {savingAmount && Number(savingAmount.replace(",", ".")) > 0 && (
               <View
@@ -995,6 +1068,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F5",
     borderWidth: 1,
     borderColor: "#000000",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   mainGoalContainer: {

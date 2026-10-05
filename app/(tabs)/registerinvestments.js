@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import {
     collection,
@@ -32,6 +33,7 @@ export default function RegisterInvestment() {
     const [amount, setAmount] = useState("");
     const [type, setType] = useState("");
     const [date, setDate] = useState("");
+    const [showDatePicker, setShowDatePicker] = useState(false);
 
     const isSmallScreen = width < 360;
     const isMediumScreen = width >= 360 && width < 600;
@@ -60,6 +62,20 @@ export default function RegisterInvestment() {
         colors.background?.toLowerCase() === "#071426" ||
         colors.primaryBackground?.toLowerCase() === "#081023" ||
         colors.primaryBackground?.toLowerCase() === "#071426";
+
+    const handleDateChange = (event, selectedDate) => {
+        if (Platform.OS === "android") {
+            setShowDatePicker(false);
+        }
+
+        if (selectedDate) {
+            const day = String(selectedDate.getDate()).padStart(2, "0");
+            const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+            const year = selectedDate.getFullYear();
+
+            setDate(`${day}/${month}/${year}`);
+        }
+    };
 
     const registrarInversion = async () => {
         if (!investmentName || !amount || !type || !date) {
@@ -528,27 +544,57 @@ export default function RegisterInvestment() {
                                     {t.date}
                                 </Text>
 
-                                <TextInput
+                                <TouchableOpacity
                                     style={[
                                         styles.input,
+                                        styles.dateInput,
                                         {
                                             borderColor:
                                                 colors.border,
-                                            color:
-                                                colors.text,
                                             backgroundColor:
                                                 isDarkTheme
                                                     ? colors.primaryBackground
                                                     : "#FAFAFA",
                                         },
                                     ]}
-                                    placeholder={
-                                        t.datePlaceholder
+                                    onPress={() =>
+                                        setShowDatePicker(true)
                                     }
-                                    placeholderTextColor="#999"
-                                    value={date}
-                                    onChangeText={setDate}
-                                />
+                                    activeOpacity={0.8}
+                                >
+                                    <Text
+                                        style={{
+                                            color: date
+                                                ? colors.text
+                                                : "#999",
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        {date ||
+                                            t.datePlaceholder}
+                                    </Text>
+
+                                    <MaterialCommunityIcons
+                                        name="calendar-month-outline"
+                                        size={22}
+                                        color="#999"
+                                    />
+                                </TouchableOpacity>
+
+                                {showDatePicker && (
+                                    <DateTimePicker
+                                        value={new Date()}
+                                        mode="date"
+                                        display={
+                                            Platform.OS === "ios"
+                                                ? "spinner"
+                                                : "default"
+                                        }
+                                        onChange={
+                                            handleDateChange
+                                        }
+                                    />
+                                )}
 
                                 <TouchableOpacity
                                     style={[
@@ -660,7 +706,7 @@ export default function RegisterInvestment() {
                         activeOpacity={0.8}
                         onPress={() =>
                             router.push(
-                                "/expensesManagement"
+                                "/expensesmanagement"
                             )
                         }
                     >
@@ -812,6 +858,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#081023",
         backgroundColor: "#FAFAFA",
+    },
+
+    dateInput: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
     },
 
     amountContainer: {

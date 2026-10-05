@@ -277,7 +277,6 @@ export default function Redemptionhistory() {
                 backgroundColor={colors.header}
             />
 
-            {/* HEADER */}
             <View
                 style={[
                     styles.header,
@@ -419,7 +418,6 @@ export default function Redemptionhistory() {
                 </TouchableOpacity>
             </View>
 
-            {/* MAIN */}
             <View
                 style={[
                     styles.card,
@@ -453,7 +451,6 @@ export default function Redemptionhistory() {
                         },
                     ]}
                 >
-                    {/* CARD RESUMEN */}
                     <View
                         style={[
                             styles.resumen,
@@ -493,7 +490,6 @@ export default function Redemptionhistory() {
                                 },
                             ]}
                         >
-                            {/* GIFT */}
                             <View
                                 style={[
                                     styles.giftContainer,
@@ -512,7 +508,6 @@ export default function Redemptionhistory() {
                                 />
                             </View>
 
-                            {/* BENEFITS */}
                             <View
                                 style={
                                     styles.resumenItem
@@ -574,7 +569,6 @@ export default function Redemptionhistory() {
                                 </Text>
                             </View>
 
-                            {/* TOTAL REDEEMED */}
                             <View
                                 style={
                                     styles.resumenItem
@@ -648,7 +642,6 @@ export default function Redemptionhistory() {
                                 </Text>
                             </View>
 
-                            {/* EXCHANGES */}
                             <View
                                 style={
                                     styles.resumenItem
@@ -712,7 +705,6 @@ export default function Redemptionhistory() {
                         </View>
                     </View>
 
-                    {/* FILTERS */}
                     <View
                         style={[
                             styles.filters,
@@ -767,47 +759,8 @@ export default function Redemptionhistory() {
                                 isDarkTheme
                             }
                         />
-
-                        <Filter
-                            text={t.inProcess}
-                            icon="checkmark-circle-outline"
-                            active={
-                                filter ===
-                                "In process"
-                            }
-                            onPress={() =>
-                                setfilter(
-                                    "In process"
-                                )
-                            }
-                            scale={scale}
-                            colors={colors}
-                            isDarkTheme={
-                                isDarkTheme
-                            }
-                        />
-
-                        <Filter
-                            text={t.canceled}
-                            icon="close-circle-outline"
-                            active={
-                                filter ===
-                                "Canceled"
-                            }
-                            onPress={() =>
-                                setfilter(
-                                    "Canceled"
-                                )
-                            }
-                            scale={scale}
-                            colors={colors}
-                            isDarkTheme={
-                                isDarkTheme
-                            }
-                        />
                     </View>
 
-                    {/* LIST */}
                     <View
                         style={[
                             styles.list,
@@ -1040,7 +993,6 @@ export default function Redemptionhistory() {
                 </ScrollView>
             </View>
 
-            {/* BOTTOM NAV */}
             <View
                 style={[
                     styles.bottomBar,

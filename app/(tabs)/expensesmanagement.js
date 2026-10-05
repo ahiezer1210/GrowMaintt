@@ -567,7 +567,6 @@ export default function ExpenseManagement() {
               borderRadius: 20 * scale,
               zIndex: 10,
               elevation: 10,
-              backgroundColor: colors.input,
             },
           ]}
           onPress={() =>

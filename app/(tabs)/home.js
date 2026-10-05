@@ -661,16 +661,103 @@ export default function App() {
     .trim()
     .toLowerCase();
 
+  const now = new Date();
+
+  const startOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    0,
+    0,
+    0,
+    0
+  );
+
+  const endOfDay = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+
+  const dayOfWeek = now.getDay();
+
+  const mondayOffset =
+    dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+  const startOfWeek = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() + mondayOffset,
+    0,
+    0,
+    0,
+    0
+  );
+
+  const endOfWeek = new Date(
+    startOfWeek.getFullYear(),
+    startOfWeek.getMonth(),
+    startOfWeek.getDate() + 6,
+    23,
+    59,
+    59,
+    999
+  );
+
+  const startOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0
+  );
+
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23,
+    59,
+    59,
+    999
+  );
+
   const filteredRecords = records
     .filter((record) => {
-      const recordPeriod = String(
-        record.frequency || ""
-      )
-        .trim()
-        .toLowerCase();
+      if (!record.date) {
+        return false;
+      }
 
-      return recordPeriod === selectedPeriod;
+      const recordDate = record.date;
 
+      if (selectedPeriod === "daily") {
+        return (
+          recordDate >= startOfDay &&
+          recordDate <= endOfDay
+        );
+      }
+
+      if (selectedPeriod === "weekly") {
+        return (
+          recordDate >= startOfWeek &&
+          recordDate <= endOfWeek
+        );
+      }
+
+      if (selectedPeriod === "monthly") {
+        return (
+          recordDate >= startOfMonth &&
+          recordDate <= endOfMonth
+        );
+      }
+
+      return false;
     })
     .sort((a, b) => {
       if (!a.date && !b.date)
@@ -1467,7 +1554,7 @@ function BottomNav({
             style={styles.navItem}
             onPress={() => {
               if (
-                route !== "/home"
+                route !== "../home"
               ) {
                 router.push(route);
               }

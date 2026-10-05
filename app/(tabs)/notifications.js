@@ -27,18 +27,18 @@ const categories = ["All", "Savings", "Investment", "Rewards", "Security"];
 
 const getSecurityTitle = (type, t) => {
   const titles = {
-    new_device_login: t.newLoginDetected,
-    login_attempt: t.loginDetected,
-    password_change: t.passwordChanged,
-    password_reset: t.passwordReset,
-    email_change: t.emailChanged,
-    phone_change: t.phoneChanged,
-    profile_change: t.profileUpdated,
-    device_unlinked: t.deviceUnlinked,
-    suspicious_activity: t.suspiciousActivity,
+    new_device_login: t.newLoginDetected || "New login detected",
+    login_attempt: t.loginDetected || "Login attempt detected",
+    password_change: t.passwordChanged || "Password changed",
+    password_reset: t.passwordReset || "Password reset",
+    email_change: t.emailChanged || "Email changed",
+    phone_change: t.phoneChanged || "Phone changed",
+    profile_change: t.profileUpdated || "Profile updated",
+    device_unlinked: t.deviceUnlinked || "Device unlinked",
+    suspicious_activity: t.suspiciousActivity || "Suspicious activity",
   };
 
-  return titles[type] || t.securityAlert;
+  return titles[type] || t.securityAlert || "Security alert";
 };
 
 const getSecurityIcon = (type) => {
@@ -67,7 +67,7 @@ const getGeneralIcon = (category) => {
   return icons[category] || "bell-outline";
 };
 
-const formatDate = (timestamp, language) => {
+const formatDate = (timestamp, language, t) => {
   const empty = {
     date: "",
     time: "",
@@ -106,7 +106,10 @@ const formatDate = (timestamp, language) => {
     minute: "2-digit",
   });
 
-  const fullDate = `${date} ${language === "es" ? "a las" : "at"} ${time}`;
+  const connector =
+    t.at || (language === "es" ? "a las" : "at");
+
+  const fullDate = `${date} ${connector} ${time}`;
 
   return {
     date,
@@ -136,7 +139,6 @@ export default function NotificationsScreen() {
     ? 1.15
     : 1;
 
-  // Escala usada por el header (igual que en logout / edit_profile)
   const headerScale = isSmallScreen ? 0.85 : isTablet ? 1.15 : 1;
 
   const s = (value) => Math.round(value * scale);
@@ -147,11 +149,16 @@ export default function NotificationsScreen() {
   const [activeTab, setActiveTab] = useState("home");
 
   const categoryLabels = {
-    All: t.all,
-    Savings: t.savings,
-    Investment: t.investments,
-    Rewards: t.rewards,
-    Security: t.security,
+    All: t.all || (language === "es" ? "Todos" : "All"),
+    Savings:
+      t.savings || (language === "es" ? "Ahorros" : "Savings"),
+    Investment:
+      t.investments ||
+      (language === "es" ? "Inversiones" : "Investment"),
+    Rewards:
+      t.rewards || (language === "es" ? "Recompensas" : "Rewards"),
+    Security:
+      t.security || (language === "es" ? "Seguridad" : "Security"),
   };
 
   useEffect(() => {
@@ -162,7 +169,6 @@ export default function NotificationsScreen() {
       unsubscribers = [];
     };
 
-    // Espera a que Firebase restaure la sesión antes de escuchar datos
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       clearListeners();
 
@@ -174,8 +180,12 @@ export default function NotificationsScreen() {
 
       setLoading(true);
 
-      // ---- Alertas de seguridad ----
-      const securityRef = collection(db, "Users", user.uid, "securityAlerts");
+      const securityRef = collection(
+        db,
+        "Users",
+        user.uid,
+        "securityAlerts"
+      );
 
       unsubscribers.push(
         onSnapshot(
@@ -184,7 +194,11 @@ export default function NotificationsScreen() {
             const securityNotifications = snapshot.docs.map((item) => {
               const alert = item.data();
 
-              const formatted = formatDate(alert.createdAt, language);
+              const formatted = formatDate(
+                alert.createdAt,
+                language,
+                t
+              );
 
               return {
                 id: `security-${item.id}`,
@@ -197,7 +211,10 @@ export default function NotificationsScreen() {
                 description:
                   alert.message ||
                   alert.description ||
-                  t.securityEventDetected,
+                  t.securityEventDetected ||
+                  (language === "es"
+                    ? "Se detectó un evento de seguridad."
+                    : "A security event was detected."),
                 deviceName: alert.deviceName || null,
                 amount: null,
                 points: null,
@@ -206,7 +223,10 @@ export default function NotificationsScreen() {
                 rewardId: null,
                 rewardTitle: null,
                 redeemedId: null,
-                status: alert.read === true ? "Read" : "Unread",
+                status:
+                  alert.read === true
+                    ? t.read || "Read"
+                    : t.unread || "Unread",
                 unread: alert.read !== true,
                 time: formatted.time,
                 date: formatted.date,
@@ -221,7 +241,10 @@ export default function NotificationsScreen() {
                 (item) => item.category !== "Security"
               );
 
-              return [...generalNotifications, ...securityNotifications].sort(
+              return [
+                ...generalNotifications,
+                ...securityNotifications,
+              ].sort(
                 (a, b) => b.createdAt - a.createdAt
               );
             });
@@ -234,8 +257,11 @@ export default function NotificationsScreen() {
         )
       );
 
-      // ---- Notificaciones generales ----
-      const generalCategories = ["Savings", "Investment", "Rewards"];
+      const generalCategories = [
+        "Savings",
+        "Investment",
+        "Rewards",
+      ];
 
       generalCategories.forEach((category) => {
         const notificationRef = doc(
@@ -248,66 +274,119 @@ export default function NotificationsScreen() {
           onSnapshot(
             notificationRef,
             (snapshot) => {
-              const data = snapshot.exists() ? snapshot.data() : {};
+              const data = snapshot.exists()
+                ? snapshot.data()
+                : {};
 
-              const notificationArray = Array.isArray(data.notifications)
+              const notificationArray = Array.isArray(
+                data.notifications
+              )
                 ? data.notifications
                 : [];
 
-              const mappedNotifications = notificationArray.map(
-                (notification, index) => {
-                  const formatted = formatDate(
-                    notification.createdAt,
-                    language
-                  );
+              const mappedNotifications =
+                notificationArray.map(
+                  (notification, index) => {
+                    const formatted = formatDate(
+                      notification.createdAt,
+                      language,
+                      t
+                    );
 
-                  const notificationId =
-                    notification.id ||
-                    `${category.toLowerCase()}-${index}-${formatted.createdAt}`;
+                    const notificationId =
+                      notification.id ||
+                      `${category.toLowerCase()}-${index}-${formatted.createdAt}`;
 
-                  return {
-                    id: `notification-${snapshot.id}-${notificationId}`,
-                    alertId: snapshot.id,
-                    notificationId,
-                    category: notification.category || category,
-                    collectionName: "Notificaciones",
-                    type: notification.type || "notification",
-                    title: notification.title || t.newNotification,
-                    description:
-                      notification.message ||
-                      notification.description ||
-                      t.newNotificationDescription,
-                    deviceName: notification.deviceName || null,
-                    amount: notification.amount ?? null,
-                    points: notification.points ?? null,
-                    store: notification.store || null,
-                    code: notification.code || null,
-                    rewardId: notification.rewardId || null,
-                    rewardTitle: notification.rewardTitle || null,
-                    redeemedId: notification.redeemedId || null,
-                    status: notification.read === true ? "Read" : "Unread",
-                    unread: notification.read !== true,
-                    time: formatted.time,
-                    date: formatted.date,
-                    fullDate: formatted.fullDate,
-                    icon:
-                      notification.icon ||
-                      getGeneralIcon(notification.category || category),
-                    createdAt: formatted.createdAt,
-                  };
-                }
-              );
+                    return {
+                      id: `notification-${snapshot.id}-${notificationId}`,
+                      alertId: snapshot.id,
+                      notificationId,
+                      category:
+                        notification.category || category,
+                      collectionName: "Notificaciones",
+                      type:
+                        notification.type ||
+                        "notification",
 
-              setNotifications((previous) => {
-                const otherNotifications = previous.filter(
-                  (item) =>
-                    !(
-                      item.collectionName === "Notificaciones" &&
-                      item.category === category
-                    )
+                      title:
+                        notification.title ||
+                        t.newNotification ||
+                        (language === "es"
+                          ? "Nueva notificación"
+                          : "New notification"),
+
+                      description:
+                        notification.message ||
+                        notification.description ||
+                        t.newNotificationDescription ||
+                        (language === "es"
+                          ? "Tienes una nueva notificación."
+                          : "You have a new notification."),
+
+                      deviceName:
+                        notification.deviceName || null,
+
+                      amount:
+                        notification.amount ?? null,
+
+                      points:
+                        notification.points ?? null,
+
+                      store:
+                        notification.store || null,
+
+                      code:
+                        notification.code || null,
+
+                      rewardId:
+                        notification.rewardId || null,
+
+                      rewardTitle:
+                        notification.rewardTitle || null,
+
+                      redeemedId:
+                        notification.redeemedId || null,
+
+                      status:
+                        notification.read === true
+                          ? t.read || "Read"
+                          : t.unread || "Unread",
+
+                      unread:
+                        notification.read !== true,
+
+                      time: formatted.time,
+                      date: formatted.date,
+                      fullDate: formatted.fullDate,
+
+                      icon:
+                        notification.icon ||
+                        getGeneralIcon(
+                          notification.category ||
+                            category
+                        ),
+
+                      createdAt:
+                        formatted.createdAt,
+                    };
+                  }
                 );
 
-                return [...otherNotifications, ...mappedNotifications].sort(
+              setNotifications((previous) => {
+                const otherNotifications =
+                  previous.filter(
+                    (item) =>
+                      !(
+                        item.collectionName ===
+                          "Notificaciones" &&
+                        item.category === category
+                      )
+                  );
+
+                return [
+                  ...otherNotifications,
+                  ...mappedNotifications,
+                ].sort(
                   (a, b) => b.createdAt - a.createdAt
                 );
               });
@@ -331,9 +410,14 @@ export default function NotificationsScreen() {
   const filtered =
     selectedCategory === "All"
       ? notifications
-      : notifications.filter((item) => item.category === selectedCategory);
+      : notifications.filter(
+          (item) =>
+            item.category === selectedCategory
+        );
 
-  const unreadCount = notifications.filter((item) => item.unread).length;
+  const unreadCount = notifications.filter(
+    (item) => item.unread
+  ).length;
 
   const openNotification = async (notification) => {
     const user = auth.currentUser;
@@ -353,17 +437,21 @@ export default function NotificationsScreen() {
         );
 
         if (notification.unread) {
-          await runTransaction(db, async (transaction) => {
-            const snapshot = await transaction.get(ref);
+          await runTransaction(
+            db,
+            async (transaction) => {
+              const snapshot =
+                await transaction.get(ref);
 
-            if (!snapshot.exists()) {
-              return;
+              if (!snapshot.exists()) {
+                return;
+              }
+
+              transaction.update(ref, {
+                read: true,
+              });
             }
-
-            transaction.update(ref, {
-              read: true,
-            });
-          });
+          );
         }
 
         router.push({
@@ -387,36 +475,54 @@ export default function NotificationsScreen() {
       );
 
       if (notification.unread) {
-        await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(notificationRef);
+        await runTransaction(
+          db,
+          async (transaction) => {
+            const snapshot =
+              await transaction.get(
+                notificationRef
+              );
 
-          if (!snapshot.exists()) {
-            return;
-          }
-
-          const data = snapshot.data();
-
-          const notificationArray = Array.isArray(data.notifications)
-            ? data.notifications
-            : [];
-
-          const updatedNotifications = notificationArray.map((item, index) => {
-            const itemId = item.id || `${category.toLowerCase()}-${index}`;
-
-            if (String(itemId) === String(notification.notificationId)) {
-              return {
-                ...item,
-                read: true,
-              };
+            if (!snapshot.exists()) {
+              return;
             }
 
-            return item;
-          });
+            const data = snapshot.data();
 
-          transaction.update(notificationRef, {
-            notifications: updatedNotifications,
-          });
-        });
+            const notificationArray =
+              Array.isArray(data.notifications)
+                ? data.notifications
+                : [];
+
+            const updatedNotifications =
+              notificationArray.map(
+                (item, index) => {
+                  const itemId =
+                    item.id ||
+                    `${category.toLowerCase()}-${index}`;
+
+                  if (
+                    String(itemId) ===
+                    String(
+                      notification.notificationId
+                    )
+                  ) {
+                    return {
+                      ...item,
+                      read: true,
+                    };
+                  }
+
+                  return item;
+                }
+              );
+
+            transaction.update(notificationRef, {
+              notifications:
+                updatedNotifications,
+            });
+          }
+        );
       }
 
       router.push({
@@ -429,7 +535,10 @@ export default function NotificationsScreen() {
         },
       });
     } catch (error) {
-      console.log("Error opening notification:", error);
+      console.log(
+        "Error opening notification:",
+        error
+      );
     }
   };
 
@@ -444,11 +553,19 @@ export default function NotificationsScreen() {
       const batch = writeBatch(db);
 
       const unreadSecurity = notifications.filter(
-        (item) => item.category === "Security" && item.unread === true
+        (item) =>
+          item.category === "Security" &&
+          item.unread === true
       );
 
       unreadSecurity.forEach((item) => {
-        const ref = doc(db, "Users", user.uid, "securityAlerts", item.alertId);
+        const ref = doc(
+          db,
+          "Users",
+          user.uid,
+          "securityAlerts",
+          item.alertId
+        );
 
         batch.update(ref, {
           read: true,
@@ -459,7 +576,11 @@ export default function NotificationsScreen() {
         await batch.commit();
       }
 
-      const generalCategories = ["Savings", "Investment", "Rewards"];
+      const generalCategories = [
+        "Savings",
+        "Investment",
+        "Rewards",
+      ];
 
       for (const category of generalCategories) {
         const notificationRef = doc(
@@ -468,40 +589,56 @@ export default function NotificationsScreen() {
           `${user.uid}_${category}`
         );
 
-        await runTransaction(db, async (transaction) => {
-          const snapshot = await transaction.get(notificationRef);
+        await runTransaction(
+          db,
+          async (transaction) => {
+            const snapshot =
+              await transaction.get(
+                notificationRef
+              );
 
-          if (!snapshot.exists()) {
-            return;
+            if (!snapshot.exists()) {
+              return;
+            }
+
+            const data = snapshot.data();
+
+            const notificationArray =
+              Array.isArray(data.notifications)
+                ? data.notifications
+                : [];
+
+            if (notificationArray.length === 0) {
+              return;
+            }
+
+            const updatedNotifications =
+              notificationArray.map(
+                (item) => ({
+                  ...item,
+                  read: true,
+                })
+              );
+
+            transaction.update(notificationRef, {
+              notifications:
+                updatedNotifications,
+            });
           }
-
-          const data = snapshot.data();
-
-          const notificationArray = Array.isArray(data.notifications)
-            ? data.notifications
-            : [];
-
-          if (notificationArray.length === 0) {
-            return;
-          }
-
-          const updatedNotifications = notificationArray.map((item) => ({
-            ...item,
-            read: true,
-          }));
-
-          transaction.update(notificationRef, {
-            notifications: updatedNotifications,
-          });
-        });
+        );
       }
     } catch (error) {
-      console.log("Error marking notifications as read:", error);
+      console.log(
+        "Error marking notifications as read:",
+        error
+      );
     }
   };
 
   const goHome = () => {
-    if (typeof router.dismissTo === "function") {
+    if (
+      typeof router.dismissTo === "function"
+    ) {
       router.dismissTo("/home");
     } else {
       router.replace("/home");
@@ -531,7 +668,9 @@ export default function NotificationsScreen() {
       router.push("/expensesmanagement");
     } else if (from === "/registerexpenses") {
       router.push("/registerexpenses");
-    } else if (from === "/registerinvestments") {
+    } else if (
+      from === "/registerinvestments"
+    ) {
       router.push("/registerinvestments");
     } else if (from === "/usermanual") {
       router.push("/usermanual");
@@ -547,7 +686,9 @@ export default function NotificationsScreen() {
       router.push("/settings");
     } else if (from === "/linkeddevices") {
       router.push("/linkeddevices");
-    } else if (from === "/logoutalldevices") {
+    } else if (
+      from === "/logoutalldevices"
+    ) {
       router.push("/logoutalldevices");
     } else if (from === "/logout") {
       router.push("/logout");
@@ -557,11 +698,17 @@ export default function NotificationsScreen() {
       router.push("/investments");
     } else if (from === "/pointsExchange") {
       router.push("/pointsExchange");
-    } else if (from === "/redemption_history") {
+    } else if (
+      from === "/redemption_history"
+    ) {
       router.push("/redemption_history");
-    } else if (from === "/expensesManagement") {
+    } else if (
+      from === "/expensesManagement"
+    ) {
       router.push("/expensesManagement");
-    } else if (from === "/expensecontrolperiod") {
+    } else if (
+      from === "/expensecontrolperiod"
+    ) {
       router.push("/expensecontrolperiod");
     } else if (from === "/registergoals") {
       router.push("/registergoals");
@@ -576,7 +723,12 @@ export default function NotificationsScreen() {
 
   return (
     <SafeAreaView
-      style={[styles.container, { backgroundColor: colors.header }]}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.header,
+        },
+      ]}
       edges={["left", "right"]}
     >
       <StatusBar
@@ -585,18 +737,20 @@ export default function NotificationsScreen() {
         barStyle="light-content"
       />
 
-      {/* HEADER IGUAL AL DE LOGOUT */}
       <View
         style={[
           styles.header,
           {
             height: 118 * headerScale,
-            paddingHorizontal: isSmallScreen ? 18 : isTablet ? 45 : 25,
+            paddingHorizontal: isSmallScreen
+              ? 18
+              : isTablet
+              ? 45
+              : 25,
             backgroundColor: colors.header,
           },
         ]}
       >
-        {/* Título primero y con pointerEvents="none": no tapa los botones */}
         <Text
           pointerEvents="none"
           style={[
@@ -604,14 +758,23 @@ export default function NotificationsScreen() {
             {
               fontSize: 25 * headerScale,
               transform: [
-                { translateX: 4 * headerScale },
-                { translateY: 1 * headerScale },
+                {
+                  translateX:
+                    4 * headerScale,
+                },
+                {
+                  translateY:
+                    1 * headerScale,
+                },
               ],
               color: colors.white,
             },
           ]}
         >
-          {t.notifications}
+          {t.notifications ||
+            (language === "es"
+              ? "Notificaciones"
+              : "Notifications")}
         </Text>
 
         <TouchableOpacity
@@ -620,12 +783,22 @@ export default function NotificationsScreen() {
             {
               zIndex: 10,
               elevation: 10,
-              transform: [{ translateY: 4 * headerScale }],
+              transform: [
+                {
+                  translateY:
+                    4 * headerScale,
+                },
+              ],
             },
           ]}
           onPress={volver}
           activeOpacity={0.7}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
         >
           <MaterialCommunityIcons
             name="arrow-left"
@@ -656,12 +829,22 @@ export default function NotificationsScreen() {
             {
               zIndex: 10,
               elevation: 10,
-              transform: [{ translateY: 4 * headerScale }],
+              transform: [
+                {
+                  translateY:
+                    4 * headerScale,
+                },
+              ],
             },
           ]}
           onPress={markAllAsRead}
           activeOpacity={0.7}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          hitSlop={{
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10,
+          }}
         >
           <MaterialCommunityIcons
             name="check-all"
@@ -701,10 +884,14 @@ export default function NotificationsScreen() {
                   paddingHorizontal: s(10),
                   borderRadius: s(9),
                   backgroundColor:
-                    selectedCategory === category ? colors.icon : colors.input,
+                    selectedCategory === category
+                      ? colors.icon
+                      : colors.input,
                 },
               ]}
-              onPress={() => setSelectedCategory(category)}
+              onPress={() =>
+                setSelectedCategory(category)
+              }
               activeOpacity={0.8}
             >
               <Text
@@ -726,12 +913,29 @@ export default function NotificationsScreen() {
         </View>
 
         <ScrollView
-          style={[styles.list, { paddingHorizontal: s(16) }]}
-          contentContainerStyle={[styles.listContent, { paddingBottom: s(90) }]}
+          style={[
+            styles.list,
+            {
+              paddingHorizontal: s(16),
+            },
+          ]}
+          contentContainerStyle={[
+            styles.listContent,
+            {
+              paddingBottom: s(90),
+            },
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {loading ? (
-            <View style={[styles.empty, { minHeight: s(420) }]}>
+            <View
+              style={[
+                styles.empty,
+                {
+                  minHeight: s(420),
+                },
+              ]}
+            >
               <View
                 style={[
                   styles.emptyIcon,
@@ -759,11 +963,21 @@ export default function NotificationsScreen() {
                   },
                 ]}
               >
-                {t.loadingNotifications}
+                {t.loadingNotifications ||
+                  (language === "es"
+                    ? "Cargando notificaciones..."
+                    : "Loading notifications...")}
               </Text>
             </View>
           ) : filtered.length === 0 ? (
-            <View style={[styles.empty, { minHeight: s(420) }]}>
+            <View
+              style={[
+                styles.empty,
+                {
+                  minHeight: s(420),
+                },
+              ]}
+            >
               <View
                 style={[
                   styles.emptyIcon,
@@ -791,7 +1005,10 @@ export default function NotificationsScreen() {
                   },
                 ]}
               >
-                {t.noNotifications}
+                {t.noNotifications ||
+                  (language === "es"
+                    ? "No hay notificaciones"
+                    : "No notifications")}
               </Text>
 
               <Text
@@ -804,7 +1021,11 @@ export default function NotificationsScreen() {
                   },
                 ]}
               >
-                {t.noNotificationsDescription || t.newNotificationDescription}
+                {t.noNotificationsDescription ||
+                  t.newNotificationDescription ||
+                  (language === "es"
+                    ? "No tienes nuevas notificaciones."
+                    : "You don't have any new notifications.")}
               </Text>
             </View>
           ) : (
@@ -821,7 +1042,9 @@ export default function NotificationsScreen() {
                     backgroundColor: colors.card,
                   },
                 ]}
-                onPress={() => openNotification(item)}
+                onPress={() =>
+                  openNotification(item)
+                }
                 activeOpacity={0.8}
               >
                 <View
@@ -830,7 +1053,8 @@ export default function NotificationsScreen() {
                     {
                       width: s(35),
                       marginRight: s(7),
-                      backgroundColor: colors.input,
+                      backgroundColor:
+                        colors.input,
                       borderRadius: s(20),
                     },
                   ]}
@@ -845,10 +1069,14 @@ export default function NotificationsScreen() {
                 <View
                   style={[
                     styles.notificationContent,
-                    { paddingRight: s(15) },
+                    {
+                      paddingRight: s(15),
+                    },
                   ]}
                 >
-                  <View style={styles.titleRow}>
+                  <View
+                    style={styles.titleRow}
+                  >
                     <Text
                       style={[
                         styles.title,
@@ -874,7 +1102,8 @@ export default function NotificationsScreen() {
                             width: s(7),
                             height: s(7),
                             borderRadius: s(7),
-                            backgroundColor: colors.icon,
+                            backgroundColor:
+                              colors.icon,
                           },
                         ]}
                       />
@@ -887,7 +1116,8 @@ export default function NotificationsScreen() {
                       {
                         fontSize: s(9),
                         lineHeight: s(12),
-                        color: colors.secondaryText,
+                        color:
+                          colors.secondaryText,
                       },
                     ]}
                     numberOfLines={2}
@@ -895,14 +1125,22 @@ export default function NotificationsScreen() {
                     {item.description}
                   </Text>
 
-                  <View style={[styles.dateRow, { marginTop: s(4) }]}>
+                  <View
+                    style={[
+                      styles.dateRow,
+                      {
+                        marginTop: s(4),
+                      },
+                    ]}
+                  >
                     <Text
                       style={[
                         styles.time,
                         {
                           fontSize: s(8),
                           marginRight: s(3),
-                          color: colors.secondaryText,
+                          color:
+                            colors.secondaryText,
                         },
                       ]}
                     >
@@ -914,7 +1152,8 @@ export default function NotificationsScreen() {
                         styles.date,
                         {
                           fontSize: s(8),
-                          color: colors.secondaryText,
+                          color:
+                            colors.secondaryText,
                         },
                       ]}
                     >
@@ -929,7 +1168,12 @@ export default function NotificationsScreen() {
 
         <SafeAreaView
           edges={["bottom"]}
-          style={[styles.bottomContainer, { backgroundColor: colors.nav }]}
+          style={[
+            styles.bottomContainer,
+            {
+              backgroundColor: colors.nav,
+            },
+          ]}
         >
           <View
             style={[
@@ -942,25 +1186,59 @@ export default function NotificationsScreen() {
             ]}
           >
             {[
-              ["home", "/home", "home-outline", 35],
-              ["reports", "/historial", "chart-box-outline", 35],
-              ["swap", "/expensesManagement", "swap-horizontal", 37],
-              ["layers", "/currentgoal", "layers-outline", 35],
-              ["account", "/profile", "account-outline", 35],
-            ].map(([tab, route, icon, size]) => (
-              <TouchableOpacity
-                key={tab}
-                style={styles.navItem}
-                onPress={() => nav(tab, route)}
-                activeOpacity={0.8}
-              >
-                <MaterialCommunityIcons
-                  name={icon}
-                  size={s(size)}
-                  color={colors.white}
-                />
-              </TouchableOpacity>
-            ))}
+              [
+                "home",
+                "../home",
+                "home-outline",
+                35,
+              ],
+              [
+                "reports",
+                "../historial",
+                "chart-box-outline",
+                35,
+              ],
+              [
+                "swap",
+                "../expensesmanagement",
+                "swap-horizontal",
+                37,
+              ],
+              [
+                "layers",
+                "/currentgoal",
+                "layers-outline",
+                35,
+              ],
+              [
+                "account",
+                "/profile",
+                "account-outline",
+                35,
+              ],
+            ].map(
+              ([
+                tab,
+                route,
+                icon,
+                size,
+              ]) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={styles.navItem}
+                  onPress={() =>
+                    nav(tab, route)
+                  }
+                  activeOpacity={0.8}
+                >
+                  <MaterialCommunityIcons
+                    name={icon}
+                    size={s(size)}
+                    color={colors.white}
+                  />
+                </TouchableOpacity>
+              )
+            )}
           </View>
         </SafeAreaView>
       </View>
@@ -974,7 +1252,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#071426",
   },
 
-  /* HEADER IGUAL AL LOGOUT */
   header: {
     width: "100%",
     flexDirection: "row",

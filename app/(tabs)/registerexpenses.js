@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
 import {
   addDoc,
@@ -27,7 +28,7 @@ import { auth, db } from "../../firebaseConfig";
 
 export default function Registerexpenses() {
   const { width } = useWindowDimensions();
-  const { colors } = useAppSettings();
+  const { colors, t } = useAppSettings();
 
   const isDarkTheme = colors.background === "#121212";
 
@@ -43,6 +44,7 @@ export default function Registerexpenses() {
   const [expenseType, setExpenseType] = useState("");
   const [frequency, setFrequency] = useState("");
   const [date, setDate] = useState("");
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const numericAmount = parseFloat(amount);
 
@@ -60,13 +62,29 @@ export default function Registerexpenses() {
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
-    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "swap-horizontal", route: "/expensesmanagement" },
     { icon: "layers-outline", route: "/currentgoal" },
     { icon: "account-outline", route: "/profile" },
   ];
 
   const goHome = () => {
     router.replace("/home");
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    if (Platform.OS === "android") {
+      setShowDatePicker(false);
+    }
+
+    if (selectedDate) {
+      const day = String(selectedDate.getDate()).padStart(2, "0");
+      const month = String(
+        selectedDate.getMonth() + 1
+      ).padStart(2, "0");
+      const year = selectedDate.getFullYear();
+
+      setDate(`${day}/${month}/${year}`);
+    }
   };
 
   const saveExpense = async () => {
@@ -77,14 +95,22 @@ export default function Registerexpenses() {
       !frequency ||
       !date
     ) {
-      Alert.alert("Error", "Please complete all fields.");
+      Alert.alert(
+        t.error || "Error",
+        t.completeAllFields ||
+          "Please complete all fields."
+      );
       return;
     }
 
     const numericAmount = parseFloat(amount);
 
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      Alert.alert("Error", "Please enter a valid amount.");
+      Alert.alert(
+        t.error || "Error",
+        t.validAmount ||
+          "Please enter a valid amount."
+      );
       return;
     }
 
@@ -92,7 +118,11 @@ export default function Registerexpenses() {
       const user = auth.currentUser;
 
       if (!user) {
-        Alert.alert("Error", "There is no authenticated user.");
+        Alert.alert(
+          t.error || "Error",
+          t.noAuthenticatedUser ||
+            "There is no authenticated user."
+        );
         return;
       }
 
@@ -132,17 +162,25 @@ export default function Registerexpenses() {
         {
           userId: user.uid,
           category: "Savings",
-          title: "New savings",
+          title:
+            t.newSavings || "New savings",
           message: `You saved $${savings.toFixed(
             2
-          )} by rounding up your expense.`,
+          )} ${
+            t.byRoundingExpense ||
+            "by rounding up your expense."
+          }`,
           read: false,
           createdAt: serverTimestamp(),
         },
         { merge: true }
       );
 
-      Alert.alert("Success", "Expense registered successfully.");
+      Alert.alert(
+        t.success || "Success",
+        t.expenseRegisteredSuccessfully ||
+          "Expense registered successfully."
+      );
 
       setAmount("");
       setCategory("");
@@ -152,7 +190,11 @@ export default function Registerexpenses() {
     } catch (error) {
       console.error("Error saving expense:", error);
 
-      Alert.alert("Error", "The expense could not be saved.");
+      Alert.alert(
+        t.error || "Error",
+        t.expenseCouldNotBeSaved ||
+          "The expense could not be saved."
+      );
     }
   };
 
@@ -186,14 +228,19 @@ export default function Registerexpenses() {
         translucent
         backgroundColor="transparent"
         barStyle={
-          isDarkTheme ? "light-content" : "dark-content"
+          isDarkTheme
+            ? "light-content"
+            : "dark-content"
         }
       />
 
       <View
         style={[
           styles.app,
-          { backgroundColor: colors.primaryBackground },
+          {
+            backgroundColor:
+              colors.primaryBackground,
+          },
         ]}
       >
         <View
@@ -249,7 +296,8 @@ export default function Registerexpenses() {
               },
             ]}
           >
-            Register Expenses
+            {t.registerExpenses ||
+              "Register Expenses"}
           </Text>
 
           <TouchableOpacity
@@ -319,7 +367,7 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Amount
+                {t.amount || "Amount"}
               </Text>
 
               <TextInput
@@ -351,7 +399,8 @@ export default function Registerexpenses() {
                     },
                   ]}
                 >
-                  Automatic Rounding
+                  {t.automaticRounding ||
+                    "Automatic Rounding"}
                 </Text>
 
                 <View
@@ -370,7 +419,11 @@ export default function Registerexpenses() {
                     color="#25B5D1"
                   />
 
-                  <View style={styles.roundingTextContainer}>
+                  <View
+                    style={
+                      styles.roundingTextContainer
+                    }
+                  >
                     <Text
                       style={[
                         styles.roundingValue,
@@ -395,7 +448,7 @@ export default function Registerexpenses() {
                         },
                       ]}
                     >
-                      Save $
+                      {t.save || "Save"} $
                       {validAmount
                         ? savings.toFixed(2)
                         : "0.00"}
@@ -419,7 +472,7 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Category
+                {t.category || "Category"}
               </Text>
 
               <TextInput
@@ -434,7 +487,10 @@ export default function Registerexpenses() {
                 ]}
                 value={category}
                 onChangeText={setCategory}
-                placeholder="E.g. Food"
+                placeholder={
+                  t.categoryExample ||
+                  "E.g. Food"
+                }
                 placeholderTextColor={
                   colors.secondaryText
                 }
@@ -449,7 +505,7 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Expense Type
+                {t.expenseType || "Expense Type"}
               </Text>
 
               <TextInput
@@ -464,7 +520,10 @@ export default function Registerexpenses() {
                 ]}
                 value={expenseType}
                 onChangeText={setExpenseType}
-                placeholder="E.g. Necessary"
+                placeholder={
+                  t.expenseTypeExample ||
+                  "E.g. Necessary"
+                }
                 placeholderTextColor={
                   colors.secondaryText
                 }
@@ -479,49 +538,62 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Frequency
+                {t.frequency || "Frequency"}
               </Text>
 
-              <View style={styles.frequencyContainer}>
-                {["Daily", "Weekly", "Monthly"].map(
-                  (item) => (
-                    <TouchableOpacity
-                      key={item}
+              <View
+                style={styles.frequencyContainer}
+              >
+                {[
+                  {
+                    value: "Daily",
+                    label: t.daily || "Daily",
+                  },
+                  {
+                    value: "Weekly",
+                    label: t.weekly || "Weekly",
+                  },
+                  {
+                    value: "Monthly",
+                    label: t.monthly || "Monthly",
+                  },
+                ].map((item) => (
+                  <TouchableOpacity
+                    key={item.value}
+                    style={[
+                      styles.frequencyButton,
+                      {
+                        borderColor:
+                          frequency === item.value
+                            ? "#25B5D1"
+                            : colors.border,
+                        backgroundColor:
+                          frequency === item.value
+                            ? "#25B5D1"
+                            : colors.card,
+                      },
+                    ]}
+                    onPress={() =>
+                      setFrequency(item.value)
+                    }
+                    activeOpacity={0.8}
+                  >
+                    <Text
                       style={[
-                        styles.frequencyButton,
+                        styles.frequencyText,
                         {
-                          borderColor:
-                            frequency === item
-                              ? "#25B5D1"
-                              : colors.border,
-                          backgroundColor:
-                            frequency === item
-                              ? "#25B5D1"
-                              : colors.card,
+                          color:
+                            frequency === item.value
+                              ? "#FFFFFF"
+                              : colors.text,
+                          fontSize: scale(14),
                         },
                       ]}
-                      onPress={() =>
-                        setFrequency(item)
-                      }
-                      activeOpacity={0.8}
                     >
-                      <Text
-                        style={[
-                          styles.frequencyText,
-                          {
-                            color:
-                              frequency === item
-                                ? "#FFFFFF"
-                                : colors.text,
-                            fontSize: scale(14),
-                          },
-                        ]}
-                      >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  )
-                )}
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
               <Text
@@ -533,26 +605,53 @@ export default function Registerexpenses() {
                   },
                 ]}
               >
-                Date
+                {t.date || "Date"}
               </Text>
 
-              <TextInput
+              <TouchableOpacity
                 style={[
                   styles.input,
+                  styles.dateInput,
                   {
-                    color: colors.text,
                     borderColor: colors.border,
                     backgroundColor: colors.card,
-                    fontSize: scale(16),
                   },
                 ]}
-                value={date}
-                onChangeText={setDate}
-                placeholder="DD/MM/YYYY"
-                placeholderTextColor={
-                  colors.secondaryText
+                onPress={() =>
+                  setShowDatePicker(true)
                 }
-              />
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={{
+                    color: date
+                      ? colors.text
+                      : colors.secondaryText,
+                    fontSize: scale(16),
+                  }}
+                >
+                  {date || "DD/MM/YYYY"}
+                </Text>
+
+                <MaterialCommunityIcons
+                  name="calendar-month-outline"
+                  size={scale(23)}
+                  color={colors.secondaryText}
+                />
+              </TouchableOpacity>
+
+              {showDatePicker && (
+                <DateTimePicker
+                  value={new Date()}
+                  mode="date"
+                  display={
+                    Platform.OS === "ios"
+                      ? "spinner"
+                      : "default"
+                  }
+                  onChange={handleDateChange}
+                />
+              )}
 
               <TouchableOpacity
                 style={[
@@ -576,7 +675,7 @@ export default function Registerexpenses() {
                     },
                   ]}
                 >
-                  Save
+                  {t.save || "Save"}
                 </Text>
               </TouchableOpacity>
 
@@ -605,7 +704,7 @@ export default function Registerexpenses() {
                     },
                   ]}
                 >
-                  Cancel
+                  {t.cancel || "Cancel"}
                 </Text>
               </TouchableOpacity>
             </ScrollView>
@@ -711,6 +810,12 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingHorizontal: 16,
     marginBottom: 8,
+  },
+
+  dateInput: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
 
   roundingGroup: {
