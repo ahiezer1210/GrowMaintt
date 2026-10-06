@@ -1,146 +1,179 @@
 import { router } from "expo-router";
-import { useEffect } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { StyleSheet, Text, View, useWindowDimensions, } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import {
+    Image,
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+    useWindowDimensions,
+} from "react-native";
 
-import { auth } from "../../firebaseConfig";
-
-
-export default function Inicio() {
+export default function Welcome() {
   const { width } = useWindowDimensions();
 
-  const isSmallScreen = width < 360;
-  const isMediumScreen = width >= 360 && width < 600;
-  const isTablet = width >= 600;
-  const isLargeScreen = width >= 900;
-
-  const scaleSize = isSmallScreen
-    ? 0.85
-    : isMediumScreen
-      ? 1
-      : isTablet
-        ? 1.15
-        : 1.25;
-
-  const s = (value) => Math.round(value * scaleSize);
-
-  const scale = useSharedValue(0.7);
-  const opacity = useSharedValue(0);
-
-  useEffect(() => {
-    opacity.value = withTiming(1, {
-      duration: 500,
-    });
-
-    scale.value = withDelay(
-      100,
-      withSpring(1, {
-        damping: 13,
-        stiffness: 100,
-      })
-    );
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const timer = setTimeout(() => {
-        if (user) {
-          // Ya inició sesión anteriormente
-          router.replace("/home");
-        } else {
-          // No hay una sesión iniciada
-          router.replace("/welcome");
-        }
-      }, 1500);
-
-      return () => clearTimeout(timer);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const logoAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: opacity.value,
-      transform: [
-        {
-          scale: scale.value,
-        },
-      ],
-    };
-  });
+  const small = width < 360;
+  const tablet = width >= 600;
+  const horizontalPadding = tablet ? 50 : small ? 18 : 25;
+  const logoSize = tablet ? 400 : 340;
+  const appNameSize = tablet ? 52 : 43;
+  const buttonHeight = tablet ? 72 : 64;
+  const buttonFontSize = tablet ? 32 : 29;
 
   return (
-    <View style={styles.container}>
-      <Text
-        style={[
-          styles.welcome,
-          {
-            fontSize: s(40),
-            marginBottom: s(55),
-          },
-        ]}
+    <SafeAreaView style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: horizontalPadding,
+          paddingTop: 40,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        ¡Welcome!
-      </Text>
+        <View style={styles.container}>
 
-      <Animated.Image
-        source={require("../../assets/images/logo.png")}
-        style={[
-          styles.logo,
-          {
-            width: s(300),
-            height: s(300),
-            marginBottom: s(35),
-          },
-          logoAnimatedStyle,
-        ]}
-        resizeMode="contain"
-      />
+          <Image
+            source={require("../../assets/images/logo.png")}
+            style={[
+              styles.logo,
+              {
+                width: logoSize,
+                height: logoSize,
+              },
+            ]}
+            resizeMode="contain"
+          />
 
-      <Text
-        style={[
-          styles.appName,
-          {
-            fontSize: s(40),
-          },
-        ]}
-      >
-        GrowMaint
-      </Text>
-    </View>
+          <Text style={[
+            styles.appName,
+            {
+              fontSize: appNameSize,
+            },
+          ]}>
+            GrowMaint
+          </Text>
+
+          <View style={styles.buttonsContainer}>
+
+            <Pressable
+              onPress={() => router.push("/login")}
+              style={({ pressed }) => [
+                styles.loginButton,
+                {
+                  height: buttonHeight,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[
+                styles.loginText,
+                {
+                  fontSize: buttonFontSize,
+                },
+              ]}>
+                Log In
+              </Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => router.push("/register")}
+              style={({ pressed }) => [
+                styles.registerButton,
+                {
+                  height: buttonHeight,
+                },
+                pressed && styles.pressed,
+              ]}
+            >
+              <Text style={[
+                styles.registerText,
+                {
+                  fontSize: buttonFontSize,
+                },
+              ]}>
+                Sign Up
+              </Text>
+            </Pressable>
+
+          </View>
+
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#0D1E2D",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#0D1E2D",
     alignItems: "center",
     justifyContent: "center",
-  },
-
-  welcome: {
-    color: "#FFFFFF",
-    fontSize: 40,
-    fontWeight: "700",
-    marginBottom: 55,
+    paddingVertical: 40,
+    overflow: "hidden",
   },
 
   logo: {
-    width: 300,
-    height: 300,
-    marginBottom: 35,
+    marginTop: 20,
+    marginBottom: 10,
   },
 
   appName: {
     color: "#FFFFFF",
-    fontSize: 40,
+    fontWeight: "800",
+    marginTop: -5,
+    letterSpacing: -1,
+    textAlign: "center",
+  },
+
+  buttonsContainer: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: "auto",
+    marginBottom: 20,
+    gap: 20,
+  },
+
+  loginButton: {
+    width: "92%",
+    backgroundColor: "#08AEEF",
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  loginText: {
+    color: "#FFFFFF",
     fontWeight: "700",
+  },
+
+  registerButton: {
+    width: "92%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  registerText: {
+    color: "#0D1E2D",
+    fontWeight: "700",
+  },
+
+  pressed: {
+    opacity: 0.8,
+    transform: [
+      {
+        scale: 0.97,
+      },
+    ],
   },
 });
