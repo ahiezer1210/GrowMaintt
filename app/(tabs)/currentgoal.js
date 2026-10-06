@@ -933,8 +933,8 @@ export default function SavingsGoalsScreen() {
         {[
           ["home-outline", "/home"],
           ["chart-box-outline", "/historial"],
-          ["swap-horizontal", "/expensesManagement"],
-          ["layers-outline", "/expensesManagement"],
+          ["swap-horizontal", "/expensesmanagement"],
+          ["layers-outline", "/expensesmanagement"],
           ["account-outline", "/profile"],
         ].map(([icon, route], index) => (
           <TouchableOpacity

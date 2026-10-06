@@ -4,7 +4,7 @@
     "slug": "GrowMaint",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/logogrowmaint.png",
     "scheme": "growmaint",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -12,18 +12,19 @@
     },
     "android": {
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.GrowMaint"
+      "package": "com.anonymous.GrowMaint",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/logogrowmaint.png",
+        "backgroundColor": "#081023"
+      }
     },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
-    },
+  
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logo.png",
+          "image": "./assets/images/logogrowmaint.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#081023",
