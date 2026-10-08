@@ -364,7 +364,6 @@ export default function TermsScreen() {
                 </Text>
               </TouchableOpacity>
 
-              {/* REJECT */}
               <TouchableOpacity
                 style={[
                   styles.actionButton,
@@ -374,7 +373,7 @@ export default function TermsScreen() {
                     backgroundColor: COLORS.cyan,
                   },
                 ]}
-                onPress={() => setAccepted(false)}
+                onPress={() => router.replace("/index")}
                 activeOpacity={0.8}
               >
                 <Text
@@ -391,77 +390,6 @@ export default function TermsScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
-        </View>
-
-        <View
-          style={[
-            styles.bottomBar,
-            {
-              height: s(65),
-              borderTopLeftRadius: s(78),
-              backgroundColor: colors.nav,
-            },
-          ]}
-        >
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.8}
-            onPress={() => router.push("/home")}
-          >
-            <MaterialCommunityIcons
-              name="home-outline"
-              size={s(35)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.8}
-            onPress={() => router.push("/historial")}
-          >
-            <MaterialCommunityIcons
-              name="chart-box-outline"
-              size={s(35)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.8}
-            onPress={() => router.push("/expensesManagement")}
-          >
-            <MaterialCommunityIcons
-              name="swap-horizontal"
-              size={s(37)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.8}
-            onPress={() => router.push("/currentgoal")}
-          >
-            <MaterialCommunityIcons
-              name="layers-outline"
-              size={s(35)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.navItem}
-            activeOpacity={0.8}
-            onPress={() => router.push("/profile")}
-          >
-            <MaterialCommunityIcons
-              name="account-outline"
-              size={s(35)}
-              color={colors.white}
-            />
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -573,23 +501,5 @@ const styles = StyleSheet.create({
 
   buttonText: {
     fontWeight: "700",
-  },
-
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-around",
-    overflow: "hidden",
-  },
-
-  navItem: {
-    flex: 1,
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
