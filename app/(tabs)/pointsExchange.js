@@ -593,7 +593,7 @@ export default function PointExchange() {
               paddingHorizontal: horizontalPadding,
               paddingTop: 12 * scale,
               paddingBottom: 18 * scale,
-              backgroundColor: colors.primaryBackground,
+              backgroundColor: colors.header,
             },
           ]}
         >
@@ -1088,7 +1088,7 @@ const styles = StyleSheet.create({
   goal: {
     position: "absolute",
     right: 0,
-    top: -12,
+    top: -17,
   },
 
   goalText: {

@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 25,
     fontWeight: "700",
     color: "#0b1624",
     textAlign: "center",

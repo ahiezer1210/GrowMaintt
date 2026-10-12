@@ -249,7 +249,7 @@ export default function Redemptionhistory() {
         },
         {
             icon: "swap-horizontal",
-            route: "/expensesManagement",
+            route: "/expensesmanagement",
         },
         {
             icon: "layers-outline",
