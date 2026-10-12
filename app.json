@@ -14,7 +14,7 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.GrowMaint",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logoiconoo.png",
+        "foregroundImage": "./assets/images/logo1.png",
         "backgroundColor": "#081023"
       }
     },
@@ -24,7 +24,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/logoiconoo.png",
+          "image": "./assets/images/logo1.png",
           "imageWidth": 100,
           "resizeMode": "contain",
           "backgroundColor": "#081023",

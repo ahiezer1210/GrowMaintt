@@ -102,39 +102,16 @@ export default function LoginScreen() {
     }
   };
 
-  const handleSignIn = async () => {
-    if (!email.trim() || !password) {
-      Alert.alert(
-        "Incomplete fields",
-        "Please enter your email and password."
-      );
-      return;
-    }
-
-    setLoading(true);
-
+  const registerLoginInBackground = async (user) => {
     try {
-      const credential = await signInWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-
-      const user = credential.user;
       const userRef = doc(db, "Users", user.uid);
       const userSnapshot = await getDoc(userRef);
 
-      let userData = {};
-
-      if (userSnapshot.exists()) {
-        userData = userSnapshot.data();
-      } else {
+      if (!userSnapshot.exists()) {
         await setDoc(userRef, {
           points: 0,
           createdAt: serverTimestamp(),
         });
-
-        userData = { points: 0 };
       }
 
       const deviceId = await getDeviceId();
@@ -237,17 +214,30 @@ export default function LoginScreen() {
       }
 
       await createPasswordResetAlert(user);
+    } catch (error) {
+      console.log("Error registrando el inicio de sesión:", error);
+    }
+  };
 
-      // Requisitos obligatorios antes de entrar a Home.
-      if (userData.termsAccepted !== true) {
-        router.replace("/terms");
-        return;
-      }
+  const handleSignIn = async () => {
+    if (!email.trim() || !password) {
+      Alert.alert(
+        "Incomplete fields",
+        "Please enter your email and password."
+      );
+      return;
+    }
 
-      if (userData.identityVerified !== true) {
-        router.replace("/identityverification");
-        return;
-      }
+    setLoading(true);
+
+    try {
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        email.trim(),
+        password
+      );
+
+      registerLoginInBackground(credential.user);
 
       router.replace("/(tabs)/home");
     } catch (error) {

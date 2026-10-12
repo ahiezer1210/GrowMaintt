@@ -1,5 +1,8 @@
-import { router } from "expo-router";
+import { Redirect, router, useFocusEffect } from "expo-router";
+import { onAuthStateChanged } from "firebase/auth";
+import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   Pressable,
   SafeAreaView,
@@ -10,7 +13,16 @@ import {
   useWindowDimensions,
 } from "react-native";
 
+import { auth } from "../../firebaseConfig";
+import { getDestination } from "../../utils/authDestination";
+
+const AUTH_TIMEOUT_MS = 5000;
+const DESTINATION_TIMEOUT_MS = 4000;
+
 export default function Welcome() {
+  const [checking, setChecking] = useState(true);
+  const [destination, setDestination] = useState(null);
+
   const { width } = useWindowDimensions();
 
   const small = width < 360;
@@ -20,6 +32,59 @@ export default function Welcome() {
   const appNameSize = tablet ? 52 : 43;
   const buttonHeight = tablet ? 72 : 64;
   const buttonFontSize = tablet ? 32 : 29;
+
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+
+      const authTimeout = setTimeout(() => {
+        if (!cancelled) {
+          console.log("AUTH TIMEOUT: mostrando botones");
+          setChecking(false);
+        }
+      }, AUTH_TIMEOUT_MS);
+
+      const unsub = onAuthStateChanged(auth, async (user) => {
+        if (cancelled) return;
+        clearTimeout(authTimeout);
+
+        console.log("AUTH AL ABRIR:", user ? user.email : "null (sin sesión)");
+
+        if (!user) {
+          setDestination(null);
+          setChecking(false);
+          return;
+        }
+
+        const route = await Promise.race([
+          getDestination(user.uid),
+          new Promise((resolve) =>
+            setTimeout(() => resolve("/(tabs)/home"), DESTINATION_TIMEOUT_MS)
+          ),
+        ]);
+
+        if (!cancelled) setDestination(route);
+      });
+
+      return () => {
+        cancelled = true;
+        clearTimeout(authTimeout);
+        unsub();
+      };
+    }, [])
+  );
+
+  if (destination) {
+    return <Redirect href={destination} />;
+  }
+
+  if (checking) {
+    return (
+      <View style={styles.loadingScreen}>
+        <ActivityIndicator size="large" color="#08AEEF" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -34,7 +99,6 @@ export default function Welcome() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.container}>
-
           <Image
             source={require("../../assets/images/logo.png")}
             style={[
@@ -47,17 +111,18 @@ export default function Welcome() {
             resizeMode="contain"
           />
 
-          <Text style={[
-            styles.appName,
-            {
-              fontSize: appNameSize,
-            },
-          ]}>
+          <Text
+            style={[
+              styles.appName,
+              {
+                fontSize: appNameSize,
+              },
+            ]}
+          >
             GrowMaint
           </Text>
 
           <View style={styles.buttonsContainer}>
-
             <Pressable
               onPress={() => router.push("/login")}
               style={({ pressed }) => [
@@ -68,12 +133,14 @@ export default function Welcome() {
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[
-                styles.loginText,
-                {
-                  fontSize: buttonFontSize,
-                },
-              ]}>
+              <Text
+                style={[
+                  styles.loginText,
+                  {
+                    fontSize: buttonFontSize,
+                  },
+                ]}
+              >
                 Log In
               </Text>
             </Pressable>
@@ -88,18 +155,18 @@ export default function Welcome() {
                 pressed && styles.pressed,
               ]}
             >
-              <Text style={[
-                styles.registerText,
-                {
-                  fontSize: buttonFontSize,
-                },
-              ]}>
+              <Text
+                style={[
+                  styles.registerText,
+                  {
+                    fontSize: buttonFontSize,
+                  },
+                ]}
+              >
                 Sign Up
               </Text>
             </Pressable>
-
           </View>
-
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -107,6 +174,13 @@ export default function Welcome() {
 }
 
 const styles = StyleSheet.create({
+  loadingScreen: {
+    flex: 1,
+    backgroundColor: "#0D1E2D",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   screen: {
     flex: 1,
     backgroundColor: "#0D1E2D",
