@@ -6,7 +6,7 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          display: "none", // ← Esto oculta completamente el footer
+          display: "none", 
         },
       }}
     >

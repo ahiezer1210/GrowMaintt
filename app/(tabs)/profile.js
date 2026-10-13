@@ -1,6 +1,5 @@
-
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useEffect, useState } from "react";
@@ -20,6 +19,7 @@ import { auth, db } from "../../firebaseConfig";
 
 export default function Profile() {
   const { colors, t } = useAppSettings();
+  const { from } = useLocalSearchParams();
 
   const [username, setUsername] = useState("");
   const [photoURL, setPhotoURL] = useState(null);
@@ -140,28 +140,29 @@ export default function Profile() {
     router.replace("/home");
   };
 
+  const goBack = () => {
+    if (from) {
+      router.replace(from); // vuelve a la pantalla de origen
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace("/home"); // último recurso
+    }
+  };
+
   if (loading) {
     return (
       <SafeAreaView
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: headerColor },
-        ]}
+        style={[styles.loadingContainer, { backgroundColor: headerColor }]}
       >
-        <ActivityIndicator
-          size="large"
-          color={colors.primary}
-        />
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: headerColor },
-      ]}
+      style={[styles.container, { backgroundColor: headerColor }]}
       edges={["top", "left", "right"]}
     >
       {/* ENCABEZADO AZUL OSCURO */}
@@ -175,7 +176,7 @@ export default function Profile() {
       >
         <TouchableOpacity
           style={styles.backButton}
-          onPress={goHome}
+          onPress={goBack}
           activeOpacity={0.7}
           hitSlop={{
             top: 10,
@@ -251,10 +252,7 @@ export default function Profile() {
           ]}
         >
           {photoURL ? (
-            <Image
-              source={{ uri: photoURL }}
-              style={styles.logo}
-            />
+            <Image source={{ uri: photoURL }} style={styles.logo} />
           ) : (
             <View style={styles.placeholder}>
               <MaterialCommunityIcons
@@ -309,13 +307,9 @@ export default function Profile() {
                 style={[
                   styles.opttion,
                   {
-                    minHeight: isTablet
-                      ? 98 * scale
-                      : 60 * scale,
+                    minHeight: isTablet ? 98 * scale : 60 * scale,
                     marginBottom: 18 * scale,
-                    marginRight: isTablet
-                      ? 380 * scale
-                      : 120 * scale,
+                    marginRight: isTablet ? 380 * scale : 120 * scale,
                   },
                 ]}
                 onPress={() => {
@@ -337,12 +331,8 @@ export default function Profile() {
                     styles.iconContainer,
                     {
                       backgroundColor: option.color,
-                      width: isTablet
-                        ? 70 * scale
-                        : 45 * scale,
-                      height: isTablet
-                        ? 70 * scale
-                        : 45 * scale,
+                      width: isTablet ? 70 * scale : 45 * scale,
+                      height: isTablet ? 70 * scale : 45 * scale,
                       borderRadius: 12 * scale,
                       marginRight: 16 * scale,
                     },
@@ -359,9 +349,7 @@ export default function Profile() {
                   style={[
                     styles.optionText,
                     {
-                      fontSize: isTablet
-                        ? 20 * scale
-                        : 16 * scale,
+                      fontSize: isTablet ? 20 * scale : 16 * scale,
                       lineHeight: 28 * scale,
                       color: colors.text,
                     },
@@ -380,11 +368,7 @@ export default function Profile() {
         style={[
           styles.bottomBar,
           {
-            height: isSmallScreen
-              ? 60
-              : isTablet
-              ? 65 * scale
-              : 65,
+            height: isSmallScreen ? 60 : isTablet ? 65 * scale : 65,
             borderTopLeftRadius: 78 * scale,
             backgroundColor: colors.nav,
           },

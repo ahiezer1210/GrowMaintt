@@ -30,7 +30,7 @@ import { db } from "../../firebaseConfig";
 const NAV = [
   ["home-outline", "/home"],
   ["chart-box-outline", "/historial"],
-  ["swap-horizontal", "/expensesManagement"],
+  ["swap-horizontal", "/expensesmanagement"],
   ["layers-outline", "/currentgoal"],
   ["account-outline", "/profile"],
 ];
@@ -101,21 +101,15 @@ const BackupScreen = ({ navigation }) => {
 
   const [autoBackup, setAutoBackup] = useState(true);
   const [useMobileData, setUseMobileData] = useState(false);
-  const [endToEndEncryption, setEndToEndEncryption] =
-    useState(false);
+  const [endToEndEncryption, setEndToEndEncryption] = useState(false);
 
   const [backupProgress, setBackupProgress] = useState(0);
-  const [backupStatus, setBackupStatus] =
-    useState("No Backup Yet");
-  const [lastBackup, setLastBackup] =
-    useState("--/--/----");
-  const [backupSize, setBackupSize] =
-    useState("0 KB");
+  const [backupStatus, setBackupStatus] = useState("No Backup Yet");
+  const [lastBackup, setLastBackup] = useState("--/--/----");
+  const [backupSize, setBackupSize] = useState("0 KB");
 
-  const [backupRunning, setBackupRunning] =
-    useState(false);
-  const [settingsSaving, setSettingsSaving] =
-    useState(false);
+  const [backupRunning, setBackupRunning] = useState(false);
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   const auth = getAuth();
 
@@ -151,9 +145,7 @@ const BackupScreen = ({ navigation }) => {
     }
 
     if (Array.isArray(value)) {
-      return value.map((item) =>
-        convertForFirestore(item)
-      );
+      return value.map((item) => convertForFirestore(item));
     }
 
     if (typeof value === "object") {
@@ -200,9 +192,7 @@ const BackupScreen = ({ navigation }) => {
     }
 
     const day = String(value.getDate()).padStart(2, "0");
-    const month = String(
-      value.getMonth() + 1
-    ).padStart(2, "0");
+    const month = String(value.getMonth() + 1).padStart(2, "0");
     const year = value.getFullYear();
 
     return `${day}/${month}/${year}`;
@@ -240,8 +230,7 @@ const BackupScreen = ({ navigation }) => {
         "settings"
       );
 
-      const settingsSnapshot =
-        await getDoc(settingsRef);
+      const settingsSnapshot = await getDoc(settingsRef);
 
       if (!settingsSnapshot.exists()) {
         return;
@@ -253,53 +242,35 @@ const BackupScreen = ({ navigation }) => {
         setAutoBackup(data.autoBackup);
       }
 
-      if (
-        typeof data.useMobileData === "boolean"
-      ) {
+      if (typeof data.useMobileData === "boolean") {
         setUseMobileData(data.useMobileData);
       }
 
-      if (
-        typeof data.endToEndEncryption ===
-        "boolean"
-      ) {
-        setEndToEndEncryption(
-          data.endToEndEncryption
-        );
+      if (typeof data.endToEndEncryption === "boolean") {
+        setEndToEndEncryption(data.endToEndEncryption);
       }
 
       if (data.lastBackup) {
-        setLastBackup(
-          formatDate(data.lastBackup)
-        );
+        setLastBackup(formatDate(data.lastBackup));
       }
 
       if (data.backupSize) {
         setBackupSize(data.backupSize);
       }
 
-      if (
-        typeof data.backupProgress === "number"
-      ) {
-        setBackupProgress(
-          data.backupProgress
-        );
+      if (typeof data.backupProgress === "number") {
+        setBackupProgress(data.backupProgress);
       }
 
       if (data.backupStatus) {
         setBackupStatus(data.backupStatus);
       }
     } catch (error) {
-      console.log(
-        "Error loading backup settings:",
-        error
-      );
+      console.log("Error loading backup settings:", error);
     }
   };
 
-  const getCollectionData = async (
-    collectionName
-  ) => {
+  const getCollectionData = async (collectionName) => {
     try {
       const user = auth.currentUser;
 
@@ -307,10 +278,7 @@ const BackupScreen = ({ navigation }) => {
         return [];
       }
 
-      const collectionRef = collection(
-        db,
-        collectionName
-      );
+      const collectionRef = collection(db, collectionName);
 
       let snapshot;
 
@@ -322,9 +290,7 @@ const BackupScreen = ({ navigation }) => {
 
         snapshot = await getDocs(userQuery);
       } catch {
-        snapshot = await getDocs(
-          collectionRef
-        );
+        snapshot = await getDocs(collectionRef);
       }
 
       const documents = [];
@@ -332,11 +298,7 @@ const BackupScreen = ({ navigation }) => {
       snapshot.forEach((item) => {
         const data = item.data();
 
-        if (
-          data &&
-          data.uid &&
-          data.uid !== user.uid
-        ) {
+        if (data && data.uid && data.uid !== user.uid) {
           return;
         }
 
@@ -348,38 +310,21 @@ const BackupScreen = ({ navigation }) => {
 
       return documents;
     } catch (error) {
-      console.log(
-        `Error reading collection ${collectionName}:`,
-        error
-      );
-
+      console.log(`Error reading collection ${collectionName}:`, error);
       return [];
     }
   };
 
-  const getUserSubcollectionData = async (
-    uid,
-    subcollectionName
-  ) => {
+  const getUserSubcollectionData = async (uid, subcollectionName) => {
     try {
-      const reference = collection(
-        db,
-        "Users",
-        uid,
-        subcollectionName
-      );
-
-      const snapshot =
-        await getDocs(reference);
-
+      const reference = collection(db, "Users", uid, subcollectionName);
+      const snapshot = await getDocs(reference);
       const documents = [];
 
       snapshot.forEach((item) => {
         documents.push({
           id: item.id,
-          data: convertForFirestore(
-            item.data()
-          ),
+          data: convertForFirestore(item.data()),
         });
       });
 
@@ -389,17 +334,11 @@ const BackupScreen = ({ navigation }) => {
         `Error reading user subcollection ${subcollectionName}:`,
         error
       );
-
       return [];
     }
   };
 
-  const saveBackupSection = async (
-    uid,
-    backupId,
-    sectionName,
-    documents
-  ) => {
+  const saveBackupSection = async (uid, backupId, sectionName, documents) => {
     const sectionRef = doc(
       db,
       "Users",
@@ -418,18 +357,9 @@ const BackupScreen = ({ navigation }) => {
     });
   };
 
-  const updateBackupSettings = async (
-    uid,
-    backupData
-  ) => {
+  const updateBackupSettings = async (uid, backupData) => {
     await setDoc(
-      doc(
-        db,
-        "Users",
-        uid,
-        "BackupSettings",
-        "settings"
-      ),
+      doc(db, "Users", uid, "BackupSettings", "settings"),
       backupData,
       {
         merge: true,
@@ -450,8 +380,7 @@ const BackupScreen = ({ navigation }) => {
       setBackupProgress(5);
 
       const backupId = `${Date.now()}`;
-      const backupDate =
-        new Date().toISOString();
+      const backupDate = new Date().toISOString();
 
       const backupReference = doc(
         db,
@@ -473,29 +402,18 @@ const BackupScreen = ({ navigation }) => {
 
       setBackupProgress(10);
 
-      const profileSnapshot =
-        await getDoc(
-          doc(db, "Users", user.uid)
-        );
+      const profileSnapshot = await getDoc(doc(db, "Users", user.uid));
 
-      const profile =
-        profileSnapshot.exists()
-          ? convertForFirestore(
-              profileSnapshot.data()
-            )
-          : {};
+      const profile = profileSnapshot.exists()
+        ? convertForFirestore(profileSnapshot.data())
+        : {};
 
-      await saveBackupSection(
-        user.uid,
-        backupId,
-        "profile",
-        [
-          {
-            id: user.uid,
-            data: profile,
-          },
-        ]
-      );
+      await saveBackupSection(user.uid, backupId, "profile", [
+        {
+          id: user.uid,
+          data: profile,
+        },
+      ]);
 
       setBackupProgress(20);
 
@@ -505,19 +423,12 @@ const BackupScreen = ({ navigation }) => {
         endToEndEncryption,
       };
 
-      await saveBackupSection(
-        user.uid,
-        backupId,
-        "settings",
-        [
-          {
-            id: "settings",
-            data: convertForFirestore(
-              settingsData
-            ),
-          },
-        ]
-      );
+      await saveBackupSection(user.uid, backupId, "settings", [
+        {
+          id: "settings",
+          data: convertForFirestore(settingsData),
+        },
+      ]);
 
       setBackupProgress(25);
 
@@ -531,28 +442,17 @@ const BackupScreen = ({ navigation }) => {
         settings: [
           {
             id: "settings",
-            data: convertForFirestore(
-              settingsData
-            ),
+            data: convertForFirestore(settingsData),
           },
         ],
       };
 
-      const totalCollections =
-        BACKUP_COLLECTIONS.length;
+      const totalCollections = BACKUP_COLLECTIONS.length;
 
-      for (
-        let i = 0;
-        i < totalCollections;
-        i++
-      ) {
-        const current =
-          BACKUP_COLLECTIONS[i];
+      for (let i = 0; i < totalCollections; i++) {
+        const current = BACKUP_COLLECTIONS[i];
 
-        const documents =
-          await getCollectionData(
-            current.name
-          );
+        const documents = await getCollectionData(current.name);
 
         await saveBackupSection(
           user.uid,
@@ -561,34 +461,21 @@ const BackupScreen = ({ navigation }) => {
           documents
         );
 
-        allBackupDocuments[
-          current.backupName
-        ] = documents;
+        allBackupDocuments[current.backupName] = documents;
 
         const progress =
-          25 +
-          Math.round(
-            ((i + 1) /
-              totalCollections) *
-              55
-          );
+          25 + Math.round(((i + 1) / totalCollections) * 55);
 
         setBackupProgress(progress);
       }
 
-      for (
-        let i = 0;
-        i < USER_SUBCOLLECTIONS.length;
-        i++
-      ) {
-        const subcollection =
-          USER_SUBCOLLECTIONS[i];
+      for (let i = 0; i < USER_SUBCOLLECTIONS.length; i++) {
+        const subcollection = USER_SUBCOLLECTIONS[i];
 
-        const documents =
-          await getUserSubcollectionData(
-            user.uid,
-            subcollection
-          );
+        const documents = await getUserSubcollectionData(
+          user.uid,
+          subcollection
+        );
 
         await saveBackupSection(
           user.uid,
@@ -597,9 +484,7 @@ const BackupScreen = ({ navigation }) => {
           documents
         );
 
-        allBackupDocuments[
-          `user_${subcollection}`
-        ] = documents;
+        allBackupDocuments[`user_${subcollection}`] = documents;
       }
 
       setBackupProgress(90);
@@ -614,10 +499,7 @@ const BackupScreen = ({ navigation }) => {
         createdAt: backupDate,
       };
 
-      const calculatedSize =
-        calculateSize(
-          finalBackupData
-        );
+      const calculatedSize = calculateSize(finalBackupData);
 
       await setDoc(
         backupReference,
@@ -636,32 +518,22 @@ const BackupScreen = ({ navigation }) => {
         }
       );
 
-      await updateBackupSettings(
-        user.uid,
-        {
-          autoBackup,
-          useMobileData,
-          endToEndEncryption,
-          lastBackup: backupDate,
-          backupSize: calculatedSize,
-          lastBackupId: backupId,
-          backupProgress: 100,
-          backupStatus:
-            "Backup Completed",
-          updatedAt: serverTimestamp(),
-        }
-      );
+      await updateBackupSettings(user.uid, {
+        autoBackup,
+        useMobileData,
+        endToEndEncryption,
+        lastBackup: backupDate,
+        backupSize: calculatedSize,
+        lastBackupId: backupId,
+        backupProgress: 100,
+        backupStatus: "Backup Completed",
+        updatedAt: serverTimestamp(),
+      });
 
       setBackupProgress(100);
-      setBackupStatus(
-        "Backup Completed"
-      );
-      setLastBackup(
-        formatDate(backupDate)
-      );
-      setBackupSize(
-        calculatedSize
-      );
+      setBackupStatus("Backup Completed");
+      setLastBackup(formatDate(backupDate));
+      setBackupSize(calculatedSize);
 
       Alert.alert(
         t.backupCompleted,
@@ -673,30 +545,20 @@ const BackupScreen = ({ navigation }) => {
         ]
       );
     } catch (error) {
-      console.log(
-        "Backup error:",
-        error
-      );
+      console.log("Backup error:", error);
 
       setBackupProgress(0);
-      setBackupStatus(
-        "Backup Failed"
-      );
+      setBackupStatus("Backup Failed");
 
       const user = auth.currentUser;
 
       if (user) {
         try {
-          await updateBackupSettings(
-            user.uid,
-            {
-              backupProgress: 0,
-              backupStatus:
-                "Backup Failed",
-              updatedAt:
-                serverTimestamp(),
-            }
-          );
+          await updateBackupSettings(user.uid, {
+            backupProgress: 0,
+            backupStatus: "Backup Failed",
+            updatedAt: serverTimestamp(),
+          });
         } catch (settingsError) {
           console.log(
             "Error saving failed backup state:",
@@ -705,10 +567,7 @@ const BackupScreen = ({ navigation }) => {
         }
       }
 
-      Alert.alert(
-        t.backupError,
-        t.backupErrorMessage
-      );
+      Alert.alert(t.backupError, t.backupErrorMessage);
     } finally {
       setBackupRunning(false);
     }
@@ -724,35 +583,22 @@ const BackupScreen = ({ navigation }) => {
 
       setSettingsSaving(true);
 
-      await updateBackupSettings(
-        user.uid,
-        {
-          autoBackup,
-          useMobileData,
-          endToEndEncryption,
-          updatedAt:
-            serverTimestamp(),
-        }
-      );
+      await updateBackupSettings(user.uid, {
+        autoBackup,
+        useMobileData,
+        endToEndEncryption,
+        updatedAt: serverTimestamp(),
+      });
 
       setSettingsSaving(false);
 
-      Alert.alert(
-        t.settingsSaved,
-        t.settingsSavedMessage
-      );
+      Alert.alert(t.settingsSaved, t.settingsSavedMessage);
     } catch (error) {
-      console.log(
-        "Error saving backup settings:",
-        error
-      );
+      console.log("Error saving backup settings:", error);
 
       setSettingsSaving(false);
 
-      Alert.alert(
-        t.settingsError,
-        t.settingsErrorMessage
-      );
+      Alert.alert(t.settingsError, t.settingsErrorMessage);
     }
   };
 
@@ -766,34 +612,36 @@ const BackupScreen = ({ navigation }) => {
       style={[
         styles.container,
         {
-          backgroundColor:
-            colors.primaryBackground,
+          backgroundColor: colors.primaryBackground,
         },
       ]}
     >
       <StatusBar
-        backgroundColor={
-          colors.primaryBackground
-        }
+        backgroundColor={colors.primaryBackground}
         barStyle="light-content"
       />
 
+      {/* HEADER */}
       <View
         style={[
           styles.header,
           {
-            backgroundColor:
-              colors.header,
+            backgroundColor: colors.header,
             height: 118 * scale,
+            paddingHorizontal: tablet ? 35 : 20,
           },
         ]}
       >
         <TouchableOpacity
-          onPress={() =>
-            router.push("/settings")
-          }
+          onPress={() => router.push("/settings")}
           activeOpacity={0.7}
-          style={styles.backButton}
+          style={[
+            styles.backButton,
+            {
+              transform: [{ translateY: 4 * scale }],
+            },
+          ]}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <MaterialCommunityIcons
             name="arrow-left"
@@ -803,22 +651,31 @@ const BackupScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <Text
+          pointerEvents="none"
           style={[
             styles.headerTitle,
             {
-              fontSize: 25 * scale,
+              fontSize: 20 * scale,
+              lineHeight: 24 * scale,
+              transform: [{ translateY: 2 * scale }],
+              paddingHorizontal: 48 * scale,
             },
           ]}
+          numberOfLines={2}
         >
           {t.backup}
         </Text>
 
         <TouchableOpacity
-          style={styles.notification}
+          style={[
+            styles.notification,
+            {
+              transform: [{ translateY: 4 * scale }],
+            },
+          ]}
           onPress={() =>
             router.push({
-              pathname:
-                "/notifications",
+              pathname: "/notifications",
               params: {
                 from: "/backup",
               },
@@ -839,24 +696,17 @@ const BackupScreen = ({ navigation }) => {
           style={[
             styles.successCard,
             {
-              backgroundColor:
-                colors.card,
+              backgroundColor: colors.card,
             },
           ]}
         >
-          <View
-            style={styles.successHeader}
-          >
+          <View style={styles.successHeader}>
             <MaterialCommunityIcons
-              color={
-                colors.text
-              }
+              color={colors.text}
               name={
-                backupStatus ===
-                "Backup Failed"
+                backupStatus === "Backup Failed"
                   ? "alert-circle-outline"
-                  : backupStatus ===
-                    "Backup Completed"
+                  : backupStatus === "Backup Completed"
                   ? "shield-check-outline"
                   : "cloud-upload-outline"
               }
@@ -867,8 +717,7 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.successTitle,
                 {
-                  color:
-                    colors.text,
+                  color: colors.text,
                 },
               ]}
             >
@@ -876,17 +725,12 @@ const BackupScreen = ({ navigation }) => {
             </Text>
           </View>
 
-          <View
-            style={
-              styles.progressContainer
-            }
-          >
+          <View style={styles.progressContainer}>
             <View
               style={[
                 styles.progressBarBackground,
                 {
-                  backgroundColor:
-                    colors.border,
+                  backgroundColor: colors.border,
                 },
               ]}
             >
@@ -895,8 +739,7 @@ const BackupScreen = ({ navigation }) => {
                   styles.progressBarFill,
                   {
                     width: `${backupProgress}%`,
-                    backgroundColor:
-                      colors.icon,
+                    backgroundColor: colors.icon,
                   },
                 ]}
               />
@@ -906,8 +749,7 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.progressText,
                 {
-                  color:
-                    colors.icon,
+                  color: colors.icon,
                 },
               ]}
             >
@@ -916,15 +758,12 @@ const BackupScreen = ({ navigation }) => {
           </View>
         </View>
 
-        <View
-          style={styles.infoCardsRow}
-        >
+        <View style={styles.infoCardsRow}>
           <View
             style={[
               styles.infoCardWhite,
               {
-                backgroundColor:
-                  colors.card,
+                backgroundColor: colors.card,
               },
             ]}
           >
@@ -939,8 +778,7 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.infoLabelDark,
                 {
-                  color:
-                    colors.secondaryText,
+                  color: colors.secondaryText,
                 },
               ]}
             >
@@ -951,8 +789,7 @@ const BackupScreen = ({ navigation }) => {
               style={[
                 styles.infoValueDark,
                 {
-                  color:
-                    colors.text,
+                  color: colors.text,
                 },
               ]}
             >
@@ -964,8 +801,7 @@ const BackupScreen = ({ navigation }) => {
             style={[
               styles.infoCardBlue,
               {
-                backgroundColor:
-                  colors.icon,
+                backgroundColor: colors.icon,
               },
             ]}
           >
@@ -976,39 +812,24 @@ const BackupScreen = ({ navigation }) => {
               style={styles.cardIcon}
             />
 
-            <Text
-              style={styles.infoLabelLight}
-            >
-              {t.size}
-            </Text>
+            <Text style={styles.infoLabelLight}>{t.size}</Text>
 
-            <Text
-              style={styles.infoValueLight}
-            >
-              {backupSize}
-            </Text>
+            <Text style={styles.infoValueLight}>{backupSize}</Text>
           </View>
         </View>
       </View>
 
       <ScrollView
-        showsVerticalScrollIndicator={
-          false
-        }
-        contentContainerStyle={
-          styles.scrollContent
-        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
       >
         <View
           style={[
             styles.whiteSheet,
             {
-              backgroundColor:
-                colors.card,
-              paddingHorizontal:
-                tablet ? 35 : 20,
-              paddingTop:
-                landscape ? 12 : 16,
+              backgroundColor: colors.card,
+              paddingHorizontal: tablet ? 35 : 20,
+              paddingTop: landscape ? 12 : 16,
             },
           ]}
         >
@@ -1017,8 +838,7 @@ const BackupScreen = ({ navigation }) => {
               styles.sectionTitle,
               {
                 fontSize: 13 * scale,
-                color:
-                  colors.text,
+                color: colors.text,
               },
             ]}
           >
@@ -1029,8 +849,7 @@ const BackupScreen = ({ navigation }) => {
             style={[
               styles.greyDivider,
               {
-                backgroundColor:
-                  colors.border,
+                backgroundColor: colors.border,
               },
             ]}
           />
@@ -1039,29 +858,22 @@ const BackupScreen = ({ navigation }) => {
             style={[
               styles.descriptionText,
               {
-                fontSize:
-                  9.5 * scale,
-                lineHeight:
-                  13 * scale,
-                color:
-                  colors.secondaryText,
+                fontSize: 9.5 * scale,
+                lineHeight: 13 * scale,
+                color: colors.secondaryText,
               },
             ]}
           >
             {t.backupDescription}
           </Text>
 
-          <View
-            style={styles.settingRow}
-          >
+          <View style={styles.settingRow}>
             <Text
               style={[
                 styles.settingLabel,
                 {
-                  fontSize:
-                    11.5 * scale,
-                  color:
-                    colors.text,
+                  fontSize: 11.5 * scale,
+                  color: colors.text,
                 },
               ]}
             >
@@ -1070,33 +882,23 @@ const BackupScreen = ({ navigation }) => {
 
             <Switch
               value={autoBackup}
-              onValueChange={
-                setAutoBackup
-              }
-              disabled={
-                backupRunning
-              }
+              onValueChange={setAutoBackup}
+              disabled={backupRunning}
               thumbColor="#FFFFFF"
               trackColor={{
-                false:
-                  colors.border,
-                true:
-                  colors.primaryBackground,
+                false: colors.border,
+                true: colors.primaryBackground,
               }}
             />
           </View>
 
-          <View
-            style={styles.settingRow}
-          >
+          <View style={styles.settingRow}>
             <Text
               style={[
                 styles.settingLabel,
                 {
-                  fontSize:
-                    11.5 * scale,
-                  color:
-                    colors.text,
+                  fontSize: 11.5 * scale,
+                  color: colors.text,
                 },
               ]}
             >
@@ -1105,90 +907,60 @@ const BackupScreen = ({ navigation }) => {
 
             <Switch
               value={useMobileData}
-              onValueChange={
-                setUseMobileData
-              }
-              disabled={
-                backupRunning
-              }
+              onValueChange={setUseMobileData}
+              disabled={backupRunning}
               thumbColor="#FFFFFF"
               trackColor={{
-                false:
-                  colors.border,
-                true:
-                  colors.primaryBackground,
+                false: colors.border,
+                true: colors.primaryBackground,
               }}
             />
           </View>
 
-          <View
-            style={
-              styles.encryptionSection
-            }
-          >
+          <View style={styles.encryptionSection}>
             <Text
               style={[
                 styles.encryptionTitle,
                 {
-                  color:
-                    colors.text,
+                  color: colors.text,
                 },
               ]}
             >
-              {
-                t.endToEndEncryption
-              }
+              {t.endToEndEncryption}
             </Text>
 
             <Text
               style={[
                 styles.encryptionDescription,
                 {
-                  color:
-                    colors.secondaryText,
+                  color: colors.secondaryText,
                 },
               ]}
             >
-              {
-                t.encryptionDescription
-              }
+              {t.encryptionDescription}
             </Text>
 
-            <View
-              style={styles.settingRow}
-            >
+            <View style={styles.settingRow}>
               <Text
                 style={[
                   styles.settingLabel,
                   {
-                    fontSize:
-                      11.5 * scale,
-                    color:
-                      colors.text,
+                    fontSize: 11.5 * scale,
+                    color: colors.text,
                   },
                 ]}
               >
-                {endToEndEncryption
-                  ? t.enabled
-                  : t.disabled}
+                {endToEndEncryption ? t.enabled : t.disabled}
               </Text>
 
               <Switch
-                value={
-                  endToEndEncryption
-                }
-                onValueChange={
-                  setEndToEndEncryption
-                }
-                disabled={
-                  backupRunning
-                }
+                value={endToEndEncryption}
+                onValueChange={setEndToEndEncryption}
+                disabled={backupRunning}
                 thumbColor="#FFFFFF"
                 trackColor={{
-                  false:
-                    colors.border,
-                  true:
-                    colors.primaryBackground,
+                  false: colors.border,
+                  true: colors.primaryBackground,
                 }}
               />
             </View>
@@ -1198,8 +970,7 @@ const BackupScreen = ({ navigation }) => {
             style={[
               styles.greyDivider,
               {
-                backgroundColor:
-                  colors.border,
+                backgroundColor: colors.border,
               },
             ]}
           />
@@ -1211,15 +982,9 @@ const BackupScreen = ({ navigation }) => {
             style={[
               styles.backupButton,
               {
-                backgroundColor:
-                  colors.primaryBackground,
-                width: tablet
-                  ? 300
-                  : "70%",
-                opacity:
-                  backupRunning
-                    ? 0.6
-                    : 1,
+                backgroundColor: colors.primaryBackground,
+                width: tablet ? 300 : "70%",
+                opacity: backupRunning ? 0.6 : 1,
               },
             ]}
           >
@@ -1227,10 +992,8 @@ const BackupScreen = ({ navigation }) => {
               name={
                 backupRunning
                   ? "cloud-upload"
-                  : backupProgress ===
-                      100 &&
-                    backupStatus ===
-                      "Backup Completed"
+                  : backupProgress === 100 &&
+                    backupStatus === "Backup Completed"
                   ? "check-circle-outline"
                   : "cloud-upload-outline"
               }
@@ -1238,17 +1001,11 @@ const BackupScreen = ({ navigation }) => {
               color="#FFFFFF"
             />
 
-            <Text
-              style={
-                styles.backupButtonText
-              }
-            >
+            <Text style={styles.backupButtonText}>
               {backupRunning
                 ? `${t.creatingBackup}... ${backupProgress}%`
-                : backupProgress ===
-                    100 &&
-                  backupStatus ===
-                    "Backup Completed"
+                : backupProgress === 100 &&
+                  backupStatus === "Backup Completed"
                 ? t.performBackupAgain
                 : t.performBackup}
             </Text>
@@ -1257,34 +1014,18 @@ const BackupScreen = ({ navigation }) => {
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={saveSettings}
-            disabled={
-              settingsSaving ||
-              backupRunning
-            }
+            disabled={settingsSaving || backupRunning}
             style={[
               styles.saveButton,
               {
-                backgroundColor:
-                  colors.icon,
-                width: tablet
-                  ? 300
-                  : "55%",
-                opacity:
-                  settingsSaving ||
-                  backupRunning
-                    ? 0.6
-                    : 1,
+                backgroundColor: colors.icon,
+                width: tablet ? 300 : "55%",
+                opacity: settingsSaving || backupRunning ? 0.6 : 1,
               },
             ]}
           >
-            <Text
-              style={
-                styles.saveButtonText
-              }
-            >
-              {settingsSaving
-                ? t.saving
-                : t.saveSettings}
+            <Text style={styles.saveButtonText}>
+              {settingsSaving ? t.saving : t.saveSettings}
             </Text>
           </TouchableOpacity>
         </View>
@@ -1294,57 +1035,36 @@ const BackupScreen = ({ navigation }) => {
         style={[
           styles.bottomBarContainer,
           {
-            backgroundColor:
-              colors.card,
+            backgroundColor: colors.card,
           },
         ]}
       >
-        <SafeAreaView
-          edges={["bottom"]}
-          style={
-            styles.bottomBarWrapper
-          }
-        >
+        <SafeAreaView edges={["bottom"]} style={styles.bottomBarWrapper}>
           <View
             style={[
               styles.bottomTabBar,
               {
-                height:
-                  65 * scale,
-                borderTopLeftRadius:
-                  78 * scale,
+                height: 65 * scale,
+                borderTopLeftRadius: 78 * scale,
               },
             ]}
           >
-            {NAV.map(
-              ([icon, route], index) => (
-                <TouchableOpacity
-                  key={index}
-                  style={
-                    styles.tabItem
+            {NAV.map(([icon, route], index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.tabItem}
+                onPress={() => router.push(route)}
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons
+                  name={icon}
+                  size={
+                    icon === "swap-horizontal" ? 37 * scale : 35 * scale
                   }
-                  onPress={() =>
-                    router.push(
-                      route
-                    )
-                  }
-                  activeOpacity={0.7}
-                >
-                  <MaterialCommunityIcons
-                    name={icon}
-                    size={
-                      icon ===
-                      "swap-horizontal"
-                        ? 37 *
-                          scale
-                        : 35 *
-                          scale
-                    }
-                    color="#FFFFFF"
-                  />
-                </TouchableOpacity>
-              )
-            )}
+                  color="#FFFFFF"
+                />
+              </TouchableOpacity>
+            ))}
           </View>
         </SafeAreaView>
       </View>
@@ -1358,48 +1078,37 @@ const styles = StyleSheet.create({
   },
 
   header: {
-    height: 118,
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 25,
     position: "relative",
   },
 
   backButton: {
-    position: "absolute",
-    left: 15,
-    top: 34,
-    width: 55,
-    height: 55,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
+    zIndex: 20,
   },
 
   headerTitle: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontSize: 25,
-    fontWeight: "700",
+    position: "absolute",
+    left: 0,
+    right: 0,
     textAlign: "center",
-    transform: [
-      { translateY: 3 },
-      { translateX: -2 },
-    ],
+    color: "#FFFFFF",
+    fontWeight: "700",
+    zIndex: 1,
   },
 
   notification: {
-    position: "absolute",
-    right: 15,
-    top: 34,
-    width: 55,
-    height: 55,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
-    zIndex: 999,
-    elevation: 10,
+    zIndex: 20,
   },
 
   topSection: {

@@ -779,7 +779,7 @@ export default function SecurityAlertScreen() {
           <TouchableOpacity
             style={styles.bottomItem}
             onPress={() =>
-              router.replace("/expensesManagement")
+              router.replace("/expensesmanagement")
             }
           >
             <MaterialCommunityIcons

@@ -54,6 +54,14 @@ export default function InversionesScreen() {
     router.replace("/home");
   };
 
+  // Al ir a profile se envía la pantalla de origen para poder regresar a ella
+  const goTo = (route) =>
+    router.push(
+      route === "/profile"
+        ? { pathname: "/profile", params: { from: "/investments" } }
+        : route
+    );
+
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
@@ -403,7 +411,7 @@ export default function InversionesScreen() {
               key={index}
               style={styles.navItem}
               onPress={() =>
-                item.route === "/home" ? goHome() : router.push(item.route)
+                item.route === "/home" ? goHome() : goTo(item.route)
               }
               activeOpacity={0.7}
             >

@@ -88,18 +88,18 @@ export default function PointExchange() {
   const scale = isSmallScreen
     ? 0.85
     : isPhone
-      ? 1
-      : isLargeTablet
-        ? 1.35
-        : 1.15;
+    ? 1
+    : isLargeTablet
+    ? 1.35
+    : 1.15;
 
   const horizontalPadding = isSmallScreen
     ? 18
     : isPhone
-      ? 25
-      : isLargeTablet
-        ? 60
-        : 45;
+    ? 25
+    : isLargeTablet
+    ? 60
+    : 45;
 
   const headerHeight = 118 * scale;
   const bottomHeight = 65 * scale;
@@ -165,10 +165,7 @@ export default function PointExchange() {
     let totalRedeemed = 0;
 
     const updateAvailablePoints = () => {
-      const available = Math.max(
-        totalPoints - totalRedeemed,
-        0
-      );
+      const available = Math.max(totalPoints - totalRedeemed, 0);
 
       setAvailablePoints(available);
     };
@@ -244,17 +241,12 @@ export default function PointExchange() {
   const redeemReward = async (reward) => {
     const user = auth.currentUser;
 
-    const translatedReward =
-      rewardTranslations[reward.id] || {};
+    const translatedReward = rewardTranslations[reward.id] || {};
 
-    const rewardTitle =
-      translatedReward.title || reward.title;
+    const rewardTitle = translatedReward.title || reward.title;
 
     if (!user) {
-      Alert.alert(
-        t.sessionRequired,
-        t.sessionRequiredMessage
-      );
+      Alert.alert(t.sessionRequired, t.sessionRequiredMessage);
       return;
     }
 
@@ -279,10 +271,7 @@ export default function PointExchange() {
         where("userId", "==", user.uid)
       );
 
-      const [
-        pointsSnapshot,
-        redeemedSnapshot,
-      ] = await Promise.all([
+      const [pointsSnapshot, redeemedSnapshot] = await Promise.all([
         new Promise((resolve, reject) => {
           const unsubscribe = onSnapshot(
             pointsQuery,
@@ -330,34 +319,20 @@ export default function PointExchange() {
         }
       });
 
-      const currentAvailablePoints = Math.max(
-        totalPoints - totalRedeemed,
-        0
-      );
+      const currentAvailablePoints = Math.max(totalPoints - totalRedeemed, 0);
 
       if (currentAvailablePoints < reward.points) {
-        Alert.alert(
-          t.notEnoughPoints,
-          t.notEnoughPointsNow
-        );
+        Alert.alert(t.notEnoughPoints, t.notEnoughPointsNow);
         return;
       }
 
       const code = generarCodigo(reward.store);
 
-      const redeemedRef = doc(
-        collection(db, "Redeemed")
-      );
+      const redeemedRef = doc(collection(db, "Redeemed"));
 
-      const rewardRef = doc(
-        collection(db, "Recompensas")
-      );
+      const rewardRef = doc(collection(db, "Recompensas"));
 
-      const notificationRef = doc(
-        db,
-        "Notificaciones",
-        `${user.uid}_Rewards`
-      );
+      const notificationRef = doc(db, "Notificaciones", `${user.uid}_Rewards`);
 
       const rewardNotification = {
         id: `${redeemedRef.id}_reward`,
@@ -376,47 +351,40 @@ export default function PointExchange() {
         createdAt: Timestamp.now(),
       };
 
-      await runTransaction(
-        db,
-        async (transaction) => {
-          transaction.set(redeemedRef, {
-            userId: user.uid,
-            rewardId: reward.id,
-            store: reward.store,
-            title: rewardTitle,
-            points: reward.points,
-            code: code,
-            redeemedAt: serverTimestamp(),
-          });
+      await runTransaction(db, async (transaction) => {
+        transaction.set(redeemedRef, {
+          userId: user.uid,
+          rewardId: reward.id,
+          store: reward.store,
+          title: rewardTitle,
+          points: reward.points,
+          code: code,
+          redeemedAt: serverTimestamp(),
+        });
 
-          transaction.set(rewardRef, {
-            userId: user.uid,
-            rewardId: reward.id,
-            store: reward.store,
-            title: rewardTitle,
-            description:
-              translatedReward.description ||
-              reward.description,
-            points: reward.points,
-            code: code,
-            status: "active",
-            redeemedAt: serverTimestamp(),
-          });
+        transaction.set(rewardRef, {
+          userId: user.uid,
+          rewardId: reward.id,
+          store: reward.store,
+          title: rewardTitle,
+          description: translatedReward.description || reward.description,
+          points: reward.points,
+          code: code,
+          status: "active",
+          redeemedAt: serverTimestamp(),
+        });
 
-          transaction.set(
-            notificationRef,
-            {
-              uid: user.uid,
-              category: "Rewards",
-              notifications: arrayUnion(
-                rewardNotification
-              ),
-              updatedAt: serverTimestamp(),
-            },
-            { merge: true }
-          );
-        }
-      );
+        transaction.set(
+          notificationRef,
+          {
+            uid: user.uid,
+            category: "Rewards",
+            notifications: arrayUnion(rewardNotification),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      });
 
       Alert.alert(
         t.rewardUnlockedExclamation,
@@ -428,26 +396,18 @@ export default function PointExchange() {
         ]
       );
     } catch (error) {
-      console.log(
-        "Error redeeming reward:",
-        error
-      );
+      console.log("Error redeeming reward:", error);
 
-      Alert.alert(
-        t.somethingWentWrong,
-        t.redeemRewardError
-      );
+      Alert.alert(t.somethingWentWrong, t.redeemRewardError);
     } finally {
       setRedeemingReward(null);
     }
   };
 
   const confirmarCanje = (reward) => {
-    const translatedReward =
-      rewardTranslations[reward.id] || {};
+    const translatedReward = rewardTranslations[reward.id] || {};
 
-    const rewardTitle =
-      translatedReward.title || reward.title;
+    const rewardTitle = translatedReward.title || reward.title;
 
     if (availablePoints < reward.points) {
       Alert.alert(
@@ -484,12 +444,20 @@ export default function PointExchange() {
     });
   };
 
+  // Al ir a profile se envía la pantalla de origen para poder regresar a ella
+  const goTo = (route) =>
+    router.push(
+      route === "/profile"
+        ? { pathname: "/profile", params: { from: "/pointsExchange" } }
+        : route
+    );
+
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
     {
       icon: "swap-horizontal",
-      route: "/expensesManagement",
+      route: "/expensesmanagement",
     },
     {
       icon: "layers-outline",
@@ -524,9 +492,7 @@ export default function PointExchange() {
           style={[
             styles.backButton,
             {
-              transform: [
-                { translateY: 4 * scale },
-              ],
+              transform: [{ translateY: 4 * scale }],
             },
           ]}
           onPress={() => router.push("/home")}
@@ -545,10 +511,7 @@ export default function PointExchange() {
               fontSize: 25 * scale,
               lineHeight: 27 * scale,
               color: colors.white,
-              transform: [
-                { translateX: 7 * scale },
-                { translateY: 1 * scale },
-              ],
+              transform: [{ translateX: 7 * scale }, { translateY: 1 * scale }],
             },
           ]}
         >
@@ -561,9 +524,7 @@ export default function PointExchange() {
           style={[
             styles.headerBell,
             {
-              transform: [
-                { translateY: 4 * scale },
-              ],
+              transform: [{ translateY: 4 * scale }],
             },
           ]}
           onPress={abrirNotificaciones}
@@ -760,8 +721,7 @@ export default function PointExchange() {
               },
             ]}
           >
-            {Math.round(progressPercentage)}%{" "}
-            {t.ofYourGoal}
+            {Math.round(progressPercentage)}% {t.ofYourGoal}
           </Text>
         </View>
 
@@ -788,14 +748,11 @@ export default function PointExchange() {
           </Text>
 
           {rewards.map((item) => {
-            const isUnlocked =
-              availablePoints >= item.points;
+            const isUnlocked = availablePoints >= item.points;
 
-            const isRedeeming =
-              redeemingReward === item.id;
+            const isRedeeming = redeemingReward === item.id;
 
-            const translatedReward =
-              rewardTranslations[item.id] || {};
+            const translatedReward = rewardTranslations[item.id] || {};
 
             return (
               <View
@@ -833,9 +790,7 @@ export default function PointExchange() {
                   style={[
                     styles.rewardName,
                     {
-                      width: isTablet
-                        ? 120 * scale
-                        : 85 * scale,
+                      width: isTablet ? 120 * scale : 85 * scale,
                       paddingLeft: 8 * scale,
                     },
                   ]}
@@ -849,8 +804,7 @@ export default function PointExchange() {
                       },
                     ]}
                   >
-                    {translatedReward.title ||
-                      item.title}
+                    {translatedReward.title || item.title}
                   </Text>
 
                   <Text
@@ -883,8 +837,7 @@ export default function PointExchange() {
                       },
                     ]}
                   >
-                    {translatedReward.description ||
-                      item.description}
+                    {translatedReward.description || item.description}
                   </Text>
                 </View>
 
@@ -892,9 +845,7 @@ export default function PointExchange() {
                   style={[
                     styles.rewardAction,
                     {
-                      width: isTablet
-                        ? 100 * scale
-                        : 82 * scale,
+                      width: isTablet ? 100 * scale : 82 * scale,
                     },
                   ]}
                 >
@@ -936,11 +887,7 @@ export default function PointExchange() {
                         },
                       ]}
                     >
-                      {isRedeeming
-                        ? "..."
-                        : isUnlocked
-                          ? t.redeem
-                          : t.locked}
+                      {isRedeeming ? "..." : isUnlocked ? t.redeem : t.locked}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -964,16 +911,12 @@ export default function PointExchange() {
           <TouchableOpacity
             key={index}
             style={styles.navItem}
-            onPress={() => router.push(item.route)}
+            onPress={() => goTo(item.route)}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name={item.icon}
-              size={
-                item.icon === "swap-horizontal"
-                  ? 37 * scale
-                  : 35 * scale
-              }
+              size={item.icon === "swap-horizontal" ? 37 * scale : 35 * scale}
               color={colors.white}
             />
           </TouchableOpacity>

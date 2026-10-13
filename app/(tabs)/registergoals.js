@@ -1,4 +1,3 @@
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { router } from "expo-router";
@@ -45,9 +44,7 @@ export default function SavingsGoal() {
     ? "Ej. Comprar un teléfono nuevo"
     : "E.g. Buy a new phone";
 
-  const placeholderTargetAmount = isSpanish
-    ? "Ej. $300.00"
-    : "E.g. $300.00";
+  const placeholderTargetAmount = isSpanish ? "Ej. $300.00" : "E.g. $300.00";
 
   const placeholderCalculated = isSpanish
     ? "Calculado automáticamente"
@@ -107,6 +104,14 @@ export default function SavingsGoal() {
   const goHome = () => {
     router.replace("/home");
   };
+
+  // Al ir a profile se envía la pantalla de origen para poder regresar a ella
+  const goTo = (route) =>
+    router.push(
+      route === "/profile"
+        ? { pathname: "/profile", params: { from: "/registergoals" } }
+        : route
+    );
 
   const resetForm = () => {
     setGoalName("");
@@ -212,9 +217,7 @@ export default function SavingsGoal() {
     };
 
     // Formato numérico: día/mes/año o día-mes-año.
-    const numericDate = text.match(
-      /^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/
-    );
+    const numericDate = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
 
     if (numericDate) {
       const day = Number(numericDate[1]);
@@ -275,12 +278,7 @@ export default function SavingsGoal() {
     return null;
   };
 
-  const calculateSavingValues = (
-    target,
-    selectedFrequency,
-    start,
-    end
-  ) => {
+  const calculateSavingValues = (target, selectedFrequency, start, end) => {
     const cleanTarget = String(target)
       .replace(/\$/g, "")
       .replace(/,/g, ".")
@@ -308,12 +306,9 @@ export default function SavingsGoal() {
     }
 
     if (selectedFrequency === "daily") {
-      const difference =
-        endDateValue.getTime() - startDateValue.getTime();
+      const difference = endDateValue.getTime() - startDateValue.getTime();
 
-      const days = Math.round(
-        difference / (1000 * 60 * 60 * 24)
-      );
+      const days = Math.round(difference / (1000 * 60 * 60 * 24));
 
       if (days <= 0) {
         return null;
@@ -328,8 +323,7 @@ export default function SavingsGoal() {
 
     if (selectedFrequency === "monthly") {
       let months =
-        (endDateValue.getFullYear() - startDateValue.getFullYear()) *
-          12 +
+        (endDateValue.getFullYear() - startDateValue.getFullYear()) * 12 +
         (endDateValue.getMonth() - startDateValue.getMonth());
 
       // Si las fechas abarcan parte de un mes adicional,
@@ -382,8 +376,7 @@ export default function SavingsGoal() {
 
     setSavingAmount(result.amount.toFixed(2));
 
-    const unitText =
-      result.unit === "day" ? t.perDay : t.perMonth;
+    const unitText = result.unit === "day" ? t.perDay : t.perMonth;
 
     const periodText =
       result.unit === "day"
@@ -524,21 +517,16 @@ export default function SavingsGoal() {
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
-    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "swap-horizontal", route: "/expensesmanagement" },
     { icon: "layers-outline", route: "/currentgoal" },
     { icon: "account-outline", route: "/profile" },
   ];
 
-  const inputBackground = isDarkTheme
-    ? colors.primaryBackground
-    : "#F3F4F5";
+  const inputBackground = isDarkTheme ? colors.primaryBackground : "#F3F4F5";
 
   return (
     <SafeAreaView
-      style={[
-        styles.container,
-        { backgroundColor: colors.primaryBackground },
-      ]}
+      style={[styles.container, { backgroundColor: colors.primaryBackground }]}
     >
       <StatusBar
         translucent
@@ -555,11 +543,7 @@ export default function SavingsGoal() {
             styles.header,
             {
               height: headerHeight,
-              paddingHorizontal: isSmallScreen
-                ? 18
-                : isTablet
-                ? 45
-                : 25,
+              paddingHorizontal: isSmallScreen ? 18 : isTablet ? 45 : 25,
               backgroundColor: colors.header,
             },
           ]}
@@ -570,10 +554,7 @@ export default function SavingsGoal() {
               styles.headerTitle,
               {
                 fontSize: 25 * hs,
-                transform: [
-                  { translateX: 4 * hs },
-                  { translateY: 1 * hs },
-                ],
+                transform: [{ translateX: 4 * hs }, { translateY: 1 * hs }],
                 color: colors.white,
               },
             ]}
@@ -631,16 +612,8 @@ export default function SavingsGoal() {
             styles.card,
             {
               backgroundColor: colors.background,
-              borderTopLeftRadius: isTablet
-                ? 55
-                : isSmallScreen
-                ? 35
-                : 45,
-              borderTopRightRadius: isTablet
-                ? 55
-                : isSmallScreen
-                ? 35
-                : 45,
+              borderTopLeftRadius: isTablet ? 55 : isSmallScreen ? 35 : 45,
+              borderTopRightRadius: isTablet ? 55 : isSmallScreen ? 35 : 45,
               paddingHorizontal: horizontalPadding,
               paddingTop: 25 * scale,
             },
@@ -719,10 +692,7 @@ export default function SavingsGoal() {
             />
 
             <View
-              style={[
-                styles.mainGoalContainer,
-                { marginBottom: s(22) },
-              ]}
+              style={[styles.mainGoalContainer, { marginBottom: s(22) }]}
             >
               <Text
                 style={[
@@ -758,12 +728,7 @@ export default function SavingsGoal() {
               {t.savingFrequency}
             </Text>
 
-            <View
-              style={[
-                styles.typeContainer,
-                { marginBottom: s(17) },
-              ]}
-            >
+            <View style={[styles.typeContainer, { marginBottom: s(17) }]}>
               <TouchableOpacity
                 style={[
                   styles.typeButton,
@@ -782,10 +747,7 @@ export default function SavingsGoal() {
                   style={[
                     styles.typeText,
                     {
-                      color:
-                        frequency === "daily"
-                          ? "#FFFFFF"
-                          : colors.text,
+                      color: frequency === "daily" ? "#FFFFFF" : colors.text,
                       fontSize: s(12),
                     },
                   ]}
@@ -812,10 +774,7 @@ export default function SavingsGoal() {
                   style={[
                     styles.typeText,
                     {
-                      color:
-                        frequency === "monthly"
-                          ? "#FFFFFF"
-                          : colors.text,
+                      color: frequency === "monthly" ? "#FFFFFF" : colors.text,
                       fontSize: s(12),
                     },
                   ]}
@@ -880,19 +839,12 @@ export default function SavingsGoal() {
                   height: s(40),
                   borderRadius: s(18),
                   marginBottom: s(17),
-                  backgroundColor: isDarkTheme
-                    ? "#25B7D3"
-                    : "#081023",
+                  backgroundColor: isDarkTheme ? "#25B7D3" : "#081023",
                 },
               ]}
               onPress={handleCalculate}
             >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { fontSize: s(15) },
-                ]}
-              >
+              <Text style={[styles.buttonText, { fontSize: s(15) }]}>
                 {t.calculateSaving}
               </Text>
             </TouchableOpacity>
@@ -945,9 +897,7 @@ export default function SavingsGoal() {
               <DateTimePicker
                 value={parseDate(startDate) || new Date()}
                 mode="date"
-                display={
-                  Platform.OS === "ios" ? "spinner" : "default"
-                }
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={handleStartDateChange}
               />
             )}
@@ -1000,65 +950,57 @@ export default function SavingsGoal() {
               <DateTimePicker
                 value={parseDate(endDate) || new Date()}
                 mode="date"
-                display={
-                  Platform.OS === "ios" ? "spinner" : "default"
-                }
+                display={Platform.OS === "ios" ? "spinner" : "default"}
                 onChange={handleEndDateChange}
               />
             )}
 
-            {savingAmount &&
-              Number(savingAmount.replace(",", ".")) > 0 && (
-                <View
+            {savingAmount && Number(savingAmount.replace(",", ".")) > 0 && (
+              <View
+                style={[
+                  styles.calculationContainer,
+                  {
+                    borderRadius: s(15),
+                    padding: s(15),
+                    marginBottom: s(5),
+                    backgroundColor: inputBackground,
+                  },
+                ]}
+              >
+                <Text
                   style={[
-                    styles.calculationContainer,
+                    styles.calculationTitle,
+                    { color: colors.text, fontSize: s(13) },
+                  ]}
+                >
+                  {t.recommendedSaving}
+                </Text>
+
+                <Text
+                  style={[
+                    styles.calculationAmount,
                     {
-                      borderRadius: s(15),
-                      padding: s(15),
-                      marginBottom: s(5),
-                      backgroundColor: inputBackground,
+                      fontSize: s(24),
+                      marginTop: s(3),
                     },
                   ]}
                 >
-                  <Text
-                    style={[
-                      styles.calculationTitle,
-                      { color: colors.text, fontSize: s(13) },
-                    ]}
-                  >
-                    {t.recommendedSaving}
-                  </Text>
+                  ${Number(savingAmount.replace(",", ".")).toFixed(2)}
+                </Text>
 
-                  <Text
-                    style={[
-                      styles.calculationAmount,
-                      {
-                        fontSize: s(24),
-                        marginTop: s(3),
-                      },
-                    ]}
-                  >
-                    $
-                    {Number(
-                      savingAmount.replace(",", ".")
-                    ).toFixed(2)}
-                  </Text>
-
-                  <Text
-                    style={[
-                      styles.calculationText,
-                      {
-                        color: colors.secondaryText,
-                        fontSize: s(12),
-                      },
-                    ]}
-                  >
-                    {frequency === "daily"
-                      ? t.perDay
-                      : t.perMonth}
-                  </Text>
-                </View>
-              )}
+                <Text
+                  style={[
+                    styles.calculationText,
+                    {
+                      color: colors.secondaryText,
+                      fontSize: s(12),
+                    },
+                  ]}
+                >
+                  {frequency === "daily" ? t.perDay : t.perMonth}
+                </Text>
+              </View>
+            )}
 
             <TouchableOpacity
               style={[
@@ -1076,12 +1018,7 @@ export default function SavingsGoal() {
               disabled={saving}
               activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { fontSize: s(17) },
-                ]}
-              >
+              <Text style={[styles.buttonText, { fontSize: s(17) }]}>
                 {saving ? t.saving : t.saveGoal}
               </Text>
             </TouchableOpacity>
@@ -1101,12 +1038,7 @@ export default function SavingsGoal() {
               disabled={saving}
               activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.buttonText,
-                  { fontSize: s(17) },
-                ]}
-              >
+              <Text style={[styles.buttonText, { fontSize: s(17) }]}>
                 {t.cancel}
               </Text>
             </TouchableOpacity>
@@ -1129,17 +1061,13 @@ export default function SavingsGoal() {
             key={item.route}
             style={styles.navItem}
             onPress={() =>
-              item.route === "/home"
-                ? goHome()
-                : router.push(item.route)
+              item.route === "/home" ? goHome() : goTo(item.route)
             }
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name={item.icon}
-              size={
-                (item.icon === "swap-horizontal" ? 37 : 35) * hs
-              }
+              size={(item.icon === "swap-horizontal" ? 37 : 35) * hs}
               color={colors.white}
             />
           </TouchableOpacity>
@@ -1247,7 +1175,7 @@ const styles = StyleSheet.create({
   },
 
   calculateButton: {
-    backgroundColor: "#081023",
+    backgroundColor: "#25B7D3",
     justifyContent: "center",
     alignItems: "center",
   },

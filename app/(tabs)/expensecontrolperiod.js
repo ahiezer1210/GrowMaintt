@@ -115,7 +115,7 @@ export default function Expensescreen() {
   const navItems = [
     { icon: "home-outline", route: "/home" },
     { icon: "chart-box-outline", route: "/historial" },
-    { icon: "swap-horizontal", route: "/expensesManagement" },
+    { icon: "swap-horizontal", route: "/expensesmanagement" },
     { icon: "layers-outline", route: "/currentgoal" },
     { icon: "account-outline", route: "/profile" },
   ];

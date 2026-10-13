@@ -56,7 +56,7 @@ const navItems = [
   },
   {
     icon: "swap-horizontal",
-    route: "/expensesManagement",
+    route: "/expensesmanagement",
   },
   {
     icon: "layers-outline",

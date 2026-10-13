@@ -1,3 +1,4 @@
+
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import {
@@ -672,7 +673,14 @@ export default function ExpenseManagement() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => router.push("/profile")}
+          onPress={() =>
+            router.push({
+              pathname: "/profile",
+              params: {
+                from: "/expensesmanagement",
+              },
+            })
+          }
           activeOpacity={0.8}
         >
           <MaterialCommunityIcons

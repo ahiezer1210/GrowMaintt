@@ -83,7 +83,7 @@ export default function LogoutDevices() {
     },
     {
       icon: "swap-horizontal",
-      route: "/expensesManagement",
+      route: "/expensesmanagement",
     },
     {
       icon: "layers-outline",

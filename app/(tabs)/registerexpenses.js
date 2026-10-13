@@ -48,16 +48,11 @@ export default function Registerexpenses() {
 
   const numericAmount = parseFloat(amount);
 
-  const validAmount =
-    !isNaN(numericAmount) && numericAmount > 0;
+  const validAmount = !isNaN(numericAmount) && numericAmount > 0;
 
-  const roundedAmount = validAmount
-    ? Math.ceil(numericAmount)
-    : 0;
+  const roundedAmount = validAmount ? Math.ceil(numericAmount) : 0;
 
-  const savings = validAmount
-    ? roundedAmount - numericAmount
-    : 0;
+  const savings = validAmount ? roundedAmount - numericAmount : 0;
 
   const navItems = [
     { icon: "home-outline", route: "/home" },
@@ -71,6 +66,14 @@ export default function Registerexpenses() {
     router.replace("/home");
   };
 
+  // Al ir a profile se envía la pantalla de origen para poder regresar a ella
+  const goTo = (route) =>
+    router.push(
+      route === "/profile"
+        ? { pathname: "/profile", params: { from: "/registerexpenses" } }
+        : route
+    );
+
   const handleDateChange = (event, selectedDate) => {
     if (Platform.OS === "android") {
       setShowDatePicker(false);
@@ -78,9 +81,7 @@ export default function Registerexpenses() {
 
     if (selectedDate) {
       const day = String(selectedDate.getDate()).padStart(2, "0");
-      const month = String(
-        selectedDate.getMonth() + 1
-      ).padStart(2, "0");
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
       const year = selectedDate.getFullYear();
 
       setDate(`${day}/${month}/${year}`);
@@ -88,17 +89,10 @@ export default function Registerexpenses() {
   };
 
   const saveExpense = async () => {
-    if (
-      !amount ||
-      !category ||
-      !expenseType ||
-      !frequency ||
-      !date
-    ) {
+    if (!amount || !category || !expenseType || !frequency || !date) {
       Alert.alert(
         t.error || "Error",
-        t.completeAllFields ||
-          "Please complete all fields."
+        t.completeAllFields || "Please complete all fields."
       );
       return;
     }
@@ -108,8 +102,7 @@ export default function Registerexpenses() {
     if (isNaN(numericAmount) || numericAmount <= 0) {
       Alert.alert(
         t.error || "Error",
-        t.validAmount ||
-          "Please enter a valid amount."
+        t.validAmount || "Please enter a valid amount."
       );
       return;
     }
@@ -120,8 +113,7 @@ export default function Registerexpenses() {
       if (!user) {
         Alert.alert(
           t.error || "Error",
-          t.noAuthenticatedUser ||
-            "There is no authenticated user."
+          t.noAuthenticatedUser || "There is no authenticated user."
         );
         return;
       }
@@ -146,29 +138,23 @@ export default function Registerexpenses() {
           uid: user.uid,
           userId: user.uid,
           amount: savings,
+          frequency, // mismo periodo que el gasto
+          date, // misma fecha que el gasto
           source: "Expense rounding",
           createdAt: serverTimestamp(),
         });
       }
 
-      const notificationRef = doc(
-        db,
-        "Notificaciones",
-        `${user.uid}_Savings`
-      );
+      const notificationRef = doc(db, "Notificaciones", `${user.uid}_Savings`);
 
       await setDoc(
         notificationRef,
         {
           userId: user.uid,
           category: "Savings",
-          title:
-            t.newSavings || "New savings",
-          message: `You saved $${savings.toFixed(
-            2
-          )} ${
-            t.byRoundingExpense ||
-            "by rounding up your expense."
+          title: t.newSavings || "New savings",
+          message: `You saved $${savings.toFixed(2)} ${
+            t.byRoundingExpense || "by rounding up your expense."
           }`,
           read: false,
           createdAt: serverTimestamp(),
@@ -178,8 +164,7 @@ export default function Registerexpenses() {
 
       Alert.alert(
         t.success || "Success",
-        t.expenseRegisteredSuccessfully ||
-          "Expense registered successfully."
+        t.expenseRegisteredSuccessfully || "Expense registered successfully."
       );
 
       setAmount("");
@@ -192,8 +177,7 @@ export default function Registerexpenses() {
 
       Alert.alert(
         t.error || "Error",
-        t.expenseCouldNotBeSaved ||
-          "The expense could not be saved."
+        t.expenseCouldNotBeSaved || "The expense could not be saved."
       );
     }
   };
@@ -217,42 +201,29 @@ export default function Registerexpenses() {
     });
   };
 
+  // Altura del header para el offset del teclado
+  const headerHeight = 118 * hs;
+
   return (
     <View
-      style={[
-        styles.screen,
-        { backgroundColor: colors.primaryBackground },
-      ]}
+      style={[styles.screen, { backgroundColor: colors.primaryBackground }]}
     >
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle={
-          isDarkTheme
-            ? "light-content"
-            : "dark-content"
-        }
+        barStyle={isDarkTheme ? "light-content" : "dark-content"}
       />
 
       <View
-        style={[
-          styles.app,
-          {
-            backgroundColor:
-              colors.primaryBackground,
-          },
-        ]}
+        style={[styles.app, { backgroundColor: colors.primaryBackground }]}
       >
+        {/* HEADER */}
         <View
           style={[
             styles.header,
             {
-              height: 118 * hs,
-              paddingHorizontal: small
-                ? 18
-                : tablet
-                ? 45
-                : 25,
+              height: headerHeight,
+              paddingHorizontal: small ? 18 : tablet ? 45 : 25,
               backgroundColor: colors.header,
             },
           ]}
@@ -261,9 +232,7 @@ export default function Registerexpenses() {
             style={[
               styles.back,
               {
-                transform: [
-                  { translateY: 4 * hs },
-                ],
+                transform: [{ translateY: 4 * hs }],
               },
             ]}
             onPress={goHome}
@@ -288,25 +257,19 @@ export default function Registerexpenses() {
               styles.headerTitle,
               {
                 fontSize: 25 * hs,
-                transform: [
-                  { translateX: 4 * hs },
-                  { translateY: 1 * hs },
-                ],
+                transform: [{ translateX: 4 * hs }, { translateY: 1 * hs }],
                 color: colors.white,
               },
             ]}
           >
-            {t.registerExpenses ||
-              "Register Expenses"}
+            {t.registerExpenses || "Register Expenses"}
           </Text>
 
           <TouchableOpacity
             style={[
               styles.headerBell,
               {
-                transform: [
-                  { translateY: 4 * hs },
-                ],
+                transform: [{ translateY: 4 * hs }],
               },
             ]}
             onPress={abrirNotificaciones}
@@ -320,31 +283,21 @@ export default function Registerexpenses() {
           </TouchableOpacity>
         </View>
 
+        {/* CONTENIDO PRINCIPAL */}
         <View
           style={[
             styles.main,
             {
               backgroundColor: colors.background,
-              borderTopLeftRadius: tablet
-                ? 55
-                : small
-                ? 35
-                : 45,
-              borderTopRightRadius: tablet
-                ? 55
-                : small
-                ? 35
-                : 45,
+              borderTopLeftRadius: tablet ? 55 : small ? 35 : 45,
+              borderTopRightRadius: tablet ? 55 : small ? 35 : 45,
             },
           ]}
         >
           <KeyboardAvoidingView
             style={styles.keyboard}
-            behavior={
-              Platform.OS === "ios"
-                ? "padding"
-                : undefined
-            }
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? headerHeight : 0}
           >
             <ScrollView
               contentContainerStyle={[
@@ -352,12 +305,16 @@ export default function Registerexpenses() {
                 {
                   paddingHorizontal: scale(24),
                   paddingTop: scale(30),
-                  paddingBottom: scale(100),
+                  // Más espacio inferior para que los botones no queden tapados
+                  paddingBottom: scale(140),
                 },
               ]}
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
+              // Ayuda a que el ScrollView se ajuste mejor cuando aparece el teclado
+              keyboardDismissMode="interactive"
             >
+              {/* Amount */}
               <Text
                 style={[
                   styles.label,
@@ -383,12 +340,12 @@ export default function Registerexpenses() {
                 value={amount}
                 onChangeText={setAmount}
                 placeholder="$0.00"
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholderTextColor={colors.secondaryText}
                 keyboardType="decimal-pad"
+                returnKeyType="next"
               />
 
+              {/* Automatic Rounding */}
               <View style={styles.roundingGroup}>
                 <Text
                   style={[
@@ -399,8 +356,7 @@ export default function Registerexpenses() {
                     },
                   ]}
                 >
-                  {t.automaticRounding ||
-                    "Automatic Rounding"}
+                  {t.automaticRounding || "Automatic Rounding"}
                 </Text>
 
                 <View
@@ -419,11 +375,7 @@ export default function Registerexpenses() {
                     color="#25B5D1"
                   />
 
-                  <View
-                    style={
-                      styles.roundingTextContainer
-                    }
-                  >
+                  <View style={styles.roundingTextContainer}>
                     <Text
                       style={[
                         styles.roundingValue,
@@ -433,10 +385,7 @@ export default function Registerexpenses() {
                         },
                       ]}
                     >
-                      $
-                      {validAmount
-                        ? roundedAmount.toFixed(2)
-                        : "0.00"}
+                      ${validAmount ? roundedAmount.toFixed(2) : "0.00"}
                     </Text>
 
                     <Text
@@ -449,9 +398,7 @@ export default function Registerexpenses() {
                       ]}
                     >
                       {t.save || "Save"} $
-                      {validAmount
-                        ? savings.toFixed(2)
-                        : "0.00"}
+                      {validAmount ? savings.toFixed(2) : "0.00"}
                     </Text>
                   </View>
 
@@ -463,6 +410,7 @@ export default function Registerexpenses() {
                 </View>
               </View>
 
+              {/* Category */}
               <Text
                 style={[
                   styles.label,
@@ -487,15 +435,12 @@ export default function Registerexpenses() {
                 ]}
                 value={category}
                 onChangeText={setCategory}
-                placeholder={
-                  t.categoryExample ||
-                  "E.g. Food"
-                }
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholder={t.categoryExample || "E.g. Food"}
+                placeholderTextColor={colors.secondaryText}
+                returnKeyType="next"
               />
 
+              {/* Expense Type */}
               <Text
                 style={[
                   styles.label,
@@ -520,15 +465,12 @@ export default function Registerexpenses() {
                 ]}
                 value={expenseType}
                 onChangeText={setExpenseType}
-                placeholder={
-                  t.expenseTypeExample ||
-                  "E.g. Necessary"
-                }
-                placeholderTextColor={
-                  colors.secondaryText
-                }
+                placeholder={t.expenseTypeExample || "E.g. Necessary"}
+                placeholderTextColor={colors.secondaryText}
+                returnKeyType="next"
               />
 
+              {/* Frequency */}
               <Text
                 style={[
                   styles.label,
@@ -541,9 +483,7 @@ export default function Registerexpenses() {
                 {t.frequency || "Frequency"}
               </Text>
 
-              <View
-                style={styles.frequencyContainer}
-              >
+              <View style={styles.frequencyContainer}>
                 {[
                   {
                     value: "Daily",
@@ -564,18 +504,12 @@ export default function Registerexpenses() {
                       styles.frequencyButton,
                       {
                         borderColor:
-                          frequency === item.value
-                            ? "#25B5D1"
-                            : colors.border,
+                          frequency === item.value ? "#25B5D1" : colors.border,
                         backgroundColor:
-                          frequency === item.value
-                            ? "#25B5D1"
-                            : colors.card,
+                          frequency === item.value ? "#25B5D1" : colors.card,
                       },
                     ]}
-                    onPress={() =>
-                      setFrequency(item.value)
-                    }
+                    onPress={() => setFrequency(item.value)}
                     activeOpacity={0.8}
                   >
                     <Text
@@ -583,9 +517,7 @@ export default function Registerexpenses() {
                         styles.frequencyText,
                         {
                           color:
-                            frequency === item.value
-                              ? "#FFFFFF"
-                              : colors.text,
+                            frequency === item.value ? "#FFFFFF" : colors.text,
                           fontSize: scale(14),
                         },
                       ]}
@@ -596,6 +528,7 @@ export default function Registerexpenses() {
                 ))}
               </View>
 
+              {/* Date */}
               <Text
                 style={[
                   styles.label,
@@ -617,16 +550,12 @@ export default function Registerexpenses() {
                     backgroundColor: colors.card,
                   },
                 ]}
-                onPress={() =>
-                  setShowDatePicker(true)
-                }
+                onPress={() => setShowDatePicker(true)}
                 activeOpacity={0.8}
               >
                 <Text
                   style={{
-                    color: date
-                      ? colors.text
-                      : colors.secondaryText,
+                    color: date ? colors.text : colors.secondaryText,
                     fontSize: scale(16),
                   }}
                 >
@@ -644,15 +573,12 @@ export default function Registerexpenses() {
                 <DateTimePicker
                   value={new Date()}
                   mode="date"
-                  display={
-                    Platform.OS === "ios"
-                      ? "spinner"
-                      : "default"
-                  }
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={handleDateChange}
                 />
               )}
 
+              {/* Botones */}
               <TouchableOpacity
                 style={[
                   styles.saveButton,
@@ -686,9 +612,7 @@ export default function Registerexpenses() {
                     width: scale(225),
                     height: scale(54),
                     borderRadius: scale(27),
-                    backgroundColor: isDarkTheme
-                      ? "#2A2A2A"
-                      : "#E5E5E5",
+                    backgroundColor: isDarkTheme ? "#2A2A2A" : "#E5E5E5",
                     marginTop: scale(12),
                   },
                 ]}
@@ -711,6 +635,7 @@ export default function Registerexpenses() {
           </KeyboardAvoidingView>
         </View>
 
+        {/* BOTTOM BAR */}
         <View
           style={[
             styles.bottomBar,
@@ -727,18 +652,12 @@ export default function Registerexpenses() {
               style={styles.navItem}
               activeOpacity={0.8}
               onPress={() =>
-                item.route === "/home"
-                  ? goHome()
-                  : router.push(item.route)
+                item.route === "/home" ? goHome() : goTo(item.route)
               }
             >
               <MaterialCommunityIcons
                 name={item.icon}
-                size={
-                  (item.icon === "swap-horizontal"
-                    ? 37
-                    : 35) * hs
-                }
+                size={(item.icon === "swap-horizontal" ? 37 : 35) * hs}
                 color={colors.white}
               />
             </TouchableOpacity>
@@ -794,6 +713,7 @@ const styles = StyleSheet.create({
 
   scrollContent: {
     alignItems: "center",
+    flexGrow: 1, // importante para que el contenido pueda crecer
   },
 
   label: {

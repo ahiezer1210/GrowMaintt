@@ -1,14 +1,15 @@
-
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { onAuthStateChanged } from "firebase/auth";
 import {
   collection,
   doc,
+  increment,
   onSnapshot,
   query,
-  updateDoc,
+  serverTimestamp,
   where,
+  writeBatch,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import {
@@ -90,13 +91,9 @@ export default function SavingsGoalsScreen() {
             ...item.data(),
           }));
 
-          const main = goals.find(
-            (item) => item.isMainGoal === true
-          );
+          const main = goals.find((item) => item.isMainGoal === true);
 
-          const others = goals.filter(
-            (item) => item.isMainGoal !== true
-          );
+          const others = goals.filter((item) => item.id !== main?.id);
 
           setMainGoal(main || null);
           setSavedgoal(others);
@@ -118,26 +115,17 @@ export default function SavingsGoalsScreen() {
     };
   }, []);
 
-  const mainTarget = mainGoal
-    ? Number(mainGoal.targetAmount || 0)
-    : 0;
-
-  const mainSaved = mainGoal
-    ? Number(mainGoal.currentSavings || 0)
-    : 0;
+  const mainTarget = mainGoal ? Number(mainGoal.targetAmount || 0) : 0;
+  const mainSaved = mainGoal ? Number(mainGoal.currentSavings || 0) : 0;
 
   const progress =
     mainTarget > 0
-      ? Math.min(
-          100,
-          Math.round((mainSaved / mainTarget) * 100)
-        )
+      ? Math.min(100, Math.round((mainSaved / mainTarget) * 100))
       : 0;
 
   const remaining = Math.max(0, mainTarget - mainSaved);
 
-  const hasGoals =
-    mainGoal !== null || savedgoal.length > 0;
+  const hasGoals = mainGoal !== null || savedgoal.length > 0;
 
   const toggleGoal = (goalId) => {
     if (expandedGoal === goalId) {
@@ -150,7 +138,7 @@ export default function SavingsGoalsScreen() {
   };
 
   const handleAddMoney = async (selectedGoal) => {
-    const value = Number(abono);
+    const value = Number(abono.replace(",", "."));
 
     if (!abono || isNaN(value) || value <= 0) {
       Alert.alert(
@@ -175,30 +163,55 @@ export default function SavingsGoalsScreen() {
       return;
     }
 
+    const user = auth.currentUser;
+
+    if (!user) {
+      Alert.alert(
+        t.error || "Error",
+        t.mustBeLoggedIn || "You must be logged in."
+      );
+      return;
+    }
+
     try {
       setAddingMoney(true);
 
-      await updateDoc(
-        doc(db, "Metas de Ahorro", selectedGoal.id),
-        {
-          currentSavings: current + value,
-        }
-      );
+      const now = new Date();
+      const date = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()}`;
+
+      const batch = writeBatch(db);
+
+      batch.update(doc(db, "Metas de Ahorro", selectedGoal.id), {
+        currentSavings: increment(value),
+      });
+
+      batch.set(doc(collection(db, "Ahorros")), {
+        uid: user.uid,
+        amount: value,
+        category: selectedGoal.goalName,
+        description: selectedGoal.description || "",
+        date,
+        source: "goal",
+        goalId: selectedGoal.id,
+        createdAt: serverTimestamp(),
+      });
+
+      await batch.commit();
 
       setAbono("");
 
       Alert.alert(
         t.amountAdded || "Amount added",
-        t.savingsUpdated ||
-          "Your savings have been updated successfully."
+        t.savingsUpdated || "Your savings have been updated successfully."
       );
     } catch (error) {
       console.log("ERROR ADDING MONEY:", error);
 
       Alert.alert(
         t.error || "Error",
-        t.amountCouldNotBeAdded ||
-          "The amount could not be added."
+        t.amountCouldNotBeAdded || "The amount could not be added."
       );
     } finally {
       setAddingMoney(false);
@@ -269,7 +282,6 @@ export default function SavingsGoalsScreen() {
           {t.savingsGoals || "Savings Goals"}
         </Text>
 
-        {/* CAMPANA: SE MANTIENE SIN CAMBIOS */}
         <TouchableOpacity
           style={[
             styles.notificationButton,
@@ -290,7 +302,6 @@ export default function SavingsGoalsScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* PRIMERA TARJETA: CONTENEDOR CON CURVA SUPERIOR */}
       <View
         style={[
           styles.content,
@@ -351,7 +362,6 @@ export default function SavingsGoalsScreen() {
                     },
                   ]}
                 >
-                  {/* SEGUNDA TARJETA: META PRINCIPAL */}
                   <View
                     style={[
                       styles.mainGoalCard,
@@ -529,9 +539,7 @@ export default function SavingsGoalsScreen() {
                       ]}
                     >
                       {t.deadline || "Deadline"}:{" "}
-                      {mainGoal.endDate ||
-                        t.noDeadline ||
-                        "No deadline"}
+                      {mainGoal.endDate || t.noDeadline || "No deadline"}
                     </Text>
 
                     {expandedGoal === mainGoal.id && (
@@ -652,10 +660,7 @@ export default function SavingsGoalsScreen() {
 
                     const goalProgress =
                       target > 0
-                        ? Math.min(
-                            100,
-                            Math.round((saved / target) * 100)
-                          )
+                        ? Math.min(100, Math.round((saved / target) * 100))
                         : 0;
 
                     return (
@@ -678,9 +683,7 @@ export default function SavingsGoalsScreen() {
                             styles.otherGoalCard,
                             {
                               backgroundColor:
-                                colors.card ||
-                                colors.surface ||
-                                "#f2f2f2",
+                                colors.card || colors.surface || "#f2f2f2",
                               borderTopLeftRadius: s(18),
                               borderTopRightRadius: s(18),
                               borderBottomLeftRadius: s(18),
@@ -730,8 +733,7 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.otherGoalAmount,
                                   {
-                                    color:
-                                      colors.secondaryText || "#6b7280",
+                                    color: colors.secondaryText || "#6b7280",
                                     fontSize: s(13),
                                   },
                                 ]}
@@ -799,8 +801,7 @@ export default function SavingsGoalsScreen() {
                                 style={[
                                   styles.descriptionText,
                                   {
-                                    color:
-                                      colors.secondaryText || "#4b5563",
+                                    color: colors.secondaryText || "#4b5563",
                                     fontSize: s(13),
                                     marginBottom: s(15),
                                   },
@@ -836,9 +837,7 @@ export default function SavingsGoalsScreen() {
                                     backgroundColor: colors.card || "#fff",
                                   },
                                 ]}
-                                placeholder={
-                                  t.enterAmount || "Enter amount"
-                                }
+                                placeholder={t.enterAmount || "Enter amount"}
                                 placeholderTextColor="#999"
                                 keyboardType="decimal-pad"
                                 value={abono}
@@ -886,11 +885,7 @@ export default function SavingsGoalsScreen() {
         style={[
           styles.bottomBar,
           {
-            height: isSmallScreen
-              ? 60
-              : isTablet
-              ? 65 * scale
-              : 65,
+            height: isSmallScreen ? 60 : isTablet ? 65 * scale : 65,
             borderTopLeftRadius: 78 * scale,
           },
         ]}
@@ -899,22 +894,30 @@ export default function SavingsGoalsScreen() {
           ["home-outline", "/home"],
           ["chart-box-outline", "/historial"],
           ["swap-horizontal", "/expensesmanagement"],
-          ["layers-outline", "/expensesmanagement"],
+          ["layers-outline", "/currentgoal"],
           ["account-outline", "/profile"],
         ].map(([icon, route], index) => (
           <TouchableOpacity
             key={index}
             style={styles.navItem}
-            onPress={() => router.push(route)}
+            onPress={() => {
+              if (route === "/profile") {
+                // Misma lógica que en Expense Management
+                router.push({
+                  pathname: "/profile",
+                  params: {
+                    from: "/currentgoal",
+                  },
+                });
+              } else {
+                router.push(route);
+              }
+            }}
             activeOpacity={0.7}
           >
             <MaterialCommunityIcons
               name={icon}
-              size={
-                icon === "swap-horizontal"
-                  ? 37 * scale
-                  : 35 * scale
-              }
+              size={icon === "swap-horizontal" ? 37 * scale : 35 * scale}
               color="#FFFFFF"
             />
           </TouchableOpacity>
@@ -1078,7 +1081,7 @@ const styles = StyleSheet.create({
   },
 
   otherGoalAmount: {
-    color: "#6b7280",
+    color: "#25B5D1",
   },
 
   otherProgressBackground: {

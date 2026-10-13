@@ -34,7 +34,7 @@ const NAV_ITEMS = [
   {
     icon: "swap-horizontal",
     key: "expenses",
-    route: "/expensesManagement",
+    route: "/expensesmanagement",
   },
   {
     icon: "layers-outline",

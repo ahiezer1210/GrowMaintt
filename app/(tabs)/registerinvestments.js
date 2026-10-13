@@ -8,8 +8,9 @@ import {
     serverTimestamp,
     writeBatch,
 } from "firebase/firestore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+    Keyboard,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -34,6 +35,26 @@ export default function RegisterInvestment() {
     const [type, setType] = useState("");
     const [date, setDate] = useState("");
     const [showDatePicker, setShowDatePicker] = useState(false);
+    const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+    useEffect(() => {
+        const showEvent =
+            Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+        const hideEvent =
+            Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+        const showSub = Keyboard.addListener(showEvent, () =>
+            setKeyboardVisible(true)
+        );
+        const hideSub = Keyboard.addListener(hideEvent, () =>
+            setKeyboardVisible(false)
+        );
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, []);
 
     const isSmallScreen = width < 360;
     const isMediumScreen = width >= 360 && width < 600;
@@ -57,11 +78,17 @@ export default function RegisterInvestment() {
 
     const s = (value) => Math.round(value * scale);
 
+    const k = isSmallScreen ? 0.85 : isTablet ? 1.15 : 1;
+
     const isDarkTheme =
         colors.background?.toLowerCase() === "#081023" ||
         colors.background?.toLowerCase() === "#071426" ||
         colors.primaryBackground?.toLowerCase() === "#081023" ||
         colors.primaryBackground?.toLowerCase() === "#071426";
+
+    const inputBackground = isDarkTheme
+        ? colors.primaryBackground
+        : "#FAFAFA";
 
     const handleDateChange = (event, selectedDate) => {
         if (Platform.OS === "android") {
@@ -83,14 +110,9 @@ export default function RegisterInvestment() {
             return;
         }
 
-        const investmentAmount = Number(
-            amount.replace(",", ".")
-        );
+        const investmentAmount = Number(amount.replace(",", "."));
 
-        if (
-            isNaN(investmentAmount) ||
-            investmentAmount <= 0
-        ) {
+        if (isNaN(investmentAmount) || investmentAmount <= 0) {
             alert(t.validAmount);
             return;
         }
@@ -105,19 +127,9 @@ export default function RegisterInvestment() {
                 return;
             }
 
-            const userRef = doc(
-                db,
-                "Users",
-                user.uid
-            );
-
-            const investmentRef = doc(
-                collection(db, "investments")
-            );
-
-            const pointsRef = doc(
-                collection(db, "Points")
-            );
+            const userRef = doc(db, "Users", user.uid);
+            const investmentRef = doc(collection(db, "investments"));
+            const pointsRef = doc(collection(db, "Points"));
 
             const batch = writeBatch(db);
 
@@ -175,31 +187,19 @@ export default function RegisterInvestment() {
         >
             <KeyboardAvoidingView
                 style={{ flex: 1 }}
-                behavior={
-                    Platform.OS === "ios"
-                        ? "padding"
-                        : "height"
-                }
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
             >
                 <View
                     style={[
                         styles.header,
                         {
-                            height:
-                                118 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1),
-                            paddingHorizontal:
-                                isSmallScreen
-                                    ? 18
-                                    : isTablet
-                                        ? 45
-                                        : 25,
-                            backgroundColor:
-                                colors.header,
+                            height: 118 * k,
+                            paddingHorizontal: isSmallScreen
+                                ? 18
+                                : isTablet
+                                    ? 45
+                                    : 25,
+                            backgroundColor: colors.header,
                         },
                     ]}
                 >
@@ -207,34 +207,15 @@ export default function RegisterInvestment() {
                         style={[
                             styles.back,
                             {
-                                transform: [
-                                    {
-                                        translateY:
-                                            4 *
-                                            (isSmallScreen
-                                                ? 0.85
-                                                : isTablet
-                                                    ? 1.15
-                                                    : 1),
-                                    },
-                                ],
+                                transform: [{ translateY: 4 * k }],
                             },
                         ]}
-                        onPress={() =>
-                            router.push("/home")
-                        }
+                        onPress={() => router.push("/home")}
                         activeOpacity={0.7}
                     >
                         <MaterialCommunityIcons
                             name="arrow-left"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -243,32 +224,10 @@ export default function RegisterInvestment() {
                         style={[
                             styles.headerTitle,
                             {
-                                fontSize:
-                                    25 *
-                                    (isSmallScreen
-                                        ? 0.85
-                                        : isTablet
-                                            ? 1.15
-                                            : 1),
+                                fontSize: 25 * k,
                                 transform: [
-                                    {
-                                        translateX:
-                                            4 *
-                                            (isSmallScreen
-                                                ? 0.85
-                                                : isTablet
-                                                    ? 1.15
-                                                    : 1),
-                                    },
-                                    {
-                                        translateY:
-                                            1 *
-                                            (isSmallScreen
-                                                ? 0.85
-                                                : isTablet
-                                                    ? 1.15
-                                                    : 1),
-                                    },
+                                    { translateX: 4 * k },
+                                    { translateY: 1 * k },
                                 ],
                                 color: colors.white,
                             },
@@ -281,23 +240,12 @@ export default function RegisterInvestment() {
                         style={[
                             styles.headerBell,
                             {
-                                transform: [
-                                    {
-                                        translateY:
-                                            4 *
-                                            (isSmallScreen
-                                                ? 0.85
-                                                : isTablet
-                                                    ? 1.15
-                                                    : 1),
-                                    },
-                                ],
+                                transform: [{ translateY: 4 * k }],
                             },
                         ]}
                         onPress={() =>
                             router.push({
-                                pathname:
-                                    "/notifications",
+                                pathname: "/notifications",
                                 params: {
                                     from: "/registerinvestments",
                                 },
@@ -307,14 +255,7 @@ export default function RegisterInvestment() {
                     >
                         <MaterialCommunityIcons
                             name="bell-circle-outline"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -324,8 +265,7 @@ export default function RegisterInvestment() {
                     style={[
                         styles.mainWrapper,
                         {
-                            backgroundColor:
-                                colors.header,
+                            backgroundColor: colors.header,
                         },
                     ]}
                 >
@@ -333,55 +273,42 @@ export default function RegisterInvestment() {
                         style={[
                             styles.main,
                             {
-                                backgroundColor:
-                                    colors.background,
-                                borderTopLeftRadius:
-                                    isTablet
-                                        ? 55
-                                        : isSmallScreen
-                                            ? 35
-                                            : 45,
-                                borderTopRightRadius:
-                                    isTablet
-                                        ? 55
-                                        : isSmallScreen
-                                            ? 35
-                                            : 45,
+                                backgroundColor: colors.background,
+                                borderTopLeftRadius: isTablet
+                                    ? 55
+                                    : isSmallScreen
+                                        ? 35
+                                        : 45,
+                                borderTopRightRadius: isTablet
+                                    ? 55
+                                    : isSmallScreen
+                                        ? 35
+                                        : 45,
                             },
                         ]}
                     >
                         <ScrollView
-                            showsVerticalScrollIndicator={
-                                false
-                            }
+                            showsVerticalScrollIndicator={false}
                             contentContainerStyle={[
                                 styles.scrollContent,
                                 {
-                                    paddingHorizontal:
-                                        horizontalPadding,
+                                    paddingHorizontal: horizontalPadding,
                                     paddingBottom: s(100),
                                 },
                             ]}
                             keyboardShouldPersistTaps="handled"
                         >
-                            <View
-                                style={
-                                    styles.titleContainer
-                                }
-                            >
+                            <View style={styles.titleContainer}>
                                 <Text
                                     style={[
                                         styles.title,
                                         {
                                             fontSize: s(23),
-                                            color:
-                                                colors.text,
+                                            color: colors.text,
                                         },
                                     ]}
                                 >
-                                    {
-                                        t.registerYourInvestment
-                                    }
+                                    {t.registerYourInvestment}
                                 </Text>
 
                                 <Text
@@ -389,14 +316,11 @@ export default function RegisterInvestment() {
                                         styles.subtitle,
                                         {
                                             fontSize: s(14),
-                                            color:
-                                                colors.secondaryText,
+                                            color: colors.secondaryText,
                                         },
                                     ]}
                                 >
-                                    {
-                                        t.investmentInformation
-                                    }
+                                    {t.investmentInformation}
                                 </Text>
                             </View>
 
@@ -404,18 +328,14 @@ export default function RegisterInvestment() {
                                 style={[
                                     styles.form,
                                     {
-                                        backgroundColor:
-                                            colors.background,
+                                        backgroundColor: colors.background,
                                     },
                                 ]}
                             >
                                 <Text
                                     style={[
                                         styles.label,
-                                        {
-                                            color:
-                                                colors.text,
-                                        },
+                                        { color: colors.text },
                                     ]}
                                 >
                                     {t.investmentName}
@@ -425,35 +345,21 @@ export default function RegisterInvestment() {
                                     style={[
                                         styles.input,
                                         {
-                                            borderColor:
-                                                colors.border,
-                                            color:
-                                                colors.text,
-                                            backgroundColor:
-                                                isDarkTheme
-                                                    ? colors.primaryBackground
-                                                    : "#FAFAFA",
+                                            borderColor: colors.border,
+                                            color: colors.text,
+                                            backgroundColor: inputBackground,
                                         },
                                     ]}
-                                    placeholder={
-                                        t.investmentNamePlaceholder
-                                    }
+                                    placeholder={t.investmentNamePlaceholder}
                                     placeholderTextColor="#999"
-                                    value={
-                                        investmentName
-                                    }
-                                    onChangeText={
-                                        setInvestmentName
-                                    }
+                                    value={investmentName}
+                                    onChangeText={setInvestmentName}
                                 />
 
                                 <Text
                                     style={[
                                         styles.label,
-                                        {
-                                            color:
-                                                colors.text,
-                                        },
+                                        { color: colors.text },
                                     ]}
                                 >
                                     {t.amount}
@@ -463,48 +369,30 @@ export default function RegisterInvestment() {
                                     style={[
                                         styles.amountContainer,
                                         {
-                                            borderColor:
-                                                colors.border,
-                                            backgroundColor:
-                                                isDarkTheme
-                                                    ? colors.primaryBackground
-                                                    : "#FAFAFA",
+                                            borderColor: colors.border,
+                                            backgroundColor: inputBackground,
                                         },
                                     ]}
                                 >
-                                    <Text
-                                        style={
-                                            styles.dollar
-                                        }
-                                    >
-                                        $
-                                    </Text>
+                                    <Text style={styles.dollar}>$</Text>
 
                                     <TextInput
                                         style={[
                                             styles.amountInput,
-                                            {
-                                                color:
-                                                    colors.text,
-                                            },
+                                            { color: colors.text },
                                         ]}
                                         placeholder="0.00"
                                         placeholderTextColor="#999"
                                         keyboardType="decimal-pad"
                                         value={amount}
-                                        onChangeText={
-                                            setAmount
-                                        }
+                                        onChangeText={setAmount}
                                     />
                                 </View>
 
                                 <Text
                                     style={[
                                         styles.label,
-                                        {
-                                            color:
-                                                colors.text,
-                                        },
+                                        { color: colors.text },
                                     ]}
                                 >
                                     {t.investmentType}
@@ -514,19 +402,12 @@ export default function RegisterInvestment() {
                                     style={[
                                         styles.input,
                                         {
-                                            borderColor:
-                                                colors.border,
-                                            color:
-                                                colors.text,
-                                            backgroundColor:
-                                                isDarkTheme
-                                                    ? colors.primaryBackground
-                                                    : "#FAFAFA",
+                                            borderColor: colors.border,
+                                            color: colors.text,
+                                            backgroundColor: inputBackground,
                                         },
                                     ]}
-                                    placeholder={
-                                        t.investmentTypePlaceholder
-                                    }
+                                    placeholder={t.investmentTypePlaceholder}
                                     placeholderTextColor="#999"
                                     value={type}
                                     onChangeText={setType}
@@ -535,10 +416,7 @@ export default function RegisterInvestment() {
                                 <Text
                                     style={[
                                         styles.label,
-                                        {
-                                            color:
-                                                colors.text,
-                                        },
+                                        { color: colors.text },
                                     ]}
                                 >
                                     {t.date}
@@ -549,17 +427,11 @@ export default function RegisterInvestment() {
                                         styles.input,
                                         styles.dateInput,
                                         {
-                                            borderColor:
-                                                colors.border,
-                                            backgroundColor:
-                                                isDarkTheme
-                                                    ? colors.primaryBackground
-                                                    : "#FAFAFA",
+                                            borderColor: colors.border,
+                                            backgroundColor: inputBackground,
                                         },
                                     ]}
-                                    onPress={() =>
-                                        setShowDatePicker(true)
-                                    }
+                                    onPress={() => setShowDatePicker(true)}
                                     activeOpacity={0.8}
                                 >
                                     <Text
@@ -570,8 +442,7 @@ export default function RegisterInvestment() {
                                             fontSize: 14,
                                         }}
                                     >
-                                        {date ||
-                                            t.datePlaceholder}
+                                        {date || t.datePlaceholder}
                                     </Text>
 
                                     <MaterialCommunityIcons
@@ -590,9 +461,7 @@ export default function RegisterInvestment() {
                                                 ? "spinner"
                                                 : "default"
                                         }
-                                        onChange={
-                                            handleDateChange
-                                        }
+                                        onChange={handleDateChange}
                                     />
                                 )}
 
@@ -601,15 +470,11 @@ export default function RegisterInvestment() {
                                         styles.button,
                                         {
                                             height: s(52),
-                                            borderRadius:
-                                                s(15),
-                                            marginTop:
-                                                s(25),
+                                            borderRadius: s(15),
+                                            marginTop: s(25),
                                         },
                                     ]}
-                                    onPress={
-                                        registrarInversion
-                                    }
+                                    onPress={registrarInversion}
                                 >
                                     <MaterialCommunityIcons
                                         name="check-circle-outline"
@@ -620,62 +485,38 @@ export default function RegisterInvestment() {
                                     <Text
                                         style={[
                                             styles.buttonText,
-                                            {
-                                                fontSize:
-                                                    s(16),
-                                            },
+                                            { fontSize: s(16) },
                                         ]}
                                     >
-                                        {
-                                            t.registerInvestmentButton
-                                        }
+                                        {t.registerInvestmentButton}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
                         </ScrollView>
                     </View>
                 </View>
+            </KeyboardAvoidingView>
 
+            {/* Barra inferior: fuera del KeyboardAvoidingView y oculta con el teclado */}
+            {!keyboardVisible && (
                 <View
                     style={[
                         styles.bottomBar,
                         {
-                            height:
-                                65 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1),
-                            borderTopLeftRadius:
-                                78 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1),
-                            backgroundColor:
-                                colors.nav,
+                            height: 65 * k,
+                            borderTopLeftRadius: 78 * k,
+                            backgroundColor: colors.nav,
                         },
                     ]}
                 >
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() =>
-                            router.push("/home")
-                        }
+                        onPress={() => router.push("/home")}
                     >
                         <MaterialCommunityIcons
                             name="home-outline"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -683,20 +524,11 @@ export default function RegisterInvestment() {
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() =>
-                            router.push("/historial")
-                        }
+                        onPress={() => router.push("/historial")}
                     >
                         <MaterialCommunityIcons
                             name="chart-box-outline"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -704,22 +536,11 @@ export default function RegisterInvestment() {
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() =>
-                            router.push(
-                                "/expensesmanagement"
-                            )
-                        }
+                        onPress={() => router.push("/expensesmanagement")}
                     >
                         <MaterialCommunityIcons
                             name="swap-horizontal"
-                            size={
-                                37 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={37 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -727,22 +548,11 @@ export default function RegisterInvestment() {
                     <TouchableOpacity
                         style={styles.navItem}
                         activeOpacity={0.8}
-                        onPress={() =>
-                            router.push(
-                                "/currentgoal"
-                            )
-                        }
+                        onPress={() => router.push("/currentgoal")}
                     >
                         <MaterialCommunityIcons
                             name="layers-outline"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
@@ -751,24 +561,22 @@ export default function RegisterInvestment() {
                         style={styles.navItem}
                         activeOpacity={0.8}
                         onPress={() =>
-                            router.push("/profile")
+                            router.push({
+                                pathname: "/profile",
+                                params: {
+                                    from: "/registerinvestments",
+                                },
+                            })
                         }
                     >
                         <MaterialCommunityIcons
                             name="account-outline"
-                            size={
-                                35 *
-                                (isSmallScreen
-                                    ? 0.85
-                                    : isTablet
-                                        ? 1.15
-                                        : 1)
-                            }
+                            size={35 * k}
                             color={colors.white}
                         />
                     </TouchableOpacity>
                 </View>
-            </KeyboardAvoidingView>
+            )}
         </SafeAreaView>
     );
 }

@@ -74,7 +74,7 @@ export default function Devices() {
     },
     {
       icon: "swap-horizontal",
-      route: "/expensesManagement",
+      route: "/expensesmanagement",
     },
     {
       icon: "layers-outline",
